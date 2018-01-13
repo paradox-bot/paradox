@@ -1,2 +1,2 @@
 # paradox
-A pretty sex Python bot 
+A pretty sexy Python bot 
