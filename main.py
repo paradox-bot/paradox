@@ -180,7 +180,6 @@ async def cmd_parser(message, cmd, args):
     else:
         #At this point we have tried all our command types. 
         ##The user probably made a spelling mistake.
-        await reply(message, "I don't recognise this command!")
         return
 
 #----End Meta stuff----
