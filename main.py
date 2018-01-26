@@ -130,6 +130,8 @@ async def on_message(message):
         #Okay, it probably wasn't meant for us, or they can't type
         #Either way, let's ignore them
         return
+    if message.content == (PREFIX): 
+        return
     #TODO: Put something here about checking blacklisted users.
     #Okay, we have decided it was meant for us. Let's log it
     await log("Got the command \n{}\nfrom \"{}\" with id \"{}\" ".format(
