@@ -38,6 +38,7 @@ client = discord.Client()
 
 
 
+
 @client.event
 async def on_ready():
     await client.change_presence(status=discord.Status.online)
@@ -49,5 +50,22 @@ async def on_ready():
 
 async def reply(message, content):
     await client.send_message(message.channel, content)
+
+
+
+@client.event
+async def on_message(message):
+        if message.content.startswith('~about'):
+                await reply(message, 'This is a bot created via the collaborative efforts of Retro, Pue, and Loomy.')
+        elif message.content.startswith('~ping'):
+                sentMessage = await client.send_message(message.channel, 'Beep')
+                mainMsg = sentMessage.timestamp
+                editedMessage = await client.edit_message(sentMessage,'Boop')
+                editMsg = editedMessage.edited_timestamp
+                latency = editMsg - mainMsg
+                latency = latency.microseconds // 1000
+                latency = str(latency)
+                await client.edit_message(sentMessage, 'Ping: '+latency+'ms')	
+
 
 client.run(conf.kget("TOKEN"))
