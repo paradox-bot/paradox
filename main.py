@@ -66,6 +66,8 @@ async def on_message(message):
                 latency = latency.microseconds // 1000
                 latency = str(latency)
                 await client.edit_message(sentMessage, 'Ping: '+latency+'ms')	
+       elif message.content.startsWith('~help'):
+               await client.send_message(message.channel, 'Available commands: `about`, `ping`')
 
 
 client.run(conf.kget("TOKEN"))
