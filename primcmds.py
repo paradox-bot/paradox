@@ -6,6 +6,7 @@
 import discord
 import asyncio
 import json
+import os
 
 from parautils import *
 
@@ -46,6 +47,14 @@ def prim_cmd(cmdName, category, desc = "No description", helpDesc = "No help has
 #------COMMANDS------
 
 #Primitive Commands
+
+@prim_cmd("restart", "general")
+async def prim_cmd_restart(message, args, client, conf, userdata):
+    await reply(client, message, os.system('./run.sh'))
+
+@prim_cmd("prestart", "general")
+async def prim_cmd_prestart(message, args, client, conf, userdata):
+    await reply(client, message, os.system('./pullrun.sh'))
 
 @prim_cmd("about", "general")
 async def prim_cmd_about(message, args, client, conf, userdata):
