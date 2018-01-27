@@ -70,7 +70,7 @@ async def prim_cmd_list(message, args, client, conf, userdata):
 async def prim_cmd_help(message, args, client, conf, userdata):
     msg = ""
     if args == "":
-        msg = "```asciidoc = Available Commands: =\n"
+        msg = "```Available Commands:\n"
         for cmd in sorted(primCmds):
             msg += "\t{}:\t {}\n".format(cmd, primCmds[cmd][2])
         msg += "This bot is a work in progress. If you have any questions, please ask a developer.\n"
