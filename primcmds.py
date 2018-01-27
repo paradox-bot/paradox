@@ -81,7 +81,7 @@ async def prim_cmd_help(message, args, client, conf, userdata):
             if cmd in primCmds:
                 msg += "```{}```\n".format(primCmds[cmd][3])
             else:
-                msg += "```Command '{}' not found. Use help or list to see available commands.```\n".format(cmd)
+                msg += "I couldnn't find a command named `{}`. Please make sure you have spelled the command correctly. \n".format(cmd)
     await reply(client, message, msg)
 
 #------END COMMANDS------
