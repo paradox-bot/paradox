@@ -84,5 +84,16 @@ async def prim_cmd_help(message, args, client, conf, userdata):
                 msg += "I couldn't find a command named `{}`. Please make sure you have spelled the command correctly. \n".format(cmd)
     await reply(client, message, msg)
 
+@prim_cmd("testembed", "testing", "Sends a test embed.", "Usage: testembed\n\nSends a test embed, what more do you want?")
+async def prim_cmd_testembed(message,args, client, conf, userdata):
+    embed = discord.Embed(title = "This is a title", color = discord.Colour.teal()) \
+        .set_author(name = "I am an Author") \
+        .add_field(name = "This is a field1 title", value = "This is field1 content", inline = True) \
+        .add_field(name = "This is a field2 title", value = "This is field2 content", inline = True) \
+        .add_field(name = "This is a field3 title", value = "This is field3 content", inline = False) \
+        .set_footer(text = "This is a footer")
+    await client.send_message(message.channel, embed=embed)
+
+
 #------END COMMANDS------
 
