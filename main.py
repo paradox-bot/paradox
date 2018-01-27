@@ -3,7 +3,8 @@ import asyncio
 import json
 import configparser as cfgp
 
-CONFFILE = "paradox.conf"
+CONF_FILE = "paradox.conf"
+USER_CONF_FILE = "paradox_userdata.conf"
 
 class Conf(cfgp.ConfigParser):
     section = "General"
@@ -29,7 +30,45 @@ class Conf(cfgp.ConfigParser):
 
 
 
-conf = Conf(CONFFILE)
+class UserConf:
+    userSection = 'USERS'
+    def __init__(self, conffile):
+        self.conffile = conffile
+        if not os.path.isfile(conffile):
+            with open(conffile, 'a+') as configfile:
+                configfile.write('')
+        config = cfgp.ConfigParser()
+        config.read(conffile)
+        if self.userSection not in config.sections():
+            config[self.userSection] = {}
+        self.users = config[self.userSection]
+        self.config = config
+    def get(self, userid, prop):
+        if str(userid) not in self.users:
+            self.users[str(userid)] = '{}'
+        user = json.loads(self.users[str(userid)])
+        return user.get(prop, None)
+    def getintlist(self, userid, prop):
+        value = self.get(userid, prop)
+        return value if value is not None else []
+    def getStr(self, userid, prop):
+        value = self.get(userid, prop)
+        return value if value is not None else ""
+    def set(self, userid, prop, value):
+        if str(userid) not in self.users:
+            self.users[str(userid)] = "{}"
+        user = json.loads(self.users[str(userid)])
+        user[prop] = value
+        self.users[str(userid)] = json.dumps(user)
+        self.write()
+    def write(self):
+        with open(self.conffile, 'w') as configfile:
+            self.config.write(configfile)
+
+
+
+conf = Conf(CONF_FILE)
+userdata = UserConf(USER_CONF_FILE)
 TOKEN = conf.kget("TOKEN")
 PREFIX = conf.kget("PREFIX")
 
@@ -131,6 +170,8 @@ async def on_message(message):
         #Either way, let's ignore them
         return
     if message.content == (PREFIX): 
+        #Some ass just typed the prefix to try and trigger us.
+        #Not even going to try parsing, just quit.
         return
     #TODO: Put something here about checking blacklisted users.
     #Okay, we have decided it was meant for us. Let's log it
@@ -175,8 +216,8 @@ async def cmd_parser(message, cmd, args):
                 await reply(message, "Something went wrong. The error has been logged")
             except:
                 await log("Something unexpected happened and I can't print the error. Dying now.")
-        #Either way, we are done here.
-        return
+            #Either way, we are done here.
+            return
     else:
         #At this point we have tried all our command types. 
         ##The user probably made a spelling mistake.
