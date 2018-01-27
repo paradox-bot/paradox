@@ -20,7 +20,7 @@ Not intended to be used in production.
 primCmds = {}
 
 #Command decorator
-def prim_cmd(cmdName, category, desc, helpDesc):
+def prim_cmd(cmdName, category, desc = "No description", helpDesc = "No help has yet been written for this command."):
     '''
     Decorator wrapper which adds the command to the commands dict so it can be looked up and run.
         cmdName -- Name of the command
@@ -47,11 +47,11 @@ def prim_cmd(cmdName, category, desc, helpDesc):
 
 #Primitive Commands
 
-@prim_cmd("about", "general", "No description", "No help")
+@prim_cmd("about", "general")
 async def prim_cmd_about(message, args, client, conf, userdata):
     await reply(client, message, 'This is a bot created via the collaborative efforts of Retro, Pue, and Loomy.')
 
-@prim_cmd("ping", "general", "No description", "No help")
+@prim_cmd("ping", "general")
 async def prim_cmd_ping(message, args, client, conf, userdata):
     sentMessage = await client.send_message(message.channel, 'Beep')
     mainMsg = sentMessage.timestamp
@@ -62,10 +62,27 @@ async def prim_cmd_ping(message, args, client, conf, userdata):
     latency = str(latency)
     await client.edit_message(sentMessage, 'Ping: '+latency+'ms')
 
-@prim_cmd("help", "general", "No description", "No help")
-async def prim_cmd_help(message, args, client, conf, userdata):
+@prim_cmd("list", "general")
+async def prim_cmd_list(message, args, client, conf, userdata):
    await client.send_message(message.channel, 'Available commands: `about`, `ping`')
 
+@prim_cmd("help", "general", "Provides some detailed help on a command", "Usage: help [command name]\n\nShows detailed help on the requested command, or lists all the commands.")
+async def prim_cmd_help(message, args, client, conf, userdata):
+    msg = ""
+    if args == "":
+        msg = "```Available Commands:\n"
+        for cmd in sorted(primCmds):
+            msg += "\t{}:\t {}\n".format(cmd, primCmds[cmd][2])
+        msg += "This bot is a work in progress. If you have any questions, please ask a developer.\n"
+        msg += "```"
+    else:
+        params = args.split(' ')
+        for cmd in params:
+            if cmd in primCmds:
+                msg += "```{}```\n".format(primCmds[cmd][3])
+            else:
+                msg += "```Command '{}' not found. Use help or list to see available commands.```\n".format(cmd)
+    await reply(client, message, msg)
 
 #------END COMMANDS------
 
