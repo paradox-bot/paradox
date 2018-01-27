@@ -3,6 +3,9 @@ import asyncio
 import json
 from userconf import UserConf
 from botconf import Conf
+from parautils import *
+
+import primcmds
 
 #Global constants/ environment variables
 
@@ -23,38 +26,6 @@ PREFIX = conf.kget("PREFIX")
 client = discord.Client()
 
 
-#----Primitive Commands setup----
-'''
-This is for adding basic commands as a proof of concept.
-Not intended to be used in production.
-'''
-
-#Initialise command dict
-##Entries are indexed by cmdName and contain data described in prim_cmd
-primCmds = {}
-
-#Command decorator
-def prim_cmd(cmdName, category, desc, helpDesc):
-    '''
-    Decorator wrapper which adds the command to the commands dict so it can be looked up and run.
-        cmdName -- Name of the command
-        category -- string representing the category, if categorised commands are created
-            (e.g. for categorised help)
-        desc -- user readable short description for the command
-        helpDesc -- user readable help string for the command
-    Returns the actual decorator below
-    '''
-    def decorator(func):
-        '''
-        Takes in the function, adds it to the cmd dictionary, spits it out again.
-        '''
-        primCmds[cmdName] = [func, category, desc, helpDesc]
-        return func
-    return decorator
-
-
-#----End primitive commands setup---
-
 
 
 
@@ -69,39 +40,6 @@ async def on_ready():
     print("Logged into", len(client.servers), "servers")
     
 
-
-'''
-#Old on_message versions
-@client.event
-async def on_message(message):
-        if message.content.startswith('~about'):
-                await reply(message, 'This is a bot created via the collaborative efforts of Retro, Pue, and Loomy.')
-        elif message.content.startswith('~ping'):
-                sentMessage = await client.send_message(message.channel, 'Beep')
-                mainMsg = sentMessage.timestamp
-                editedMessage = await client.edit_message(sentMessage,'Boop')
-                editMsg = editedMessage.edited_timestamp
-                latency = editMsg - mainMsg
-                latency = latency.microseconds // 1000
-                latency = str(latency)
-                await client.edit_message(sentMessage, 'Ping: '+latency+'ms')	
-@client.event
-async def on_message(message):
-        if message.content.startswith('~about'):
-                await reply(message, 'This is a bot created via the collaborative efforts of Retro, Pue, and Loomy.')
-        elif message.content.startswith('~ping'):
-                sentMessage = await client.send_message(message.channel, 'Beep')
-                mainMsg = sentMessage.timestamp
-                editedMessage = await client.edit_message(sentMessage,'Boop')
-                editMsg = editedMessage.edited_timestamp
-                latency = editMsg - mainMsg
-                latency = latency.microseconds // 1000
-                latency = str(latency)
-                await client.edit_message(sentMessage, 'Ping: '+latency+'ms')
-       elif message.content.startsWith('~help'):
-               await client.send_message(message.channel, 'Available commands: `about`, `ping`')
-                
-'''
 
 #We saw a message!
 @client.event
@@ -146,11 +84,11 @@ async def cmd_parser(message, cmd, args):
         args: The arguments given to the command by the user
     '''
     #For now just have primitive command parsing, see above
-    if cmd in primCmds:
+    if cmd in primcmds.primCmds:
         try:
             #Try running the command using the associated function,
             ##we don't trust this will actually work though.
-            await primCmds[cmd][0](message, args)
+            await primcmds.primCmds[cmd][0](message, args, client, conf, userdata)
             return
         except:
             #If it didn't work, print the stacktrace, and try to inform the user.
@@ -160,7 +98,7 @@ async def cmd_parser(message, cmd, args):
             ##Maybe discord broke!
             ##Or more likely there's a permission error
             try:
-                await reply(message, "Something went wrong. The error has been logged")
+                await reply(client, message, "Something went wrong. The error has been logged")
             except:
                 await log("Something unexpected happened and I can't print the error. Dying now.")
             #Either way, we are done here.
@@ -173,50 +111,7 @@ async def cmd_parser(message, cmd, args):
 #----End Meta stuff----
 
 
-#----Helper functions and routines----
-async def log(logMessage):
-    '''
-    Logs logMessage in some nice way.
-    '''
-    #TODO: Log to file, or something nice.
-    #For now just print it.
-    print(logMessage)
-    return
 
-
-
-async def reply(message, content):
-    await client.send_message(message.channel, content)
-
-#----End Helper functions----
-
-
-
-#------COMMANDS------
-
-#Primitive Commands
-
-@prim_cmd("about", "general", "No description", "No help")
-async def prim_cmd_about(message, args):
-    await reply(message, 'This is a bot created via the collaborative efforts of Retro, Pue, and Loomy.')
-
-@prim_cmd("ping", "general", "No description", "No help")
-async def prim_cmd_ping(message, args):
-    sentMessage = await client.send_message(message.channel, 'Beep')
-    mainMsg = sentMessage.timestamp
-    editedMessage = await client.edit_message(sentMessage,'Boop')
-    editMsg = editedMessage.edited_timestamp
-    latency = editMsg - mainMsg
-    latency = latency.microseconds // 1000
-    latency = str(latency)
-    await client.edit_message(sentMessage, 'Ping: '+latency+'ms')
-
-@prim_cmd("help", "general", "No description", "No help")
-async def prim_cmd_help(message, args):
-   await client.send_message(message.channel, 'Available commands: `about`, `ping`')
-
-
-#------END COMMANDS------
 
 #----Event loops----
 #----End event loops----
