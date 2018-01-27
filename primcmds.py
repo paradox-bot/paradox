@@ -72,7 +72,7 @@ async def prim_cmd_help(message, args, client, conf, userdata):
     if args == "":
         msg = "```prolog\nAvailable Commands:\n"
         for cmd in sorted(primCmds):
-            msg += "\t{}:{}  {}\n".format(cmd," "*(20-len(cmd)) ,primCmds[cmd][2])
+            msg += "{}{}:\t{}\n".format(" "*(12-len(cmd)), cmd, primCmds[cmd][2])
         msg += "This bot is a work in progress. If you have any questions, please ask a developer.\n"
         msg += "```"
     else:
