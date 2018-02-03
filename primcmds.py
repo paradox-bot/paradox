@@ -162,7 +162,7 @@ async def prim_cmd_logs(message, cargs, client, conf, userdata):
 
 async def _async(message, cargs, client, conf, userdata):
     if cargs == '':
-        return (primCmds['async'][2], 1)
+        return (primCmds['async'][3], 1)
     env = {'message' : message,
            'args' : cargs,
            'client' : client,
@@ -209,6 +209,33 @@ async def cmd_async(message, cargs, client, conf, userdata):
     else:
         await reply(client, message, "**Async input:**```py\n{}\n```\n**Output:**```py\n{}\n```".format(cargs, output))
 
+
+async def _exec(message, cargs, client, conf, userdata):
+    if cargs == '':
+        return (primCmds['exec'][3],1)
+    old_stdout = sys.stdout
+    redirected_output = sys.stdout = StringIO()
+    result = None
+    try:
+        exec(cargs)
+        result = (redirected_output.getvalue(), 0)
+    except Exception:
+        traceback.print_exc()
+        result = (str(traceback.format_exc()), 2)
+    finally:
+        sys.stdout = old_stdout
+    return result
+
+@prim_cmd("exec", "exec", "Executes code and shows the output", "Usage: exec <code>\n\nRuns <code> in current environment using exec() and prints the output or error.") 
+@require_perm("Exec")
+async def cmd_exec(message, cargs, client, conf, userdata):
+    output, error = await _exec(message, cargs, client, conf, userdata)
+    if error == 1:
+        await reply(client, message, output)
+    elif error == 2:
+        await reply(client, message, "**Exec input:**```py\n{}\n```\n**Output (error):**```py\n{}\n```".format(cargs, output))
+    else:
+        await reply(client, message, "**Exec input:**```py\n{}\n```\n**Output:**```py\n{}\n```".format(cargs, output))
 
 
 
