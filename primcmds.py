@@ -16,6 +16,32 @@ This is for adding basic commands as a proof of concept.
 Not intended to be used in production.
 '''
 
+#Define permission dictionary
+permFuncs = {}
+
+async def perm_default(message, args, client, conf, userdata):
+    await reply(client, message, "Sorry, you don't have the required permission. In fact, the required permission isn't defined yet!")
+    return 1
+
+def require_perm(permName):
+    permFunc = permFuncs[permName] if permName in permFuncs else perm_default
+    def perm_decorator(func):
+        async def permed_func(message, args, client, conf, userdata, *args, **kwargs):
+            error = await permFunc(message, args, client, conf, userdata)
+            if error == 0:
+                func(args, kwargs)
+            else:
+                log("Permission failure running command in message \n{}\nFrom user \n{}\nRequired permission \"{}\" which returned error code \"{}\"".format(message.content, message.author.id, permName, error))
+            return
+        return permed_func
+    return perm_decorator
+
+def perm_func(permName):
+    def decorator(func):
+        permFuncs[permName] = [func]
+        return func
+    return decorator
+
 #Initialise command dict
 ##Entries are indexed by cmdName and contain data described in prim_cmd
 primCmds = {}
@@ -40,8 +66,18 @@ def prim_cmd(cmdName, category, desc = "No description", helpDesc = "No help has
     return decorator
 
 
-#----End primitive commands setup---
 
+#----End primitive commands setup---
+#------PERMISSION FUNCTIONS------
+
+@perm_func("Exec perms")
+async def perm_exec(message, args, client, conf, userdata):
+    if int(message.author.id) not in conf.kgetintlist("execWhiteList"):
+        await reply(message, "You don't have the require Exec perms to use this command.")
+        return 1
+    return 0
+
+#----End permission functions----
 
 
 #------COMMANDS------
@@ -49,10 +85,12 @@ def prim_cmd(cmdName, category, desc = "No description", helpDesc = "No help has
 #Primitive Commands
 
 @prim_cmd("restart", "general")
+@require_perm("Exec perms")
 async def prim_cmd_restart(message, args, client, conf, userdata):
     await reply(client, message, os.system('./run.sh'))
 
 @prim_cmd("prestart", "general")
+@require_perm("Exec perms")
 async def prim_cmd_prestart(message, args, client, conf, userdata):
     await reply(client, message, os.system('./pullrun.sh'))
 
@@ -94,6 +132,7 @@ async def prim_cmd_help(message, args, client, conf, userdata):
     await reply(client, message, msg)
 
 @prim_cmd("testembed", "testing", "Sends a test embed.", "Usage: testembed\n\nSends a test embed, what more do you want?")
+@require_perm("Exec perms")
 async def prim_cmd_testembed(message,args, client, conf, userdata):
     embed = discord.Embed(title = "This is a title", color = discord.Colour.teal()) \
         .set_author(name = "I am an Author") \
