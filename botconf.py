@@ -30,7 +30,7 @@ class Conf:
     def getStr(self, settingName, default = ""):
         return self.get(settingName, default)
     def set(self, settingName, value):
-        self.settings[settingName] = value
+        self.settings[settingName] = str(value)
         self.write()
     def write(self):
         with open(self.conffile, 'w') as configfile:

@@ -181,7 +181,7 @@ async def prim_cmd_help(message, args, client, conf, userdata):
     await reply(client, message, msg)
 
 @prim_cmd("testembed", "testing", "Sends a test embed.", "Usage: testembed\n\nSends a test embed, what more do you want?")
-@require_perm("Exec perms")
+@require_perm("Exec")
 async def prim_cmd_testembed(message,args, client, conf, userdata):
     embed = discord.Embed(title = "This is a title", color = discord.Colour.teal()) \
         .set_author(name = "I am an Author") \
