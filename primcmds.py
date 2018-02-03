@@ -72,7 +72,7 @@ def prim_cmd(cmdName, category, desc = "No description", helpDesc = "No help has
 #------PERMISSION FUNCTIONS------
 
 @perm_func("Master")
-async def perm_exec(message, cargs, client, conf, userdata):
+async def perm_master(message, cargs, client, conf, userdata):
     if int(message.author.id) not in conf.getintlist("masters"):
         await reply(client, message, "This command requires you to be one of my masters.")
         return 1
@@ -80,7 +80,7 @@ async def perm_exec(message, cargs, client, conf, userdata):
 
 @perm_func("Exec")
 async def perm_exec(message, cargs, client, conf, userdata):
-    if int(message.author.id) not in conf.getintlist("execWhiteList"):
+    if (int(message.author.id) not in conf.getintlist("execWhiteList")) and (int(message.author.id) not in conf.getintlist("masters")):
         await reply(client, message, "You don't have the required Exec perms to use this command.")
         return 1
     return 0
@@ -141,6 +141,9 @@ async def prim_cmd_masters(message, cargs, client, conf, userdata):
         await reply(client, message, primCmds["masters"][3])
 
 
+#TODO: refactor masters to a general list add/check/remove function, add exec config or join commands
+
+
 @prim_cmd("logs", "admin", "Reads and returns the logs", "Usage: logs [number]\n\nSends the logfile or the last <number> lines of the log.")
 @require_perm("Master")
 async def prim_cmd_logs(message, cargs, client, conf, userdata):
@@ -154,6 +157,58 @@ async def prim_cmd_logs(message, cargs, client, conf, userdata):
 
 
 #Bot exec commands
+
+async def _async(message, cargs, client, conf, userdata):
+    if cargs == '':
+        return (primCmds['async'][2], 1)
+    env = {'message' : message,
+           'args' : cargs,
+           'client' : client,
+           'conf' : conf,
+           'userdata' : userdata,
+           'channel' : message.channel,
+           'author' : message.author,
+           'server' : message.server}
+    env.update(globals())
+    old_stdout = sys.stdout
+    redirected_output = sys.stdout = StringIO()
+    result = None
+    exec_string = "async def _temp_exec():\n"
+    exec_string += '\n'.join(' ' * 4 + line for line in cargs.split('\n'))
+    try:
+        exec(exec_string, env)
+        result = (redirected_output.getvalue(), 0)
+    except Exception:
+        traceback.print_exc()
+        result = (str(traceback.format_exc()), 2)
+    _temp_exec = env['_temp_exec']
+    try:
+        returnval = yield from _temp_exec()
+        value = redirected_output.getvalue()
+        if returnval == None:
+            result = (value, 0)
+        else:
+            result = (value + '\n' + str(returnval), 0)
+    except Exception:
+        traceback.print_exc()
+        result = (str(traceback.format_exc()), 2)
+    finally:
+        sys.stdout = old_stdout
+    return result
+
+@prim_cmd("async", "exec", "Executes async code and shows the output", "Usage: async <code>\n\nRuns <code> as an asyncronous coroutine and prints the output or error.") 
+@require_perm("Exec")
+async def cmd_async(message, cargs, client, conf, userdata):
+    output, error = await _async(message, cargs, client, conf, userdata)
+    if error == 1:
+        await reply(client, message, output)
+    elif error == 2:
+        await reply(client, message, "**Async input:**```py\n{}\n```\n**Output (error):**```py\n{}\n```".format(parameters, output))
+    else:
+        await reply(client, message, "**Async input:**```py\n{}\n```\n**Output:**```py\n{}\n```".format(parameters, output))
+
+
+
 
 
 #General utility commands
