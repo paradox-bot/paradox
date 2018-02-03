@@ -141,24 +141,6 @@ async def prim_cmd_masters(message, args, client, conf, userdata):
 #Bot exec commands
 
 
-
-
-
-        if parameters == '':
-        yield from reply(message, conf.kgetintlist('MASTERS'))
-        return
-    params = parameters.split(' ')
-    action = params[0]
-    if action in ['add', '+']:
-            if len(params) == 2:
-                conf.ksetintlist('MASTERS', conf.kgetintlist('MASTERS') + [int(params[1])])
-                conf.kwrite()
-                yield from reply(message, "Added "+params[1]+" to MASTER list")
-                return
-            else:
-                yield from reply(message, "Please provide a valid user id to add")
-                return
-
 #General utility commands
 
 @prim_cmd("about", "general")
