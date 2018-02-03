@@ -72,14 +72,14 @@ def prim_cmd(cmdName, category, desc = "No description", helpDesc = "No help has
 #------PERMISSION FUNCTIONS------
 
 @perm_func("Master")
-async def perm_exec(message, args, client, conf, userdata):
+async def perm_exec(message, cargs, client, conf, userdata):
     if int(message.author.id) not in conf.getintlist("masters"):
         await reply(client, message, "This command requires you to be one of my masters.")
         return 1
     return 0
 
 @perm_func("Exec")
-async def perm_exec(message, args, client, conf, userdata):
+async def perm_exec(message, cargs, client, conf, userdata):
     if int(message.author.id) not in conf.getintlist("execWhiteList"):
         await reply(client, message, "You don't have the required Exec perms to use this command.")
         return 1
@@ -100,12 +100,12 @@ async def perm_exec(message, args, client, conf, userdata):
 #Bot admin commands
 @prim_cmd("restart", "admin")
 @require_perm("Master")
-async def prim_cmd_restart(message, args, client, conf, userdata):
+async def prim_cmd_restart(message, cargs, client, conf, userdata):
     await reply(client, message, os.system('./run.sh'))
 
 @prim_cmd("prestart", "admin")
 @require_perm("Master")
-async def prim_cmd_prestart(message, args, client, conf, userdata):
+async def prim_cmd_prestart(message, cargs, client, conf, userdata):
     await reply(client, message, os.system('./pullrun.sh'))
 
 
@@ -113,11 +113,11 @@ async def prim_cmd_prestart(message, args, client, conf, userdata):
 
 @prim_cmd("masters", "admin", "Modify or check the bot masters", "Usage: masters [list] | [+/add | -/remove] <userid/mention>\n\nAdds or removes a bot master by id or mention, or lists all current masters.")
 @require_perm("Master")
-async def prim_cmd_masters(message, args, client, conf, userdata):
+async def prim_cmd_masters(message, cargs, client, conf, userdata):
     masters = conf.getintlist("masters")
     #TODO: Make this a human readable list of names
     masterNames = ', '.join([str(master) for master in masters])
-    params = args.split(' ')
+    params = cargs.split(' ')
     action = params[0]
     if action in ['', 'list']:
         await reply(client, message, "My masters are:\n{}".format(masterNames))
@@ -145,11 +145,11 @@ async def prim_cmd_masters(message, args, client, conf, userdata):
 #General utility commands
 
 @prim_cmd("about", "general")
-async def prim_cmd_about(message, args, client, conf, userdata):
+async def prim_cmd_about(message, cargs, client, conf, userdata):
     await reply(client, message, 'This is a bot created via the collaborative efforts of Retro, Pue, and Loomy.')
 
 @prim_cmd("ping", "general")
-async def prim_cmd_ping(message, args, client, conf, userdata):
+async def prim_cmd_ping(message, cargs, client, conf, userdata):
     sentMessage = await client.send_message(message.channel, 'Beep')
     mainMsg = sentMessage.timestamp
     editedMessage = await client.edit_message(sentMessage,'Boop')
@@ -160,20 +160,20 @@ async def prim_cmd_ping(message, args, client, conf, userdata):
     await client.edit_message(sentMessage, 'Ping: '+latency+'ms')
 
 @prim_cmd("list", "general")
-async def prim_cmd_list(message, args, client, conf, userdata):
+async def prim_cmd_list(message, cargs, client, conf, userdata):
    await client.send_message(message.channel, 'Available commands: `about`, `ping`')
 
 @prim_cmd("help", "general", "Provides some detailed help on a command", "Usage: help [command name]\n\nShows detailed help on the requested command, or lists all the commands.")
-async def prim_cmd_help(message, args, client, conf, userdata):
+async def prim_cmd_help(message, cargs, client, conf, userdata):
     msg = ""
-    if args == "":
+    if cargs == "":
         msg = "```prolog\nAvailable Commands:\n"
         for cmd in sorted(primCmds):
             msg += "{}{}:\t{}\n".format(" "*(12-len(cmd)), cmd, primCmds[cmd][2])
         msg += "This bot is a work in progress. If you have any questions, please ask a developer.\n"
         msg += "```"
     else:
-        params = args.split(' ')
+        params = cargs.split(' ')
         for cmd in params:
             if cmd in primCmds:
                 msg += "```{}```\n".format(primCmds[cmd][3])
@@ -183,7 +183,7 @@ async def prim_cmd_help(message, args, client, conf, userdata):
 
 @prim_cmd("testembed", "testing", "Sends a test embed.", "Usage: testembed\n\nSends a test embed, what more do you want?")
 @require_perm("Exec")
-async def prim_cmd_testembed(message,args, client, conf, userdata):
+async def prim_cmd_testembed(message, cargs, client, conf, userdata):
     embed = discord.Embed(title = "This is a title", color = discord.Colour.teal()) \
         .set_author(name = "I am an Author") \
         .add_field(name = "This is a field1 title", value = "This is field1 content", inline = True) \
