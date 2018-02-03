@@ -147,7 +147,7 @@ async def prim_cmd_logs(message, cargs, client, conf, userdata):
     logfile = LOGFILE #Getting this from utils at the moment
     params = cargs.split(' ')
     if cargs == '':
-        await client.send_file(message, logfile)
+        await client.send_file(message.channel, logfile)
     elif params[0].isdigit():
         logs = await tail(logfile, params[0])
         await reply(client, message, "Here are your logs:\n```{}```".format(logs))
