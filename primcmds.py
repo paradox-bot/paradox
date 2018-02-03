@@ -30,7 +30,7 @@ def require_perm(permName):
         async def permed_func(message, cargs, client, conf, userdata, *args, **kwargs):
             error = await permFunc(message, cargs, client, conf, userdata)
             if error == 0:
-                func(args, kwargs)
+                await func(message, cargs, client, conf, userdata)
             else:
                 await log("Permission failure running command in message \n{}\nFrom user \n{}\nRequired permission \"{}\" which returned error code \"{}\"".format(message.content, message.author.id, permName, error))
             return
