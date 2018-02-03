@@ -112,6 +112,7 @@ async def prim_cmd_prestart(message, args, client, conf, userdata):
 
 
 @prim_cmd("masters", "admin", "Modify or check the bot masters", "Usage: masters [list] | [+/add | -/remove] <userid/mention>\n\nAdds or removes a bot master by id or mention, or lists all current masters.")
+@require_perm("Master")
 async def prim_cmd_masters(message, args, client, conf, userdata):
     masters = conf.getintlist("masters")
     #TODO: Make this a human readable list of names
