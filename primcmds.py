@@ -183,7 +183,7 @@ async def _async(message, cargs, client, conf, userdata):
         result = (str(traceback.format_exc()), 2)
     _temp_exec = env['_temp_exec']
     try:
-        returnval = yield from _temp_exec()
+        returnval = await _temp_exec()
         value = redirected_output.getvalue()
         if returnval == None:
             result = (value, 0)
