@@ -29,7 +29,7 @@ async def tail(filename, n, offset=0):
     p1 = subprocess.Popen('tail -n '+n+offset+' '+filename, shell = True, stdin=None, stdout=subprocess.PIPE)
     lines = p1.communicate().readlines()
     p1.stdout.close()
-  return lines[:,-offset]
+    return lines[:,-offset]
 
 
 async def reply(client, message, content):
