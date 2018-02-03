@@ -120,7 +120,7 @@ async def prim_cmd_masters(message, args, client, conf, userdata):
     action = params[0]
     if action in ['', 'list']:
         await reply(client, message, "My masters are:\n{}".format(masterNames))
-    elif (action in ['+', 'add']) and (len(params) = 2) and params[1].strip('<!@>').isdigit():
+    elif (action in ['+', 'add']) and (len(params) == 2) and params[1].strip('<!@>').isdigit():
         userid = params[1].strip('<!@>')
         if userid in masters:
             await reply(client, message, "This user is already one of my masters!")
@@ -128,7 +128,7 @@ async def prim_cmd_masters(message, args, client, conf, userdata):
             masters.append(userid)
             conf.set("masters", masters)
             await reply(client, message, "I accept this user as a new master.")
-    elif (action in ['-', 'remove']) and (len(params) = 2) and params[1].strip('<!@>').isdigit():
+    elif (action in ['-', 'remove']) and (len(params) == 2) and params[1].strip('<!@>').isdigit():
         userid = params[1].strip('<!@>')
         if userid not in masters:
             await reply(client, message, "This user is not one of my masters!")
