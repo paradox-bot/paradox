@@ -1,6 +1,7 @@
 import discord
 import asyncio
 import json
+import traceback
 from userconf import UserConf
 from botconf import Conf
 from parautils import *
@@ -19,8 +20,8 @@ USER_CONF_FILE = "paradox_userdata.conf"
 conf = Conf(CONF_FILE)
 userdata = UserConf(USER_CONF_FILE)
 
-TOKEN = conf.kget("TOKEN")
-PREFIX = conf.kget("PREFIX")
+TOKEN = conf.get("TOKEN")
+PREFIX = conf.get("PREFIX")
 
 
 client = discord.Client()
@@ -49,7 +50,7 @@ async def on_message(message):
     If it looks like a message for us, and it's not from anyone bad,
     pass it on to the command parser.
     '''
-    PREFIX = conf.kget("PREFIX") #In case someone changed it while we weren't looking
+    PREFIX = conf.get("PREFIX") #In case someone changed it while we weren't looking
     if not message.content.startswith(PREFIX):
         #Okay, it probably wasn't meant for us, or they can't type
         #Either way, let's ignore them
@@ -118,4 +119,4 @@ async def cmd_parser(message, cmd, args):
 
 
 #----Everything is defined, start the client!----
-client.run(conf.kget("TOKEN"))
+client.run(conf.get("TOKEN"))
