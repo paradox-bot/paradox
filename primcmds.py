@@ -8,6 +8,7 @@ import asyncio
 import json
 import os
 import sys
+import StringIO
 
 from parautils import *
 
