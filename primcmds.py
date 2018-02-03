@@ -137,6 +137,20 @@ async def prim_cmd_masters(message, cargs, client, conf, userdata):
             masters.remove(userid)
             conf.set("masters", masters)
             await reply(client, message, "I have rejected this master.")
+    else:
+        await reply(client, message, primCmds["masters"][3])
+
+
+@prim_cmd("logs", "admin", "Reads and returns the logs", "Usage: logs [number]\n\nSends the logfile or the last <number> lines of the log.")
+@require_perm("Master")
+async def prim_cmd_logs(message, cargs, client, conf, userdata):
+    logfile = LOGFILE #Getting this from utils at the moment
+    params = cargs.split(' ')
+    if cargs == '':
+        await client.send_file(message, file=logfile)
+    elif params[0].isdigit():
+        logs = tail(logfile, params[0])
+        await reply(client, message, "Here are your logs:\n```{}```".format(logs))
 
 
 #Bot exec commands
