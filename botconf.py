@@ -26,7 +26,7 @@ class Conf:
             return default
         return self.settings[settingName]
     def getintlist(self, settingName, default = []):
-        return json.loads(self.get(settingName, default))
+        return json.loads(self.get(settingName, str(default)))
     def getStr(self, settingName, default = ""):
         return self.get(settingName, default)
     def set(self, settingName, value):
