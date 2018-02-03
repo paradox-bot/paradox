@@ -24,6 +24,7 @@ async def perm_default(message, args, client, conf, userdata):
     return 1
 
 def require_perm(permName):
+    permName = permName.lower()
     permFunc = permFuncs[permName][0] if permName in permFuncs else perm_default
     def perm_decorator(func):
         async def permed_func(message, cargs, client, conf, userdata, *args, **kwargs):
@@ -38,7 +39,7 @@ def require_perm(permName):
 
 def perm_func(permName):
     def decorator(func):
-        permFuncs[permName] = [func]
+        permFuncs[permName.lower()] = [func]
         return func
     return decorator
 
@@ -70,7 +71,14 @@ def prim_cmd(cmdName, category, desc = "No description", helpDesc = "No help has
 #----End primitive commands setup---
 #------PERMISSION FUNCTIONS------
 
-@perm_func("Exec perms")
+@perm_func("Master")
+async def perm_exec(message, args, client, conf, userdata):
+    if int(message.author.id) not in conf.getintlist("masters"):
+        await reply(client, message, "This command requires you to be one of my masters.")
+        return 1
+    return 0
+
+@perm_func("Exec")
 async def perm_exec(message, args, client, conf, userdata):
     if int(message.author.id) not in conf.getintlist("execWhiteList"):
         await reply(client, message, "You don't have the require Exec perms to use this command.")
@@ -79,20 +87,79 @@ async def perm_exec(message, args, client, conf, userdata):
 
 #----End permission functions----
 
+#---Helper functions---
+
+
+#---End helper functions---
+
 
 #------COMMANDS------
 
 #Primitive Commands
 
-@prim_cmd("restart", "general")
-@require_perm("Exec perms")
+#Bot admin commands
+@prim_cmd("restart", "admin")
+@require_perm("Master")
 async def prim_cmd_restart(message, args, client, conf, userdata):
     await reply(client, message, os.system('./run.sh'))
 
-@prim_cmd("prestart", "general")
-@require_perm("Exec perms")
+@prim_cmd("prestart", "admin")
+@require_perm("Master")
 async def prim_cmd_prestart(message, args, client, conf, userdata):
     await reply(client, message, os.system('./pullrun.sh'))
+
+
+
+
+@prim_cmd("masters", "admin", "Modify or check the bot masters", "Usage: masters [list] | [+/add | -/remove] <userid/mention>\n\nAdds or removes a bot master by id or mention, or lists all current masters.")
+async def prim_cmd_masters(message, args, client, conf, userdata):
+    masters = conf.getintlist("masters")
+    #TODO: Make this a human readable list of names
+    masterNames = ', '.join(masters)
+    params = args.split(' ')
+    action = params[0]
+    if action in ['', 'list']:
+        await reply(client, message, "My masters are:\n{}".format(masterNames))
+    elif (action in ['+', 'add']) and (len(params) = 2) and params[1].strip('<!@>').isdigit():
+        userid = params[1].strip('<!@>')
+        if userid in masters:
+            await reply(client, message, "This user is already one of my masters!")
+        else:
+            masters.append(userid)
+            conf.set("masters", masters)
+            await reply(client, message, "I accept this user as a new master.")
+    elif (action in ['-', 'remove']) and (len(params) = 2) and params[1].strip('<!@>').isdigit():
+        userid = params[1].strip('<!@>')
+        if userid not in masters:
+            await reply(client, message, "This user is not one of my masters!")
+        else:
+            masters.remove(userid)
+            conf.set("masters", masters)
+            await reply(client, message, "I have rejected this master.")
+
+
+#Bot exec commands
+
+
+
+
+
+        if parameters == '':
+        yield from reply(message, conf.kgetintlist('MASTERS'))
+        return
+    params = parameters.split(' ')
+    action = params[0]
+    if action in ['add', '+']:
+            if len(params) == 2:
+                conf.ksetintlist('MASTERS', conf.kgetintlist('MASTERS') + [int(params[1])])
+                conf.kwrite()
+                yield from reply(message, "Added "+params[1]+" to MASTER list")
+                return
+            else:
+                yield from reply(message, "Please provide a valid user id to add")
+                return
+
+#General utility commands
 
 @prim_cmd("about", "general")
 async def prim_cmd_about(message, args, client, conf, userdata):
