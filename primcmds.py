@@ -32,7 +32,7 @@ def require_perm(permName):
             if error == 0:
                 func(args, kwargs)
             else:
-                log("Permission failure running command in message \n{}\nFrom user \n{}\nRequired permission \"{}\" which returned error code \"{}\"".format(message.content, message.author.id, permName, error))
+                await log("Permission failure running command in message \n{}\nFrom user \n{}\nRequired permission \"{}\" which returned error code \"{}\"".format(message.content, message.author.id, permName, error))
             return
         return permed_func
     return perm_decorator
@@ -81,7 +81,7 @@ async def perm_exec(message, args, client, conf, userdata):
 @perm_func("Exec")
 async def perm_exec(message, args, client, conf, userdata):
     if int(message.author.id) not in conf.getintlist("execWhiteList"):
-        await reply(client, message, "You don't have the require Exec perms to use this command.")
+        await reply(client, message, "You don't have the required Exec perms to use this command.")
         return 1
     return 0
 
