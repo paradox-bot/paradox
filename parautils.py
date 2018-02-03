@@ -29,7 +29,7 @@ async def tail(filename, n):
     p1 = subprocess.Popen('tail -n '+str(n)+' '+filename, shell = True, stdin=None, stdout=subprocess.PIPE)
     out,err = p1.communicate()
     p1.stdout.close()
-    return str(out)
+    return out.decode('utf-8')
 
 
 async def reply(client, message, content):
