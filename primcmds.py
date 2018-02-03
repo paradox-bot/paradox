@@ -205,9 +205,9 @@ async def cmd_async(message, cargs, client, conf, userdata):
     if error == 1:
         await reply(client, message, output)
     elif error == 2:
-        await reply(client, message, "**Async input:**```py\n{}\n```\n**Output (error):**```py\n{}\n```".format(parameters, output))
+        await reply(client, message, "**Async input:**```py\n{}\n```\n**Output (error):**```py\n{}\n```".format(cargs, output))
     else:
-        await reply(client, message, "**Async input:**```py\n{}\n```\n**Output:**```py\n{}\n```".format(parameters, output))
+        await reply(client, message, "**Async input:**```py\n{}\n```\n**Output:**```py\n{}\n```".format(cargs, output))
 
 
 
