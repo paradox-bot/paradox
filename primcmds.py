@@ -24,7 +24,7 @@ async def perm_default(message, args, client, conf, userdata):
     return 1
 
 def require_perm(permName):
-    permFunc = permFuncs[permName] if permName in permFuncs else perm_default
+    permFunc = permFuncs[permName][0] if permName in permFuncs else perm_default
     def perm_decorator(func):
         async def permed_func(message, cargs, client, conf, userdata, *args, **kwargs):
             error = await permFunc(message, cargs, client, conf, userdata)
@@ -73,7 +73,7 @@ def prim_cmd(cmdName, category, desc = "No description", helpDesc = "No help has
 @perm_func("Exec perms")
 async def perm_exec(message, args, client, conf, userdata):
     if int(message.author.id) not in conf.kgetintlist("execWhiteList"):
-        await reply(message, "You don't have the require Exec perms to use this command.")
+        await reply(client, message, "You don't have the require Exec perms to use this command.")
         return 1
     return 0
 
