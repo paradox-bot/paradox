@@ -25,12 +25,11 @@ async def log(logMessage):
         logfile.write("\n"+logMessage+"\n")
     return
 
-async def tail(filename, n, offset=0):
-    p1 = subprocess.Popen('tail -n '+str(n)+str(offset)+' '+filename, shell = True, stdin=None, stdout=subprocess.PIPE)
+async def tail(filename, n):
+    p1 = subprocess.Popen('tail -n '+str(n)+' '+filename, shell = True, stdin=None, stdout=subprocess.PIPE)
     out,err = p1.communicate()
-    lines = out.readlines()
     p1.stdout.close()
-    return lines[:,-offset]
+    return str(out)
 
 
 async def reply(client, message, content):
