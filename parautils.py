@@ -6,6 +6,7 @@ import discord
 import asyncio
 import json
 import os
+import subprocess
 
 
 LOGFILE = "paralog.log"
@@ -25,9 +26,9 @@ async def log(logMessage):
     return
 
 async def tail(filename, n, offset=0):
-  stdin,stdout = os.popen2("tail -n "+n+offset+" "+filename)
-  stdin.close()
-  lines = stdout.readlines(); stdout.close()
+    p1 = subprocess.Popen('tail -n '+n+offset+' '+filename, shell = True, stdin=None, stdout=subprocess.PIPE)
+    lines = p1.communicate().readlines()
+    p1.stdout.close()
   return lines[:,-offset]
 
 
