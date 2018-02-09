@@ -103,6 +103,7 @@ async def cmd_parser(message, cmd, args):
             ##Or more likely there's a permission error
             try:
                 await reply(client, message, "Something went wrong. The error has been logged")
+
             except:
                 await log("Something unexpected happened and I can't print the error. Dying now.")
             #Either way, we are done here.
