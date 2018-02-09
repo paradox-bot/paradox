@@ -53,4 +53,4 @@ class _dataManipulator:
         keyData = json.loads(self.data[str(key)])
         keyData[prop] = value
         self.data[str(key)] = json.dumps(keyData)
-        master.write()
+        self.master.write()

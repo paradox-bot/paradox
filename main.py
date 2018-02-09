@@ -1,7 +1,7 @@
 import discord
 import asyncio
 import json
-import traceback
+from traceback import traceback
 
 from botdata import BotData
 from userconf import UserConf
