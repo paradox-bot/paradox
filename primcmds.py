@@ -243,7 +243,7 @@ async def cmd_exec(message, cargs, client, conf, userdata):
 async def prim_cmd_about(message, cargs, client, conf, userdata):
     await reply(client, message, 'This is a bot created via the collaborative efforts of Retro, Pue, and Loomy.')
     
-@prim_cmd("invite", "general")
+@prim_cmd("invite", "general", "Sends the bot's invite link")
 async def prim_cmd_about(message, cargs, client, conf, userdata):
     await reply(client, message, 'Here\'s my invite link! \n <https://discordapp.com/api/oauth2/authorize?client_id=401613224694251538&permissions=8&scope=bot>')
 
