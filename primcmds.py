@@ -104,14 +104,7 @@ async def perm_exec(message, cargs, client, conf, botdata):
 @prim_cmd("restart", "admin")
 @require_perm("Master")
 async def prim_cmd_restart(message, cargs, client, conf, botdata):
-    await reply(client, message, os.system('./run.sh'))
-
-@prim_cmd("prestart", "admin")
-@require_perm("Master")
-async def prim_cmd_prestart(message, cargs, client, conf, botdata):
-    await reply(client, message, os.system('./pullrun.sh'))
-
-
+    await reply(client, message, os.system('./Nanny/scripts/redeploy.sh'))
 
 
 @prim_cmd("masters", "admin", "Modify or check the bot masters", "Usage: masters [list] | [+/add | -/remove] <userid/mention>\n\nAdds or removes a bot master by id or mention, or lists all current masters.")
