@@ -2,6 +2,8 @@ import discord
 import asyncio
 import json
 import traceback
+
+from botdata import BotData
 from userconf import UserConf
 from botconf import Conf
 from parautils import *
@@ -11,14 +13,15 @@ import primcmds
 #Global constants/ environment variables
 
 CONF_FILE = "paradox.conf"
-USER_CONF_FILE = "paradox_userdata.conf"
-
+#USER_CONF_FILE = "paradox_userdata.conf"
+BOT_DATA_FILE = "paradox_botdata.conf"
 
 
 #Initialise
 
 conf = Conf(CONF_FILE)
-userdata = UserConf(USER_CONF_FILE)
+#userdata = UserConf(USER_CONF_FILE)
+botdata = BotData(BOT_DATA_FILE)
 
 TOKEN = conf.get("TOKEN")
 PREFIX = conf.get("PREFIX")
@@ -89,7 +92,7 @@ async def cmd_parser(message, cmd, args):
         try:
             #Try running the command using the associated function,
             ##we don't trust this will actually work though.
-            await primcmds.primCmds[cmd][0](message, args, client, conf, userdata)
+            await primcmds.primCmds[cmd][0](message, args, client, conf, botdata)
             return
         except:
             #If it didn't work, print the stacktrace, and try to inform the user.

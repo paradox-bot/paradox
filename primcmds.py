@@ -21,7 +21,7 @@ Not intended to be used in production.
 #Define permission dictionary
 permFuncs = {}
 
-async def perm_default(message, args, client, conf, userdata):
+async def perm_default(message, args, client, conf, botdata):
     await reply(client, message, "Sorry, you don't have the required permission. In fact, the required permission isn't defined yet!")
     return 1
 
@@ -29,10 +29,10 @@ def require_perm(permName):
     permName = permName.lower()
     permFunc = permFuncs[permName][0] if permName in permFuncs else perm_default
     def perm_decorator(func):
-        async def permed_func(message, cargs, client, conf, userdata, *args, **kwargs):
-            error = await permFunc(message, cargs, client, conf, userdata)
+        async def permed_func(message, cargs, client, conf, botdata, *args, **kwargs):
+            error = await permFunc(message, cargs, client, conf, botdata)
             if error == 0:
-                await func(message, cargs, client, conf, userdata)
+                await func(message, cargs, client, conf, botdata)
             else:
                 await log("Permission failure running command in message \n{}\nFrom user \n{}\nRequired permission \"{}\" which returned error code \"{}\"".format(message.content, message.author.id, permName, error))
             return
@@ -74,14 +74,14 @@ def prim_cmd(cmdName, category, desc = "No description", helpDesc = "No help has
 #------PERMISSION FUNCTIONS------
 
 @perm_func("Master")
-async def perm_master(message, cargs, client, conf, userdata):
+async def perm_master(message, cargs, client, conf, botdata):
     if int(message.author.id) not in conf.getintlist("masters"):
         await reply(client, message, "This command requires you to be one of my masters.")
         return 1
     return 0
 
 @perm_func("Exec")
-async def perm_exec(message, cargs, client, conf, userdata):
+async def perm_exec(message, cargs, client, conf, botdata):
     if (int(message.author.id) not in conf.getintlist("execWhiteList")) and (int(message.author.id) not in conf.getintlist("masters")):
         await reply(client, message, "You don't have the required Exec perms to use this command.")
         return 1
@@ -102,12 +102,12 @@ async def perm_exec(message, cargs, client, conf, userdata):
 #Bot admin commands
 @prim_cmd("restart", "admin")
 @require_perm("Master")
-async def prim_cmd_restart(message, cargs, client, conf, userdata):
+async def prim_cmd_restart(message, cargs, client, conf, botdata):
     await reply(client, message, os.system('./run.sh'))
 
 @prim_cmd("prestart", "admin")
 @require_perm("Master")
-async def prim_cmd_prestart(message, cargs, client, conf, userdata):
+async def prim_cmd_prestart(message, cargs, client, conf, botdata):
     await reply(client, message, os.system('./pullrun.sh'))
 
 
@@ -115,7 +115,7 @@ async def prim_cmd_prestart(message, cargs, client, conf, userdata):
 
 @prim_cmd("masters", "admin", "Modify or check the bot masters", "Usage: masters [list] | [+/add | -/remove] <userid/mention>\n\nAdds or removes a bot master by id or mention, or lists all current masters.")
 @require_perm("Master")
-async def prim_cmd_masters(message, cargs, client, conf, userdata):
+async def prim_cmd_masters(message, cargs, client, conf, botdata):
     masters = conf.getintlist("masters")
     #TODO: Make this a human readable list of names
     masterNames = ', '.join([str(master) for master in masters])
@@ -148,7 +148,7 @@ async def prim_cmd_masters(message, cargs, client, conf, userdata):
 
 @prim_cmd("logs", "admin", "Reads and returns the logs", "Usage: logs [number]\n\nSends the logfile or the last <number> lines of the log.")
 @require_perm("Master")
-async def prim_cmd_logs(message, cargs, client, conf, userdata):
+async def prim_cmd_logs(message, cargs, client, conf, botdata):
     logfile = LOGFILE #Getting this from utils at the moment
     params = cargs.split(' ')
     if cargs == '':
@@ -160,14 +160,14 @@ async def prim_cmd_logs(message, cargs, client, conf, userdata):
 
 #Bot exec commands
 
-async def _async(message, cargs, client, conf, userdata):
+async def _async(message, cargs, client, conf, botdata):
     if cargs == '':
         return (primCmds['async'][3], 1)
     env = {'message' : message,
            'args' : cargs,
            'client' : client,
            'conf' : conf,
-           'userdata' : userdata,
+           'botdata' : botdata,
            'channel' : message.channel,
            'author' : message.author,
            'server' : message.server}
@@ -200,8 +200,8 @@ async def _async(message, cargs, client, conf, userdata):
 
 @prim_cmd("async", "exec", "Executes async code and shows the output", "Usage: async <code>\n\nRuns <code> as an asyncronous coroutine and prints the output or error.") 
 @require_perm("Exec")
-async def cmd_async(message, cargs, client, conf, userdata):
-    output, error = await _async(message, cargs, client, conf, userdata)
+async def cmd_async(message, cargs, client, conf, botdata):
+    output, error = await _async(message, cargs, client, conf, botdata)
     if error == 1:
         await reply(client, message, output)
     elif error == 2:
@@ -210,7 +210,7 @@ async def cmd_async(message, cargs, client, conf, userdata):
         await reply(client, message, "**Async input:**```py\n{}\n```\n**Output:**```py\n{}\n```".format(cargs, output))
 
 
-async def _exec(message, cargs, client, conf, userdata):
+async def _exec(message, cargs, client, conf, botdata):
     if cargs == '':
         return (primCmds['exec'][3],1)
     old_stdout = sys.stdout
@@ -228,8 +228,8 @@ async def _exec(message, cargs, client, conf, userdata):
 
 @prim_cmd("exec", "exec", "Executes code and shows the output", "Usage: exec <code>\n\nRuns <code> in current environment using exec() and prints the output or error.") 
 @require_perm("Exec")
-async def cmd_exec(message, cargs, client, conf, userdata):
-    output, error = await _exec(message, cargs, client, conf, userdata)
+async def cmd_exec(message, cargs, client, conf, botdata):
+    output, error = await _exec(message, cargs, client, conf, botdata)
     if error == 1:
         await reply(client, message, output)
     elif error == 2:
@@ -243,11 +243,11 @@ async def cmd_exec(message, cargs, client, conf, userdata):
 #General utility commands
 
 @prim_cmd("about", "general")
-async def prim_cmd_about(message, cargs, client, conf, userdata):
+async def prim_cmd_about(message, cargs, client, conf, botdata):
     await reply(client, message, 'This is a bot created via the collaborative efforts of Retro, Pue, and Loomy.')
 
 @prim_cmd("ping", "general")
-async def prim_cmd_ping(message, cargs, client, conf, userdata):
+async def prim_cmd_ping(message, cargs, client, conf, botdata):
     sentMessage = await client.send_message(message.channel, 'Beep')
     mainMsg = sentMessage.timestamp
     editedMessage = await client.edit_message(sentMessage,'Boop')
@@ -258,11 +258,11 @@ async def prim_cmd_ping(message, cargs, client, conf, userdata):
     await client.edit_message(sentMessage, 'Ping: '+latency+'ms')
 
 @prim_cmd("list", "general")
-async def prim_cmd_list(message, cargs, client, conf, userdata):
+async def prim_cmd_list(message, cargs, client, conf, botdata):
    await client.send_message(message.channel, 'Available commands: `about`, `ping`')
 
 @prim_cmd("help", "general", "Provides some detailed help on a command", "Usage: help [command name]\n\nShows detailed help on the requested command, or lists all the commands.")
-async def prim_cmd_help(message, cargs, client, conf, userdata):
+async def prim_cmd_help(message, cargs, client, conf, botdata):
     msg = ""
     if cargs == "":
         msg = "```ini\n [ Available Commands: ]\n"
@@ -281,7 +281,7 @@ async def prim_cmd_help(message, cargs, client, conf, userdata):
 
 @prim_cmd("testembed", "testing", "Sends a test embed.", "Usage: testembed\n\nSends a test embed, what more do you want?")
 @require_perm("Exec")
-async def prim_cmd_testembed(message, cargs, client, conf, userdata):
+async def prim_cmd_testembed(message, cargs, client, conf, botdata):
     embed = discord.Embed(title = "This is a title", color = discord.Colour.teal()) \
         .set_author(name = "I am an Author") \
         .add_field(name = "This is a field1 title", value = "This is field1 content", inline = True) \
