@@ -265,10 +265,10 @@ async def prim_cmd_list(message, cargs, client, conf, userdata):
 async def prim_cmd_help(message, cargs, client, conf, userdata):
     msg = ""
     if cargs == "":
-        msg = "```prolog\nAvailable Commands:\n"
+        msg = "```ini\n [ Available Commands: ]\n"
         for cmd in sorted(primCmds):
-            msg += "{}{}:\t{}\n".format(" "*(12-len(cmd)), cmd, primCmds[cmd][2])
-        msg += "This bot is a work in progress. If you have any questions, please ask a developer.\n"
+            msg += "; {}{}:\t{}\n".format(" "*(12-len(cmd)), cmd, primCmds[cmd][2])
+        msg += "; This bot is a work in progress. If you have any questions, please ask a developer.\n"
         msg += "```"
     else:
         params = cargs.split(' ')
