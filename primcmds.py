@@ -239,15 +239,15 @@ async def cmd_exec(message, cargs, client, conf, userdata):
 
 #General utility commands
 
-@prim_cmd("about", "general")
+@prim_cmd("about", "general", "Provides information about the bot", "Usage: about\n\nSends a message containing about the bot.")
 async def prim_cmd_about(message, cargs, client, conf, userdata):
     await reply(client, message, 'This is a bot created via the collaborative efforts of Retro, Pue, and Loomy.')
     
-@prim_cmd("invite", "general", "Sends the bot's invite link")
+@prim_cmd("invite", "general", "Sends the bot's invite link", "Usage: invite\n\nSends the link to invite the bot to your server.")
 async def prim_cmd_about(message, cargs, client, conf, userdata):
     await reply(client, message, 'Here\'s my invite link! \n <https://discordapp.com/api/oauth2/authorize?client_id=401613224694251538&permissions=8&scope=bot>')
 
-@prim_cmd("ping", "general")
+@prim_cmd("ping", "general", "Checks the bot's latency", "Usage: ping\n\nChecks the response delay of the bot. Usually used to test whether the bot is responsive or not.")
 async def prim_cmd_ping(message, cargs, client, conf, userdata):
     sentMessage = await client.send_message(message.channel, 'Beep')
     mainMsg = sentMessage.timestamp
@@ -257,10 +257,6 @@ async def prim_cmd_ping(message, cargs, client, conf, userdata):
     latency = latency.microseconds // 1000
     latency = str(latency)
     await client.edit_message(sentMessage, 'Ping: '+latency+'ms')
-
-@prim_cmd("list", "general")
-async def prim_cmd_list(message, cargs, client, conf, userdata):
-   await client.send_message(message.channel, 'Available commands: `about`, `ping`')
 
 @prim_cmd("help", "general", "Provides some detailed help on a command", "Usage: help [command name]\n\nShows detailed help on the requested command, or lists all the commands.")
 async def prim_cmd_help(message, cargs, client, conf, userdata):
