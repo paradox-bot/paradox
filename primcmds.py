@@ -8,6 +8,7 @@ import asyncio
 import json
 import os
 import sys
+import traceback
 from io import StringIO
 
 from parautils import *
