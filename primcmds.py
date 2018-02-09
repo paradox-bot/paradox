@@ -110,9 +110,6 @@ async def prim_cmd_restart(message, cargs, client, conf, userdata):
 async def prim_cmd_prestart(message, cargs, client, conf, userdata):
     await reply(client, message, os.system('./pullrun.sh'))
 
-
-
-
 @prim_cmd("masters", "admin", "Modify or check the bot masters", "Usage: masters [list] | [+/add | -/remove] <userid/mention>\n\nAdds or removes a bot master by id or mention, or lists all current masters.")
 @require_perm("Master")
 async def prim_cmd_masters(message, cargs, client, conf, userdata):
@@ -245,6 +242,10 @@ async def cmd_exec(message, cargs, client, conf, userdata):
 @prim_cmd("about", "general")
 async def prim_cmd_about(message, cargs, client, conf, userdata):
     await reply(client, message, 'This is a bot created via the collaborative efforts of Retro, Pue, and Loomy.')
+    
+@prim_cmd("invite", "general")
+async def prim_cmd_about(message, cargs, client, conf, userdata):
+    await reply(client, message, 'Here\'s my invite link! \n <https://discordapp.com/api/oauth2/authorize?client_id=401613224694251538&permissions=8&scope=bot>')
 
 @prim_cmd("ping", "general")
 async def prim_cmd_ping(message, cargs, client, conf, userdata):
