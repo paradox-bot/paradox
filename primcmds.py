@@ -194,7 +194,7 @@ async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
         value = server_settings[conf_setting].read(botdata, message.server)
         await reply(client, message, "The value of {} is {}".format(conf_setting, value))
     else:
-        errmsg = server_settings[conf_setting].write(botdata, message.server, value, message, client)
+        errmsg = server_settings[conf_setting].write(botdata, message.server, ' '.join(params[1:]), message, client)
         if errmsg:
             await reply(client, message, errmsg)
         else:
