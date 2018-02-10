@@ -12,6 +12,7 @@ import traceback
 from io import StringIO
 
 from parautils import *
+from serverconfig import server_settings
 
 #----Primitive Commands setup----
 '''
@@ -166,6 +167,33 @@ async def prim_cmd_logs(message, cargs, client, conf, botdata):
     elif params[0].isdigit():
         logs = await tail(logfile, params[0])
         await reply(client, message, "Here are your logs:\n```{}```".format(logs))
+
+#Config commands
+
+
+@prim_cmd("serverconfig", "config", "Server configuration", "I'm too tired to write stuff. Temporary thing for testing things atm. Weill be re-written.")
+@require_perm("Master")
+async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
+    if cargs == "":
+        """
+        Print all config options and descriptions and stuff in a pretty way.
+        """
+        msg = "Configuration options: ```"
+        for option in sorted(server_settings):
+            msg += "{}: {}".format(option, server_settings[option].ctype.accept)
+        msg += "```"
+        await reply(client, message, msg)
+        return
+
+    params = cargs.split(' ')
+    if len(params) == 1:
+        conf_setting = params[0]
+        if conf_setting not in server_settings:
+            await reply(client, message, "I can't find this server setting!")
+            return
+        value = server_settings[conf_setting].read(message.server)
+        await reply(client, message, "The value of {} is {}".format(conf_setting, value))
+
 
 
 #Bot exec commands
