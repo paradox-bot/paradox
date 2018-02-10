@@ -12,6 +12,7 @@ import traceback
 from io import StringIO
 
 from parautils import *
+from serverconfig import server_settings
 
 #----Primitive Commands setup----
 '''
@@ -102,10 +103,26 @@ async def perm_exec(message, cargs, client, conf, botdata):
 
 #Bot admin commands
 
+@prim_cmd("shutdown", "admin")
+@require_perm("Master")
+async def prim_cmd_shutdown(message, cargs, client, conf, botdata):
+    await reply(client, message, "Shutting down, cya another day~")
+    await client.logout()
+
+
 @prim_cmd("restart", "admin", "Restart the bot without pulling from git first", "Usage: restart\n\nRestarts the bot without pulling from git first")
 @require_perm("Master")
 async def prim_cmd_restart(message, cargs, client, conf, botdata):
     await reply(client, message, os.system('./Nanny/scripts/redeploy.sh'))
+
+@prim_cmd("setgame", "admin", "Sets my playing status!", "Usage: setgame <status>\n\nSets my playing status to <status>. The following keys may be used:\n\t$users: Number of users I can see.\n\t$servers: Number of servers I am in.\n\t$channels: Number of channels I am in.")
+@require_perm("Master")
+async def prim_cmd_setgame(message, cargs, client, conf, botdata):
+#    current_status = client.servers[0].get_member(client.user.id)
+#    await client.change_presence(status=current_status, game = discord.Game(name=cargs))
+    status = await para_format(client, cargs, message)
+    await client.change_presence(game = discord.Game(name = status))
+    await reply(client, message, "Game changed to: \'{}\'".format(status))
 
 
 @prim_cmd("masters", "admin", "Modify or check the bot masters", "Usage: masters [list] | [+/add | -/remove] <userid/mention>\n\nAdds or removes a bot master by id or mention, or lists all current masters.")
@@ -151,6 +168,39 @@ async def prim_cmd_logs(message, cargs, client, conf, botdata):
     elif params[0].isdigit():
         logs = await tail(logfile, params[0])
         await reply(client, message, "Here are your logs:\n```{}```".format(logs))
+
+#Config commands
+
+
+@prim_cmd("serverconfig", "config", "Server configuration", "I'm too tired to write stuff. Temporary thing for testing things atm. Weill be re-written.")
+@require_perm("Master")
+async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
+    if cargs == "":
+        """
+        Print all config options and descriptions and stuff in a pretty way.
+        """
+        msg = "Configuration options: ```"
+        for option in sorted(server_settings):
+            msg += "{}: {}".format(option, server_settings[option].ctype.accept)
+        msg += "```"
+        await reply(client, message, msg)
+        return
+
+    params = cargs.split(' ')
+    conf_setting = params[0]
+    if conf_setting not in server_settings:
+        await reply(client, message, "I can't find this server setting!")
+        return
+    if len(params) == 1:
+        value = server_settings[conf_setting].read(botdata, message.server)
+        await reply(client, message, "The value of {} is {}".format(conf_setting, value))
+    else:
+        errmsg = server_settings[conf_setting].write(botdata, message.server, ' '.join(params[1:]), message, client)
+        if errmsg:
+            await reply(client, message, errmsg)
+        else:
+            await reply(client, message, "The setting was set successfully")
+
 
 
 #Bot exec commands

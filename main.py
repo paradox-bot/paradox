@@ -4,7 +4,6 @@ import json
 import traceback
 
 from botdata import BotData
-from userconf import UserConf
 from botconf import Conf
 from parautils import *
 
@@ -26,7 +25,6 @@ botdata = BotData(BOT_DATA_FILE)
 TOKEN = conf.get("TOKEN")
 PREFIX = conf.get("PREFIX")
 
-
 client = discord.Client()
 
 
@@ -37,7 +35,11 @@ client = discord.Client()
 
 @client.event
 async def on_ready():
-    await client.change_presence(status=discord.Status.online)
+    GAME = conf.getStr("GAME")
+    if GAME == "":
+        GAME = "in $servers servers!"
+    GAME = await para_format(client, GAME)
+    await client.change_presence(status=discord.Status.online, game=discord.Game(name=GAME))
     print("Logged in as")
     print(client.user.name)
     print(client.user.id)
