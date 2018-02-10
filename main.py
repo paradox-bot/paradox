@@ -36,8 +36,9 @@ client = discord.Client()
 
 @client.event
 async def on_ready():
-    if not GAME:
-        GAME = para_format(client, "Playing with $users users in $servers servers")
+    if GAME == "":
+        GAME = "Playing with $users users in $servers servers"
+    GAME = para_format(GAME)
     await client.change_presence(status=discord.Status.online, game=discord.Game(name=GAME))
     print("Logged in as")
     print(client.user.name)
