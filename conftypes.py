@@ -55,8 +55,8 @@ class _settingType:
             raw = self.understand(userstr)
             self.fromRaw(raw)
         return self
-
-    def understand(userstr):
+    
+    def understand(self, userstr):
         """
         This is where the complicated interpretation happens.
         Takes in a user entered string, attempts to turn it into raw data.
@@ -64,7 +64,9 @@ class _settingType:
         Writes the error string if it can't 
         """
         pass
-    def humanise(raw):
+
+    @classmethod
+    def humanise(cls, raw):
         """
         Take in raw data and humanise it to be user readable.
         Can be an alternative to initialising and getting the raw data.
@@ -87,20 +89,16 @@ class BOOL(_settingType):
             True : "Yes",
             False : "No"
             }
-    def __init__(self, userstr=None, raw=None):
-        """
-        Here to throw away any extra keyword args
-        """
-        super().__init__(userstr, raw)
-
-    def humanise(raw):
-        return outputs[raw]
-
-    def understand(userstr):
-        for pattern in inputexps:
+    
+    @classmethod
+    def humanise(cls, raw):
+        return cls.outputs[raw]
+    
+    def understand(self, userstr):
+        for pattern in self.inputexps:
             if re.match(pattern, userstr, re.I):
-                return inputexps[pattern]
-        self.errmsg = "I don't understand this value. Acceptable values are: {}".format(accept)
+                return self.inputexps[pattern]
+        self.errmsg = "I don't understand this value. Acceptable values are: {}".format(self.accept)
         self.error = 1
         return None
 
@@ -114,23 +112,19 @@ class CHANNEL(_settingType):
     name = "Channel"
     accept = "Channel mention/id/name"
 
-    def __init__(self, userstr=None, raw=None, message=None, server=None):
-        """
-        Here to throw away any extra keyword args
-        """
-        super().__init__(userstr, raw, message=message, server=server)
-
-    def humanise(raw):
+    @classmethod
+    def humanise(cls, raw):
         """
         Expect raw to be channel id
         """
         return "<#{}>".format(raw)
 
-    def understand(userstr):
+    def understand(self, userstr):
         """
         User can enter a channel mention or an id, or even a name.
         TODO: Check if the channel actually exists given an id.
         """
+        userstr = str(userstr)
         chid = userstr.strip('<#!>')
         if chid.isdigit():
             return chid
