@@ -37,7 +37,7 @@ async def reply(client, message, content):
 
 async def para_format(client, string, message=None):
     keydict = { "$servers" : str(len(client.servers)),
-                "$users" : str(len(list(client.get_all_members()))) }
+                "$users" : str(len(list(client.get_all_members()))),
                 "$channels" : str(len(list(client.get_all_channels()))) }
     for key in keydict:
         string = string.replace(key, keydict[key])
