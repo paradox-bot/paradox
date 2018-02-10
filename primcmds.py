@@ -111,7 +111,7 @@ async def prim_cmd_restart(message, cargs, client, conf, botdata):
 async def prim_cmd_setgame(message, cargs, client, conf, botdata):
 #    current_status = client.servers[0].get_member(client.user.id)
 #    await client.change_presence(status=current_status, game = discord.Game(name=cargs))
-    game = await para_format(cargs)
+    game = await para_format(client, cargs, message)
     await client.change_presence(game = discord.Game(name = game))
 
 
