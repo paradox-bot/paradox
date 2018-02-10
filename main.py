@@ -24,7 +24,6 @@ botdata = BotData(BOT_DATA_FILE)
 
 TOKEN = conf.get("TOKEN")
 PREFIX = conf.get("PREFIX")
-GAME = conf.getStr("GAME")
 
 client = discord.Client()
 
@@ -36,6 +35,7 @@ client = discord.Client()
 
 @client.event
 async def on_ready():
+    GAME = conf.getStr("GAME")
     if GAME == "":
         GAME = "Playing with $users users in $servers servers"
     GAME = para_format(GAME)
