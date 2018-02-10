@@ -19,12 +19,12 @@ class configSetting:
         """
         Sets setting in botdata
         """
-        botdata.servers.set(server, self.name, value)
+        botdata.servers.set(server.id, self.name, value)
     def get(self, botdata, server):
         """
         Returns value of setting from botdata
         """
-        return botdata.servers.get(server, self.name)
+        return botdata.servers.get(server.id, self.name)
 
     def read(self, botdata, server):
         """
