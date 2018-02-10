@@ -15,18 +15,18 @@ class configSetting:
         self.ctype = ctype
         self.default = default
 
-    def set(botdata, server, value):
+    def set(self, botdata, server, value):
         """
         Sets setting in botdata
         """
         botdata.servers.set(server, self.name, value)
-    def get(botdata, server):
+    def get(self, botdata, server):
         """
         Returns value of setting from botdata
         """
         return botdata.servers.get(server, self.name)
 
-    def read(botdata, server):
+    def read(self, botdata, server):
         """
         Gets the value of the setting and returns it in a human readable fashion
         """
@@ -35,7 +35,7 @@ class configSetting:
             setting = self.default
         return self.ctype.humanise(setting)
 
-    def write(botdata, server, userstr, message = None, client = None):
+    def write(self, botdata, server, userstr, message = None, client = None):
         """
         Takes a human written string and attempts to decipher it and write it.
         """
