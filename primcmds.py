@@ -101,6 +101,13 @@ async def perm_exec(message, cargs, client, conf, botdata):
 #Primitive Commands
 
 #Bot admin commands
+@prim_cmd("shutdown", "admin")
+@require_perm("Master")
+async def prim_cmd_shutdown(message, cargs, client, conf, botdata):
+    await reply(client, message, "Shutting down, cya another day~")
+    await client.logout()
+
+
 @prim_cmd("restart", "admin")
 @require_perm("Master")
 async def prim_cmd_restart(message, cargs, client, conf, botdata):
