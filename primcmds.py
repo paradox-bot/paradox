@@ -238,7 +238,7 @@ async def cmd_exec(message, cargs, client, conf, botdata):
 #General utility commands
 
 
-@prim_cmd("about", "general", "Provides information about the bot", "Usage: about\n\nSends a message containing about the bot.")
+@prim_cmd("about", "general", "Provides information about the bot", "Usage: about\n\nSends a message containing information about the bot.")
 async def prim_cmd_about(message, cargs, client, conf, botdata):
     await reply(client, message, 'This is a bot created via the collaborative efforts of Retro, Pue, and Loomy.')
     
@@ -256,6 +256,10 @@ async def prim_cmd_ping(message, cargs, client, conf, botdata):
     latency = latency.microseconds // 1000
     latency = str(latency)
     await client.edit_message(sentMessage, 'Ping: '+latency+'ms')
+    
+@prim_cmd("support", "general", "Sends the link to the bot guild", "Usage: support\n\nSends the invite link to the Paradøx support guild.")
+async def prim_cmd_about(message, cargs, client, conf, botdata):
+    await reply(client, message, 'Join my server here!\n\n< https://discord.gg/ECbUu8u>')
 
 @prim_cmd("help", "general", "Provides some detailed help on a command", "Usage: help [command name]\n\nShows detailed help on the requested command, or lists all the commands.")
 async def prim_cmd_help(message, cargs, client, conf, botdata):
