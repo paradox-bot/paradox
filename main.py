@@ -38,7 +38,7 @@ async def on_ready():
     GAME = conf.getStr("GAME")
     if GAME == "":
         GAME = "Playing with $users users in $servers servers"
-    GAME = para_format(GAME)
+    GAME = para_format(client, GAME)
     await client.change_presence(status=discord.Status.online, game=discord.Game(name=GAME))
     print("Logged in as")
     print(client.user.name)
