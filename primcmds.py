@@ -106,7 +106,7 @@ async def perm_exec(message, cargs, client, conf, botdata):
 async def prim_cmd_restart(message, cargs, client, conf, botdata):
     await reply(client, message, os.system('./Nanny/scripts/redeploy.sh'))
 
-@prim_cmd("setgame", "admin", "Sets my playing status!", "Usage: setgame <status>\n\nSets my playing status to <status>. The following keys may be used:\n\t$users: Number of users I can see\n\t$servers: Number of servers I am in.")
+@prim_cmd("setgame", "admin", "Sets my playing status!", "Usage: setgame <status>\n\nSets my playing status to <status>. The following keys may be used:\n\t$users: Number of users I can see.\n\t$servers: Number of servers I am in.\n\t$channels: Number of channels I am in.")
 @require_perm("Master")
 async def prim_cmd_setgame(message, cargs, client, conf, botdata):
 #    current_status = client.servers[0].get_member(client.user.id)
