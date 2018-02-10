@@ -4,7 +4,6 @@ import json
 import traceback
 
 from botdata import BotData
-from userconf import UserConf
 from botconf import Conf
 from parautils import *
 
