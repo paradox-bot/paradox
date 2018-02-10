@@ -106,13 +106,14 @@ async def perm_exec(message, cargs, client, conf, botdata):
 async def prim_cmd_restart(message, cargs, client, conf, botdata):
     await reply(client, message, os.system('./Nanny/scripts/redeploy.sh'))
 
-@prim_cmd("setgame", "admin")
+@prim_cmd("setgame", "admin", "Sets my playing status!", "Usage: setgame <status>\n\nSets my playing status to <status>. The following keys may be used:\n\t$users: Number of users I can see\n\t$servers: Number of servers I am in.")
 @require_perm("Master")
 async def prim_cmd_setgame(message, cargs, client, conf, botdata):
 #    current_status = client.servers[0].get_member(client.user.id)
 #    await client.change_presence(status=current_status, game = discord.Game(name=cargs))
     status = await para_format(client, cargs, message)
     await client.change_presence(game = discord.Game(name = status))
+    await reply(client, message, "Game changed to: \'{}\'".format(status))
 
 
 @prim_cmd("masters", "admin", "Modify or check the bot masters", "Usage: masters [list] | [+/add | -/remove] <userid/mention>\n\nAdds or removes a bot master by id or mention, or lists all current masters.")
