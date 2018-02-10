@@ -102,6 +102,7 @@ async def perm_exec(message, cargs, client, conf, botdata):
 #Primitive Commands
 
 #Bot admin commands
+
 @prim_cmd("shutdown", "admin")
 @require_perm("Master")
 async def prim_cmd_shutdown(message, cargs, client, conf, botdata):
@@ -109,7 +110,7 @@ async def prim_cmd_shutdown(message, cargs, client, conf, botdata):
     await client.logout()
 
 
-@prim_cmd("restart", "admin")
+@prim_cmd("restart", "admin", "Restart the bot without pulling from git first", "Usage: restart\n\nRestarts the bot without pulling from git first")
 @require_perm("Master")
 async def prim_cmd_restart(message, cargs, client, conf, botdata):
     await reply(client, message, os.system('./Nanny/scripts/redeploy.sh'))
