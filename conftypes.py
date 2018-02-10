@@ -140,7 +140,18 @@ class CHANNEL(_settingType):
         return None
 
 
-
+"""
+Formatable string
+TODO: accepted keys in variable from somewhere
+"""
+class FMTSTR(_settingType):
+    name = "Formatted string"
+    accept = "Formatted string, accepted keys are *blah*"
+    @classmethod
+    def humanise(cls, raw):
+        return "\"{}\"".format(str(raw))
+    def understand(self, userstr):
+        return userstr
 
 
 """
