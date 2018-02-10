@@ -186,13 +186,19 @@ async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
         return
 
     params = cargs.split(' ')
+    conf_setting = params[0]
+    if conf_setting not in server_settings:
+        await reply(client, message, "I can't find this server setting!")
+        return
     if len(params) == 1:
-        conf_setting = params[0]
-        if conf_setting not in server_settings:
-            await reply(client, message, "I can't find this server setting!")
-            return
-        value = server_settings[conf_setting].read(message.server)
+        value = server_settings[conf_setting].read(botdata, message.server)
         await reply(client, message, "The value of {} is {}".format(conf_setting, value))
+    else:
+        errmsg = server_settings[conf_setting].write(botdata, message.server, value, message, client)
+        if errmsg:
+            await reply(client, message, errmsg)
+        else:
+            await reply(client, message, "The setting was set successfully")
 
 
 
