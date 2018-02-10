@@ -4,6 +4,7 @@ import conftypes
 We will be wanting to do this for user settings as well at some point.
 Might not be able to stick with humanise as class method. Or maybe split it up.
 What if the setting is a USER? How to humanise the id?
+TODO: A help string for configSettings and a human readable description. Also categories.
 """
 
 
