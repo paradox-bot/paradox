@@ -31,7 +31,7 @@ class configSetting:
         Gets the value of the setting and returns it in a human readable fashion
         """
         setting = self.get(botdata, server)
-        if not setting:
+        if setting == None:
             setting = self.default
         return self.ctype.humanise(setting)
 
