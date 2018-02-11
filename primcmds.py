@@ -158,6 +158,34 @@ async def prim_cmd_masters(message, cargs, client, conf, botdata):
     else:
         await reply(client, message, primCmds["masters"][3])
 
+@prim_cmd("blacklist", "admin", "Modify or check the bot blacklist", "Usage: blacklist [list] | [+/add | -/remove] <userid/mention>\n\nAdds or removes a blacklisted user by id or mention, or lists all current blacklisted users.")
+@require_perm("Master")
+async def prim_cmd_blacklist(message, cargs, client, conf, botdata):
+    blist = conf.getintlist("blacklisted_users")
+    #TODO: Make this a human readable list of names
+    blistNames = ', '.join([str(black) for black in blist])
+    params = cargs.split(' ')
+    action = params[0]
+    if action in ['', 'list']:
+        await reply(client, message, "I have blacklisted:\n{}".format(blistNames))
+    elif (action in ['+', 'add']) and (len(params) == 2) and params[1].strip('<!@>').isdigit():
+        userid = int(params[1].strip('<!@>'))
+        if userid in blist:
+            await reply(client, message, "I have already blacklisted this user!")
+        else:
+            blist.append(userid)
+            conf.set("blacklisted_users", blist)
+            await reply(client, message, "I call this user a foul wretch and will not deal with them again. Blacklisted the user.")
+    elif (action in ['-', 'remove']) and (len(params) == 2) and params[1].strip('<!@>').isdigit():
+        userid = int(params[1].strip('<!@>'))
+        if userid not in blist:
+            await reply(client, message, "This user isn't on my blacklist!")
+        else:
+            blist.remove(userid)
+            conf.set("blacklisted_users", blist)
+            await reply(client, message, "Give them another chance? If you say so. Unblacklisted the user.")
+    else:
+        await reply(client, message, primCmds["blacklist"][3])
 
 #TODO: refactor masters to a general list add/check/remove function, add exec config or join commands
 

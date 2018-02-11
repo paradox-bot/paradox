@@ -64,7 +64,10 @@ async def on_message(message):
         #Some ass just typed the prefix to try and trigger us.
         #Not even going to try parsing, just quit.
         return
-    #TODO: Put something here about checking blacklisted users.
+    #TODO: Put something here about checking bot users.
+    if int(message.author) in conf.getintlist("blacklisted_users"):
+        return
+
     #Okay, we have decided it was meant for us. Let's log it
     await log("Got the command \n{}\nfrom \"{}\" with id \"{}\" ".format(
         message.content, message.author, message.author.id)
