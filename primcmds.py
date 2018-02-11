@@ -292,7 +292,6 @@ async def prim_cmd_exec(message, cargs, client, conf, botdata):
 TODO: This is a hacky usersettings, *must* be replaced with something akin to serverconfg.
 TODO: Timezone setting type
 """
-@cmd("usersettings", "```\n{0}usersettings <setting> <value>\n\nI'll put something here sometime.\nCurrently only setting is timezone, format is Country/City, some shorthands are accepted.```")
 @prim_cmd("set", "user config", "Shows or sets a user setting", "Usage: set [settingname [value]] \n\nSets <settingname> to <value>, shows the value of <settingname>, or lists your available settings.\nTemporary implementation, more is coming soon!")
 async def prim_cmd_set(message, cargs, client, conf, botdata):
     if parameters == '':
