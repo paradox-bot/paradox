@@ -369,7 +369,7 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
     except:
         await reply(client, message, "Didn't understand the timezone, aborting")
         return
-    timestr = iso8601.parse_date(datetime.datetime.now().isoformat()).astimezone(TZ).strftime('The current time for {} is `%-I:%M (%Z(%z))` on `%a, %d/%m/%Y`'.format(message.server.get_member(user).display_name))
+    timestr = iso8601.parse_date(datetime.datetime.now().isoformat()).astimezone(TZ).strftime('The current time for {} is `%-I:%M %p (%Z(%z))` on `%a, %d/%m/%Y`'.format(message.server.get_member(user).display_name))
     await reply(client, message, timestr)
 
 
