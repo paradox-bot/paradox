@@ -294,10 +294,10 @@ TODO: Timezone setting type
 """
 @prim_cmd("set", "user config", "Shows or sets a user setting", "Usage: set [settingname [value]] \n\nSets <settingname> to <value>, shows the value of <settingname>, or lists your available settings.\nTemporary implementation, more is coming soon!")
 async def prim_cmd_set(message, cargs, client, conf, botdata):
-    if parameters == '':
+    if cargs == '':
         await reply(client, message, "```timezone: Country/City, some short-hands are accepted, use ETC/+10 etc to set to GMT-10.```")
         return
-    params = parameters.split(' ')
+    params = cargs.split(' ')
     action = params[0]
     if action == "timezone":
         if len(params) == 1:
@@ -330,7 +330,7 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
                 return
             user = member.id
     tz = botdata.users.get(user, "tz")
-    if tz == "":
+    if not tz:
         await reply(client, message, "This user doesn't have a set timezone")
         return
     try:
