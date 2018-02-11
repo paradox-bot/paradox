@@ -326,20 +326,20 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
         if not user.isdigit():
             member = discord.utils.find(lambda mem: ((cargs.lower() in mem.display_name.lower()) or (cargs.lower() in mem.name.lower())), message.server.members)
             if member is None:
-                await reply(message, "Couldn't find this user!")
+                await reply(client, message, "Couldn't find this user!")
                 return
             user = member.id
     tz = botdata.users.get(user, "tz")
     if tz == "":
-        await reply(message, "This user doesn't have a set timezone")
+        await reply(client, message, "This user doesn't have a set timezone")
         return
     try:
         TZ = timezone(tz)
     except:
-        await reply(message, "Didn't understand the timezone, aborting")
+        await reply(client, message, "Didn't understand the timezone, aborting")
         return
     time = iso8601.parse_date(datetime.datetime.now().isoformat()).astimezone(TZ).strftime('%H:%M:%S %d-%m-%Y  %Z%z')
-    await reply(message, "The current time for **"+message.server.get_member(user).display_name+"** is `"+time+"`")
+    await reply(client, message, "The current time for **"+message.server.get_member(user).display_name+"** is `"+time+"`")
 
 
 
