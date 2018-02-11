@@ -65,7 +65,7 @@ async def on_message(message):
         #Not even going to try parsing, just quit.
         return
     #TODO: Put something here about checking bot users.
-    if int(message.author) in conf.getintlist("blacklisted_users"):
+    if int(message.author.id) in conf.getintlist("blacklisted_users"):
         return
 
     #Okay, we have decided it was meant for us. Let's log it
