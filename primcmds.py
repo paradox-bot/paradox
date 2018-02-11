@@ -11,6 +11,10 @@ import sys
 import traceback
 from io import StringIO
 
+import datetime
+from pytz import timezone
+import iso8601
+
 from parautils import *
 from serverconfig import server_settings
 
@@ -245,7 +249,7 @@ async def _async(message, cargs, client, conf, botdata):
 
 @prim_cmd("async", "exec", "Executes async code and shows the output", "Usage: async <code>\n\nRuns <code> as an asyncronous coroutine and prints the output or error.") 
 @require_perm("Exec")
-async def cmd_async(message, cargs, client, conf, botdata):
+async def prim_cmd_async(message, cargs, client, conf, botdata):
     output, error = await _async(message, cargs, client, conf, botdata)
     if error == 1:
         await reply(client, message, output)
@@ -273,7 +277,7 @@ async def _exec(message, cargs, client, conf, botdata):
 
 @prim_cmd("exec", "exec", "Executes code and shows the output", "Usage: exec <code>\n\nRuns <code> in current environment using exec() and prints the output or error.") 
 @require_perm("Exec")
-async def cmd_exec(message, cargs, client, conf, botdata):
+async def prim_cmd_exec(message, cargs, client, conf, botdata):
     output, error = await _exec(message, cargs, client, conf, botdata)
     if error == 1:
         await reply(client, message, output)
@@ -281,6 +285,63 @@ async def cmd_exec(message, cargs, client, conf, botdata):
         await reply(client, message, "**Exec input:**```py\n{}\n```\n**Output (error):**```py\n{}\n```".format(cargs, output))
     else:
         await reply(client, message, "**Exec input:**```py\n{}\n```\n**Output:**```py\n{}\n```".format(cargs, output))
+
+
+#User config commands
+"""
+TODO: This is a hacky usersettings, *must* be replaced with something akin to serverconfg.
+TODO: Timezone setting type
+"""
+@cmd("usersettings", "```\n{0}usersettings <setting> <value>\n\nI'll put something here sometime.\nCurrently only setting is timezone, format is Country/City, some shorthands are accepted.```")
+@prim_cmd("set", "user config", "Shows or sets a user setting", "Usage: set [settingname [value]] \n\nSets <settingname> to <value>, shows the value of <settingname>, or lists your available settings.\nTemporary implementation, more is coming soon!")
+async def prim_cmd_set(message, cargs, client, conf, botdata):
+    if parameters == '':
+        await reply(client, message, "```timezone: Country/City, some short-hands are accepted, use ETC/+10 etc to set to GMT-10.```")
+        return
+    params = parameters.split(' ')
+    action = params[0]
+    if action == "timezone":
+        if len(params) == 1:
+            tz = botdata.users.get(message.author.id, "tz")
+            if tz:
+                msg = "Your current timezone is `{}`".format(tz)
+            else:
+                msg = "You don't appear to have a set timezone! Do `set timezone <timezone>` to set it!"
+            await reply(client, message, msg)
+            return
+        tz = ' '.join(params[1:])
+        try:
+            TZ = timezone(tz)
+        except:
+            await reply(client, message, "I don't understand this timezone, sorry. More timzeone options will be coming soon!")
+            return
+        botdata.users.set(message.author.id, "tz", tz)
+        await reply(client, message, "Your timezone has been set to `{}`".format(tz))
+
+#User info commands
+@prim_cmd("time","user info", "Shows the current time for a user", "Usage: time [mention | id | partial name]\n\nGives the time for the mentioned user or yourself")
+async def prim_cmd_time(message, cargs, client, conf, botdata):
+    user = message.author.id
+    if cargs != "":
+        user = cargs.strip('<@!> ')
+        if not user.isdigit():
+            member = discord.utils.find(lambda mem: ((cargs.lower() in mem.display_name.lower()) or (cargs.lower() in mem.name.lower())), message.server.members)
+            if member is None:
+                await reply(message, "Couldn't find this user!")
+                return
+            user = member.id
+    tz = botdata.users.get(user, "tz")
+    if tz == "":
+        await reply(message, "This user doesn't have a set timezone")
+        return
+    try:
+        TZ = timezone(tz)
+    except:
+        await reply(message, "Didn't understand the timezone, aborting")
+        return
+    time = iso8601.parse_date(datetime.datetime.now().isoformat()).astimezone(TZ).strftime('%H:%M:%S %d-%m-%Y  %Z%z')
+    await reply(message, "The current time for **"+message.server.get_member(user).display_name+"** is `"+time+"`")
+
 
 
 
