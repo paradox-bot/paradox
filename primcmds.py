@@ -346,7 +346,7 @@ async def prim_cmd_set(message, cargs, client, conf, botdata):
         await reply(client, message, "Your timezone has been set to `{}`".format(tz))
 
 #User info commands
-@prim_cmd("time","user info", "Shows the current time for a user", "Usage: time [mention | id | partial name]\n\nGives the time for the mentioned user or yourself")
+@prim_cmd("time","user info", "Shows the current time for a user", "Usage: time [mention | id | partial name]\n\nGives the time for the mentioned user or yourself\nRequires the user to have set the usersetting \"timezone\".")
 async def prim_cmd_time(message, cargs, client, conf, botdata):
     user = message.author.id
     if cargs != "":
@@ -359,15 +359,18 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
             user = member.id
     tz = botdata.users.get(user, "tz")
     if not tz:
-        await reply(client, message, "This user doesn't have a set timezone")
+        if user == message.author.id:
+            await reply(client, message, "You don't have a set timezone! Set it using \"set timezone\"!")
+        else:
+            await reply(client, message, "This user doesn't have a set timezone. Ask them to set it using \"set timezone\"!")
         return
     try:
         TZ = timezone(tz)
     except:
         await reply(client, message, "Didn't understand the timezone, aborting")
         return
-    time = iso8601.parse_date(datetime.datetime.now().isoformat()).astimezone(TZ).strftime('%H:%M:%S %d-%m-%Y  %Z%z')
-    await reply(client, message, "The current time for **"+message.server.get_member(user).display_name+"** is `"+time+"`")
+    timestr = iso8601.parse_date(datetime.datetime.now().isoformat()).astimezone(TZ).strftime('The current time for {} is `%-I:%M (%Z(%z))` on `%a, %d/%m/%Y`'.format(message.server.get_member(user).display_name))
+    await reply(client, message, timestr)
 
 
 
