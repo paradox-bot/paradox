@@ -92,8 +92,8 @@ async def on_member_join(member):
     channel = server.get_channel(join_channel)
     if not channel:
         return
-    msg = await para_format(client, message, member=member)
-    await client.send_message(channel, para_format(client, join_message, member=member))
+    msg = await para_format(client, join_message, member=member)
+    await client.send_message(channel, msg)
 
 
 
