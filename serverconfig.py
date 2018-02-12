@@ -8,13 +8,13 @@ TBD: Fully modifiable strings with defaults
 """
 serv_conf["join"] = {}
 serv_conf["join"]["enabled"] = configSetting("join_msgs_enabled", "Enables/Disables join messages", "server_manager", "server_manager", conftypes.BOOL, False)
-serv_conf["join_msgs_msg"] = configSetting("join_msgs_msg", "Message to post when a user joins", "server_manager", "server_manager", conftypes.FMTSTR, "Give a warm welcome to $user!")
-serv_conf["join","desc"] = "User join message"
+serv_conf["join"]["msg"] = configSetting("join_msgs_msg", "Message to post when a user joins", "server_manager", "server_manager", conftypes.FMTSTR, "Give a warm welcome to $user!")
+serv_conf["join"]["desc"] = "User join message"
 
 serv_conf["leave"] = {}
 serv_conf["leave"]["enabled"] = configSetting("leave_msgs_enabled", "Enables/Disables leave messages", "server_manager", "server_manager", conftypes.BOOL, False)
-serv_conf["leave_msgs_msg"] = configSetting("leave_msgs_msg", "Message to post when a user leaves", "server_manager", "server_manager", conftypes.FMTSTR, "Goodbye $user, we hope you had a nice stay!")
-serv_conf["leave","desc"] = "User leave message"
+serv_conf["leave"]["msg"] = configSetting("leave_msgs_msg", "Message to post when a user leaves", "server_manager", "server_manager", conftypes.FMTSTR, "Goodbye $user, we hope you had a nice stay!")
+serv_conf["leave"]["desc"] = "User leave message"
 
 """
 serv_conf["general"] = {}
