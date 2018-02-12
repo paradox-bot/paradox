@@ -24,13 +24,13 @@ class configSetting:
         """
         botdata.servers.set(server.id, self.name, value)
 
-    def get(self, botdata, server):
+     get(self, botdata, server):
         """
         Returns value of setting from botdata
         """
         return botdata.servers.get(server.id, self.name)
 
-    def read(self, botdata, server):
+    async def read(self, botdata, server):
         """
         Gets the value of the setting and returns it in a human readable fashion
         """
@@ -39,14 +39,14 @@ class configSetting:
             setting = self.default
         return self.ctype.humanise(setting)
 
-    def write(self, botdata, server, userstr, message=None, client=None):
+    async def write(self, botdata, server, userstr, message=None, client=None):
         """
         Takes a human written string and attempts to decipher it and write it.
         """
         if self.perm_write:
             if (client is None) or (message is None):
                 return "Something went wrong while checking whether you have perms to set this setting!"
-            (errcode, errmsg) = permFuncs[self.perm_write][0](client, botdata, message=message)
+            (errcode, errmsg) = await permFuncs[self.perm_write][0](client, botdata, message=message)
             if errcode != 0:
                 return errmsg
         default_errmsg = "I didn't understand your input or something went wrong!"
