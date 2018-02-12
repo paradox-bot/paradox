@@ -27,6 +27,7 @@ serv_conf["join"]["channel"] = configSetting("join_msgs_channel",
                                              0)
 serv_conf["join"]["desc"] = "User join message"
 
+
 serv_conf["leave"] = {}
 serv_conf["leave"]["enabled"] = configSetting("leave_msgs_enabled",
                                               "Enables/Disables leave messages",
@@ -48,6 +49,14 @@ serv_conf["leave"]["channel"] = configSetting("leave_msgs_channel",
                                               0)
 serv_conf["leave"]["desc"] = "User leave message"
 
+
+serv_conf["guild"] = {}
+serv_conf["guild"]["prefix"] = configSetting("guild_prefix",
+                                             "Custom bot prefix",
+                                             "",
+                                             "manage_server",
+                                             conftypes.STR,
+                                             "")
 """
 serv_conf["general"] = {}
 serv_conf["general"]["prefix"] = configSetting("prefix", "Custom bot prefix", "manage_server", "manage_server", conftypes.STR, "")

@@ -56,8 +56,10 @@ async def on_message(message):
     If it looks like a message for us, and it's not from anyone bad,
     pass it on to the command parser.
     '''
-    PREFIX = conf.get("PREFIX") #In case someone changed it while we weren't looking
-    if not (message.content.startswith(PREFIX) or (message.content.split(' ')[0].strip('<!@>') == client.user.id)):
+    custom_prefix = serv_conf["guild"]["prefix"].get(botdata, message.server)
+    PREFIX = custom_prefix if custom_prefix else conf.get("PREFIX")
+    if not (message.content.startswith(PREFIX) or\
+            (message.content.split(' ')[0].strip('<!@>') == client.user.id)):
         #Okay, it probably wasn't meant for us, or they can't type
         #Either way, let's ignore them
         return
