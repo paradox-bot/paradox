@@ -83,7 +83,7 @@ class BOOL(_settingType):
             "^yes$" : True,
             "^true$": True,
             "^no$" : False,
-            "^false$$" : False
+            "^false$" : False
             }
     outputs = {
             True : "Yes",

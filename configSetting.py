@@ -9,8 +9,10 @@ TODO: A help string for configSettings and a human readable description. Also ca
 
 
 class configSetting:
-    def __init__(self, name, perm_view, perm_write, ctype, default):
+    def __init__(self, name, category, desc, perm_view, perm_write, ctype, default):
         self.name = name
+        self.category = category
+        self.desc = desc
         self.perm_view = perm_view
         self.ctype = ctype
         self.default = default

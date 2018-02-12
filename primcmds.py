@@ -201,39 +201,6 @@ async def prim_cmd_logs(message, cargs, client, conf, botdata):
         logs = await tail(logfile, params[0])
         await reply(client, message, "Here are your logs:\n```{}```".format(logs))
 
-#Config commands
-
-
-@prim_cmd("serverconfig", "config", "Server configuration", "I'm too tired to write stuff. Temporary thing for testing things atm. Weill be re-written.")
-@require_perm("Master")
-async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
-    if cargs == "":
-        """
-        Print all config options and descriptions and stuff in a pretty way.
-        """
-        msg = "Configuration options: ```"
-        for option in sorted(server_settings):
-            msg += "{}: {}".format(option, server_settings[option].ctype.accept)
-        msg += "```"
-        await reply(client, message, msg)
-        return
-
-    params = cargs.split(' ')
-    conf_setting = params[0]
-    if conf_setting not in server_settings:
-        await reply(client, message, "I can't find this server setting!")
-        return
-    if len(params) == 1:
-        value = server_settings[conf_setting].read(botdata, message.server)
-        await reply(client, message, "The value of {} is {}".format(conf_setting, value))
-    else:
-        errmsg = server_settings[conf_setting].write(botdata, message.server, ' '.join(params[1:]), message, client)
-        if errmsg:
-            await reply(client, message, errmsg)
-        else:
-            await reply(client, message, "The setting was set successfully")
-
-
 
 #Bot exec commands
 
@@ -313,6 +280,68 @@ async def prim_cmd_exec(message, cargs, client, conf, botdata):
         await reply(client, message, "**Exec input:**```py\n{}\n```\n**Output (error):**```py\n{}\n```".format(cargs, output))
     else:
         await reply(client, message, "**Exec input:**```py\n{}\n```\n**Output:**```py\n{}\n```".format(cargs, output))
+
+#-----End Bot manager commands-----
+
+
+#Config commands
+
+
+@prim_cmd("serverconfig", "config", "Server configuration", "Usage: serverconfig [<category> <option> [value]] | [help <category> <option>] | [show]\n\nIf no arguments are given, lists the available server configuration options. If an option is given, shows the value of the option, and sets it given a <value>.\nserverconfig help <category> <option> shows the description and valid values for that option.\nserverconfig show shows all the server configuration options and their current values.")
+@require_perm("Master")
+async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
+    params = cargs.split(' ')
+
+    if params[0] in ["", "show"]:
+        """
+        Print all config categories, their options, and descriptions or values in a pretty way.
+        """
+        msg = "Configuration options: ```"
+        for category in sorted(serv_conf):
+            msg += "{}:".format(category)
+            for option in sorted(serv_conf[category]):
+                msg += "\t{}: {}".format(option, serv_conf[category][option].desc if params[0] == "" else serv_conf[category][option].read(botdata, message.server))
+            msg += "\n"
+        msg += "```"
+        await reply(client, message, msg)
+        return
+    elif params[0] in ["help"]:
+        """
+        Prints the description and possible values for the given option.
+        """
+        if len(params) < 3:
+            await reply(client, message, "What option do you want help with? Usage: serverconfig help <category> <option>")
+            return
+        if params[1] not in serv_conf:
+            await reply(client, message, "I don't know this category! Use `serverconfig` to see all categories and options.")
+            return
+        if params[2] not in serv_conf[params[1]]:
+            await reply(client, message, "I can't find this option in the given category! Use `serverconfig` to see all categories and options.")
+            return
+        cat = params[1]
+        op = params[2]
+        op_conf = serv_conf[cat][op]
+        msg = "Option help: ```\n{}.\nAcceptable values: {}.\nDefault value: {}".format(op_conf.desc, op_conf.ctype.accept, op_conf.default)
+    else:
+        if len(params) < 2:
+            await reply(client, message, "What option do you want to see? See `help serverconfig` for usage.")
+            return
+        if params[1] not in serv_conf:
+            await reply(client, message, "I don't know this category! Use `serverconfig` to see all categories and options.")
+            return
+        if params[2] not in serv_conf[params[1]]:
+            await reply(client, message, "I can't find this option in the given category! Use `serverconfig` to see all categories and options.")
+            return
+        if len(params) = 2:
+            msg = "Current setting is:\n```{}```".format(serv_conf[params[1]][params[2]].read(botdata, message.server))
+            await reply(client, message, msg)
+        else:
+            errmsg = serv_conf[params[1]][params[2]].write(botdata, message.server, ' '.join(params[3:]), message, client)
+            if errmsg:
+                await reply(client, message, errmsg)
+            else:
+                await reply(client, message, "The setting was set successfully")
+
 
 
 #User config commands

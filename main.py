@@ -79,6 +79,22 @@ async def on_message(message):
     await cmd_parser(message, cmd, args)
     return
 
+@client.event
+async def on_member_join():
+    pass
+
+
+@client.event
+async def on_member_remove():
+    pass
+
+@client.event
+async def on_server_join():
+    pass
+
+
+
+
 #----End Discord event handling----
 
 
