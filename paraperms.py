@@ -64,7 +64,7 @@ async def perm_manager(client, botdata, conf = None, message = None, user = None
     if execerror[0] == 0:
         return (execerr, msg)
     if int(userid) not in conf.getintlist("managers"):
-        msg = "You lack the required bot manager perms to do this!")
+        msg = "You lack the required bot manager perms to do this!"
         return (1, msg)
     return (0, "")
 
