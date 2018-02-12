@@ -555,11 +555,11 @@ async def prim_cmd_tex(message, cargs, client, conf, botdata):
             break
         reaction = res.reaction
         if res.reaction.emoji == del_emoji:
-            await client.delete_msg(out_msg)
+            await client.delete_message(out_msg)
             break
         if res.reaction == show_emoji:
             show = bool(1-show)
-            await client.edit_msg(out_msg, message.author.name+":"+(cargs if show else ""))
+            await client.edit_message(out_msg, message.author.name+":"+(cargs if show else ""))
 
 
 
