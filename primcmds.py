@@ -38,7 +38,7 @@ def require_perm(permName):
     permFunc = permFuncs[permName][0] if permName in permFuncs else perm_default
     def perm_decorator(func):
         async def permed_func(message, cargs, client, conf, botdata, *args, **kwargs):
-            (error, errmsg) = await permFunc(client, conf, botdata, message = message)
+            (error, errmsg) = await permFunc(client, botdata, conf=conf, message = message)
             if error == 0:
                 await func(message, cargs, client, conf, botdata)
             else:
