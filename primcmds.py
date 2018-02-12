@@ -332,7 +332,7 @@ async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
         if params[2] not in serv_conf[params[1]]:
             await reply(client, message, "I can't find this option in the given category! Use `serverconfig` to see all categories and options.")
             return
-        if len(params) = 2:
+        if len(params) == 2:
             msg = "Current setting is:\n```{}```".format(serv_conf[params[1]][params[2]].read(botdata, message.server))
             await reply(client, message, msg)
         else:
