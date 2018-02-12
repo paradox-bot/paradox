@@ -537,10 +537,10 @@ TODO: make this threadsafe
 async def prim_cmd_tex(message, cargs, client, conf, botdata):
     await texcomp(cargs)
     try:
-        yield from client.delete_message(message)
+        await client.delete_message(message)
     except:
         pass
-    yield from client.send_file(message.channel,'out.png', content=message.author.name+":")
+    await client.send_file(message.channel,'out.png', content=message.author.name+":")
 
 
 
