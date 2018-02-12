@@ -305,7 +305,7 @@ async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
         """
         Print all config categories, their options, and descriptions or values in a pretty way.
         """
-        msg = "Configuration options: ```"
+        msg = "Configuration options:\n```\n"
         for category in sorted(serv_conf):
             msg += "{}:\n".format(category)
             for option in sorted(serv_conf[category]):
@@ -424,6 +424,7 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
 @prim_cmd("profile", "user info",\
           "Displays a user profile",\
           "Usage: profile [mention]\n\nDisplays the mentioned user's profile, or your own.")
+@require_perm("master")
 async def prim_cmd_profile(message, cargs, client, conf, botdata):
     embed = discord.Embed(type = "rich", color = discord.Colour.teal()) \
         .set_author(name = "{} ({}) <:testemote:412478719853330432>".format(message.author, message.author.id), icon_url = message.author.avatar_url) \
