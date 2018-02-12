@@ -411,7 +411,7 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
           "Displays a user profile",\
           "Usage: profile [mention]\n\nDisplays the mentioned user's profile, or your own.")
 async def prim_cmd_profile(message, cargs, client, conf, botdata):
-    embed = discord.Embed(color = discord.Colour.teal()) \
+    embed = discord.Embed(type = "rich", color = discord.Colour.teal()) \
         .set_author(name = "{} ({}) <:testemote:412478719853330432>".format(message.author, message.author.id), icon_url = message.author.avatar_url) \
         .add_field(name = "Level",\
                    value = "()", inline = True) \
@@ -422,7 +422,7 @@ async def prim_cmd_profile(message, cargs, client, conf, botdata):
         .add_field(name = "Premium",\
                    value = "Yes/No", inline = True) \
         .add_field(name = "Created at",\
-                   value = "{}".format(message.author.created_at), inline = False) \
+                   value = "{}".format(message.author.created_at), inline = False)
     await client.send_message(message.channel, embed=embed)
 
 
