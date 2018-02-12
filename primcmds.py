@@ -553,9 +553,9 @@ async def prim_cmd_tex(message, cargs, client, conf, botdata):
                                              emoji = [del_emoji, show_emoji])
         if res is None:
             break
+        await reply(client,message,"got reaction {}".format(str(res.reaction)))
         reaction = res.reaction
         if str(res.reaction) == str(del_emoji):
-            await reply(client,message,"got reaction {}".format(str(res.reaction)))
             await client.delete_msg(out_msg)
             break
         if str(res.reaction) == str(show_emoji):
