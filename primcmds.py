@@ -542,23 +542,23 @@ async def prim_cmd_tex(message, cargs, client, conf, botdata):
         pass
     out_msg = await client.send_file(message.channel,'tex/out.png', content=message.author.name+":")
 #    edit_emoj = discord.utils.get(client.get_all_emojis(), name='edit')
-    edit_emoj = discord.utils.get(client.get_all_emojis(), name='delete')
-    show_emoj = discord.utils.get(client.get_all_emojis(), name='showtex')
-    await client.add_reaction(out_msg, edit_emoj)
-    await client.add_reaction(out_msg, show_emoj)
+    del_emoji = discord.utils.get(client.get_all_emojis(), name='delete')
+    show_emoji = discord.utils.get(client.get_all_emojis(), name='showtex')
+    await client.add_reaction(out_msg, del_emoji)
+    await client.add_reaction(out_msg, show_emoji)
     show = False
     while True:
         res = await client.wait_for_reaction(message = out_msg,
-                                             timeout = 120,
-                                             emoji = ["delete", "showtex"])
-        await reply(client,message,"got reaction {}".format(res.reaction))
+                                             timeout = 120, user = message.author
+                                             emoji = [del_emoji, show_emoji])
+#        await reply(client,message,"got reaction {}".format(res.reaction))
         if res is None:
             break
         reaction = res.reaction
-        if "delete" in str(reaction.emoji):
+        if res.reaction == del_emoji:
             await client.delete_msg(out_msg)
             break
-        if "showtex" in str(reaction.emoji):
+        if res.reaction == show_emoji:
             show = bool(1-show)
             await client.edit_msg(out_msg, message.author.name+":"+(cargs if show else ""))
 
