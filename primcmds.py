@@ -540,7 +540,26 @@ async def prim_cmd_tex(message, cargs, client, conf, botdata):
         await client.delete_message(message)
     except:
         pass
-    await client.send_file(message.channel,'tex/out.png', content=message.author.name+":")
+    out_msg = await client.send_file(message.channel,'tex/out.png', content=message.author.name+":")
+#    edit_emoj = discord.utils.get(client.get_all_emojis(), name='edit')
+    edit_emoj = discord.utils.get(client.get_all_emojis(), name='delete')
+    show_emoj = discord.utils.get(client.get_all_emojis(), name='showtex')
+    await client.add_reaction(out_msg, edit_emoj)
+    await client.add_reaction(out_msg, show_emoj)
+    show = False
+    while True:
+        res = await client.wait_for_reaction(message = out_msg, timeout = 120, user = message.author,
+                                    emoji = ["delete", "showtex"])
+        if res is None:
+            break
+        reaction = res.reaction
+        if "delete" in str(reaction.emoji):
+            await client.delete_msg(out_msg)
+            break
+        if "showtex" in str(reaction.emoji):
+            show = bool(1-show)
+            await client.edit_msg(out_msg, message.author.name+":"+(cargs if show else "")
+
 
 
 
