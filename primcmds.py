@@ -412,7 +412,7 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
           "Usage: profile [mention]\n\nDisplays the mentioned user's profile, or your own.")
 async def prim_cmd_profile(message, cargs, client, conf, botdata):
     embed = discord.Embed(title = "(Probably don't need this but idk)", color = discord.Colour.teal()) \
-        .set_author(name = "{} ({})".format(message.author, message.author.id)), url = message.author.avatar_url) \
+        .set_author(name = "{} ({})".format(message.author, message.author.id), url = message.author.avatar_url) \
         .add_field(name = "This is a field1 title",\
                    value = "This is field1 content", inline = True) \
         .add_field(name = "This is a field2 title",\
