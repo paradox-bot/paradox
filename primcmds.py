@@ -271,7 +271,6 @@ TODO: Make the help look nicer, in fact nicen up all the related strings.
 humanise the default value
 """
 @prim_cmd("serverconfig", "config", "Server configuration", "Usage: serverconfig [<category> <option> [value]] | [help <category> <option>] | [show]\n\nIf no arguments are given, lists the available server configuration options. If an option is given, shows the value of the option, and sets it given a <value>.\nserverconfig help <category> <option> shows the description and valid values for that option.\nserverconfig show shows all the server configuration options and their current values.")
-@require_perm("Master")
 async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
     params = cargs.split(' ')
 
