@@ -551,14 +551,14 @@ async def prim_cmd_tex(message, cargs, client, conf, botdata):
         res = await client.wait_for_reaction(message = out_msg,
                                              timeout = 120, user = message.author,
                                              emoji = [del_emoji, show_emoji])
-        await reply(client,message,"got reaction {}".format(res.reaction))
         if res is None:
             break
         reaction = res.reaction
-        if res.reaction == del_emoji:
+        if str(res.reaction) == str(del_emoji):
+        await reply(client,message,"got reaction {}".format(str(res.reaction)))
             await client.delete_msg(out_msg)
             break
-        if res.reaction == show_emoji:
+        if str(res.reaction) == str(show_emoji):
             show = bool(1-show)
             await client.edit_msg(out_msg, message.author.name+":"+(cargs if show else ""))
 
