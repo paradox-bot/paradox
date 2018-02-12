@@ -24,7 +24,7 @@ class configSetting:
         """
         botdata.servers.set(server.id, self.name, value)
 
-     get(self, botdata, server):
+    def get(self, botdata, server):
         """
         Returns value of setting from botdata
         """
