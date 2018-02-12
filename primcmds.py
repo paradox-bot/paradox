@@ -298,7 +298,7 @@ async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
         """
         msg = "Configuration options: ```"
         for category in sorted(serv_conf):
-            msg += "{}:".format(category)
+            msg += "{}:\n".format(category)
             for option in sorted(serv_conf[category]):
                 if option == "desc":
                     continue
