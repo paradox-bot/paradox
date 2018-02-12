@@ -17,6 +17,8 @@ import iso8601
 
 from parautils import *
 from serverconfig import serv_conf
+from paraperms import permFuncs
+
 
 #----Primitive Commands setup----
 '''
@@ -24,9 +26,9 @@ This is for adding basic commands as a proof of concept.
 Not intended to be used in production.
 '''
 
-#Define permission dictionary
-permFuncs = {}
-
+"""
+Perm decorator to require permissions on functions
+"""
 async def perm_default(message, args, client, conf, botdata):
     await reply(client, message, "Sorry, you don't have the required permission. In fact, the required permission isn't defined yet!")
     return 1
@@ -36,20 +38,16 @@ def require_perm(permName):
     permFunc = permFuncs[permName][0] if permName in permFuncs else perm_default
     def perm_decorator(func):
         async def permed_func(message, cargs, client, conf, botdata, *args, **kwargs):
-            error = await permFunc(message, cargs, client, conf, botdata)
+            (error, errmsg) = await permFunc(client, conf, botdata, message = message)
             if error == 0:
                 await func(message, cargs, client, conf, botdata)
             else:
+                await reply(client, message, errmsg)
                 await log("Permission failure running command in message \n{}\nFrom user \n{}\nRequired permission \"{}\" which returned error code \"{}\"".format(message.content, message.author.id, permName, error))
             return
         return permed_func
     return perm_decorator
 
-def perm_func(permName):
-    def decorator(func):
-        permFuncs[permName.lower()] = [func]
-        return func
-    return decorator
 
 #Initialise command dict
 ##Entries are indexed by cmdName and contain data described in prim_cmd
@@ -77,24 +75,6 @@ def prim_cmd(cmdName, category, desc = "No description", helpDesc = "No help has
 
 
 #----End primitive commands setup---
-#------PERMISSION FUNCTIONS------
-
-@perm_func("Master")
-async def perm_master(message, cargs, client, conf, botdata):
-    if int(message.author.id) not in conf.getintlist("masters"):
-        await reply(client, message, "This command requires you to be one of my masters.")
-        return 1
-    return 0
-
-@perm_func("Exec")
-async def perm_exec(message, cargs, client, conf, botdata):
-    if (int(message.author.id) not in conf.getintlist("execWhiteList")) and (int(message.author.id) not in conf.getintlist("masters")):
-        await reply(client, message, "You don't have the required Exec perms to use this command.")
-        return 1
-    return 0
-
-#----End permission functions----
-
 #---Helper functions---
 
 
