@@ -42,7 +42,7 @@ async def perm_exec(client, botdata, conf = None, message = None, user = None, s
     if (user is None) or (conf is None):
         return(2, "Something went wrong inside me!")
 
-    (mastererror, msg) = await permFuncs["master"][0](client, botdata, conf, message, user,server)[0]
+    (mastererror, msg) = await permFuncs["master"][0](client, botdata, conf, message, user,server)
     if mastererror[0] == 0:
         return (mastererror, msg)
     if int(userid) not in conf.getintlist("execWhiteList"):
@@ -60,7 +60,7 @@ async def perm_manager(client, botdata, conf = None, message = None, user = None
     if (user is None) or (conf is None):
         return(2, "Something went wrong inside me!")
 
-    (execerror, msg) = await permFuncs["exec"][0](client, botdata, conf, message, user, server)[0]
+    (execerror, msg) = await permFuncs["exec"][0](client, botdata, conf, message, user, server)
     if execerror[0] == 0:
         return (execerr, msg)
     if int(userid) not in conf.getintlist("managers"):

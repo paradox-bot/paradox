@@ -97,7 +97,7 @@ async def prim_cmd_shutdown(message, cargs, client, conf, botdata):
 @prim_cmd("restart", "admin", \
           "Restart the bot without pulling from git first", \
           "Usage: restart\n\nRestarts the bot without pulling from git first")
-@require_perm("Master")
+@require_perm("Manager")
 async def prim_cmd_restart(message, cargs, client, conf, botdata):
     await reply(client, message, os.system('./Nanny/scripts/redeploy.sh'))
 
