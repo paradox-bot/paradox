@@ -411,8 +411,8 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
           "Displays a user profile",\
           "Usage: profile [mention]\n\nDisplays the mentioned user's profile, or your own.")
 async def prim_cmd_profile(message, cargs, client, conf, botdata):
-    embed = discord.Embed(title = "This is a title", color = discord.Colour.teal()) \
-        .set_author(name = "I am an Author") \
+    embed = discord.Embed(title = "(Probably don't need this but idk)", color = discord.Colour.teal()) \
+        .set_author(name = message.author + "(" + message.author.id + ")") \
         .add_field(name = "This is a field1 title",\
                    value = "This is field1 content", inline = True) \
         .add_field(name = "This is a field2 title",\
@@ -421,8 +421,7 @@ async def prim_cmd_profile(message, cargs, client, conf, botdata):
                    value = "This is field3 content", inline = False) \
         .set_footer(text = "This is a footer")
     await client.send_message(message.channel, embed=embed)
-
-
+# <:testemote:412478719853330432>
 
 
 #General utility commands
