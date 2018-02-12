@@ -409,8 +409,7 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
 
 @prim_cmd("profile", "user info",\
           "Displays a user profile",\
-          "Usage: profile [mention]\n\n\
-          Displays the mentioned user's profile, or your own.")
+          "Usage: profile [mention]\n\nDisplays the mentioned user's profile, or your own.")
 async def prim_cmd_profile(message, cargs, client, conf, botdata):
     embed = discord.Embed(title = "This is a title", color = discord.Colour.teal()) \
         .set_author(name = "I am an Author") \
@@ -431,8 +430,7 @@ async def prim_cmd_profile(message, cargs, client, conf, botdata):
 
 @prim_cmd("about", "general",\
           "Provides information about the bot",\
-          "Usage: about\n\n\
-          Sends a message containing information about the bot.")
+          "Usage: about\n\nSends a message containing information about the bot.")
 async def prim_cmd_about(message, cargs, client, conf, botdata):
     await reply(client, message, 'This is a bot created via the collaborative efforts of Retro, Pue, and Loomy.')
 
