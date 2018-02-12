@@ -43,7 +43,7 @@ async def perm_exec(client, botdata, conf = None, message = None, user = None, s
         return(2, "Something went wrong inside me!")
 
     (mastererror, msg) = await permFuncs["master"][0](client, botdata, conf, message, user,server)
-    if mastererror[0] == 0:
+    if mastererror == 0:
         return (mastererror, msg)
     if int(userid) not in conf.getintlist("execWhiteList"):
         msg = "You don't have the required Exec perms to do this!"
@@ -61,7 +61,7 @@ async def perm_manager(client, botdata, conf = None, message = None, user = None
         return(2, "Something went wrong inside me!")
 
     (execerror, msg) = await permFuncs["exec"][0](client, botdata, conf, message, user, server)
-    if execerror[0] == 0:
+    if execerror == 0:
         return (execerr, msg)
     if int(userid) not in conf.getintlist("managers"):
         msg = "You lack the required bot manager perms to do this!"
