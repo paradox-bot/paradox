@@ -143,14 +143,12 @@ class CHANNEL(_settingType):
         return None
 
 
-class FMTSTR(_settingType):
+class STR(_settingType):
     """
-    Formatable string
-    TODO: accepted keys in variable from somewhere
+    Just a plain string, nothing special
     """
-    name = "Formatted string"
-    accept = "Formatted string, accepted keys are:\n"
-    accept += "\t $username$, $mention$, $id$, $tag$, $displayname$, $server$"
+    name = "string"
+    accept = "Any text"
 
     @classmethod
     def humanise(cls, raw):
@@ -158,6 +156,16 @@ class FMTSTR(_settingType):
 
     def understand(self, userstr):
         return userstr
+
+
+class FMTSTR(STR):
+    """
+    Formatable string
+    TODO: accepted keys in variable from somewhere
+    """
+    name = "Formatted string"
+    accept = "Formatted string, accepted keys are:\n"
+    accept += "\t $username$, $mention$, $id$, $tag$, $displayname$, $server$"
 
 
 class SERVER(_settingType):
