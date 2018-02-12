@@ -149,8 +149,8 @@ class FMTSTR(_settingType):
     TODO: accepted keys in variable from somewhere
     """
     name = "Formatted string"
-    accept = "Formatted string, accepted keys are:"
-    accept += "\t $username$, $mention$, $id$, $tag$, $displayname$, $server$."
+    accept = "Formatted string, accepted keys are:\n"
+    accept += "\t $username$, $mention$, $id$, $tag$, $displayname$, $server$"
 
     @classmethod
     def humanise(cls, raw):
