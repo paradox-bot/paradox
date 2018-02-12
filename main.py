@@ -57,7 +57,7 @@ async def on_message(message):
     pass it on to the command parser.
     '''
     PREFIX = conf.get("PREFIX") #In case someone changed it while we weren't looking
-    if not message.content.startswith(PREFIX):
+    if not (message.content.startswith(PREFIX) or (message.content.split(' ')[0].strip('<!@>') == client.user.id)):
         #Okay, it probably wasn't meant for us, or they can't type
         #Either way, let's ignore them
         return
@@ -65,7 +65,8 @@ async def on_message(message):
         #Some ass just typed the prefix to try and trigger us.
         #Not even going to try parsing, just quit.
         return
-    #TODO: Put something here about checking bot users.
+    if message.author.bot:
+        return
     if int(message.author.id) in conf.getintlist("blacklisted_users"):
         return
 
@@ -74,7 +75,10 @@ async def on_message(message):
         message.content, message.author, message.author.id)
         )
     #Now strip the prefix, we don't need that anymore, and extract command
-    cmd_message = message.content[len(PREFIX):]
+    if message.content.startswith(PREFIX):
+        cmd_message = message.content[len(PREFIX):]
+    else:
+        cmd_message = message.content[len(message.content.split(' ')[0]):]
     cmd = cmd_message.strip().split(' ')[0].lower()
     args = ' '.join(cmd_message.strip().split(' ')[1:])
     await cmd_parser(message, cmd, args)
