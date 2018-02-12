@@ -429,6 +429,15 @@ async def prim_cmd_profile(message, cargs, client, conf, botdata):
 #General utility commands
 
 
+@prim_cmd("echo", "general",\
+          "Sends what you tell me to!",\
+          "Usage: echo <text>\n\nReplies to the message with <text>")
+async def prim_cmd_echo(message, cargs, client, conf, botdata):
+    if cargs == "":
+        await reply(client, message, "I can't send an empty message!")
+    else:
+        await reply(client, message, cargs)
+
 @prim_cmd("about", "general",\
           "Provides information about the bot",\
           "Usage: about\n\nSends a message containing information about the bot.")
