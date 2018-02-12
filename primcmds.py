@@ -551,7 +551,7 @@ async def prim_cmd_tex(message, cargs, client, conf, botdata):
         res = await client.wait_for_reaction(message = out_msg,
                                              timeout = 120, user = message.author,
                                              emoji = [del_emoji, show_emoji])
-#        await reply(client,message,"got reaction {}".format(res.reaction))
+        await reply(client,message,"got reaction {}".format(res.reaction))
         if res is None:
             break
         reaction = res.reaction
