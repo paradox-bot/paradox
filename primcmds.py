@@ -300,6 +300,8 @@ async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
         for category in sorted(serv_conf):
             msg += "{}:".format(category)
             for option in sorted(serv_conf[category]):
+                if option == "desc":
+                    continue
                 msg += "\t{}: {}".format(option, serv_conf[category][option].desc if params[0] == "" else serv_conf[category][option].read(botdata, message.server))
             msg += "\n"
         msg += "```"
@@ -315,7 +317,7 @@ async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
         if params[1] not in serv_conf:
             await reply(client, message, "I don't know this category! Use `serverconfig` to see all categories and options.")
             return
-        if params[2] not in serv_conf[params[1]]:
+        if params[2] not in serv_conf[params[1]] or params[2] == "desc":
             await reply(client, message, "I can't find this option in the given category! Use `serverconfig` to see all categories and options.")
             return
         cat = params[1]
@@ -329,7 +331,7 @@ async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
         if params[1] not in serv_conf:
             await reply(client, message, "I don't know this category! Use `serverconfig` to see all categories and options.")
             return
-        if params[2] not in serv_conf[params[1]]:
+        if params[2] not in serv_conf[params[1]] or params[2] == "desc":
             await reply(client, message, "I can't find this option in the given category! Use `serverconfig` to see all categories and options.")
             return
         if len(params) == 2:
