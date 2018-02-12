@@ -28,7 +28,7 @@ async def perm_master(client, botdata, conf = None, message = None, user = None,
     if (user is None) or (conf is None):
         return(2, "Something went wrong inside me!")
     if int(userid) not in conf.getintlist("masters"):
-        msg = "This requires you to be one of my masters!")
+        msg = "This requires you to be one of my masters!"
         return (1, msg)
     return (0, "")
 
