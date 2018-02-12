@@ -45,7 +45,7 @@ async def perm_exec(client, botdata, conf = None, message = None, user = None, s
     (mastererror, msg) = await permFuncs["master"][0](client, botdata, conf, message, user,server)[0]
     if mastererror[0] == 0:
         return (mastererror, msg)
-    if int(userid) not in conf.getintlist("execWhiteList")
+    if int(userid) not in conf.getintlist("execWhiteList"):
         msg = "You don't have the required Exec perms to do this!"
         return (1, msg)
     return (0, "")
