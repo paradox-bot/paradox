@@ -7,6 +7,7 @@ import discord
 import asyncio
 import json
 import os
+import shutil
 import sys
 import traceback
 from io import StringIO
@@ -522,6 +523,39 @@ async def prim_cmd_testembed(message, cargs, client, conf, botdata):
         .add_field(name = "This is a field3 title", value = "This is field3 content", inline = False) \
         .set_footer(text = "This is a footer")
     await client.send_message(message.channel, embed=embed)
+
+
+#Misc
+"""
+TODO: make this threadsafe
+"""
+
+@prim_cmd("tex", "Misc",\
+          "Renders LaTeX code",\
+          "Usage: tex <code\
+          \n\nRenders and displays LaTeX code. Use the reactions to show your code/ edit your code/ delete the message respectively.")
+async def prim_cmd_tex(message, cargs, client, conf, botdata):
+    await texcomp(cargs)
+    try:
+        yield from client.delete_message(message)
+    except:
+        pass
+    yield from client.send_file(message.channel,'out.png', content=message.author.name+":")
+
+
+
+async def texcomp(tex):
+    shutil.copy('tex/preamble.tex', 'tex/out.tex')
+    work = open('tex/out.tex', 'a')
+    work.write(tex)
+    work.write('\n' + '\\end{document}' + '\n')
+    work.close()
+    os.system('tex/texcompile.sh out.tex')
+    os.system('pdflatex out.tex')
+    os.system('convert -background white -flatten -border 80 -density 500 -quality 100 out.pdf out.png')
+
+
+
 
 
 #------END COMMANDS------
