@@ -8,9 +8,11 @@ values:
 """
 import re
 
+
 class _settingType:
     name = ""
     accept = ""
+
     def __init__(self, userstr=None, raw=None, message=None, server=None, botdata=None, client=None):
         """
         Initialise either empty (then must use constructors), or with userstr or raw.
@@ -55,13 +57,13 @@ class _settingType:
             raw = self.understand(userstr)
             self.fromRaw(raw)
         return self
-    
+
     def understand(self, userstr):
         """
         This is where the complicated interpretation happens.
         Takes in a user entered string, attempts to turn it into raw data.
         Returns raw data
-        Writes the error string if it can't 
+        Writes the error string if it can't
         """
         pass
 
@@ -73,27 +75,28 @@ class _settingType:
         """
         pass
 
-"""
-A sort of boolean type, more like a wrapper for a boolean.
-"""
+
 class BOOL(_settingType):
+    """
+    A sort of boolean type, more like a wrapper for a boolean.
+    """
     name = "Yes/No"
     accept = "Yes/No or True/False"
     inputexps = {
-            "^yes$" : True,
+            "^yes$": True,
             "^true$": True,
-            "^no$" : False,
-            "^false$$" : False
+            "^no$": False,
+            "^false$": False
             }
     outputs = {
-            True : "Yes",
-            False : "No"
+            True: "Yes",
+            False: "No"
             }
-    
+
     @classmethod
     def humanise(cls, raw):
         return cls.outputs[raw]
-    
+
     def understand(self, userstr):
         for pattern in self.inputexps:
             if re.match(pattern, userstr, re.I):
@@ -103,20 +106,20 @@ class BOOL(_settingType):
         return None
 
 
-
-
-"""
-Channel type.
-"""
 class CHANNEL(_settingType):
+    """
+    Channel type.
+    """
     name = "Channel"
     accept = "Channel mention/id/name"
 
     @classmethod
     def humanise(cls, raw):
         """
-        Expect raw to be channel id
+        Expect raw to be channel id or 0, an empty.
         """
+        if raw == 0:
+            return "None"
         return "<#{}>".format(raw)
 
     def understand(self, userstr):
@@ -140,26 +143,27 @@ class CHANNEL(_settingType):
         return None
 
 
-"""
-Formatable string
-TODO: accepted keys in variable from somewhere
-"""
 class FMTSTR(_settingType):
+    """
+    Formatable string
+    TODO: accepted keys in variable from somewhere
+    """
     name = "Formatted string"
-    accept = "Formatted string, accepted keys are *blah*"
+    accept = "Formatted string, accepted keys are:\n"
+    accept += "\t $username$, $mention$, $id$, $tag$, $displayname$, $server$"
+
     @classmethod
     def humanise(cls, raw):
         return "\"{}\"".format(str(raw))
+
     def understand(self, userstr):
         return userstr
 
 
-"""
-Server type.
-Incomplete.
-"""
 class SERVER(_settingType):
+    """
+    Server type.
+    Incomplete.
+    """
     name = "server"
     accept = "Server name/ server id"
-
-
