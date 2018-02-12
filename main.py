@@ -38,7 +38,7 @@ client = discord.Client()
 async def on_ready():
     GAME = conf.getStr("GAME")
     if GAME == "":
-        GAME = "in $servers servers!"
+        GAME = "in $servers$ servers!"
     GAME = await para_format(client, GAME)
     await client.change_presence(status=discord.Status.online, game=discord.Game(name=GAME))
     print("Logged in as")
