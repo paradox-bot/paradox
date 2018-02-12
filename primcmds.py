@@ -557,7 +557,7 @@ async def prim_cmd_tex(message, cargs, client, conf, botdata):
         if res.reaction.emoji == del_emoji and res.user == message.author:
             await client.delete_message(out_msg)
             break
-        if res.reaction.emoji == show_emoji:
+        if res.reaction.emoji == show_emoji and (res.user != client.user):
             show = 1-show
             await client.edit_message(out_msg, message.author.name+":\n"+("```tex\n{}\n```".format(cargs) if show else ""))
 
