@@ -302,7 +302,7 @@ async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
             for option in sorted(serv_conf[category]):
                 if option == "desc":
                     continue
-                msg += "\t{}: {}".format(option, serv_conf[category][option].desc if params[0] == "" else serv_conf[category][option].read(botdata, message.server))
+                msg += "\t{}: {}\n".format(option, serv_conf[category][option].desc if params[0] == "" else serv_conf[category][option].read(botdata, message.server))
             msg += "\n"
         msg += "```"
         await reply(client, message, msg)
@@ -324,21 +324,22 @@ async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
         op = params[2]
         op_conf = serv_conf[cat][op]
         msg = "Option help: ```\n{}.\nAcceptable values: {}.\nDefault value: {}".format(op_conf.desc, op_conf.ctype.accept, op_conf.default)
+        await reply(client, message, msg)
     else:
         if len(params) < 2:
             await reply(client, message, "What option do you want to see? See `help serverconfig` for usage.")
             return
-        if params[1] not in serv_conf:
+        if params[0] not in serv_conf:
             await reply(client, message, "I don't know this category! Use `serverconfig` to see all categories and options.")
             return
-        if params[2] not in serv_conf[params[1]] or params[2] == "desc":
+        if params[1] not in serv_conf[params[2]] or params[1] == "desc":
             await reply(client, message, "I can't find this option in the given category! Use `serverconfig` to see all categories and options.")
             return
         if len(params) == 2:
-            msg = "Current setting is:\n```{}```".format(serv_conf[params[1]][params[2]].read(botdata, message.server))
+            msg = "Current setting is:\n```{}```".format(serv_conf[params[0]][params[1]].read(botdata, message.server))
             await reply(client, message, msg)
         else:
-            errmsg = serv_conf[params[1]][params[2]].write(botdata, message.server, ' '.join(params[3:]), message, client)
+            errmsg = serv_conf[params[0]][params[1]].write(botdata, message.server, ' '.join(params[2:]), message, client)
             if errmsg:
                 await reply(client, message, errmsg)
             else:
