@@ -242,7 +242,7 @@ async def _async(message, cargs, client, conf, botdata):
         sys.stdout = old_stdout
     return result
 
-@prim_cmd("async", "exec", "Executes async code and shows the output", "Usage: async <code>\n\nRuns <code> as an asyncronous coroutine and prints the output or error.") 
+@prim_cmd("async", "exec", "Executes async code and shows the output", "Usage: async <code>\n\nRuns <code> as an asyncronous coroutine and prints the output or error.")
 @require_perm("Exec")
 async def prim_cmd_async(message, cargs, client, conf, botdata):
     output, error = await _async(message, cargs, client, conf, botdata)
@@ -270,7 +270,7 @@ async def _exec(message, cargs, client, conf, botdata):
         sys.stdout = old_stdout
     return result
 
-@prim_cmd("exec", "exec", "Executes code and shows the output", "Usage: exec <code>\n\nRuns <code> in current environment using exec() and prints the output or error.") 
+@prim_cmd("exec", "exec", "Executes code and shows the output", "Usage: exec <code>\n\nRuns <code> in current environment using exec() and prints the output or error.")
 @require_perm("Exec")
 async def prim_cmd_exec(message, cargs, client, conf, botdata):
     output, error = await _exec(message, cargs, client, conf, botdata)
@@ -407,6 +407,21 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
     timestr = iso8601.parse_date(datetime.datetime.now().isoformat()).astimezone(TZ).strftime('The current time for {} is `%-I:%M %p (%Z(%z))` on `%a, %d/%m/%Y`'.format(message.server.get_member(user).display_name))
     await reply(client, message, timestr)
 
+@prim_cmd("profile", "user info",\
+          "Displays a user profile",\
+          "Usage: profile [mention]\n\n\
+          Displays the mentioned user's profile, or your own.")
+async def prim_cmd_profile(message, cargs, client, conf, botdata):
+    embed = discord.Embed(title = "This is a title", color = discord.Colour.teal()) \
+        .set_author(name = "I am an Author") \
+        .add_field(name = "This is a field1 title",\
+                   value = "This is field1 content", inline = True) \
+        .add_field(name = "This is a field2 title",\
+                   value = "This is field2 content", inline = True) \
+        .add_field(name = "This is a field3 title",\
+                   value = "This is field3 content", inline = False) \
+        .set_footer(text = "This is a footer")
+    await client.send_message(message.channel, embed=embed)
 
 
 
@@ -414,10 +429,13 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
 #General utility commands
 
 
-@prim_cmd("about", "general", "Provides information about the bot", "Usage: about\n\nSends a message containing information about the bot.")
+@prim_cmd("about", "general",\
+          "Provides information about the bot",\
+          "Usage: about\n\n\
+          Sends a message containing information about the bot.")
 async def prim_cmd_about(message, cargs, client, conf, botdata):
     await reply(client, message, 'This is a bot created via the collaborative efforts of Retro, Pue, and Loomy.')
-    
+
 @prim_cmd("invite", "general", "Sends the bot's invite link", "Usage: invite\n\nSends the link to invite the bot to your server.")
 async def prim_cmd_about(message, cargs, client, conf, userdata):
     await reply(client, message, 'Here\'s my invite link! \n <https://discordapp.com/api/oauth2/authorize?client_id=401613224694251538&permissions=8&scope=bot>')
@@ -432,7 +450,7 @@ async def prim_cmd_ping(message, cargs, client, conf, botdata):
     latency = latency.microseconds // 1000
     latency = str(latency)
     await client.edit_message(sentMessage, 'Ping: '+latency+'ms')
-    
+
 @prim_cmd("support", "general", "Sends the link to the bot guild", "Usage: support\n\nSends the invite link to the Paradøx support guild.")
 async def prim_cmd_about(message, cargs, client, conf, botdata):
     await reply(client, message, 'Join my server here!\n\n<https://discord.gg/ECbUu8u>')
