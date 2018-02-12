@@ -558,7 +558,7 @@ async def prim_cmd_tex(message, cargs, client, conf, botdata):
             break
         if "showtex" in str(reaction.emoji):
             show = bool(1-show)
-            await client.edit_msg(out_msg, message.author.name+":"+(cargs if show else "")
+            await client.edit_msg(out_msg, message.author.name+":"+(cargs if show else ""))
 
 
 
