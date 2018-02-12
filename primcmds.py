@@ -546,19 +546,20 @@ async def prim_cmd_tex(message, cargs, client, conf, botdata):
     show_emoji = discord.utils.get(client.get_all_emojis(), name='showtex')
     await client.add_reaction(out_msg, del_emoji)
     await client.add_reaction(out_msg, show_emoji)
+    show = False
     while True:
         res = await client.wait_for_reaction(message = out_msg,
-                                             timeout = 120, user = message.author,
+                                             timeout = 120,
                                              emoji = [del_emoji, show_emoji])
         if res is None:
             break
         reaction = res.reaction
-        if res.reaction.emoji == del_emoji:
+        if res.reaction.emoji == del_emoji and res.user == message.author:
             await client.delete_message(out_msg)
             break
         if res.reaction.emoji == show_emoji:
-            await reply(client, message, "```tex\n{}\n```".format(cargs))
-            await client.edit_message(out_msg, message.author.name+":```tex\n{}\n```".format(cargs))
+            show = 1-show
+            await client.edit_message(out_msg, message.author.name+":\n"+("```tex\n{}\n```".format(cargs) if show else ""))
 
 
 
