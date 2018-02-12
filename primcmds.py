@@ -286,7 +286,10 @@ async def prim_cmd_exec(message, cargs, client, conf, botdata):
 
 #Config commands
 
-
+"""
+TODO: Make the help look nicer, in fact nicen up all the related strings.
+humanise the default value
+"""
 @prim_cmd("serverconfig", "config", "Server configuration", "Usage: serverconfig [<category> <option> [value]] | [help <category> <option>] | [show]\n\nIf no arguments are given, lists the available server configuration options. If an option is given, shows the value of the option, and sets it given a <value>.\nserverconfig help <category> <option> shows the description and valid values for that option.\nserverconfig show shows all the server configuration options and their current values.")
 @require_perm("Master")
 async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
@@ -323,7 +326,7 @@ async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
         cat = params[1]
         op = params[2]
         op_conf = serv_conf[cat][op]
-        msg = "Option help: ```\n{}.\nAcceptable values: {}.\nDefault value: {}```".format(op_conf.desc, op_conf.ctype.accept, op_conf.default)
+        msg = "Option help: ```\n{}.\nAcceptable input: {}.\nDefault value: {}```".format(op_conf.desc, op_conf.ctype.accept, op_conf.default)
         await reply(client, message, msg)
     else:
         if len(params) < 2:
@@ -336,7 +339,7 @@ async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
             await reply(client, message, "I can't find this option in the given category! Use `serverconfig` to see all categories and options.")
             return
         if len(params) == 2:
-            msg = "Current setting is:\n```{}```".format(serv_conf[params[0]][params[1]].read(botdata, message.server))
+            msg = "Current setting is:\n{}".format(serv_conf[params[0]][params[1]].read(botdata, message.server))
             await reply(client, message, msg)
         else:
             errmsg = serv_conf[params[0]][params[1]].write(botdata, message.server, ' '.join(params[2:]), message, client)

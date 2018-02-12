@@ -6,6 +6,7 @@ import traceback
 from botdata import BotData
 from botconf import Conf
 from parautils import *
+from configSetting import serv_conf
 
 import primcmds
 
@@ -44,7 +45,7 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print("Logged into", len(client.servers), "servers")
-    
+
 
 
 #We saw a message!
@@ -60,7 +61,7 @@ async def on_message(message):
         #Okay, it probably wasn't meant for us, or they can't type
         #Either way, let's ignore them
         return
-    if message.content == (PREFIX): 
+    if message.content == (PREFIX):
         #Some ass just typed the prefix to try and trigger us.
         #Not even going to try parsing, just quit.
         return
@@ -80,16 +81,37 @@ async def on_message(message):
     return
 
 @client.event
-async def on_member_join():
-    pass
+async def on_member_join(member):
+    server = member.server
+    if not serv_conf["join"]["enabled"].get(botdata, server):
+        return
+    join_channel = serv_conf["join"]["channel"].get(botdata, server)
+    join_message = serv_conf["join"]["message"].get(botdata, server)
+    if join_channel == 0:
+        return
+    channel = server.get_channel(join_channel)
+    if not channel:
+        return
+    await client.send_message(channel, para_format(client, join_message, member=member))
+
 
 
 @client.event
-async def on_member_remove():
-    pass
+async def on_member_remove(member):
+    server = member.server
+    if not serv_conf["leave"]["enabled"].get(botdata, server):
+        return
+    channel = serv_conf["leave"]["channel"].get(botdata, server)
+    message = serv_conf["leave"]["message"].get(botdata, server)
+    if channel == 0:
+        return
+    channel = server.get_channel(channel)
+    if not channel:
+        return
+    await client.send_message(channel, para_format(client, message, member=member))
 
 @client.event
-async def on_server_join():
+async def on_server_join(server):
     pass
 
 
@@ -130,7 +152,7 @@ async def cmd_parser(message, cmd, args):
             #Either way, we are done here.
             return
     else:
-        #At this point we have tried all our command types. 
+        #At this point we have tried all our command types.
         ##The user probably made a spelling mistake.
         return
 

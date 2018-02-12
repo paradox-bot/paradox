@@ -115,8 +115,10 @@ class CHANNEL(_settingType):
     @classmethod
     def humanise(cls, raw):
         """
-        Expect raw to be channel id
+        Expect raw to be channel id or 0, an empty.
         """
+        if raw == 0:
+            return "None"
         return "<#{}>".format(raw)
 
     def understand(self, userstr):
