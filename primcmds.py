@@ -16,7 +16,7 @@ from pytz import timezone
 import iso8601
 
 from parautils import *
-from serverconfig import server_settings
+from serverconfig import serv_conf
 
 #----Primitive Commands setup----
 '''
