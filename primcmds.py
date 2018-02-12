@@ -323,7 +323,7 @@ async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
         cat = params[1]
         op = params[2]
         op_conf = serv_conf[cat][op]
-        msg = "Option help: ```\n{}.\nAcceptable values: {}.\nDefault value: {}".format(op_conf.desc, op_conf.ctype.accept, op_conf.default)
+        msg = "Option help: ```\n{}.\nAcceptable values: {}.\nDefault value: {}```".format(op_conf.desc, op_conf.ctype.accept, op_conf.default)
         await reply(client, message, msg)
     else:
         if len(params) < 2:
@@ -332,7 +332,7 @@ async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
         if params[0] not in serv_conf:
             await reply(client, message, "I don't know this category! Use `serverconfig` to see all categories and options.")
             return
-        if params[1] not in serv_conf[params[2]] or params[1] == "desc":
+        if params[1] not in serv_conf[params[0]] or params[1] == "desc":
             await reply(client, message, "I can't find this option in the given category! Use `serverconfig` to see all categories and options.")
             return
         if len(params) == 2:
