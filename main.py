@@ -6,7 +6,7 @@ import traceback
 from botdata import BotData
 from botconf import Conf
 from parautils import *
-from configSetting import serv_conf
+from serverconfig import serv_conf
 
 import primcmds
 
