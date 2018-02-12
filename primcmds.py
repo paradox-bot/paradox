@@ -535,24 +535,22 @@ TODO: make this threadsafe
           "Usage: tex <code\
           \n\nRenders and displays LaTeX code. Use the reactions to show your code/ edit your code/ delete the message respectively.")
 async def prim_cmd_tex(message, cargs, client, conf, botdata):
-    await texcomp(cargs)
+    texcomp(cargs)
     try:
         await client.delete_message(message)
     except:
         pass
-    await client.send_file(message.channel,'out.png', content=message.author.name+":")
+    await client.send_file(message.channel,'tex/out.png', content=message.author.name+":")
 
 
 
-async def texcomp(tex):
+def texcomp(tex):
     shutil.copy('tex/preamble.tex', 'tex/out.tex')
     work = open('tex/out.tex', 'a')
     work.write(tex)
     work.write('\n' + '\\end{document}' + '\n')
     work.close()
-    os.system('tex/texcompile.sh out.tex')
-    os.system('pdflatex out.tex')
-    os.system('convert -background white -flatten -border 80 -density 500 -quality 100 out.pdf out.png')
+    os.system('tex/texcompile.sh out')
 
 
 
