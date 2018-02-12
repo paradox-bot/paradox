@@ -46,7 +46,7 @@ class configSetting:
         if self.perm_write:
             if (client is None) or (message is None):
                 return "Something went wrong while checking whether you have perms to set this setting!"
-            (errcode, errmsg) = permFuncs[self.perm_write](client, botdata, message=message)
+            (errcode, errmsg) = permFuncs[self.perm_write][0](client, botdata, message=message)
             if errcode != 0:
                 return errmsg
         default_errmsg = "I didn't understand your input or something went wrong!"
