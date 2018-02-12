@@ -411,17 +411,19 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
           "Displays a user profile",\
           "Usage: profile [mention]\n\nDisplays the mentioned user's profile, or your own.")
 async def prim_cmd_profile(message, cargs, client, conf, botdata):
-    embed = discord.Embed(title = "(Probably don't need this but idk)", color = discord.Colour.teal()) \
-        .set_author(name = "{} ({})".format(message.author, message.author.id), icon_url = message.author.avatar_url) \
-        .add_field(name = "This is a field1 title",\
-                   value = "This is field1 content", inline = True) \
-        .add_field(name = "This is a field2 title",\
-                   value = "This is field2 content", inline = True) \
-        .add_field(name = "This is a field3 title",\
-                   value = "This is field3 content", inline = False) \
-        .set_footer(text = "This is a footer")
+    embed = discord.Embed(color = discord.Colour.teal()) \
+        .set_author(name = "{} ({}) <:testemote:412478719853330432>".format(message.author, message.author.id), icon_url = message.author.avatar_url) \
+        .add_field(name = "Level",\
+                   value = "()", inline = True) \
+        .add_field(name = "XP",\
+                   value = "()", inline = True) \
+        .add_field(name = "Rep",\
+                   value = "()", inline = True) \
+        .add_field(name = "Premium",\
+                   value = "Yes/No", inline = True) \
+        .add_field(name = "Created at",\
+                   value = "{}".format(message.author.created_at), inline = False) \
     await client.send_message(message.channel, embed=embed)
-# <:testemote:412478719853330432>
 
 
 #General utility commands
