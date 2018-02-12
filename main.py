@@ -86,7 +86,7 @@ async def on_member_join(member):
     if not serv_conf["join"]["enabled"].get(botdata, server):
         return
     join_channel = serv_conf["join"]["channel"].get(botdata, server)
-    join_message = serv_conf["join"]["message"].get(botdata, server)
+    join_message = serv_conf["join"]["msg"].get(botdata, server)
     if join_channel == 0:
         return
     channel = server.get_channel(join_channel)
@@ -102,7 +102,7 @@ async def on_member_remove(member):
     if not serv_conf["leave"]["enabled"].get(botdata, server):
         return
     channel = serv_conf["leave"]["channel"].get(botdata, server)
-    message = serv_conf["leave"]["message"].get(botdata, server)
+    message = serv_conf["leave"]["msg"].get(botdata, server)
     if channel == 0:
         return
     channel = server.get_channel(channel)
