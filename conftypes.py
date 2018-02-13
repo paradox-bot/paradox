@@ -29,16 +29,10 @@ class _settingType:
         self.error = 0
         self.hr = ""
         self.errmsg = ""
-        if (userstr is not None) and (raw is not None):
-            """
-            Someone wants to give us both userstr and raw? We don't handle that.
-            """
-            self.error = 1
-            self.errmsg = "Something is broken inside me."
-        elif userstr is not None:
-            self.fromUser(userstr)
+        if userstr is not None:
+            return self.fromUser(userstr)
         elif raw is not None:
-            self.fromRaw(raw)
+            return self.fromRaw(raw)
 
     def fromRaw(self, raw):
         """

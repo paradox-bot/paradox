@@ -51,7 +51,7 @@ class _configSetting:
             if errcode != 0:
                 return errmsg
         default_errmsg = "I didn't understand your input or something went wrong!"
-        value = self.ctype(userstr=userstr, message=message, server=server, botdata=botdata, client=client)
+        value = self.ctype(raw=self.get(data, obj), userstr=userstr, message=message, server=server, botdata=botdata, client=client)
         if value.error:
             errmsg = value.errmsg if value.errmsg else default_errmsg
             return errmsg
