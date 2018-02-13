@@ -469,7 +469,7 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
 @require_perm("master")
 async def prim_cmd_profile(message, cargs, client, conf, botdata):
     embed = discord.Embed(type="rich", color=discord.Colour.teal()) \
-        .set_author(name="{} ({}) <:testemote:412478719853330432>".format(message.author, message.author.id),
+        .set_author(name="{} ({})".format(message.author, message.author.id),
                     icon_url=message.author.avatar_url) \
         .add_field(name="Level",
                    value="()", inline=True) \
@@ -501,7 +501,7 @@ async def prim_cmd_echo(message, cargs, client, conf, botdata):
           "Provides information about the bot",
           "Usage: about\n\nSends a message containing information about the bot.")
 async def prim_cmd_about(message, cargs, client, conf, botdata):
-    await reply(client, message, 'This is a bot created via the collaborative efforts of Retro, Pue, and Loomy.')
+    await reply(client, message, 'Paradøx was coded in Discord.py by Pue, Retro, and nockia.')
 
 
 @prim_cmd("invite", "general",
