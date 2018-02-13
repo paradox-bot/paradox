@@ -82,16 +82,12 @@ class BOOL(_settingType):
     """
     name = "Yes/No"
     accept = "Yes/No or True/False"
-    inputexps = {
-            "^yes$": True,
-            "^true$": True,
-            "^no$": False,
-            "^false$": False
-            }
-    outputs = {
-            True: "Yes",
-            False: "No"
-            }
+    inputexps = {"^yes$": True,
+                 "^true$": True,
+                 "^no$": False,
+                 "^false$": False}
+    outputs = {True: "Yes",
+               False: "No"}
 
     @classmethod
     def humanise(cls, raw):
