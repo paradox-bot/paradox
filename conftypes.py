@@ -67,8 +67,7 @@ class _settingType:
         """
         pass
 
-    @classmethod
-    def humanise(cls, raw):
+    def humanise(self, raw):
         """
         Take in raw data and humanise it to be user readable.
         Can be an alternative to initialising and getting the raw data.
@@ -89,8 +88,7 @@ class BOOL(_settingType):
     outputs = {True: "Yes",
                False: "No"}
 
-    @classmethod
-    def humanise(cls, raw):
+    def humanise(self, raw):
         return cls.outputs[raw]
 
     def understand(self, userstr):
@@ -109,8 +107,7 @@ class CHANNEL(_settingType):
     name = "Channel"
     accept = "Channel mention/id/name"
 
-    @classmethod
-    def humanise(cls, raw):
+    def humanise(self, raw):
         """
         Expect raw to be channel id or 0, an empty.
         """
@@ -139,6 +136,18 @@ class CHANNEL(_settingType):
         return None
 
 
+class  userList():
+    name = "List of users"
+    accept = "[+/add | -/remove] <userid/mention>"
+
+    def humanise(self, raw):
+        pass
+
+    def understand(self, userstr):
+        pass
+
+
+
 class STR(_settingType):
     """
     Just a plain string, nothing special
@@ -146,8 +155,7 @@ class STR(_settingType):
     name = "string"
     accept = "Any text"
 
-    @classmethod
-    def humanise(cls, raw):
+    def humanise(self, raw):
         return "\"{}\"".format(str(raw))
 
     def understand(self, userstr):

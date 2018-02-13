@@ -37,7 +37,7 @@ class configSetting:
         setting = self.get(botdata, server)
         if setting is None:
             setting = self.default
-        return self.ctype.humanise(setting)
+        return self.ctype(userstr=setting).hr
 
     async def write(self, botdata, server, userstr, message=None, client=None):
         """
