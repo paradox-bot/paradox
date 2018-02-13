@@ -8,7 +8,7 @@ values:
 """
 import re
 import discord
-
+import json
 
 class _settingType:
     name = ""
@@ -23,21 +23,22 @@ class _settingType:
         self.server = server
         self.botdata = botdata
         self.client = client
-        if message:
+        if message is not None:
             self.server = message.server
 
         self.error = 0
+        self.hr = ""
         self.errmsg = ""
-        if userstr and raw:
+        if (userstr is not None) and (raw is not None):
             """
             Someone wants to give us both userstr and raw? We don't handle that.
             """
             self.error = 1
             self.errmsg = "Something is broken inside me."
-        elif userstr:
+        elif userstr is not None:
             self.fromUser(userstr)
-        elif raw:
-            self.fromraw(raw)
+        elif raw is not None:
+            self.fromRaw(raw)
 
     def fromRaw(self, raw):
         """
@@ -137,7 +138,7 @@ class CHANNEL(_settingType):
         return None
 
 
-class userList():
+class userList(_settingType):
     name = "List of users"
     accept = "[+/add | -/remove] <userid/mention>"
     str_already_in_list = ""
@@ -149,11 +150,13 @@ class userList():
         """
         Expect raw to be a list, possibly of strings, possible of integers, containing userids.
         """
+        raw = json.loads(str(raw))
         if self.client is None:
-            return ', '.join([str(user) for user in raw if user.isdigit()])
-        users = [str(user) for user in raw if user.isdigit()]
+            return ', '.join([str(user) for user in raw if str(user).isdigit()])
+        users = [str(user) for user in raw]
         user_tags = [discord.utils.get(self.client.get_all_members(), id=user) for user in users]
-        return '`' + '`''`, `'.join(user_tags) + '`'
+        userlist = [str(user) for user in user_tags if user]
+        return '`{}`'.format('`, `'.join(userlist))
 
     def understand(self, userstr):
         params = userstr.split(' ')
@@ -172,6 +175,8 @@ class userList():
             else:
                 self.raw.remove(userid)
                 return (3, self.str_removed_from_list)
+        else:
+            return (1, "I don't understand your input. Valid input is: " + self.accept)
 
 
 class userBlackList(userList):

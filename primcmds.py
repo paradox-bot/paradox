@@ -17,6 +17,7 @@ import iso8601
 
 from parautils import para_format, reply, log, LOGFILE, tail
 from serverconfig import serv_conf
+from botconfig import bot_conf
 from paraperms import permFuncs
 
 
@@ -126,31 +127,14 @@ async def prim_cmd_setgame(message, cargs, client, conf, botdata):
           \n\nAdds or removes a bot master by id or mention, or lists all current masters.")
 @require_perm("Master")
 async def prim_cmd_masters(message, cargs, client, conf, botdata):
-    masters = conf.getintlist("masters")
-    # TODO: Make this a human readable list of names
-    masterNames = ', '.join([str(discord.utils.get(client.get_all_members(), id = str(master))) for master in masters])
+    masters = await bot_conf["masters"].read(conf, None, message, client)
     params = cargs.split(' ')
     action = params[0]
     if action in ['', 'list']:
-        await reply(client, message, "My masters are:\n{}".format(masterNames))
-    elif (action in ['+', 'add']) and (len(params) == 2) and params[1].strip('<!@>').isdigit():
-        userid = int(params[1].strip('<!@>'))
-        if userid in masters:
-            await reply(client, message, "This user is already one of my masters!")
-        else:
-            masters.append(userid)
-            conf.set("masters", masters)
-            await reply(client, message, "I accept this user as a new master.")
-    elif (action in ['-', 'remove']) and (len(params) == 2) and params[1].strip('<!@>').isdigit():
-        userid = int(params[1].strip('<!@>'))
-        if userid not in masters:
-            await reply(client, message, "This user is not one of my masters!")
-        else:
-            masters.remove(userid)
-            conf.set("masters", masters)
-            await reply(client, message, "I have rejected this master.")
+        await reply(client, message, "My masters are:\n{}".format(masters))
     else:
-        await reply(client, message, primCmds["masters"][3])
+        errmsg = await bot_conf["masters"].write(conf, None, params, message, client, message.server, botdata)
+        await reply(client, message, errmsg)
 
 
 @prim_cmd("blacklist", "admin",
