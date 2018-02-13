@@ -1,26 +1,23 @@
 import discord
 import asyncio
-import json
 import traceback
 
 from botdata import BotData
 from botconf import Conf
-from parautils import *
+from parautils import para_format, log, reply
 from serverconfig import serv_conf
 
 import primcmds
 
-#Global constants/ environment variables
+# Global constants/ environment variables
 
 CONF_FILE = "paradox.conf"
-#USER_CONF_FILE = "paradox_userdata.conf"
 BOT_DATA_FILE = "paradox_botdata.conf"
 
 
-#Initialise
+# Initialise
 
 conf = Conf(CONF_FILE)
-#userdata = UserConf(USER_CONF_FILE)
 botdata = BotData(BOT_DATA_FILE)
 
 TOKEN = conf.get("TOKEN")
@@ -28,11 +25,8 @@ PREFIX = conf.get("PREFIX")
 
 client = discord.Client()
 
+# ----Discord event handling----
 
-
-
-
-#----Discord event handling----
 
 @client.event
 async def on_ready():
@@ -47,8 +41,6 @@ async def on_ready():
     print("Logged into", len(client.servers), "servers")
 
 
-
-#We saw a message!
 @client.event
 async def on_message(message):
     '''
@@ -60,23 +52,22 @@ async def on_message(message):
     PREFIX = custom_prefix if custom_prefix else conf.get("PREFIX")
     if not (message.content.startswith(PREFIX) or\
             (message.content.split(' ')[0].strip('<!@>') == client.user.id)):
-        #Okay, it probably wasn't meant for us, or they can't type
-        #Either way, let's ignore them
+        # Okay, it probably wasn't meant for us, or they can't type
+        # Either way, let's ignore them
         return
     if message.content == (PREFIX):
-        #Some ass just typed the prefix to try and trigger us.
-        #Not even going to try parsing, just quit.
+        # Some ass just typed the prefix to try and trigger us.
+        # Not even going to try parsing, just quit.
         return
     if message.author.bot:
         return
     if int(message.author.id) in conf.getintlist("blacklisted_users"):
         return
 
-    #Okay, we have decided it was meant for us. Let's log it
-    await log("Got the command \n{}\nfrom \"{}\" with id \"{}\" ".format(
-        message.content, message.author, message.author.id)
-        )
-    #Now strip the prefix, we don't need that anymore, and extract command
+    # Okay, we have decided it was meant for us. Let's log it
+    await log("Got the command \n{}\nfrom \"{}\" with id \"{}\""
+              .format(message.content, message.author, message.author.id))
+    # Now strip the prefix, we don't need that anymore, and extract command
     if message.content.startswith(PREFIX):
         cmd_message = message.content[len(PREFIX):]
     else:
@@ -85,6 +76,7 @@ async def on_message(message):
     args = ' '.join(cmd_message.strip().split(' ')[1:])
     await cmd_parser(message, cmd, args)
     return
+
 
 @client.event
 async def on_member_join(member):
@@ -102,7 +94,6 @@ async def on_member_join(member):
     await client.send_message(channel, msg)
 
 
-
 @client.event
 async def on_member_remove(member):
     server = member.server
@@ -118,19 +109,17 @@ async def on_member_remove(member):
     msg = await para_format(client, message, member=member)
     await client.send_message(channel, msg)
 
+
 @client.event
 async def on_server_join(server):
     pass
 
+# ----End Discord event handling----
 
 
+# ----Meta stuff to handle stuff----
 
-#----End Discord event handling----
-
-
-#----Meta stuff to handle stuff----
-
-#The command parser, where we activate the appropriate command
+# The command parser, where we activate the appropriate command
 async def cmd_parser(message, cmd, args):
     '''
     Parses the command and does the right stuff
@@ -138,40 +127,37 @@ async def cmd_parser(message, cmd, args):
         cmd: The extracted command, that's what we want to look at
         args: The arguments given to the command by the user
     '''
-    #For now just have primitive command parsing, see above
+    # For now just have primitive command parsing, see above
     if cmd in primcmds.primCmds:
         try:
-            #Try running the command using the associated function,
-            ##we don't trust this will actually work though.
+            # Try running the command using the associated function,
+            # we don't trust this will actually work though.
             await primcmds.primCmds[cmd][0](message, args, client, conf, botdata)
             return
-        except:
-            #If it didn't work, print the stacktrace, and try to inform the user.
-            #TODO: Log the stacktrace using log()
+        except Exception:
+            # If it didn't work, print the stacktrace, and try to inform the user.
+            # TODO: Log the stacktrace using log()
             traceback.print_exc()
-            #Note something unexpected happened so we may not be able to inform the user.
-            ##Maybe discord broke!
-            ##Or more likely there's a permission error
+            # Note something unexpected happened so we may not be able to inform the user.
+            # Maybe discord broke!
+            # Or more likely there's a permission error
             try:
                 await reply(client, message, "Something went wrong. The error has been logged")
 
-            except:
+            except Exception:
                 await log("Something unexpected happened and I can't print the error. Dying now.")
-            #Either way, we are done here.
+            # Either way, we are done here.
             return
     else:
-        #At this point we have tried all our command types.
-        ##The user probably made a spelling mistake.
+        # At this point we have tried all our command types.
+        # The user probably made a spelling mistake.
         return
 
-#----End Meta stuff----
+# ----End Meta stuff----
+
+# ----Event loops----
+# ----End event loops----
 
 
-
-
-#----Event loops----
-#----End event loops----
-
-
-#----Everything is defined, start the client!----
+# ----Everything is defined, start the client!----
 client.run(conf.get("TOKEN"))
