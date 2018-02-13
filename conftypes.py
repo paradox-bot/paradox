@@ -164,19 +164,24 @@ class userList(_settingType):
         if (action in ['+', 'add']) and (len(params) == 2) and params[1].strip('<!@>').isdigit():
             userid = int(params[1].strip('<!@>'))
             if userid in self.raw:
-                return (3, self.str_already_in_list)
+                (self.error, self.errmsg) = (3, self.str_already_in_list)
+                return self.raw
             else:
                 self.raw.append(userid)
-                return (0, self.str_added_to_list)
+                (self.error, self.errmsg) = (0, self.str_added_to_list)
+                return self.raw
         elif (action in ['-', 'remove']) and (len(params) == 2) and params[1].strip('<!@>').isdigit():
             userid = int(params[1].strip('<!@>'))
             if userid not in self.raw:
-                return (0, self.str_not_in_list)
+                (self.error, self.errmsg) = (0, self.str_not_in_list)
+                return self.raw
             else:
                 self.raw.remove(userid)
-                return (3, self.str_removed_from_list)
+                (self.error, self.errmsg) = (3, self.str_removed_from_list)
+                return self.raw
         else:
-            return (1, "I don't understand your input. Valid input is: " + self.accept)
+            (self.error, self.errmsg) = (1, "I don't understand your input. Valid input is: " + self.accept)
+            return self.raw
 
 
 class userBlackList(userList):
