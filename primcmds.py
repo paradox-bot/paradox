@@ -505,10 +505,10 @@ async def prim_cmd_about(message, cargs, client, conf, botdata):
     devnames = ', '.join([str(discord.utils.get(client.get_all_members(), id = str(devs))) for devs in devs])
 #    await reply(client, message, 'Paradøx was coded in Discord.py by Pue, Retro, and nockia.')
     embed = discord.Embed(title="About Paradøx", color=discord.Colour.red()) \
-        .add_field(name="Info", value="Paradøx is a Discord.py bot coded by {}".format(devnames), inline=True) \
+        .add_field(name="Info", value="Paradøx is a Discord.py bot coded by {}.".format(devnames), inline=True) \
         .add_field(name="Stats", value="(Soon)", inline=True) \
         .add_field(name="Thanks to", value="(Soon)", inline=False) \
-        .set_footer(text="(Links)")
+        .set_footer(text="(Support Server)[https://discord.gg/ECbUu8u]|(Coming soon)|(Coming soon)")
     await client.send_message(message.channel, embed=embed)
 
 
