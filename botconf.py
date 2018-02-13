@@ -28,10 +28,10 @@ class Conf:
             return default
         setting = self.settings[settingName]
 
-        return json.loads('{\'' + settingName + '\':' + setting + '}')[settingName]
+        return json.loads(setting)
 
     def getintlist(self, settingName, default=[]):
-        return json.loads(self.get(settingName, str(default)))
+        return self.get(settingName, str(default))
 
     def getStr(self, settingName, default=""):
         return self.get(settingName, default)

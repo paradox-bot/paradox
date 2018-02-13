@@ -169,11 +169,11 @@ class userList(_settingType):
         elif (action in ['-', 'remove']) and (len(params) == 2) and params[1].strip('<!@>').isdigit():
             userid = int(params[1].strip('<!@>'))
             if userid not in self.raw:
-                (self.error, self.errmsg) = (0, self.str_not_in_list)
+                (self.error, self.errmsg) = (3, self.str_not_in_list)
                 return self.raw
             else:
                 self.raw.remove(userid)
-                (self.error, self.errmsg) = (3, self.str_removed_from_list)
+                (self.error, self.errmsg) = (0, self.str_removed_from_list)
                 return self.raw
         else:
             (self.error, self.errmsg) = (1, "I don't understand your input. Valid input is: `{}`".format(self.accept))
