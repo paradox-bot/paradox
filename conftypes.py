@@ -8,7 +8,7 @@ values:
 """
 import re
 import discord
-import json
+
 
 class _settingType:
     name = ""
@@ -147,7 +147,6 @@ class userList(_settingType):
         """
         Expect raw to be a list, possibly of strings, possible of integers, containing userids.
         """
-        raw = json.loads(str(raw))
         if self.client is None:
             return ', '.join([str(user) for user in raw if str(user).isdigit()])
         users = [str(user) for user in raw]

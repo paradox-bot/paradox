@@ -26,7 +26,7 @@ class Conf:
     def get(self, settingName, default=None):
         if settingName not in self.settings:
             return default
-        return self.settings[settingName]
+        return json.loads(self.settings[settingName])
 
     def getintlist(self, settingName, default=[]):
         return json.loads(self.get(settingName, str(default)))
