@@ -90,7 +90,7 @@ class BOOL(_settingType):
                False: "No"}
 
     def humanise(self, raw):
-        return cls.outputs[raw]
+        return self.outputs[raw]
 
     def understand(self, userstr):
         for pattern in self.inputexps:
@@ -137,13 +137,13 @@ class CHANNEL(_settingType):
         return None
 
 
-class  userList():
+class userList():
     name = "List of users"
     accept = "[+/add | -/remove] <userid/mention>"
-    str_already_in_list = "I have already blacklisted this user!"
-    str_not_in_list = "I haven't blacklisted this user!"
-    str_removed_from_list = "Give them another chance? If you say so. Unblacklisted the user."
-    str_added_to_list = "I call this user a foul wretch and will not deal with them again. Blacklisted the user."
+    str_already_in_list = ""
+    str_not_in_list = ""
+    str_removed_from_list = ""
+    str_added_to_list = ""
 
     def humanise(self, raw):
         """
@@ -173,6 +173,23 @@ class  userList():
                 self.raw.remove(userid)
                 return (3, self.str_removed_from_list)
 
+
+class userBlackList(userList):
+    name = "List of users"
+    accept = "[+/add | -/remove] <userid/mention>"
+    str_already_in_list = "I have already blacklisted this user!"
+    str_not_in_list = "I haven't blacklisted this user!"
+    str_removed_from_list = "Give them another chance? If you say so. Unblacklisted the user."
+    str_added_to_list = "I call this user a foul wretch and will not deal with them again. Blacklisted the user."
+
+
+class userMasterList(userList):
+    name = "List of users"
+    accept = "[+/add | -/remove] <userid/mention>"
+    str_already_in_list = "This user is already one of my masters!"
+    str_not_in_list = "This user is not one of my masters!"
+    str_removed_from_list = "I have rejected this master."
+    str_added_to_list = "I accept this user as a new master."
 
 
 class STR(_settingType):

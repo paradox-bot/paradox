@@ -336,7 +336,7 @@ async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
                 if option == "desc":
                     continue
                 msg += "\t{}: {}\n".format(option, serv_conf[category][option].desc if params[0] == ""
-                                           else (await serv_conf[category][option].read(botdata, message.server)))
+                                           else (await serv_conf[category][option].read(botdata, message.server, message=message, client=client)))
             msg += "\n"
         msg += "```"
         await reply(client, message, msg)
@@ -377,7 +377,7 @@ async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
                         "I can't find this option in the given category! Use `serverconfig` to see all categories and options.")
             return
         if len(params) == 2:
-            msg = "Current setting is:\n{}".format(await serv_conf[params[0]][params[1]].read(botdata, message.server))
+            msg = "Current setting is:\n{}".format(await serv_conf[params[0]][params[1]].read(botdata, message.server, message=message, client=client))
             await reply(client, message, msg)
         else:
             errmsg = await serv_conf[params[0]][params[1]].write(botdata,
