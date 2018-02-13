@@ -128,7 +128,7 @@ async def prim_cmd_setgame(message, cargs, client, conf, botdata):
 async def prim_cmd_masters(message, cargs, client, conf, botdata):
     masters = conf.getintlist("masters")
     # TODO: Make this a human readable list of names
-    masterNames = ', '.join([str(get_member(master)) for master in masters])
+    masterNames = ', '.join([get_member(master) for master in masters])
     params = cargs.split(' ')
     action = params[0]
     if action in ['', 'list']:
