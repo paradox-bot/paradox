@@ -30,9 +30,11 @@ class _settingType:
         self.hr = ""
         self.errmsg = ""
         if userstr is not None:
-            return self.fromUser(userstr)
+            self.fromUser(userstr)
+            return
         elif raw is not None:
-            return self.fromRaw(raw)
+            self.fromRaw(raw)
+            return
 
     def fromRaw(self, raw):
         """
