@@ -28,7 +28,7 @@ class Conf:
             return default
         setting = self.settings[settingName]
 
-        return json.loads('{\'{}\': {}}'.format(settingName,setting))[settingName]
+        return json.loads('{\'' + settingName + '\':' + setting + '}')[settingName]
 
     def getintlist(self, settingName, default=[]):
         return json.loads(self.get(settingName, str(default)))
