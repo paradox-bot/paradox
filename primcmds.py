@@ -502,12 +502,12 @@ async def prim_cmd_echo(message, cargs, client, conf, botdata):
           "Usage: about\n\nSends a message containing information about the bot.")
 async def prim_cmd_about(message, cargs, client, conf, botdata):
 #    await reply(client, message, 'Paradøx was coded in Discord.py by Pue, Retro, and nockia.')
-embed = discord.Embed(title="About Paradøx", color=discord.Colour.red()) \
-    .add_field(name="Info", value="(Soon)", inline=True) \
-    .add_field(name="Stats", value="(Soon)", inline=True) \
-    .add_field(name="Thanks to", value="(Soon)", inline=False) \
-    .set_footer(text="(Links)")
-await client.send_message(message.channel, embed=embed)
+    embed = discord.Embed(title="About Paradøx", color=discord.Colour.red()) \
+        .add_field(name="Info", value="(Soon)", inline=True) \
+        .add_field(name="Stats", value="(Soon)", inline=True) \
+        .add_field(name="Thanks to", value="(Soon)", inline=False) \
+        .set_footer(text="(Links)")
+    await client.send_message(message.channel, embed=embed)
 
 
 @prim_cmd("invite", "general",
