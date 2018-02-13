@@ -7,6 +7,7 @@ values:
     raw
 """
 import re
+import discord
 
 
 class _settingType:
@@ -139,12 +140,38 @@ class CHANNEL(_settingType):
 class  userList():
     name = "List of users"
     accept = "[+/add | -/remove] <userid/mention>"
+    str_already_in_list = "I have already blacklisted this user!"
+    str_not_in_list = "I haven't blacklisted this user!"
+    str_removed_from_list = "Give them another chance? If you say so. Unblacklisted the user."
+    str_added_to_list = "I call this user a foul wretch and will not deal with them again. Blacklisted the user."
 
     def humanise(self, raw):
-        pass
+        """
+        Expect raw to be a list, possibly of strings, possible of integers, containing userids.
+        """
+        if self.client is None:
+            return ', '.join([str(user) for user in raw if user.isdigit()])
+        users = [str(user) for user in raw if user.isdigit()]
+        user_tags = [discord.utils.get(self.client.get_all_members(), id=user) for user in users]
+        return '`' + '`''`, `'.join(user_tags) + '`'
 
     def understand(self, userstr):
-        pass
+        params = userstr.split(' ')
+        action = params[0]
+        if (action in ['+', 'add']) and (len(params) == 2) and params[1].strip('<!@>').isdigit():
+            userid = int(params[1].strip('<!@>'))
+            if userid in self.raw:
+                return (3, self.str_already_in_list)
+            else:
+                self.raw.append(userid)
+                return (0, self.str_added_to_list)
+        elif (action in ['-', 'remove']) and (len(params) == 2) and params[1].strip('<!@>').isdigit():
+            userid = int(params[1].strip('<!@>'))
+            if userid not in self.raw:
+                return (0, self.str_not_in_list)
+            else:
+                self.raw.remove(userid)
+                return (3, self.str_removed_from_list)
 
 
 

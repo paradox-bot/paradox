@@ -30,14 +30,14 @@ class configSetting:
         """
         return botdata.servers.get(server.id, self.name)
 
-    async def read(self, botdata, server):
+    async def read(self, botdata, server, message=None, client=None):
         """
         Gets the value of the setting and returns it in a human readable fashion
         """
         setting = self.get(botdata, server)
         if setting is None:
             setting = self.default
-        return self.ctype(userstr=setting).hr
+        return self.ctype(userstr=setting, client=client, message=message).hr
 
     async def write(self, botdata, server, userstr, message=None, client=None):
         """
@@ -55,4 +55,4 @@ class configSetting:
             errmsg = value.errmsg if value.errmsg else default_errmsg
             return errmsg
         self.set(botdata, server, value.raw)
-        return ""
+        return errmsg
