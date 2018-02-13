@@ -177,7 +177,7 @@ class userList(_settingType):
                 (self.error, self.errmsg) = (3, self.str_removed_from_list)
                 return self.raw
         else:
-            (self.error, self.errmsg) = (1, "I don't understand your input. Valid input is: " + self.accept)
+            (self.error, self.errmsg) = (1, "I don't understand your input. Valid input is: `{}`".format(self.accept))
             return self.raw
 
 

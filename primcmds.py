@@ -133,7 +133,7 @@ async def prim_cmd_masters(message, cargs, client, conf, botdata):
     if action in ['', 'list']:
         await reply(client, message, "My masters are:\n{}".format(masters))
     else:
-        errmsg = await bot_conf["masters"].write(conf, None, ' '.join(params[1:]), message, client, message.server, botdata)
+        errmsg = await bot_conf["masters"].write(conf, None, cargs, message, client, message.server, botdata)
         await reply(client, message, errmsg)
 
 
