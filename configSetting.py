@@ -37,18 +37,17 @@ class _configSetting:
         setting = self.get(data, obj)
         if setting is None:
             setting = self.default
-        print(setting)
         value = self.ctype(raw=setting, client=client, message=message)
         return value.hr
 
-    async def write(self, data, obj, userstr, message=None, client=None, server=None, botdata=None):
+    async def write(self, data, obj, userstr, conf=None, message=None, client=None, server=None, botdata=None):
         """
         Takes a human written string and attempts to decipher it and write it.
         """
         if self.perm_write:
             if (client is None) or (message is None):
                 return "Something went wrong while checking whether you have perms to set this setting!"
-            (errcode, errmsg) = await permFuncs[self.perm_write][0](client, data, message=message)
+            (errcode, errmsg) = await permFuncs[self.perm_write][0](client, data, message=message, conf=conf)
             if errcode != 0:
                 return errmsg
         default_errmsg = "I didn't understand your input or something went wrong!"
@@ -73,10 +72,10 @@ class serverConfigSetting(_configSetting):
         """
         return botdata.servers.get(server.id, self.name)
 
-    async def write(self, data, obj, userstr, message=None, client=None, server=None, botdata=None):
+    async def write(self, data, obj, userstr, message=None, client=None, server=None, botdata=None, conf=None):
         server = obj
         botdata = data
-        return (await super().write(data, obj, userstr, message=message, client=client, server=server, botdata=botdata))
+        return (await super().write(data, obj, userstr, message=message, client=client, server=server, botdata=botdata, conf=conf))
 
 
 class botConfigSetting(_configSetting):
@@ -91,3 +90,7 @@ class botConfigSetting(_configSetting):
         Returns value of setting from botconf, cat is again a placeholder
         """
         return botconf.get(self.name)
+
+    async def write(self, data, obj, userstr, message=None, client=None, server=None, botdata=None, conf=None):
+        conf = data
+        return (await super().write(data, obj, userstr, message=message, client=client, server=server, botdata=botdata, conf=conf))
