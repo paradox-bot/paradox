@@ -29,6 +29,7 @@ class _settingType:
         self.error = 0
         self.hr = ""
         self.errmsg = ""
+        self.raw = raw
         if userstr is not None:
             self.fromUser(userstr)
             return
