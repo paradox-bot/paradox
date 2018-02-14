@@ -319,7 +319,7 @@ async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
             for option in sorted(serv_conf[category]):
                 if option == "desc":
                     continue
-                cat_msg += "​\t`{}`: {}\n".format(option, serv_conf[category][option].desc if params[0] == ""
+                cat_msg += "`​{}{}`:\t {}\n".format(" " * (12 - len(option)), option, serv_conf[category][option].desc if params[0] == ""
                                                  else (await serv_conf[category][option].read(
                                                      botdata, message.server, message=message, client=client)))
             cat_msg += "\n"
