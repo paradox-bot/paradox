@@ -92,14 +92,14 @@ def prim_cmd(cmdName, category, desc="No description", helpDesc="No help has yet
 
 # Bot admin commands
 
-@prim_cmd("shutdown", "admin")
+@prim_cmd("shutdown", "Bot admin")
 @require_perm("Master")
 async def prim_cmd_shutdown(message, cargs, client, conf, botdata):
     await reply(client, message, "Shutting down, cya another day~")
     await client.logout()
 
 
-@prim_cmd("restart", "admin",
+@prim_cmd("restart", "Bot admin",
           "Restart the bot without pulling from git first",
           "Usage: restart\n\nRestarts the bot without pulling from git first")
 @require_perm("Manager")
@@ -107,7 +107,7 @@ async def prim_cmd_restart(message, cargs, client, conf, botdata):
     await reply(client, message, os.system('./Nanny/scripts/redeploy.sh'))
 
 
-@prim_cmd("setgame", "admin",
+@prim_cmd("setgame", "Bot admin",
           "Sets my playing status!",
           "Usage: setgame <status>\
           \n\nSets my playing status to <status>. The following keys may be used:\
@@ -121,7 +121,7 @@ async def prim_cmd_setgame(message, cargs, client, conf, botdata):
     await reply(client, message, "Game changed to: \'{}\'".format(status))
 
 
-@prim_cmd("masters", "admin",
+@prim_cmd("masters", "Bot admin",
           "Modify or check the bot masters",
           "Usage: masters [list] | [+/add | -/remove] <userid/mention>\
           \n\nAdds or removes a bot master by id or mention, or lists all current masters.")
@@ -137,7 +137,7 @@ async def prim_cmd_masters(message, cargs, client, conf, botdata):
         await reply(client, message, errmsg)
 
 
-@prim_cmd("blacklist", "admin",
+@prim_cmd("blacklist", "Bot admin",
           "Modify or check the bot blacklist",
           "Usage: blacklist [list] | [+/add | -/remove] <userid/mention>\
           \n\nAdds or removes a blacklisted user by id or mention, or lists all current blacklisted users.")
@@ -173,7 +173,7 @@ async def prim_cmd_blacklist(message, cargs, client, conf, botdata):
 # TODO: refactor masters to a general list add/check/remove function, add exec config or join commands
 
 
-@prim_cmd("logs", "admin",
+@prim_cmd("logs", "Bot admin",
           "Reads and returns the logs",
           "Usage: logs [number]\n\nSends the logfile or the last <number> lines of the log.")
 @require_perm("Master")
@@ -228,7 +228,7 @@ async def _async(message, cargs, client, conf, botdata):
     return result
 
 
-@prim_cmd("async", "exec",
+@prim_cmd("async", "Bot admin",
           "Executes async code and shows the output",
           "Usage: async <code>\
           \n\nRuns <code> as an asyncronous coroutine and prints the output or error.")
@@ -268,7 +268,7 @@ async def _exec(message, cargs, client, conf, botdata):
     return result
 
 
-@prim_cmd("exec", "exec",
+@prim_cmd("exec", "Bot admin",
           "Executes code and shows the output",
           "Usage: exec <code>\
           \n\nRuns <code> in current environment using exec() and prints the output or error.")
@@ -299,7 +299,7 @@ humanise the default value
 """
 
 
-@prim_cmd("serverconfig", "config",
+@prim_cmd("serverconfig", "Server setup",
           "Server configuration",
           "Usage: serverconfig [<category> <option> [value]] | [help <category> <option>] | [show]\
           \n\nIf no arguments are given, lists the available server configuration options.\
@@ -381,7 +381,7 @@ TODO: Timezone setting type
 """
 
 
-@prim_cmd("set", "user config",
+@prim_cmd("set", "User info",
           "Shows or sets a user setting",
           "Usage: set [settingname [value]] \
           \n\nSets <settingname> to <value>, shows the value of <settingname>, or lists your available settings.\
@@ -414,7 +414,7 @@ async def prim_cmd_set(message, cargs, client, conf, botdata):
 # User info commands
 
 
-@prim_cmd("time", "user info",
+@prim_cmd("time", "User info",
           "Shows the current time for a user",
           "Usage: time [mention | id | partial name]\
           \n\nGives the time for the mentioned user or yourself\
@@ -447,7 +447,7 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
     await reply(client, message, timestr)
 
 
-@prim_cmd("profile", "user info",
+@prim_cmd("profile", "User info",
           "Displays a user profile",
           "Usage: profile [mention]\n\nDisplays the mentioned user's profile, or your own.")
 @require_perm("master")
@@ -471,7 +471,7 @@ async def prim_cmd_profile(message, cargs, client, conf, botdata):
 # General utility commands
 
 
-@prim_cmd("echo", "general",
+@prim_cmd("echo", "General",
           "Sends what you tell me to!",
           "Usage: echo <text>\n\nReplies to the message with <text>")
 async def prim_cmd_echo(message, cargs, client, conf, botdata):
@@ -481,14 +481,14 @@ async def prim_cmd_echo(message, cargs, client, conf, botdata):
         await reply(client, message, cargs)
 
 
-@prim_cmd("about", "general",
+@prim_cmd("about", "General",
           "Provides information about the bot",
           "Usage: about\n\nSends a message containing information about the bot.")
 async def prim_cmd_about(message, cargs, client, conf, botdata):
     await reply(client, message, 'Paradøx was coded in Discord.py by Pue, Retro, and nockia.')
 
 
-@prim_cmd("invite", "general",
+@prim_cmd("invite", "General",
           "Sends the bot's invite link",
           "Usage: invite\
           \n\nSends the link to invite the bot to your server.")
@@ -496,7 +496,7 @@ async def prim_cmd_invite(message, cargs, client, conf, userdata):
     await reply(client, message, 'Here\'s my invite link! \n <https://discordapp.com/api/oauth2/authorize?client_id=401613224694251538&permissions=8&scope=bot>')
 
 
-@prim_cmd("ping", "general",
+@prim_cmd("ping", "General",
           "Checks the bot's latency",
           "Usage: ping\
           \n\nChecks the response delay of the bot. Usually used to test whether the bot is responsive or not.")
@@ -511,7 +511,7 @@ async def prim_cmd_ping(message, cargs, client, conf, botdata):
     await client.edit_message(sentMessage, 'Ping: ' + latency + 'ms')
 
 
-@prim_cmd("support", "general",
+@prim_cmd("support", "General",
           "Sends the link to the bot guild",
           "Usage: support\
           \n\nSends the invite link to the Paradøx support guild.")
@@ -519,18 +519,33 @@ async def prim_cmd_support(message, cargs, client, conf, botdata):
     await reply(client, message, 'Join my server here!\n\n<https://discord.gg/ECbUu8u>')
 
 
-@prim_cmd("help", "general",
+@prim_cmd("help", "General",
           "Provides some detailed help on a command",
           "Usage: help [command name]\
           \n\nShows detailed help on the requested command, or lists all the commands.")
 async def prim_cmd_help(message, cargs, client, conf, botdata):
     msg = ""
+    hidden_cats = ["testing"]
+    sorted_cats = ["General", "User info", "Server setup", "Bot admin", "Misc"]
     if cargs == "":
+        cat_msgs = {}
+        for cmd in sorted(primCmds):
+            cat = primCmds[cmd][1]
+            if cat in hidden_cats:
+                continue
+            if cat not in cat_msgs or not cat_msgs[cat]:
+                cat_msgs[cat] = "```ini\n [ {}: ]\n".format(cat)
+            cat_msgs[cat] += "; {}{}:\t{}\n".format(" " * (12 - len(cmd)), cmd, primCmds[cmd][2])
+        for cat in sorted_cats:
+            cat_msgs[cat] += "```"
+            msg += cat_msgs[cat]
+        """
         msg = "```ini\n [ Available Commands: ]\n"
         for cmd in sorted(primCmds):
             msg += "; {}{}:\t{}\n".format(" " * (12 - len(cmd)), cmd, primCmds[cmd][2])
         msg += "; This bot is a work in progress. If you have any questions, please ask a developer.\n"
         msg += "```"
+        """
     else:
         params = cargs.split(' ')
         for cmd in params:
