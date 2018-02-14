@@ -421,6 +421,8 @@ async def prim_cmd_set(message, cargs, client, conf, botdata):
           \n\nGives the time for the mentioned user or yourself\
           \nRequires the user to have set the usersetting \"timezone\".")
 async def prim_cmd_time(message, cargs, client, conf, botdata):
+    prefix = serv_conf["guild"]["prefix"].get(message.server)
+    prefix = prefix if prefix else bot_conf["prefix"]
     user = message.author.id
     if cargs != "":
         user = cargs.strip('<@!> ')
@@ -433,9 +435,9 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
     tz = botdata.users.get(user, "tz")
     if not tz:
         if user == message.author.id:
-            await reply(client, message, "You haven't set your timezone! Set it using \"~set timezone <timezone>\"!")
+            await reply(client, message, "You haven't set your timezone! Set it using \"{}set timezone <timezone>\"!").format("prefix")
         else:
-            await reply(client, message, "This user hasn't set their timezone. Ask them to set it using \"~set timezone <timezone>\"!")
+            await reply(client, message, "This user hasn't set their timezone. Ask them to set it using \"{}set timezone <timezone>\"!").format("prefix")
         return
     try:
         TZ = timezone(tz)
