@@ -433,14 +433,14 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
     tz = botdata.users.get(user, "tz")
     if not tz:
         if user == message.author.id:
-            await reply(client, message, "You don't have a set timezone! Set it using \"set timezone\"!")
+            await reply(client, message, "You haven't set your timezone! Set it using \"~set timezone <timezone>\"!")
         else:
-            await reply(client, message, "This user doesn't have a set timezone. Ask them to set it using \"set timezone\"!")
+            await reply(client, message, "This user hasn't set their timezone. Ask them to set it using \"`set timezone <timezone>\"!")
         return
     try:
         TZ = timezone(tz)
     except Exception:
-        await reply(client, message, "Didn't understand the timezone, aborting")
+        await reply(client, message, "An invalid timezone was provided. Aborting...")
         return
     timestr = 'The current time for {} is `%-I:%M %p (%Z(%z))` on `%a, %d/%m/%Y`'\
         .format(message.server.get_member(user).display_name)
