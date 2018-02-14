@@ -313,17 +313,18 @@ async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
         """
         Print all config categories, their options, and descriptions or values in a pretty way.
         """
-        msg = "Configuration options:\n```\n"
+        embed = discord.Embed(title="Configuration options:", color=discord.Colour.teal())
         for category in sorted(serv_conf):
-            msg += "{}:\n".format(category)
+            cat_msg = ""
             for option in sorted(serv_conf[category]):
                 if option == "desc":
                     continue
-                msg += "\t{}: {}\n".format(option, serv_conf[category][option].desc if params[0] == ""
-                                           else (await serv_conf[category][option].read(botdata, message.server, message=message, client=client)))
-            msg += "\n"
-        msg += "```"
-        await reply(client, message, msg)
+                cat_msg += "​\t`{}`: {}\n".format(option, serv_conf[category][option].desc if params[0] == ""
+                                                 else (await serv_conf[category][option].read(
+                                                     botdata, message.server, message=message, client=client)))
+            cat_msg += "\n"
+            embed.add_field(name=category, value=cat_msg, inline=False)
+        await client.send_message(message.channel, embed=embed)
         return
     elif params[0] in ["help"]:
         """
