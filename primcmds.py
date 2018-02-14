@@ -400,14 +400,14 @@ async def prim_cmd_set(message, cargs, client, conf, botdata):
             if tz:
                 msg = "Your current timezone is `{}`".format(tz)
             else:
-                msg = "You don't appear to have a set timezone! Do `set timezone <timezone>` to set it!"
+                msg = "You haven't set your timezone! Use `~set timezone <timezone>` to set it!"
             await reply(client, message, msg)
             return
         tz = ' '.join(params[1:])
         try:
             timezone(tz)
         except Exception:
-            await reply(client, message, "I don't understand this timezone, sorry. More timzeone options will be coming soon!")
+            await reply(client, message, "Unfortunately, I don't understand this timezone. More options will be available soon.")
             return
         botdata.users.set(message.author.id, "tz", tz)
         await reply(client, message, "Your timezone has been set to `{}`".format(tz))
