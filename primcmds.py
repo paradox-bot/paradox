@@ -534,7 +534,7 @@ async def prim_cmd_list(message, cargs, client, conf, botdata):
     embed = discord.Embed(title="Paradøx's commands!", color=discord.Colour.teal())
     for cat in sorted_cats:
         embed.add_field(name=cat, value="`{}`".format('`, `'.join(cats[cat])), inline=False)
-    embed.set_footer(text="Use `help` or `help <command>` for more detailed help!")
+    embed.set_footer(text="Use ~help or ~help <command> for more detailed help!")
     await client.send_message(message.channel, embed=embed)
 
 @prim_cmd("help", "General",
