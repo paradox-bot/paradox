@@ -158,15 +158,15 @@ async def prim_cmd_blacklist(message, cargs, client, conf, botdata):
             blist.append(userid)
             conf.set("blacklisted_users", blist)
             await reply(client, message,
-                        "I call this user a foul wretch and will not deal with them again. Blacklisted the user.")
+                        "I never liked them anyway. That user is now blacklisted.")
     elif (action in ['-', 'remove']) and (len(params) == 2) and params[1].strip('<!@>').isdigit():
         userid = int(params[1].strip('<!@>'))
         if userid not in blist:
-            await reply(client, message, "This user isn't on my blacklist!")
+            await reply(client, message, "This user hasn't been blacklisted.")
         else:
             blist.remove(userid)
             conf.set("blacklisted_users", blist)
-            await reply(client, message, "Give them another chance? If you say so. Unblacklisted the user.")
+            await reply(client, message, "Let's hope they stay out of trouble. That user is no longer blacklisted.")
     else:
         await reply(client, message, primCmds["blacklist"][3])
 
