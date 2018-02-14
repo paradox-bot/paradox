@@ -444,7 +444,7 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
         return
     timestr = 'The current time for {} is `%-I:%M %p (%Z(%z))` on `%a, %d/%m/%Y`'\
         .format(message.server.get_member(user).display_name)
-    timestr = iso8601.parse_date(datetime.datetime.now().isoformat()).astimezone(TZ).strftime()
+    timestr = iso8601.parse_date(datetime.datetime.now().isoformat()).astimezone(TZ).strftime(timestr)
     await reply(client, message, timestr)
 
 
