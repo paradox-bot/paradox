@@ -518,6 +518,27 @@ async def prim_cmd_ping(message, cargs, client, conf, botdata):
 async def prim_cmd_support(message, cargs, client, conf, botdata):
     await reply(client, message, 'Join my server here!\n\n<https://discord.gg/ECbUu8u>')
 
+@prim_cmd("list", "General",
+          "Lists all my commands!",
+          "Usage: list\
+          \n\nReplies with an embed containing all my visible commands.")
+async def prim_cmd_list(message, cargs, client, conf, botdata):
+    hidden_cats = ["testing"]
+    sorted_cats = ["General", "User info", "Server setup", "Bot admin", "Misc"]
+    if cargs == "":
+        cats = {}
+        for cmd in sorted(primCmds):
+            cat = primCmds[cmd][1]
+            if cat in hidden_cats:
+                continue
+            if cat not in cats:
+                cats[cat] = []
+            cats[cat].append(cmd)
+    embed = discord.Embed(title="Paradøx's commands!", color=discord.Colour.teal())
+    for cat in sorted_cats:
+        embed.add_field(name=cat, value="`{}`".format('`, `'.join(cats[cat])), inline=False)
+    embed.set_footer(text="Use `help` or `help <command>` for more detailed help!")
+    await client.send_message(message.channel, embed=embed)
 
 @prim_cmd("help", "General",
           "Provides some detailed help on a command",
@@ -546,6 +567,9 @@ async def prim_cmd_help(message, cargs, client, conf, botdata):
         msg += "; This bot is a work in progress. If you have any questions, please ask a developer.\n"
         msg += "```"
         """
+        await client.send_message(message.author, msg)
+        await reply(client, message, "I have messaged you a detailed listing of my commands! Use `list` to obtain a briefer listing.")
+        return
     else:
         params = cargs.split(' ')
         for cmd in params:
