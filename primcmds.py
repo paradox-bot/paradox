@@ -421,8 +421,8 @@ async def prim_cmd_set(message, cargs, client, conf, botdata):
           \n\nGives the time for the mentioned user or yourself\
           \nRequires the user to have set the usersetting \"timezone\".")
 async def prim_cmd_time(message, cargs, client, conf, botdata):
-    prefix = serv_conf["guild"]["prefix"].get(message.server)
-    prefix = prefix if prefix else bot_conf["prefix"]
+    prefix = serv_conf["guild"]["prefix"].get(botdata, message.server)
+    prefix = prefix if prefix else conf.get("prefix")
     user = message.author.id
     if cargs != "":
         user = cargs.strip('<@!> ')

@@ -80,13 +80,13 @@ class serverConfigSetting(_configSetting):
 
 
 class botConfigSetting(_configSetting):
-    def set(self, botconf, cat, value):
+    def set(self, botconf, cat=None, value=""):
         """
         Sets setting in botconf, cat is a placeholder
         """
         botconf.set(self.name, value)
 
-    def get(self, botconf, cat):
+    def get(self, botconf, cat=None):
         """
         Returns value of setting from botconf, cat is again a placeholder
         """
