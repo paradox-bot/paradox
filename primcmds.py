@@ -523,14 +523,11 @@ async def prim_cmd_support(message, cargs, client, conf, botdata):
           "Usage: list\
           \n\nReplies with an embed containing all my visible commands.")
 async def prim_cmd_list(message, cargs, client, conf, botdata):
-    hidden_cats = ["testing"]
-    sorted_cats = ["General", "User info", "Server setup", "Bot admin", "Misc"]
+    sorted_cats = ["General", "Fun stuff", "User info", "Server setup", "Bot admin", "Misc"]
     if cargs == "":
         cats = {}
         for cmd in sorted(primCmds):
             cat = primCmds[cmd][1]
-            if cat in hidden_cats:
-                continue
             if cat not in cats:
                 cats[cat] = []
             cats[cat].append(cmd)
@@ -546,29 +543,19 @@ async def prim_cmd_list(message, cargs, client, conf, botdata):
           \n\nShows detailed help on the requested command, or lists all the commands.")
 async def prim_cmd_help(message, cargs, client, conf, botdata):
     msg = ""
-    hidden_cats = ["testing"]
-    sorted_cats = ["General", "User info", "Server setup", "Bot admin", "Misc"]
+    sorted_cats = ["General", "Fun stuff", "User info", "Server setup", "Bot admin", "Misc"]
     if cargs == "":
         cat_msgs = {}
         for cmd in sorted(primCmds):
             cat = primCmds[cmd][1]
-            if cat in hidden_cats:
-                continue
             if cat not in cat_msgs or not cat_msgs[cat]:
                 cat_msgs[cat] = "```ini\n [ {}: ]\n".format(cat)
             cat_msgs[cat] += "; {}{}:\t{}\n".format(" " * (12 - len(cmd)), cmd, primCmds[cmd][2])
         for cat in sorted_cats:
             cat_msgs[cat] += "```"
             msg += cat_msgs[cat]
-        """
-        msg = "```ini\n [ Available Commands: ]\n"
-        for cmd in sorted(primCmds):
-            msg += "; {}{}:\t{}\n".format(" " * (12 - len(cmd)), cmd, primCmds[cmd][2])
-        msg += "; This bot is a work in progress. If you have any questions, please ask a developer.\n"
-        msg += "```"
-        """
         await client.send_message(message.author, msg)
-        await reply(client, message, "I have messaged you a detailed listing of my commands! Use `list` to obtain a briefer listing.")
+        await reply(client, message, "I have messaged you a detailed listing of my commands! Use `list` to obtain a more succinct listing.")
         return
     else:
         params = cargs.split(' ')
@@ -578,6 +565,19 @@ async def prim_cmd_help(message, cargs, client, conf, botdata):
             else:
                 msg += "I couldn't find a command named `{}`. Please make sure you have spelled the command correctly. \n".format(cmd)
     await reply(client, message, msg)
+
+
+@prim_cmd("binasc", "Fun stuff",
+          "Converts binary to ascii",
+          "Usage: binasc <binary string>")
+async def prim_cmd_binasc(message, cargs, client, conf, botdata):
+    bitstr = cargs.replace(' ', '')
+    if (not bitstr.isdigit()) or (len(bitstr) % 8 != 0):
+        await reply(client, message, "Not a valid binary string!")
+        return
+    bytelist = map(''.join, zip(*[iter(bitstr)] * 8))
+    asciilist = [chr(sum([int(b) << 7 - n for (n, b) in enumerate(byte)])) for byte in bytelist]
+    await reply(client, message, "Output: `{}`".format(''.join(asciilist)))
 
 
 @prim_cmd("testembed", "testing",
