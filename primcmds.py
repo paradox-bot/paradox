@@ -435,9 +435,9 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
     tz = botdata.users.get(user, "tz")
     if not tz:
         if user == message.author.id:
-            await reply(client, message, "You haven't set your timezone! Set it using \"{}set timezone <timezone>\"!").format("prefix")
+            await reply(client, message, "You haven't set your timezone! Set it using \"{}set timezone <timezone>\"!".format(prefix))
         else:
-            await reply(client, message, "This user hasn't set their timezone. Ask them to set it using \"{}set timezone <timezone>\"!").format("prefix")
+            await reply(client, message, "This user hasn't set their timezone. Ask them to set it using \"{}set timezone <timezone>\"!".format(prefix))
         return
     try:
         TZ = timezone(tz)
