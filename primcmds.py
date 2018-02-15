@@ -442,7 +442,7 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
     try:
         TZ = timezone(tz)
     except Exception:
-        await reply(client, message, "An invalid timezone was provided. Aborting...")
+        await reply(client, message, "An invalid timezone was provided in the JSON file. Aborting... \n **Error Code:** `ERR_OBSTRUCTED_JSON`")
         return
     timestr = 'The current time for {} is `%-I:%M %p (%Z(%z))` on `%a, %d/%m/%Y`'\
         .format(message.server.get_member(user).display_name)
