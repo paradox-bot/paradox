@@ -502,8 +502,8 @@ async def prim_cmd_invite(message, cargs, client, conf, userdata):
           "Sends the 'Lenny' copy-paste face.",
           "Usage: lenny\n\nSends the Lenny text face.")
 async def prim_cmd_lenny(message, cargs, client, conf, botdata):
-    await client.delete_message(message, message.channel)
-    await reply(client, message, "( ͡° ͜ʖ ͡°)")
+    await client.delete_message(message)
+    await reply(client, message, '( ͡° ͜ʖ ͡°)')
 
 @prim_cmd("ping", "General",
           "Checks the bot's latency",
