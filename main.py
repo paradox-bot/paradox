@@ -142,7 +142,7 @@ async def cmd_parser(message, cmd, args):
             # Maybe discord broke!
             # Or more likely there's a permission error
             try:
-                await reply(client, message, "Something went wrong. The error has been logged")
+                await reply(client, message, "Something went wrong internally.. The error has been logged and should be fixed soon!")
 
             except Exception:
                 await log("Something unexpected happened and I can't print the error. Dying now.")
