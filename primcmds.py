@@ -499,8 +499,8 @@ async def prim_cmd_invite(message, cargs, client, conf, userdata):
     await reply(client, message, 'Here\'s my invite link! \n <https://discordapp.com/api/oauth2/authorize?client_id=401613224694251538&permissions=8&scope=bot>')
 
 @prim_cmd("lenny", "Fun stuff",
-          "Sends the 'Lenny' copy-paste face.",
-          "Usage: lenny\n\nSends the Lenny text face.")
+          "( ͡° ͜ʖ ͡°)",
+          "Usage: lenny\n\nSends lenny ( ͡° ͜ʖ ͡°)")
 async def prim_cmd_lenny(message, cargs, client, conf, botdata):
     await client.delete_message(message)
     await reply(client, message, '( ͡° ͜ʖ ͡°)')
