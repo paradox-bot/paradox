@@ -78,14 +78,16 @@ class BOOL(_settingType):
     """
     A sort of boolean type, more like a wrapper for a boolean.
     """
-    name = "Yes/No"
-    accept = "Yes/No or True/False"
+    name = ""
+    accept = "Yes/No, True/False, Enabled/Disabled"
     inputexps = {"^yes$": True,
                  "^true$": True,
+                 "^enable[d]$": True,
                  "^no$": False,
-                 "^false$": False}
-    outputs = {True: "Yes",
-               False: "No"}
+                 "^false$": False,
+                 "^disable[d]$": False}
+    outputs = {True: "",
+               False: ""}
 
     def humanise(self, raw):
         return self.outputs[raw]
@@ -97,6 +99,17 @@ class BOOL(_settingType):
         self.errmsg = "I don't understand this value. Acceptable values are: {}".format(self.accept)
         self.error = 1
         return None
+
+class YES_BOOL(BOOL):
+    name = "Yes/No"
+    outputs = {True: "Yes",
+               False: "No"}
+
+
+class ENABLED_BOOL(BOOL):
+    name = "Enabled/Disabled"
+    outputs = {True: "Enabled",
+               False: "Disabled"}
 
 
 class CHANNEL(_settingType):
