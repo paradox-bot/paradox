@@ -56,7 +56,7 @@ serv_conf["guild"]["prefix"] = serverConfigSetting("guild_prefix",
                                              "",
                                              "manage_server",
                                              conftypes.STR,
-                                             "")
+                                             "~")
 """
 serv_conf["general"] = {}
 serv_conf["general"]["prefix"] = serverConfigSetting("prefix", "Custom bot prefix", "manage_server", "manage_server", conftypes.STR, "")

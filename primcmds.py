@@ -239,16 +239,16 @@ async def prim_cmd_async(message, cargs, client, conf, botdata):
         await reply(client, message, output)
     elif error == 2:
         await reply(client, message,
-                    "**Async input:**```py\
-                    \n{}\n```\
-                    \n**Output (error):**```py\
-                    \n{}\n```".format(cargs, output))
+                    "**Async input:**\
+                    \n```py\n{}\n```\
+                    \n**Output (error):** \
+                    \n```py\n{}\n```".format(cargs, output))
     else:
         await reply(client, message,
-                    "**Async input:**```py\
-                    \n{}\n```\
-                    \n**Output:**```py\
-                    \n{}\n```".format(cargs, output))
+                    "**Async input:**\
+                    \n```py\n{}\n```\
+                    \n**Output:**\
+                    \n```py\n{}\n```".format(cargs, output))
 
 
 async def _exec(message, cargs, client, conf, botdata):
@@ -278,15 +278,17 @@ async def prim_cmd_exec(message, cargs, client, conf, botdata):
     if error == 1:
         await reply(client, message, output)
     elif error == 2:
-        await reply(client, message, "**Exec input:**```py\
-                    \n{}\n```\
-                    \n**Output (error):**```py\
-                    \n{}\n```".format(cargs, output))
+        await reply(client, message,
+                    "**Exec input:** \
+                    \n```py\n{}\n```\
+                    \n**Output (error):** \
+                    \n```py\n{}\n```".format(cargs, output))
     else:
-        await reply(client, message, "**Exec input:**```py\
-                    \n{}\n```\
-                    \n**Output:**```py\
-                    \n{}\n```".format(cargs, output))
+        await reply(client, message,
+                    "**Exec input:**\
+                    \n```py\n{}\n```\
+                    \n**Output:**\
+                    \n```py\n{}\n```".format(cargs, output))
 
 # -----End Bot manager commands-----
 

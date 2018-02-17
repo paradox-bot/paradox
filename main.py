@@ -12,7 +12,7 @@ import primcmds
 # Global constants/ environment variables
 
 CONF_FILE = "paradox.conf"
-BOT_DATA_FILE = "paradox_botdata.conf"
+BOT_DATA_FILE = "botdata.db"
 
 
 # Initialise

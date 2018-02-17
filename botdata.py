@@ -3,54 +3,62 @@
     Still a basic implementation using INF files and JSON.
     TODO: Update to using a database (tinysql etc), but keep approximately the same interface.
 '''
-
-import configparser as cfgp
+import sqlite3 as sq
 import json
-import os
 
 class BotData:
-    userSection = 'USERS'
-    serverSection = 'SERVERS'
-    def __init__(self, conffile):
-        self.conffile = conffile
-        if not os.path.isfile(conffile):
-            with open(conffile, 'a+') as configfile:
-                configfile.write('')
-        config = cfgp.ConfigParser()
-        config.read(conffile)
+    userTable = 'Users'
+    serverTable = 'Servers'
+    def __init__(self, dbfile):
+        self.conn = sq.connect(dbfile)
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute('CREATE TABLE {} (userid INTEGER PRIMARY KEY)'.format(self.userTable))
+        except Exception:
+            pass
+        try:
+            cursor.execute('CREATE TABLE {} (serverid INTEGER PRIMARY KEY)'.format(self.serverTable))
+        except Exception:
+            pass
+        self.users = _dbDataManipulator(self.userTable, "userid", self.conn)
+        self.servers = _dbDataManipulator(self.serverTable, "serverid", self.conn)
+    def close(self):
+        self.conn.commit()
+        self.conn.close()
 
-        if self.userSection not in config.sections():
-            config[self.userSection] = {}
-        if self.serverSection not in config.sections():
-            config[self.serverSection] = {}
 
-        self.users = _dataManipulator(config[self.userSection], self)
-        self.servers = _dataManipulator(config[self.serverSection], self)
-        self.config = config
+class _dbDataManipulator:
+    def __init__(self, table, keyname, connection):
+        self.table = table
+        self.keyname = keyname
+        self.conn = connection
 
-    def write(self):
-        with open(self.conffile, 'w') as configfile:
-            self.config.write(configfile)
-
-class _dataManipulator:
-    def __init__(self, dataArray, master):
-        self.data = dataArray
-        self.master = master
-    def get(self, key, prop):
-        if str(key) not in self.data:
-            self.data[str(key)] = '{}'
-        keyData = json.loads(self.data[str(key)])
-        return keyData.get(prop, None)
-    def getintlist(self, key, prop):
-        value = self.get(key, prop)
-        return value if value is not None else []
-    def getStr(self, key, prop):
-        value = self.get(key, prop)
-        return value if value is not None else ""
+    def get(self, key, prop, default = None):
+        curs = self.conn.cursor()
+        try:
+            curs.execute('ALTER TABLE {} ADD {} text'.format(self.table, prop))
+        except Exception:
+            pass
+        curs.execute('SELECT {} FROM {} WHERE {} = ?'.format(prop, self.table, self.keyname), (key,))
+        value = curs.fetchone()
+        return json.loads(value[0]) if (value and value[0]) else default
     def set(self, key, prop, value):
-        if str(key) not in self.data:
-            self.data[str(key)] = "{}"
-        keyData = json.loads(self.data[str(key)])
-        keyData[prop] = value
-        self.data[str(key)] = json.dumps(keyData)
-        self.master.write()
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute('ALTER TABLE {} ADD {} text'.format(self.table, prop))
+        except Exception:
+            pass
+        cursor.execute('SELECT EXISTS(SELECT 1 FROM {} WHERE {} = ?)'.format(self.table, self.keyname), (key,))
+        exists = cursor.fetchone()
+        if not exists[0]:
+            cursor.execute('INSERT INTO {} ({}) VALUES (?)'.format(self.table, self.keyname), (key,))
+
+        cursor.execute('UPDATE {} SET {} = ? WHERE {} = ?'.format(self.table, prop, self.keyname), (json.dumps(value), key))
+        self.conn.commit()
+    def find(self, prop, value, read=False):
+        if read:
+            value = json.dumps(value)
+        curs = self.conn.cursor()
+        curs.execute('SELECT {} FROM {} WHERE {} = ?'.format(self.keyname, self.table, self.prop), (value,))
+        values = curs.fetchall()
+        return [json.loads(value) for value in values]
