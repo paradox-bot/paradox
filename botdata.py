@@ -59,4 +59,4 @@ class _dbDataManipulator:
         curs = self.conn.cursor()
         curs.execute('SELECT {} FROM {} WHERE {} = ?'.format(self.keyname, self.table, prop), (value,))
         values = curs.fetchall()
-        return [json.loads(value[0]) for value in values]
+        return [value[0] for value in values]
