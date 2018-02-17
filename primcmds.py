@@ -300,77 +300,69 @@ TODO: Make the help look nicer, in fact nicen up all the related strings.
 humanise the default value
 """
 
-
-@prim_cmd("serverconfig", "Server setup",
+@prim_cmd("config", "Server setup",
           "Server configuration",
-          "Usage: serverconfig [<category> <option> [value]] | [help <category> <option>] | [show]\
-          \n\nIf no arguments are given, lists the available server configuration options.\
-          \nIf an option is given, shows the value of the option, and sets it given a <value>.\
-          \nserverconfig help <category> <option> shows the description and valid values for that option.\
-          \nserverconfig show shows all the server configuration options and their current values.")
-async def prim_cmd_serverconfig(message, cargs, client, conf, botdata):
+          "Usage: config | config help | config <option> [value]\
+          \n\nLists your current server configuration, shows option help, or sets an option")
+async def prim_cmd_config(message, cargs, client, conf, botdata):
     params = cargs.split(' ')
 
-    if params[0] in ["", "show"]:
+    if (params[0] in ["", "help"]) and len(params) == 1:
         """
         Print all config categories, their options, and descriptions or values in a pretty way.
         """
+        sorted_cats = ["Guild settings", "Join message", "Leave message"]
+        cats = {}
+        for option in sorted(serv_conf):
+            cat = serv_conf[option].cat
+            if cat not in cats:
+                cats[cat] = []
+            if (cat not in sorted_cats) and (cat != "Hidden"):
+                sorted_cats.append(cat)
+            cats[cat].append(option)
         embed = discord.Embed(title="Configuration options:", color=discord.Colour.teal())
-        for category in sorted(serv_conf):
+        for cat in sorted_cats:
             cat_msg = ""
-            for option in sorted(serv_conf[category]):
-                if option == "desc":
-                    continue
-                cat_msg += "`​{}{}`:\t {}\n".format(" " * (12 - len(option)), option, serv_conf[category][option].desc if params[0] == ""
-                                                 else (await serv_conf[category][option].read(
-                                                     botdata, message.server, message=message, client=client)))
+            for option in cats[cat]:
+#                if option == "desc":
+#                    continue
+                if params[0] == "":
+                    option_line = await serv_conf[option].read(botdata,
+                                                               message.server,
+                                                               message=message,
+                                                               client=client)
+                else:
+                    option_line = serv_conf[option].desc
+                cat_msg += "`​{}{}`:\t {}\n".format(" " * (12 - len(option)), option, option_line)
             cat_msg += "\n"
-            embed.add_field(name=category, value=cat_msg, inline=False)
+            embed.add_field(name=cat, value=cat_msg, inline=False)
         await client.send_message(message.channel, embed=embed)
         return
-    elif params[0] in ["help"]:
+    elif (params[0] == "help") and len(params) > 1:
         """
         Prints the description and possible values for the given option.
         """
-        if len(params) < 3:
-            await reply(client, message,
-                        "What option do you want help with? Usage: serverconfig help <category> <option>")
-            return
         if params[1] not in serv_conf:
-            await reply(client, message,
-                        "I don't know this category! Use `serverconfig` to see all categories and options.")
+            await reply(client, message, "Unrecognised option! See `serverconfig help` for all options.")
             return
-        if params[2] not in serv_conf[params[1]] or params[2] == "desc":
-            await reply(client, message,
-                        "I can't find this option in the given category! Use `serverconfig` to see all categories and options.")
-            return
-        cat = params[1]
-        op = params[2]
-        op_conf = serv_conf[cat][op]
+        op = params[1]
+        op_conf = serv_conf[op]
         msg = "Option help: ```\n{}.\nAcceptable input: {}.\nDefault value: {}```"\
             .format(op_conf.desc, op_conf.ctype.accept, op_conf.default)
         await reply(client, message, msg)
     else:
-        if len(params) < 2:
-            await reply(client, message,
-                        "What option do you want to see? See `help serverconfig` for usage.")
-            return
         if params[0] not in serv_conf:
-            await reply(client, message,
-                        "I don't know this category! Use `serverconfig` to see all categories and options.")
+            await reply(client, message, "Unrecognised option! See `serverconfig help` for all options.")
             return
-        if params[1] not in serv_conf[params[0]] or params[1] == "desc":
-            await reply(client, message,
-                        "I can't find this option in the given category! Use `serverconfig` to see all categories and options.")
-            return
-        if len(params) == 2:
-            msg = "Current setting is:\n{}".format(await serv_conf[params[0]][params[1]].read(botdata, message.server, message=message, client=client))
+        if len(params) == 1:
+            op = params[0]
+            op_conf = serv_conf[op]
+            msg = "Option help: ```\n{}.\nAcceptable input: {}.\nDefault value: {}```"\
+                .format(op_conf.desc, op_conf.ctype.accept, op_conf.default)
+            msg += "Currently set to: {}".format(await op_conf.read(botdata, message.server, message=message, client=client))
             await reply(client, message, msg)
         else:
-            errmsg = await serv_conf[params[0]][params[1]].write(botdata,
-                                                                 message.server,
-                                                                 ' '.join(params[2:]),
-                                                                 message, client)
+            errmsg = await serv_conf[params[0]].write(botdata, message.server, ' '.join(params[1:]), message, client)
             if errmsg:
                 await reply(client, message, errmsg)
             else:
@@ -423,7 +415,7 @@ async def prim_cmd_set(message, cargs, client, conf, botdata):
           \n\nGives the time for the mentioned user or yourself\
           \nRequires the user to have set the usersetting \"timezone\".")
 async def prim_cmd_time(message, cargs, client, conf, botdata):
-    prefix = serv_conf["guild"]["prefix"].get(botdata, message.server)
+    prefix = serv_conf["prefix"].get(botdata, message.server)
     prefix = prefix if prefix else conf.get("prefix")
     user = message.author.id
     if cargs != "":

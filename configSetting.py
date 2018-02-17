@@ -61,6 +61,9 @@ class _configSetting:
 
 
 class serverConfigSetting(_configSetting):
+    def __init__(self, name, category, desc, perm_view, perm_write, ctype, default):
+        super().__init__(name, desc, perm_view, perm_write, ctype, default)
+        self.cat = category
     def set(self, botdata, server, value):
         """
         Sets setting in botdata
