@@ -490,7 +490,7 @@ async def prim_cmd_echo(message, cargs, client, conf, botdata):
 async def prim_cmd_about(message, cargs, client, conf, botdata):
     await reply(client, message, 'Paradøx was coded in Discord.py by Pue, Retro, and nockia.')
 
-    @prim_cmd("discrim", "Utility",
+    @prim_cmd("discrim", "General",
               "Searches for users with a given discrim",
               "Usage: discrim [discriminator]\n\nSearches all guilds the bot is in for a user with the given discriminator.")
     async def prim_cmd_discrim(message, cargs, client, conf, botdata):
@@ -527,7 +527,7 @@ async def prim_cmd_ping(message, cargs, client, conf, botdata):
     latency = str(latency)
     await client.edit_message(sentMessage, 'Ping: ' + latency + 'ms')
 
-@prim_cmd("userinfo", "Utility",
+@prim_cmd("userinfo", "General",
           "Shows the user's information",
           "Usage: userinfo (mention)\n\nSends information on the mentioned user, or yourself if no one is provided.")
 async def prim_cmd_userinfo(message, cargs, client, conf, botdata):
