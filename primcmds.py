@@ -304,7 +304,7 @@ humanise the default value
           "Server configuration",
           "Usage: config | config help | config <option> [value]\
           \n\nLists your current server configuration, shows option help, or sets an option\
-          \nFor example, \"config join_msg Welcome to the server!\" will set your join message.")
+          \nFor example, \"config join_ch #general\" could be used to set your join message channel.")
 async def prim_cmd_config(message, cargs, client, conf, botdata):
     params = cargs.split(' ')
 
