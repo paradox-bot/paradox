@@ -523,9 +523,9 @@ async def prim_cmd_ping(message, cargs, client, conf, botdata):
           "Shows the user's information",
           "Usage: userinfo (mention)\n\nSends information on the mentioned user, or yourself if no one is provided.")
 async def prim_cmd_userinfo(message, cargs, client, conf, botdata):
- embed = discord.Embed(type="rich", color=discord.Colour.teal(), url=message.author.avatar_url) \
+ embed = discord.Embed(type="rich", color=discord.Colour.teal()) \
      .set_author(name="{} ({})".format(message.author, message.author.id),
-                 icon_url=message.author.avatar_url) \
+                 icon_url=message.author.avatar_url, url=message.author_avatar_url) \
      .add_field(name="Full name",
                 value="{}".format(message.author), inline=False) \
      .add_field(name="Status",
