@@ -82,10 +82,10 @@ class BOOL(_settingType):
     accept = "Yes/No, True/False, Enabled/Disabled"
     inputexps = {"^yes$": True,
                  "^true$": True,
-                 "^enable[d]$": True,
+                 "^enabled?$": True,
                  "^no$": False,
                  "^false$": False,
-                 "^disable[d]$": False}
+                 "^disabled?$": False}
     outputs = {True: "",
                False: ""}
 
