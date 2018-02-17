@@ -490,6 +490,14 @@ async def prim_cmd_echo(message, cargs, client, conf, botdata):
 async def prim_cmd_about(message, cargs, client, conf, botdata):
     await reply(client, message, 'Paradøx was coded in Discord.py by Pue, Retro, and nockia.')
 
+    @prim_cmd("discrim", "Utility",
+              "Searches for users with a given discrim",
+              "Usage: discrim [discriminator]\n\nSearches all guilds the bot is in for a user with the given discriminator.")
+    async def prim_cmd_discrim(message, cargs, client, conf, botdata):
+     p = client.get_all_members()
+     found_members = filter(lambda m: m.discriminator==cargs, p)
+     print("{}".format([m.name for m in set(found_members)]))
+
 
 @prim_cmd("invite", "General",
           "Sends the bot's invite link",
