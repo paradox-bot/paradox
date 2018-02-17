@@ -34,7 +34,10 @@ async def tail(filename, n):
 
 
 async def reply(client, message, content):
-    await client.send_message(message.channel, content)
+    if content == "":
+        await client.send_message(message.channel, "Attempted to send an empty message!")
+    else:
+        await client.send_message(message.channel, content)
 
 
 async def para_format(client, string, message=None, server=None, member=None, user=None):
