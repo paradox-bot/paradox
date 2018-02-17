@@ -528,16 +528,18 @@ async def prim_cmd_userinfo(message, cargs, client, conf, botdata):
                  icon_url=message.author.avatar_url) \
      .add_field(name="Full name",
                 value="{}".format(message.author), inline=True) \
-      .add_field(name="Status",
-                 value="WIP", inline=True) \
+     .add_field(name="Status",
+                value="{}".format(message.author.status), inline=True) \
      .add_field(name="Nickname",
-                value="WIP", inline=True) \
-     .add_field(name="Roles",
-                value="WIP", inline=True) \
-     .add_field(name="Joined guild at",
-                value="WIP", inline=True) \
+                value="{}".format(message.author.display_name), inline=True) \
+     .add_field(name="Shared servers",
+                value="{}".format(len(list(filter(lambda m: m.id == message.author.id, client.get_all_members())))), inline=True) \
+     .add_field(name="Joined at",
+                value="{}".format(message.author.joined_at), inline=True) \
      .add_field(name="Created at",
-                value="{}".format(message.author.created_at), inline=False)
+                value="{}".format(message.author.created_at), inline=False) \
+     .add_field(name="Roles",
+                value="{}".format([r.name for r in message.author.roles]), inline=True)
  await client.send_message(message.channel, embed=embed)
 
 @prim_cmd("support", "General",
