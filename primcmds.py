@@ -495,10 +495,13 @@ async def prim_cmd_about(message, cargs, client, conf, botdata):
               "Usage: discrim [discriminator]\n\nSearches all guilds the bot is in for a user with the given discriminator.")
 async def prim_cmd_discrim(message, cargs, client, conf, botdata):
      p = client.get_all_members()
-     found_members = set(filter(lambda m: m.discriminator==cargs, p))
-     user_info = [ (m, m.id) for m in found_members]
+     found_members = set(filter(lambda m: m.discriminator.endswith(cargs), p))
+     if len(found_members) == 0:
+         await reply(client, message, "No users with this discrim found!")
+         return
+     user_info = [ (str(m), "()".format(m.id)) for m in found_members]
      max_len = len(max(list(zip(*user_info))[0],key=len))
-     user_strs = [ "{0[0]!s:^{max_len}} ({0[1]:^25})".format(user, max_len = max_len) for user in user_info]
+     user_strs = [ "{0[0]:^{max_len}} {0[1]:^25})".format(user, max_len = max_len) for user in user_info]
      await reply(client, message, "```asciidoc\n= Users found =\n{}\n```".format('\n'.join(user_strs)))
 
 
