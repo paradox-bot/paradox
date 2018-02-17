@@ -539,7 +539,7 @@ async def prim_cmd_userinfo(message, cargs, client, conf, botdata):
      .add_field(name="Created at",
                 value="{}".format(message.author.created_at), inline=False) \
      .add_field(name="Roles",
-                value="{}".format([r.name for r in message.author.roles]), inline=True)
+                value="{}".format('`'+ '`, `'.join([r.name for r in message.author.roles]) + '`'), inline=True)
  await client.send_message(message.channel, embed=embed)
 
 @prim_cmd("support", "General",
