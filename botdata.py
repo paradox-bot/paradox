@@ -1,7 +1,5 @@
 '''
-    BotData class, supersceding the old UserConf class.
-    Still a basic implementation using INF files and JSON.
-    TODO: Update to using a database (tinysql etc), but keep approximately the same interface.
+    Class which stores all required botdata in an sqllite database
 '''
 import sqlite3 as sq
 import json
@@ -59,6 +57,6 @@ class _dbDataManipulator:
         if read:
             value = json.dumps(value)
         curs = self.conn.cursor()
-        curs.execute('SELECT {} FROM {} WHERE {} = ?'.format(self.keyname, self.table, self.prop), (value,))
+        curs.execute('SELECT {} FROM {} WHERE {} = ?'.format(self.keyname, self.table, prop), (value,))
         values = curs.fetchall()
         return [json.loads(value) for value in values]
