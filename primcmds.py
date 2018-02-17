@@ -303,7 +303,8 @@ humanise the default value
 @prim_cmd("config", "Server setup",
           "Server configuration",
           "Usage: config | config help | config <option> [value]\
-          \n\nLists your current server configuration, shows option help, or sets an option")
+          \n\nLists your current server configuration, shows option help, or sets an option\
+          \nFor example, \"config join_msg Welcome to the server!\" will set your join message.")
 async def prim_cmd_config(message, cargs, client, conf, botdata):
     params = cargs.split(' ')
 
@@ -336,6 +337,7 @@ async def prim_cmd_config(message, cargs, client, conf, botdata):
                 cat_msg += "`​{}{}`:\t {}\n".format(" " * (12 - len(option)), option, option_line)
             cat_msg += "\n"
             embed.add_field(name=cat, value=cat_msg, inline=False)
+        embed.set_footer(text="Use config <option> [value] to see or set an option.")
         await client.send_message(message.channel, embed=embed)
         return
     elif (params[0] == "help") and len(params) > 1:
