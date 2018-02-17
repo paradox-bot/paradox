@@ -496,7 +496,8 @@ async def prim_cmd_about(message, cargs, client, conf, botdata):
 async def prim_cmd_discrim(message, cargs, client, conf, botdata):
      p = client.get_all_members()
      found_members = filter(lambda m: m.discriminator==cargs, p)
-     await reply(client, message, "{}".format([m.name for m in set(found_members)]))
+     name_list = [m.name for m in set(found_members)]
+     await reply(client, message, ', '.join(name_list))
 
 
 @prim_cmd("invite", "General",
