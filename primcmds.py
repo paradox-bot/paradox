@@ -519,6 +519,26 @@ async def prim_cmd_ping(message, cargs, client, conf, botdata):
     latency = str(latency)
     await client.edit_message(sentMessage, 'Ping: ' + latency + 'ms')
 
+@prim_cmd("userinfo", "Utility",
+          "Shows the user's information",
+          "Usage: userinfo (mention)\n\nSends information on the mentioned user, or yourself if no one is provided.")
+async def prim_cmd_userinfo(message, cargs, client, conf, botdata):
+ embed = discord.Embed(type="rich", color=discord.Colour.teal()) \
+     .set_author(name="{} ({})".format(message.author, message.author.id),
+                 icon_url=message.author.avatar_url) \
+     .add_field(name="Full name",
+                value="{}".format(message.author), inline=True) \
+      .add_field(name="Status",
+                 value="WIP", inline=True) \
+     .add_field(name="Nickname",
+                value="WIP", inline=True) \
+     .add_field(name="Roles",
+                value="WIP", inline=True) \
+     .add_field(name="Joined guild at",
+                value="WIP", inline=True) \
+     .add_field(name="Created at",
+                value="{}".format(message.author.created_at), inline=False)
+ await client.send_message(message.channel, embed=embed)
 
 @prim_cmd("support", "General",
           "Sends the link to the bot guild",
