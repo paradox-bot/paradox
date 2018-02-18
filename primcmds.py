@@ -15,7 +15,7 @@ import datetime
 from pytz import timezone
 import iso8601
 
-from parautils import para_format, reply, log, LOGFILE, tail
+from parautils import para_format, reply, log, LOGFILE, tail, find_user, strfdelta
 from serverconfig import serv_conf
 from botconfig import bot_conf
 from paraperms import permFuncs
@@ -532,26 +532,38 @@ async def prim_cmd_ping(message, cargs, client, conf, botdata):
 @prim_cmd("userinfo", "General",
           "Shows the user's information",
           "Usage: userinfo (mention)\n\nSends information on the mentioned user, or yourself if no one is provided.")
+@require_perm("in server")
 async def prim_cmd_userinfo(message, cargs, client, conf, botdata):
- embed = discord.Embed(type="rich", color=message.author.colour) \
-     .set_author(name="{} ({})".format(message.author.display_name, message.author.id),
-                 icon_url=message.author.avatar_url, url=message.author.avatar_url) \
-     .set_thumbnail(url=message.author.avatar_url) \
-     .add_field(name="Full name",
-                value="{}".format(message.author), inline=False) \
-     .add_field(name="Status",
-                value="{}".format(message.author.status), inline=False) \
-     .add_field(name="Nickname",
-                value="{}".format(message.author.display_name), inline=False) \
-     .add_field(name="Shared servers",
-                value="{}".format(len(list(filter(lambda m: m.id == message.author.id, client.get_all_members())))), inline=False) \
-     .add_field(name="Joined at",
-                value="{}".format(message.author.joined_at), inline=False) \
-     .add_field(name="Created at",
-                value="{}".format(message.author.created_at), inline=False) \
-     .add_field(name="Roles",
-                value="{}".format('`'+ '`, `'.join([r.name for r in message.author.roles]) + '`'), inline=False)
- await client.send_message(message.channel, embed=embed)
+    user = await find_user(client, cargs, message.server, in_server=True)
+    user = user if user else message.author
+
+    embed = discord.Embed(type="rich", color=(user.colour if user.colour.value else discord.Colour.light_grey()))
+    embed.set_author(name="{user.name} ({user.id})".format(user=user), icon_url=user.avatar_url, url=user.avatar_url)
+    embed.set_thumbnail(url=user.avatar_url)
+    embed.add_field(name="Full name", value=str(user), inline=False)
+
+    game = "Playing {}".format(user.game if user.game else "nothing")
+    statusdict = {"offline": "Offline/Invisible",
+                  "dnd": "Do Not Disturb",
+                  "online": "Online",
+                  "idle": "Idle/Away"}
+    embed.add_field(name="Status", value="{}, {}".format(statusdict[str(user.status)], game), inline=False)
+
+    embed.add_field(name="Nickname", value=str(user.display_name), inline=False)
+
+    shared = len(list(filter(lambda m: m.id == user.id, client.get_all_members())))
+    embed.add_field(name="Shared servers", value=str(shared), inline=False)
+
+    joined_ago = strfdelta(datetime.datetime.utcnow()-user.joined_at)
+    joined = user.joined_at.strftime("%-I:%M %p, %d/%m/%Y")
+    created_ago = strfdelta(datetime.datetime.utcnow()-user.created_at)
+    created = user.created_at.strftime("%-I:%M %p, %d/%m/%Y")
+    embed.add_field(name="Joined at", value="{} ({} ago)".format(joined, joined_ago), inline=False)
+    embed.add_field(name="Created at", value="{} ({} ago)".format(created, created_ago), inline=False)
+
+    roles = [r.name for r in user.roles if r.name != "@everyone"]
+    embed.add_field(name="Roles", value=('`'+ '`, `'.join(roles) + '`'), inline=False)
+    await client.send_message(message.channel, embed=embed)
 
 @prim_cmd("support", "General",
           "Sends the link to the bot guild",
