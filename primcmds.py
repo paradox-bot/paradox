@@ -431,20 +431,45 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
           "Usage: profile [mention]\n\nDisplays the mentioned user's profile, or your own.")
 @require_perm("master")
 async def prim_cmd_profile(message, cargs, client, conf, botdata):
-    rep = botdata.users.get(message.author.id, "rep")
-    embed = discord.Embed(type="rich", color=discord.Colour.teal()) \
-        .set_author(name="{} ({})".format(message.author, message.author.id),
-                    icon_url=message.author.avatar_url) \
-        .add_field(name="Level",
-                   value="()", inline=True) \
+    if cargs != "":
+        user = await find_user(client, cargs, message.server, in_server=True)
+        if user is None:
+            await reply(client, message, "Could not find this user in the server!")
+            return
+    else:
+        user = message.author
+    badge_dict = {"master": "botowner",
+                  "manager": "botmanager"}
+    badges = ""
+    for badge in badge_dict:
+        (code, msg)= await permFuncs[badge][0](client, botdata, user=user, conf=conf)
+        if code == 0:
+            badge_emoj = discord.utils.get(client.get_all_emojis(), name=badge_dict[badge])
+            if badge_emoj is not None:
+                badges += str(badge_emoj) + " "
+
+    created_ago = strfdelta(datetime.datetime.utcnow()-user.created_at)
+    created = user.created_at.strftime("%-I:%M %p, %d/%m/%Y")
+    rep = botdata.users.get(user.id, "rep")
+    embed = discord.Embed(type="rich", color=user.colour) \
+        .set_author(name="{user} ({user.id})".format(user=user),
+                    icon_url=user.avatar_url)
+    if badges:
+        embed.add_field(name="Badges", value=badges, inline=False)
+
+    embed.add_field(name="Level",
+                   value="(Coming Soon!)", inline=True) \
         .add_field(name="XP",
-                   value="()", inline=True) \
-        .add_field(name="Rep",
+                   value="(Coming Soon!)", inline=True) \
+        .add_field(name="Reputation",
                    value=rep, inline=True) \
         .add_field(name="Premium",
-                   value="Yes/No", inline=True) \
-        .add_field(name="Created at",
-                   value="{}".format(message.author.created_at), inline=False)
+                   value="No", inline=True)
+    tz = botdata.users.get(user.id, "tz")
+    if tz:
+        embed.add_field(name="Timezone", value=tz, inline=False)
+    embed.add_field(name="Created at",
+                   value="{} ({} ago)".format(created, created_ago), inline=False)
     await client.send_message(message.channel, embed=embed)
 
 
