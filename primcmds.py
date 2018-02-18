@@ -10,6 +10,7 @@ import shutil
 import sys
 import traceback
 from io import StringIO
+import aiohttp
 
 import datetime
 from pytz import timezone
@@ -668,6 +669,31 @@ async def prim_cmd_binasc(message, cargs, client, conf, botdata):
     asciilist = [chr(sum([int(b) << 7 - n for (n, b) in enumerate(byte)])) for byte in bytelist]
     await reply(client, message, "Output: `{}`".format(''.join(asciilist)))
 
+
+@prim_cmd("cat", "Fun stuff",
+          "Sends a random cat image",
+          "Usage cat\
+          \n\nReplies with a random cat image!")
+async def prim_cmd_cat(message, cargs, client, conf, botdata):
+    async with aiohttp.get('http://random.cat/meow') as r:
+        if r.status == 200:
+            js = await r.json()
+            embed = discord.Embed(title="Meow!", color=discord.Colour.light_grey())
+            embed.set_image(url=js['file'])
+            await client.send_message(message.channel, embed=embed)
+
+
+@prim_cmd("dog", "Fun stuff",
+          "Sends a random dog image",
+          "Usage dog\
+          \n\nReplies with a random dog image!")
+async def prim_cmd_dog(message, cargs, client, conf, botdata):
+    async with aiohttp.get('http://random.dog/woof') as r:
+        if r.status == 200:
+            dog = await r.text()
+            embed = discord.Embed(title="Woof!", color=discord.Colour.light_grey())
+            embed.set_image(url="https://random.dog/"+dog)
+            await client.send_message(message.channel, embed=embed)
 
 @prim_cmd("testembed", "testing",
           "Sends a test embed.",
