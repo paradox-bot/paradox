@@ -50,7 +50,7 @@ def require_perm(permName):
                 await log("Permission failure running command in message \
                           \n{}\nFrom user \n{}\
                           \nRequired permission \"{}\" which returned error code \"{}\""
-                          .format(message.contentm, message.author.id, permName, error))
+                          .format(message.content, message.author.id, permName, error))
             return
         return permed_func
     return perm_decorator
