@@ -467,7 +467,14 @@ async def prim_cmd_profile(message, cargs, client, conf, botdata):
                    value="No", inline=True)
     tz = botdata.users.get(user.id, "tz")
     if tz:
-        embed.add_field(name="Timezone", value=tz, inline=False)
+        try:
+            TZ = timezone(tz)
+        except Exception:
+            await reply(client, message, "An invalid timezone was provided in the database. Aborting... \n **Error Code:** `ERR_CORRUPTED_DB`")
+            return
+        timestr = '`%-I:%M %p (%Z(%z))` on `%a, %d/%m/%Y`'
+        timestr = iso8601.parse_date(datetime.datetime.now().isoformat()).astimezone(TZ).strftime(timestr)
+        embed.add_field(name="Timezone", value="{} ({})".format(tz, timestr), inline=False)
     embed.add_field(name="Created at",
                    value="{} ({} ago)".format(created, created_ago), inline=False)
     await client.send_message(message.channel, embed=embed)
