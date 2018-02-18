@@ -530,7 +530,7 @@ async def prim_cmd_rep(message, cargs, client, conf, botdata):
         if given_rep is not None and last_rep is not None:
             last_rep_time = datetime.datetime.fromtimestamp(int(last_rep))
             given_ago = strfdelta(now - last_rep_time)
-            given_msg = "You have given {} reputation! You last gave reputation {} ago.".format(given_rep, given_ago)
+            given_msg = "You have given {} reputation points! You last gave a reputation point {} ago.".format(given_rep, given_ago)
             reptime = datetime.timedelta(days = 1) - (now - last_rep_time)
             if reptime.seconds > 0:
                 rep_time_msg = "You may give reputation in {}.".format(strfdelta(reptime, sec = True))
@@ -542,11 +542,16 @@ async def prim_cmd_rep(message, cargs, client, conf, botdata):
         if not user:
             await reply(client, message, "I couldn't find that user in this server sorry.")
             return
+        if user == client.user:
+            await reply(client, message, "Aww thanks!")
+        elif user.bot:
+            await reply(client, message, "Bots don't need reputation points!")
+            return
         if last_rep is not None:
             last_rep_time = datetime.datetime.fromtimestamp(int(last_rep))
             reptime = datetime.timedelta(days = 1) - (now - last_rep_time)
             if reptime.seconds > 0:
-                msg = "Cool down! You may give reputation in {}".format(strfdelta(reptime, sec = True))
+                msg = "Cool down! You may give reputation in {}.".format(strfdelta(reptime, sec = True))
                 await reply(client, message, msg)
                 return
         rep = botdata.users.get(user.id, "rep")
