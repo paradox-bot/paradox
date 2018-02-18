@@ -572,11 +572,12 @@ async def prim_cmd_ping(message, cargs, client, conf, botdata):
 async def prim_cmd_userinfo(message, cargs, client, conf, botdata):
     user = await find_user(client, cargs, message.server, in_server=True)
     user = user if user else message.author
+    bot_emoji = discord.utils.get(client.get_all_emojis(), name='para-bot')
 
     embed = discord.Embed(type="rich", color=(user.colour if user.colour.value else discord.Colour.light_grey()))
     embed.set_author(name="{user.name} ({user.id})".format(user=user), icon_url=user.avatar_url, url=user.avatar_url)
     embed.set_thumbnail(url=user.avatar_url)
-    embed.add_field(name="Full name", value=(":robot:  " if user.bot else "")+str(user), inline=False)
+    embed.add_field(name="Full name", value=(bot_emoji if user.bot else "")+str(user), inline=False)
 
     game = "Playing {}".format(user.game if user.game else "nothing")
     statusdict = {"offline": "Offline/Invisible",
