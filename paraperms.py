@@ -4,9 +4,8 @@
 
 import asyncio
 
-#Define permission dictionary
+# Define permission dictionary
 permFuncs = {}
-
 
 
 def perm_func(permName):
@@ -16,13 +15,12 @@ def perm_func(permName):
     return decorator
 
 
-#------PERMISSION FUNCTIONS------
+# ------PERMISSION FUNCTIONS------
 
 @perm_func("Master")
-async def perm_master(client, botdata, conf = None, message = None, user = None, server = None):
+async def perm_master(client, botdata, conf=None, message=None, user=None, server=None):
     if message is not None:
         user = message.author
-        server = message.server
     if user is not None:
         userid = user.id
     if (user is None) or (conf is None):
@@ -32,17 +30,18 @@ async def perm_master(client, botdata, conf = None, message = None, user = None,
         return (1, msg)
     return (0, "")
 
+
 @perm_func("Exec")
-async def perm_exec(client, botdata, conf = None, message = None, user = None, server = None):
+async def perm_exec(client, botdata, conf=None, message=None, user=None, server=None):
     if message is not None:
         user = message.author
         server = message.server
     if user is not None:
         userid = user.id
     if (user is None) or (conf is None):
-        return(2, "Something went wrong inside me!")
+        return(2, "An internal error occurred.")
 
-    (mastererror, msg) = await permFuncs["master"][0](client, botdata, conf, message, user,server)
+    (mastererror, msg) = await permFuncs["master"][0](client, botdata, conf, message, user, server)
     if mastererror == 0:
         return (mastererror, msg)
     if int(userid) not in conf.getintlist("execWhiteList"):
@@ -50,15 +49,16 @@ async def perm_exec(client, botdata, conf = None, message = None, user = None, s
         return (1, msg)
     return (0, "")
 
+
 @perm_func("Manager")
-async def perm_manager(client, botdata, conf = None, message = None, user = None, server = None):
+async def perm_manager(client, botdata, conf=None, message=None, user=None, server=None):
     if message is not None:
         user = message.author
         server = message.server
     if user is not None:
         userid = user.id
     if (user is None) or (conf is None):
-        return(2, "Something went wrong inside me!")
+        return(2, "An internal error occurred.")
 
     (execerror, msg) = await permFuncs["exec"][0](client, botdata, conf, message, user, server)
     if execerror == 0:
@@ -71,18 +71,23 @@ async def perm_manager(client, botdata, conf = None, message = None, user = None
 """
 TODO: check whether server_permissions accounts for server owner
 """
+
+@perm_func("in server")
+async def perm_in_server(client, botdata, conf=None, message=None, user=None, server=None):
+    if (message is None):
+        return(2, "An internal error occurred.")
+    if not message.server:
+        return(1, "This can only be used in a server!")
+    return(0, "")
+
 @perm_func("manage_server")
-async def perm_manage_server(client, botdata, conf = None, message = None, user = None, server = None):
+async def perm_manage_server(client, botdata, conf=None, message=None, user=None, server=None):
     if message is not None:
         user = message.author
         server = message.server
-    if user is not None:
-        userid = user.id
     if (user is None) or (server is None):
-        return (2, "Something went wrong inside me!")
+        return (2, "An internal error occurred.")
     if not (user.server_permissions.manage_server or user.server_permissions.administrator):
         return (1, "You lack the `Manage Server` permission on this server!")
     return (0, "")
-#----End permission functions----
-
-
+# ----End permission functions----
