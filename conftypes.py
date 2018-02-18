@@ -197,9 +197,9 @@ class userBlackList(userList):
     name = "List of users"
     accept = "[+/add | -/remove] <userid/mention>"
     str_already_in_list = "I have already blacklisted this user!"
-    str_not_in_list = "I haven't blacklisted this user!"
-    str_removed_from_list = "Give them another chance? If you say so. Unblacklisted the user."
-    str_added_to_list = "I call this user a foul wretch and will not deal with them again. Blacklisted the user."
+    str_not_in_list = "This user hasn't been blacklisted."
+    str_removed_from_list = "Let's hope they stay out of trouble. That user is no longer blacklisted."
+    str_added_to_list = "I never liked them anyway, that user is now blacklisted."
 
 
 class userMasterList(userList):
