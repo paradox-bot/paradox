@@ -578,7 +578,7 @@ async def prim_cmd_userinfo(message, cargs, client, conf, botdata):
     embed = discord.Embed(type="rich", color=(user.colour if user.colour.value else discord.Colour.light_grey()))
     embed.set_author(name="{user.name} ({user.id})".format(user=user), icon_url=user.avatar_url, url=user.avatar_url)
     embed.set_thumbnail(url=user.avatar_url)
-    embed.add_field(name="Full name", value=(bot_emoji if user.bot else "")+str(user), inline=False)
+    embed.add_field(name="Full name", value=("{} ".format(bot_emoji) if user.bot else "")+str(user), inline=False)
 
     game = "Playing {}".format(user.game if user.game else "nothing")
     statusdict = {"offline": "Offline/Invisible",
