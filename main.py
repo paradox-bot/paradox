@@ -49,8 +49,11 @@ async def on_message(message):
     pass it on to the command parser.
     '''
     prefix_conf = serv_conf["prefix"]
-    prefix = prefix_conf.get(botdata, message.server)
-    prefix = prefix if prefix != prefix_conf.default else conf.get("PREFIX")
+    if message.server:
+        prefix = prefix_conf.get(botdata, message.server)
+        prefix = prefix if prefix != prefix_conf.default else conf.get("PREFIX")
+    else:
+        prefix = conf.get("PREFIX")
     if not (message.content.startswith(PREFIX) or\
             (message.content.split(' ')[0].strip('<!@>') == client.user.id)):
         # Okay, it probably wasn't meant for us, or they can't type
