@@ -26,10 +26,12 @@ class Conf:
     def get(self, settingName, default=None):
         if settingName not in self.settings:
             return default
-        return self.settings[settingName]
+        setting = self.settings[settingName]
+
+        return json.loads(setting)
 
     def getintlist(self, settingName, default=[]):
-        return json.loads(self.get(settingName, str(default)))
+        return self.get(settingName, str(default))
 
     def getStr(self, settingName, default=""):
         return self.get(settingName, default)

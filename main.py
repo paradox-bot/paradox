@@ -12,7 +12,7 @@ import primcmds
 # Global constants/ environment variables
 
 CONF_FILE = "paradox.conf"
-BOT_DATA_FILE = "paradox_botdata.conf"
+BOT_DATA_FILE = "botdata.db"
 
 
 # Initialise
@@ -48,8 +48,12 @@ async def on_message(message):
     If it looks like a message for us, and it's not from anyone bad,
     pass it on to the command parser.
     '''
-    custom_prefix = serv_conf["guild"]["prefix"].get(botdata, message.server)
-    PREFIX = custom_prefix if custom_prefix else conf.get("PREFIX")
+    prefix_conf = serv_conf["prefix"]
+    if message.server:
+        prefix = prefix_conf.get(botdata, message.server)
+        prefix = prefix if prefix != prefix_conf.default else conf.get("PREFIX")
+    else:
+        prefix = conf.get("PREFIX")
     if not (message.content.startswith(PREFIX) or\
             (message.content.split(' ')[0].strip('<!@>') == client.user.id)):
         # Okay, it probably wasn't meant for us, or they can't type
@@ -81,10 +85,10 @@ async def on_message(message):
 @client.event
 async def on_member_join(member):
     server = member.server
-    if not serv_conf["join"]["enabled"].get(botdata, server):
+    if not serv_conf["join"].get(botdata, server):
         return
-    join_channel = serv_conf["join"]["channel"].get(botdata, server)
-    join_message = serv_conf["join"]["msg"].get(botdata, server)
+    join_channel = serv_conf["join_ch"].get(botdata, server)
+    join_message = serv_conf["join_msg"].get(botdata, server)
     if join_channel == 0:
         return
     channel = server.get_channel(join_channel)
@@ -97,10 +101,10 @@ async def on_member_join(member):
 @client.event
 async def on_member_remove(member):
     server = member.server
-    if not serv_conf["leave"]["enabled"].get(botdata, server):
+    if not serv_conf["leave"].get(botdata, server):
         return
-    channel = serv_conf["leave"]["channel"].get(botdata, server)
-    message = serv_conf["leave"]["msg"].get(botdata, server)
+    channel = serv_conf["leave_ch"].get(botdata, server)
+    message = serv_conf["leave_msg"].get(botdata, server)
     if channel == 0:
         return
     channel = server.get_channel(channel)
@@ -142,7 +146,7 @@ async def cmd_parser(message, cmd, args):
             # Maybe discord broke!
             # Or more likely there's a permission error
             try:
-                await reply(client, message, "Something went wrong. The error has been logged")
+                await reply(client, message, "Something went wrong internally.. The error has been logged and should be fixed soon!")
 
             except Exception:
                 await log("Something unexpected happened and I can't print the error. Dying now.")

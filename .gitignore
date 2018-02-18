@@ -1,3 +1,6 @@
+# Data file
+*.db
+
 # Conf files
 *.conf
 
