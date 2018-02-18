@@ -431,6 +431,7 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
           "Usage: profile [mention]\n\nDisplays the mentioned user's profile, or your own.")
 @require_perm("master")
 async def prim_cmd_profile(message, cargs, client, conf, botdata):
+    rep = botdata.users.get(message.author.id, "rep")
     embed = discord.Embed(type="rich", color=discord.Colour.teal()) \
         .set_author(name="{} ({})".format(message.author, message.author.id),
                     icon_url=message.author.avatar_url) \
@@ -439,7 +440,7 @@ async def prim_cmd_profile(message, cargs, client, conf, botdata):
         .add_field(name="XP",
                    value="()", inline=True) \
         .add_field(name="Rep",
-                   value="()", inline=True) \
+                   value=rep, inline=True) \
         .add_field(name="Premium",
                    value="Yes/No", inline=True) \
         .add_field(name="Created at",
