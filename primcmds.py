@@ -671,6 +671,19 @@ async def prim_cmd_binasc(message, cargs, client, conf, botdata):
     asciilist = [chr(sum([int(b) << 7 - n for (n, b) in enumerate(byte)])) for byte in bytelist]
     await reply(client, message, "Output: `{}`".format(''.join(asciilist)))
 
+@prim_cmd("cheatreport", "General",
+          "Reports a user for cheating with rep/level/xp",
+          "Usage: report [user] [cheat] [evidence]\
+          \n\nReports a user for cheating on a social system. Please provide the user you wish to report, the form of cheat, and your evidence.")
+async def prim_cmd_cr(message, cargs, client, conf, botdata):
+    await reply(client, message, 'WIP. Pue pls write')
+    embed = discord.Embed(title="Cheat Report", color=discord.Colour.red()) \
+        .set_author(name="Message author's details") \
+        .add_field(name="User", value=".", inline=True) \
+        .add_field(name="Cheat", value="Alt Repping|Chatbot|Spamming", inline=True) \
+        .add_field(name="Evidence", value="(Evidence from args)", inline=False) \
+        .set_footer(text="Guild name|Timestamp")
+    await client.send_message(message.channel, embed=embed)
 
 @prim_cmd("cat", "Fun stuff",
           "Sends a random cat image",
