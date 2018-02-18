@@ -82,10 +82,12 @@ async def para_format(client, string, message=None, server=None, member=None, us
     return string
 
 
-def strfdelta(delta):
+def strfdelta(delta, sec = False):
     output = [[delta.days, 'day'],
               [delta.seconds // 3600, 'hour'],
               [delta.seconds // 60 % 60, 'minute']]
+    if sec:
+        output.append([delta.seconds % 60, 'second'])
     for i in range(len(output)):
         if output[i][0] != 1:
             output[i][1] += 's'
