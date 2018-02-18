@@ -530,7 +530,7 @@ async def prim_cmd_rep(message, cargs, client, conf, botdata):
         if given_rep is not None and last_rep is not None:
             last_rep_time = datetime.datetime.fromtimestamp(int(last_rep))
             given_ago = strfdelta(now - last_rep_time)
-            given_msg = "You have given {} reputation points! You last gave a reputation point {} ago.".format(given_rep, given_ago)
+            given_msg = "You have given {} reputation point{}! You last gave a reputation point {} ago.".format(given_rep, "s" if given_rep>1 else "", given_ago)
             reptime = datetime.timedelta(days = 1) - (now - last_rep_time)
             if reptime.seconds > 0:
                 rep_time_msg = "You may give reputation in {}.".format(strfdelta(reptime, sec = True))
