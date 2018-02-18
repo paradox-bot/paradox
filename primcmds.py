@@ -678,7 +678,8 @@ async def prim_cmd_binasc(message, cargs, client, conf, botdata):
 async def prim_cmd_cr(message, cargs, client, conf, botdata):
     await reply(client, message, 'WIP. Pue pls write')
     embed = discord.Embed(title="Cheat Report", color=discord.Colour.red()) \
-        .set_author(name="Message author's details") \
+        .set_author(name="{} ({})".format(message.author, message.author.id),
+                    icon_url=message.author.avatar_url) \
         .add_field(name="User", value=".", inline=True) \
         .add_field(name="Cheat", value="Alt Repping|Chatbot|Spamming", inline=True) \
         .add_field(name="Evidence", value="(Evidence from args)", inline=False) \
