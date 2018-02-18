@@ -143,34 +143,14 @@ async def prim_cmd_masters(message, cargs, client, conf, botdata):
           \n\nAdds or removes a blacklisted user by id or mention, or lists all current blacklisted users.")
 @require_perm("Master")
 async def prim_cmd_blacklist(message, cargs, client, conf, botdata):
-    blist = conf.getintlist("blacklisted_users")
-    # TODO: Make this a human readable list of names
-    blistNames = ', '.join([str(black) for black in blist])
+    blist = await bot_conf["blacklist"].read(conf, None, message, client)
     params = cargs.split(' ')
     action = params[0]
     if action in ['', 'list']:
-        await reply(client, message, "I have blacklisted:\n{}".format(blistNames))
-    elif (action in ['+', 'add']) and (len(params) == 2) and params[1].strip('<!@>').isdigit():
-        userid = int(params[1].strip('<!@>'))
-        if userid in blist:
-            await reply(client, message, "I have already blacklisted this user!")
-        else:
-            blist.append(userid)
-            conf.set("blacklisted_users", blist)
-            await reply(client, message,
-                        "I never liked them anyway. That user is now blacklisted.")
-    elif (action in ['-', 'remove']) and (len(params) == 2) and params[1].strip('<!@>').isdigit():
-        userid = int(params[1].strip('<!@>'))
-        if userid not in blist:
-            await reply(client, message, "This user hasn't been blacklisted.")
-        else:
-            blist.remove(userid)
-            conf.set("blacklisted_users", blist)
-            await reply(client, message, "Let's hope they stay out of trouble. That user is no longer blacklisted.")
+        await reply(client, message, "I have blacklisted:\n{}".format(blist))
     else:
-        await reply(client, message, primCmds["blacklist"][3])
-
-# TODO: refactor masters to a general list add/check/remove function, add exec config or join commands
+        errmsg = await bot_conf["blacklist"].write(conf, None, cargs, message, client, message.server, botdata)
+        await reply(client, message, errmsg)
 
 
 @prim_cmd("logs", "Bot admin",
@@ -296,8 +276,7 @@ async def prim_cmd_exec(message, cargs, client, conf, botdata):
 # Config commands
 
 """
-TODO: Make the help look nicer, in fact nicen up all the related strings.
-humanise the default value
+TODO: Humanise the default value
 """
 
 @prim_cmd("config", "Server setup",
@@ -541,6 +520,9 @@ async def prim_cmd_rep(message, cargs, client, conf, botdata):
         user = await find_user(client, cargs, message.server, in_server=True)
         if not user:
             await reply(client, message, "I couldn't find that user in this server sorry.")
+            return
+        if user == message.author:
+            await reply(client, message, "You can't give yourself reputation!")
             return
         if user == client.user:
             await reply(client, message, "Aww thanks!")
