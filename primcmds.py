@@ -515,7 +515,7 @@ async def prim_cmd_lenny(message, cargs, client, conf, botdata):
     await client.delete_message(message)
     await reply(client, message, '( ͡° ͜ʖ ͡°)')
 
-@prim_cmd("rep", "Fun Stuff",
+@prim_cmd("rep", "Fun stuff",
           "Give reputation to a user",
           "Usage: rep [mention]\
           \n\nGives a reputation point to the mentioned user or shows your current reputation cooldown timer.")
