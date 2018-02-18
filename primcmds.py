@@ -515,6 +515,54 @@ async def prim_cmd_lenny(message, cargs, client, conf, botdata):
     await client.delete_message(message)
     await reply(client, message, '( ͡° ͜ʖ ͡°)')
 
+@prim_cmd("rep", "Fun Stuff",
+          "Give reputation to a user",
+          "Usage: rep [mention]\
+          \n\nGives a reputation point to the mentioned user or shows your current reputation cooldown timer.")
+async def prim_cmd_rep(message, cargs, client, conf, botdata):
+    now = datetime.datetime.utcnow()
+    last_rep = botdata.users.get(message.author.id, "last_rep_time")
+    if cargs == "":
+        given_rep = botdata.users.get(message.author.id, "given_rep")
+        if given_rep is None:
+            given_msg = "You have not yet given any reputation!"
+            rep_time_msg = "Start giving reputation using `rep <user>`!"
+        if given_rep is not None and last_rep is not None:
+            last_rep_time = datetime.datetime.fromtimestamp(int(last_rep))
+            given_ago = strfdelta(now - last_rep_time)
+            given_msg = "You have given {} reputation! You last gave reputation {} ago.".format(given_rep, given_ago)
+            reptime = datetime.timedelta(days = 1) - (now - last_rep_time)
+            if reptime.seconds > 0:
+                rep_time_msg = "You may give reputation in {}.".format(strfdelta(reptime, sec = True))
+            else:
+                rep_time_msg = "You may now give reputation!"
+        await reply(client, message, "{}\n{}".format(given_msg,rep_time_msg))
+    else:
+        user = await find_user(client, cargs, message.server, in_server=True)
+        if not user:
+            await reply(client, message, "I couldn't find that user in this server sorry.")
+            return
+        if last_rep is not None:
+            last_rep_time = datetime.datetime.fromtimestamp(int(last_rep))
+            reptime = datetime.timedelta(days = 1) - (now - last_rep_time)
+            if reptime.seconds > 0:
+                msg = "Cool down! You may give reputation in {}".format(strfdelta(reptime, sec = True))
+                await reply(client, message, msg)
+                return
+        rep = botdata.users.get(user.id, "rep")
+        rep = int(rep) + 1 if rep else 1
+        botdata.users.set(user.id, "rep", str(rep))
+        given_rep = botdata.users.get(message.author.id, "given_rep")
+        given_rep = int(given_rep) + 1 if given_rep else 1
+        botdata.users.set(message.author.id, "given_rep", str(given_rep))
+        botdata.users.set(message.author.id, "last_rep_time", str(now.strftime('%s')))
+        await reply(client, message, "You have given 1 reputation point to {}".format(user.mention))
+
+
+
+
+
+
 @prim_cmd("ping", "General",
           "Checks the bot's latency",
           "Usage: ping\
@@ -529,7 +577,7 @@ async def prim_cmd_ping(message, cargs, client, conf, botdata):
     latency = str(latency)
     await client.edit_message(sentMessage, 'Ping: ' + latency + 'ms')
 
-@prim_cmd("userinfo", "General",
+@prim_cmd("userinfo", "User info",
           "Shows the user's information",
           "Usage: userinfo (mention)\n\nSends information on the mentioned user, or yourself if no one is provided.")
 @require_perm("in server")
