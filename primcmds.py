@@ -303,7 +303,7 @@ humanise the default value
 @prim_cmd("config", "Server setup",
           "Server configuration",
           "Usage: config | config help | config <option> [value]\
-          \n\nLists your current server configuration, shows option help, or sets an option\
+          \n\nLists your current server configuration, shows option help, or sets an option.\
           \nFor example, \"config join_ch #general\" could be used to set your join message channel.")
 async def prim_cmd_config(message, cargs, client, conf, botdata):
     params = cargs.split(' ')
@@ -533,9 +533,10 @@ async def prim_cmd_ping(message, cargs, client, conf, botdata):
           "Shows the user's information",
           "Usage: userinfo (mention)\n\nSends information on the mentioned user, or yourself if no one is provided.")
 async def prim_cmd_userinfo(message, cargs, client, conf, botdata):
- embed = discord.Embed(type="rich", color=discord.Colour.teal()) \
-     .set_author(name="{} ({})".format(message.author, message.author.id),
+ embed = discord.Embed(type="rich", color=message.author.colour) \
+     .set_author(name="{} ({})".format(message.author.display_name, message.author.id),
                  icon_url=message.author.avatar_url, url=message.author.avatar_url) \
+     .set_thumbnail(url=message.author.avatar_url) \
      .add_field(name="Full name",
                 value="{}".format(message.author), inline=False) \
      .add_field(name="Status",
