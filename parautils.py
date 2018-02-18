@@ -4,7 +4,7 @@
 
 import asyncio
 import subprocess
-
+import discord
 
 LOGFILE = "paralog.log"
 # Logfile should really not be defined here. Logging should probably be done in a class or something.
@@ -38,6 +38,22 @@ async def reply(client, message, content):
         await client.send_message(message.channel, "Attempted to send an empty message!")
     else:
         await client.send_message(message.channel, content)
+
+async def find_user(client, userstr, server=None, in_server=False):
+    if userstr == "":
+        return None
+    maybe_user_id = userstr.strip('<@!> ')
+    if maybe_user_id.isdigit():
+        def is_user(member):
+            return member.id == maybe_user_id
+    else:
+        def is_user(member):
+            return ((userstr.lower() in member.display_name.lower()) or (userstr.lower() in member.name.lower()))
+    if server:
+        member = discord.utils.find(is_user, server.members)
+    if not (member or in_server):
+        member = discord.utils.find(is_user, client.get_all_members)
+    return member
 
 
 async def para_format(client, string, message=None, server=None, member=None, user=None):
