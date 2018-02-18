@@ -56,6 +56,13 @@ async def find_user(client, userstr, server=None, in_server=False):
         member = discord.utils.find(is_user, client.get_all_members)
     return member
 
+def get_prefix(conf, serv_conf, botdata, server):
+    prefix_conf = serv_conf["prefix"]
+    prefix = conf.get("PREFIX")
+    if server:
+        prefix = prefix_conf.get(botdata, server)
+        prefix = prefix if prefix != prefix_conf.default else conf.get("PREFIX")
+    return prefix
 
 async def para_format(client, string, message=None, server=None, member=None, user=None):
     if member:
