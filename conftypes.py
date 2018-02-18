@@ -74,6 +74,19 @@ class _settingType:
         pass
 
 
+class TIMEZONE(_settingType):
+    """
+    Wrapper for timezone stuff
+    """
+    name = "Timezone"
+    accept = "A timezone in the form Country/City, some short-hands are accepted. More options coming soon!"
+    def humanise(self, raw):
+        return "\"{}\"".format(str(raw))
+
+    def understand(self, raw):
+        pass
+
+
 class BOOL(_settingType):
     """
     A sort of boolean type, more like a wrapper for a boolean.
