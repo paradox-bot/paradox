@@ -72,6 +72,13 @@ async def perm_manager(client, botdata, conf=None, message=None, user=None, serv
 TODO: check whether server_permissions accounts for server owner
 """
 
+@perm_func("in server")
+async def perm_in_server(client, botdata, conf=None, message=None, user=None, server=None):
+    if (message is None):
+        return(2, "An internal error occurred.")
+    if not message.server:
+        return(1, "This can only be used in a server!")
+    return(0, "")
 
 @perm_func("manage_server")
 async def perm_manage_server(client, botdata, conf=None, message=None, user=None, server=None):
