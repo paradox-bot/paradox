@@ -474,7 +474,7 @@ async def prim_cmd_profile(message, cargs, client, conf, botdata):
             return
         timestr = '`%-I:%M %p (%Z(%z))` on `%a, %d/%m/%Y`'
         timestr = iso8601.parse_date(datetime.datetime.now().isoformat()).astimezone(TZ).strftime(timestr)
-        embed.add_field(name="Current Time", value="{}".format(tz, timestr), inline=False)
+        embed.add_field(name="Current Time", value="{}".format(timestr), inline=False)
     embed.add_field(name="Created at",
                    value="{} ({} ago)".format(created, created_ago), inline=False)
     await client.send_message(message.channel, embed=embed)
