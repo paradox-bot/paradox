@@ -420,7 +420,7 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
     except Exception:
         await reply(client, message, "An invalid timezone was provided in the JSON file. Aborting... \n **Error Code:** `ERR_OBSTRUCTED_JSON`")
         return
-    timestr = 'The current time for {} is `%-I:%M %p (%Z(%z))` on `%a, %d/%m/%Y`'\
+    timestr = 'The current time for **{}** is **%-I:%M %p (%Z(%z))** on **%a, %d/%m/%Y**'\
         .format(message.server.get_member(user).display_name)
     timestr = iso8601.parse_date(datetime.datetime.now().isoformat()).astimezone(TZ).strftime(timestr)
     await reply(client, message, timestr)
@@ -472,7 +472,7 @@ async def prim_cmd_profile(message, cargs, client, conf, botdata):
         except Exception:
             await reply(client, message, "An invalid timezone was provided in the database. Aborting... \n **Error Code:** `ERR_CORRUPTED_DB`")
             return
-        timestr = '`%-I:%M %p (%Z(%z))` on `%a, %d/%m/%Y`'
+        timestr = '**%-I:%M %p (%Z(%z))** on **%a, %d/%m/%Y**'
         timestr = iso8601.parse_date(datetime.datetime.now().isoformat()).astimezone(TZ).strftime(timestr)
         embed.add_field(name="Current Time", value="{}".format(timestr), inline=False)
     embed.add_field(name="Created at",
