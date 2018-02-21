@@ -53,5 +53,5 @@ serv_conf["prefix"] = serverConfigSetting("guild_prefix", "Guild settings",
                                              "",
                                              "manage_server",
                                              conftypes.STR,
-                                             "~")
+                                             "")
 # serv_conf["guild_desc"] = "general guild settings"
