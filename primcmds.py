@@ -543,12 +543,13 @@ async def prim_cmd_rep(message, cargs, client, conf, botdata):
     cooldown = 24*60*60
     now = datetime.datetime.utcnow()
     now_timestamp = int(now.strftime('%s'))
-    last_rep = int(botdata.users.get(message.author.id, "last_rep_time"))
+    last_rep = botdata.users.get(message.author.id, "last_rep_time")
 
     if cargs == "" or cargs.strip() == "stats":
         if last_rep is None:
             await reply(client, message, "You have not yet given any reputation!\nStart giving reputation using `re <user>`!")
             return
+        last_rep = int(last_rep)
         given_ago = now_timestamp - last_rep
         if cargs == "":
             can_give_in = cooldown - given_ago
