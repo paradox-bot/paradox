@@ -429,7 +429,6 @@ async def prim_cmd_time(message, cargs, client, conf, botdata):
 @prim_cmd("profile", "User info",
           "Displays a user profile",
           "Usage: profile [mention]\n\nDisplays the mentioned user's profile, or your own.")
-@require_perm("master")
 async def prim_cmd_profile(message, cargs, client, conf, botdata):
     if cargs != "":
         user = await find_user(client, cargs, message.server, in_server=True)
