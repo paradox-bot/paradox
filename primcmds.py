@@ -553,7 +553,7 @@ async def prim_cmd_rep(message, cargs, client, conf, botdata):
             given_ago = now_timestamp - int(last_rep)
             given_msg = "You have given **{}** reputation point{}! You last gave a reputation point {} ago.".format(given_rep, "s" if int(given_rep)>1 else "", strfdelta(datetime.timedelta(seconds=given_ago)))
             if given_ago < cooldown:
-                rep_time_msg = "You may give reputation in {}.".format(strfdelta(cooldown - given_ago, sec = True))
+                rep_time_msg = "You may give reputation in {}.".format(strfdelta(datetime.timedelta(seconds=(cooldown - given_ago)), sec = True))
             else:
                 rep_time_msg = "You may now give reputation!"
         await reply(client, message, "{}\n{}".format(given_msg,rep_time_msg))
@@ -573,7 +573,7 @@ async def prim_cmd_rep(message, cargs, client, conf, botdata):
         if last_rep is not None:
             given_ago = now_timestamp - int(last_rep)
             if given_ago < cooldown:
-                msg = "Cool down! You may give reputation in {}.".format(strfdelta(cooldown - given_ago, sec = True))
+                msg = "Cool down! You may give reputation in {}.".format(strfdelta(datetime.timedelta(seconds=(cooldown - given_ago)), sec = True))
                 await reply(client, message, msg)
                 return
         rep = botdata.users.get(user.id, "rep")
