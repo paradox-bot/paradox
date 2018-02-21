@@ -547,7 +547,7 @@ async def prim_cmd_rep(message, cargs, client, conf, botdata):
 
     if cargs == "" or cargs.strip() == "stats":
         if last_rep is None:
-            await reply(client, message, "You have not yet given any reputation!\nStart giving reputation using `re <user>`!")
+            await reply(client, message, "You have not yet given any reputation!\nStart giving reputation using `rep <user>`!")
             return
         last_rep = int(last_rep)
         given_ago = now_timestamp - last_rep
