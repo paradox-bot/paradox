@@ -537,26 +537,32 @@ async def prim_cmd_lenny(message, cargs, client, conf, botdata):
 
 @prim_cmd("rep", "Fun stuff",
           "Give reputation to a user",
-          "Usage: rep [mention]\
+          "Usage: rep [mention] | rep stats\
           \n\nGives a reputation point to the mentioned user or shows your current reputation cooldown timer.")
 async def prim_cmd_rep(message, cargs, client, conf, botdata):
+    cooldown = 24*60*60
     now = datetime.datetime.utcnow()
-    last_rep = botdata.users.get(message.author.id, "last_rep_time")
-    if cargs == "":
-        given_rep = botdata.users.get(message.author.id, "given_rep")
-        if given_rep is None:
-            given_msg = "You have not yet given any reputation!"
-            rep_time_msg = "Start giving reputation using `rep <user>`!"
-        if given_rep is not None and last_rep is not None:
-            last_rep_time = datetime.datetime.fromtimestamp(int(last_rep))
-            given_ago = strfdelta(now - last_rep_time)
-            given_msg = "You have given **{}** reputation point{}! You last gave a reputation point {} ago.".format(given_rep, "s" if int(given_rep)>1 else "", given_ago)
-            reptime = datetime.timedelta(days = 1) - (now - last_rep_time)
-            if reptime.days > 0:
-                rep_time_msg = "You may give reputation in {}.".format(strfdelta(reptime, sec = True))
+    now_timestamp = int(now.strftime('%s'))
+    last_rep = int(botdata.users.get(message.author.id, "last_rep_time"))
+
+    if cargs == "" or cargs.strip() == "stats":
+        if last_rep is None:
+            await reply(client, message, "You have not yet given any reputation!\nStart giving reputation using `re <user>`!")
+            return
+        given_ago = now_timestamp - last_rep
+        if cargs == "":
+            can_give_in = cooldown - given_ago
+            if can_give_in > 0:
+                can_give_str = strfdelta(datetime.timedelta(seconds=can_give_in), sec=True)
+                msg = "You may give reputation in {}.".format(can_give_str)
             else:
-                rep_time_msg = "You may now give reputation!"
-        await reply(client, message, "{}\n{}".format(given_msg,rep_time_msg))
+                msg = "You may now give reputation!"
+        else:
+            given_rep = botdata.users.get(message.author.id, "given_rep")
+            last_rep_str = strfdelta(datetime.timedelta(seconds=given_ago))
+            msg = "You have given **{}** reputation point{}! You last gave a reputation point **{}** ago.".format(given_rep, "s" if int(given_rep)>1 else "", last_rep_str)
+        await reply(client, message, msg)
+        return
     else:
         user = await find_user(client, cargs, message.server, in_server=True)
         if not user:
@@ -571,10 +577,9 @@ async def prim_cmd_rep(message, cargs, client, conf, botdata):
             await reply(client, message, "Bots don't need reputation points!")
             return
         if last_rep is not None:
-            last_rep_time = datetime.datetime.fromtimestamp(int(last_rep))
-            reptime = datetime.timedelta(days = 1) - (now - last_rep_time)
-            if reptime.days > 0:
-                msg = "Cool down! You may give reputation in {}.".format(strfdelta(reptime, sec = True))
+            given_ago = now_timestamp - int(last_rep)
+            if given_ago < cooldown:
+                msg = "Cool down! You may give reputation in {}.".format(strfdelta(datetime.timedelta(seconds=(cooldown - given_ago)), sec = True))
                 await reply(client, message, msg)
                 return
         rep = botdata.users.get(user.id, "rep")
