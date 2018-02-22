@@ -16,3 +16,6 @@ Here are some other features:
 # Support
 Paradøx has a support guild, which also doubles as a developer hub and a community to chat with and make friends!
 You can join the support guild [here.](https://discord.gg/ECbUu8u)
+
+# Documentation
+Command documentation can either be found with `~help cmdname` or on the [WIP Website.](https://paradoxical.pw)
