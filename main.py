@@ -94,6 +94,8 @@ async def on_member_join(member):
     channel = server.get_channel(join_channel)
     if not channel:
         return
+    if not join_message:
+        return
     msg = await para_format(client, join_message, member=member)
     await client.send_message(channel, msg)
 
@@ -109,6 +111,8 @@ async def on_member_remove(member):
         return
     channel = server.get_channel(channel)
     if not channel:
+        return
+    if not message:
         return
     msg = await para_format(client, message, member=member)
     await client.send_message(channel, msg)

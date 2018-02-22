@@ -65,6 +65,9 @@ def get_prefix(conf, serv_conf, botdata, server):
     return prefix
 
 async def para_format(client, string, message=None, server=None, member=None, user=None):
+    if string is None:
+        log("For some reason the format function got null input.")
+        return None
     if member:
         user = member
     keydict = {"$servers$": str(len(client.servers)),
