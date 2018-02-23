@@ -38,7 +38,7 @@ serv_conf["leave_msg"] = serverConfigSetting("leave_msgs_msg", "Leave message",
                                           "manage_server",
                                           "manage_server",
                                           conftypes.FMTSTR,
-                                          "Goodbye $user$, we hope you had a nice stay!")
+                                          "Goodbye $username$, we hope you had a nice stay!")
 serv_conf["leave_ch"] = serverConfigSetting("leave_msgs_channel", "Leave message",
                                               "Channel to post in when user leaves",
                                               "manage_server",
