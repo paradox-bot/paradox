@@ -68,6 +68,26 @@ async def perm_manager(client, botdata, conf=None, message=None, user=None, serv
         return (1, msg)
     return (0, "")
 
+
+@perm_func("Contributor")
+async def perm_contributor(client, botdata, conf=None, message=None, user=None, server=None):
+        if message is not None:
+            user = message.author
+            server = message.server
+        if user is not None:
+            userid = user.id
+        if (user is None) or (conf is None):
+            return(2, "An internal error occurred.")
+
+        (execerror, msg) = await permFuncs["exec"][0](client, botdata, conf, message, user, server)
+        if execerror == 0:
+            return (execerror, msg)
+        if int(userid) not in conf.getintlist("contributors"):
+            msg = "You lack the required contributor perms to do this!"
+            return (1, msg)
+        return (0, "")
+
+
 """
 TODO: check whether server_permissions accounts for server owner
 """
