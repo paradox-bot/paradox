@@ -3,17 +3,21 @@ Currently a weak implementation, aiming for a working prototype.
 Needs to be completed ASAP.
 """
 import importlib
+import traceback
+from Context import CommandContext
 
 
 class Bot:
-    def __init__(self, client, data, serv_conf, user_conf, bot_conf):
+    def __init__(self, client, data, serv_conf, user_conf, bot_conf, log_file="bot.log", DEBUG=0):
         self.client = client
         self.data = data
         self.objects = {}
         self.cmds = {}
-        self.serv_conf = serv_conf # TODO: Why are these even here?
+        self.serv_conf = serv_conf  # TODO: Why are these even here?
         self.user_conf = user_conf
         self.bot_conf = bot_conf
+        self.log_file = log_file
+        self.DEBUG = DEBUG
 
         self.prefix_cache = {}
         self.command_cache = {}
@@ -28,7 +32,7 @@ class Bot:
             """
             prefix_conf = self.serv_conf["prefix"]
             if message.server:
-                prefix = prefix_conf.get(botdata, message.server)
+                prefix = prefix_conf.get(data, message.server)
                 prefix = prefix if prefix else self.bot_conf.get("PREFIX")
             else:
                 prefix = self.bot_conf.get("PREFIX")
@@ -40,14 +44,45 @@ class Bot:
                     prefix = message.content.split(' ')[0]
             if message.author.bot:
                 return
-            if int(message.author.id) in conf.getintlist("blacklisted_users"):
+            if int(message.author.id) in bot_conf.getintlist("blacklisted_users"):
                 return
-            cmd_msg = message.content[len(prefix):]
-            cmd_name = cmd_msg[0]
+            self.parse_cmd(prefix, message)
 
+    async def parse_cmd(self, used_prefix, message):
+        if self.DEBUG > 0:
+            await self.log("Got the command \n{}\nfrom \"{}\" with id \"{}\""
+                           .format(message.content, message.author, message.author.id))
+        cmd_msg = message.content[len(used_prefix):]
+        cmd_name = cmd_msg.strip().split(' ')[0]
+        arg_str = cmd_msg[len(cmd_name):].strip()
+        cmd_name = cmd_name.strip.lower()
+        if cmd_name not in self.cmds:
+            return
+        cmd = self.cmds[cmd_name]
+        cmdCtx = CommandContext(bot=self,
+                                message=message,
+                                cmd=cmd,
+                                arg_str=arg_str)
+        try:
+            await cmd.run(cmdCtx)
+        except Exception:
+            traceback.print_exc()
+            try:
+                await self.client.send_message(
+                    "Something went wrong internally.. The error has been logged and should be fixed soon!")
+            except Exception:
+                await self.log("Something unexpected happened and I can't print the error. Dying now.")
 
-
-
+    async def log(self, logMessage):
+        '''
+        Logs logMessage in some nice way.
+        '''
+        # TODO: Some nicer logging, timestamps, a little bit of context
+        # For now just print it.
+        print(logMessage)
+        with open(self.LOGFILE, 'a+') as logfile:
+            logfile.write("\n" + logMessage + "\n")
+        return
 
     def load_cmds(self, filepath):
         """
@@ -65,3 +100,4 @@ class Bot:
         Should loading logic be done by the files? Probably not.
         Maybe use a function to load a single event, and pass the files a bot instance
         """
+        pass

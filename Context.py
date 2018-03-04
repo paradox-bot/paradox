@@ -123,7 +123,7 @@ class CommandContext(MessageContext):
                 if self.used_prefix is None:
                     self.err = (-2, "Require used prefix for initialising cmd context from message")
                     return
-                self.arg_str = self.cntnt[len(self.used_prefix):].strip()
+                self.arg_str = self.cntnt[len(self.used_prefix):].strip()[len(self.cmd.name):]
             self.params = await self.parse_args(self.arg_str)
 
     async def parse_args(self, arg_str):
