@@ -82,7 +82,7 @@ async def perm_manager(client, botdata, conf=None, message=None, user=None, serv
     (execerror, msg) = await permFuncs["exec"][0](client, botdata, conf, message, user, server)
     if execerror == 0:
         return (execerror, msg)
-    if int(userid) not in conf.getintlist("managers"):
+    if int(userid) not in conf.getintlist("manager"):
         msg = "You lack the required bot manager perms to do this!"
         return (1, msg)
     return (0, "")
@@ -101,7 +101,7 @@ async def perm_contributor(client, botdata, conf=None, message=None, user=None, 
         (execerror, msg) = await permFuncs["managers"][0](client, botdata, conf, message, user, server)
         if execerror == 0:
             return (execerror, msg)
-        if int(userid) not in conf.getintlist("contributors"):
+        if int(userid) not in conf.getintlist("contributor"):
             msg = "You lack the required contributor perms to do this!"
             return (1, msg)
         return (0, "")
