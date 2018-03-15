@@ -79,7 +79,7 @@ async def perm_manager(client, botdata, conf=None, message=None, user=None, serv
     if (user is None) or (conf is None):
         return(2, "An internal error occurred.")
 
-    (execerror, msg) = await permFuncs["Developer"][0](client, botdata, conf, message, user, server)
+    (execerror, msg) = await permFuncs["developer"][0](client, botdata, conf, message, user, server)
     if execerror == 0:
         return (execerror, msg)
     if int(userid) not in conf.getintlist("managers"):
