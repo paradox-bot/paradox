@@ -88,11 +88,13 @@ async def on_member_join(member):
     if not serv_conf["join"].get(botdata, server):
         return
     join_channel = serv_conf["join_ch"].get(botdata, server)
-    join_message = serv_conf["join_msg"].get(botdata, server)
+    join_message = serv_conf["join_msg"].read(botdata, server)
     if join_channel == 0:
         return
     channel = server.get_channel(join_channel)
     if not channel:
+        return
+    if not join_message:
         return
     msg = await para_format(client, join_message, member=member)
     await client.send_message(channel, msg)
@@ -104,11 +106,13 @@ async def on_member_remove(member):
     if not serv_conf["leave"].get(botdata, server):
         return
     channel = serv_conf["leave_ch"].get(botdata, server)
-    message = serv_conf["leave_msg"].get(botdata, server)
+    message = serv_conf["leave_msg"].read(botdata, server)
     if channel == 0:
         return
     channel = server.get_channel(channel)
     if not channel:
+        return
+    if not message:
         return
     msg = await para_format(client, message, member=member)
     await client.send_message(channel, msg)
@@ -146,7 +150,7 @@ async def cmd_parser(message, cmd, args):
             # Maybe discord broke!
             # Or more likely there's a permission error
             try:
-                await reply(client, message, "Something went wrong internally.. The error has been logged and should be fixed soon!")
+                await reply(client, message, "Something went wrong internally. The error has been logged and should be fixed soon!")
 
             except Exception:
                 await log("Something unexpected happened and I can't print the error. Dying now.")
