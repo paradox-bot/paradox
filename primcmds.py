@@ -527,7 +527,7 @@ async def prim_cmd_discrim(message, cargs, client, conf, botdata):
           "Usage: invite\
           \n\nSends the link to invite the bot to your server.")
 async def prim_cmd_invite(message, cargs, client, conf, userdata):
-    await reply(client, message, 'Here\'s my invite link! \n <https://discordapp.com/api/oauth2/authorize?client_id=401613224694251538&permissions=8&scope=bot>')
+    await reply(client, message, 'Here\'s my invite link! \n <https://discordapp.com/api/oauth2/authorize?client_id=419356082981568522&permissions=8&scope=bot>')
 
 @prim_cmd("lenny", "Fun stuff",
           "( ͡° ͜ʖ ͡°)",
