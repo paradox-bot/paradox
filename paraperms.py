@@ -98,7 +98,7 @@ async def perm_contributor(client, botdata, conf=None, message=None, user=None, 
         if (user is None) or (conf is None):
             return(2, "An internal error occurred.")
 
-        (execerror, msg) = await permFuncs["developer"][0](client, botdata, conf, message, user, server)
+        (execerror, msg) = await permFuncs["developers"][0](client, botdata, conf, message, user, server)
         if execerror == 0:
             return (execerror, msg)
         if int(userid) not in conf.getintlist("contributors"):
