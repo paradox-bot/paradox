@@ -63,7 +63,7 @@ async def perm_developer(client, botdata, conf=None, message=None, user=None, se
         (execerror, msg) = await permFuncs["exec"][0](client, botdata, conf, message, user, server)
         if execerror == 0:
             return (execerror, msg)
-        if int(userid) not in conf.getintlist("developer"):
+        if int(userid) not in conf.getintlist("developers"):
             msg = "You lack the required developer perms to do this!"
             return (1, msg)
         return (0, "")
@@ -79,7 +79,7 @@ async def perm_manager(client, botdata, conf=None, message=None, user=None, serv
     if (user is None) or (conf is None):
         return(2, "An internal error occurred.")
 
-    (execerror, msg) = await permFuncs["exec"][0](client, botdata, conf, message, user, server)
+    (execerror, msg) = await permFuncs["Developer"][0](client, botdata, conf, message, user, server)
     if execerror == 0:
         return (execerror, msg)
     if int(userid) not in conf.getintlist("managers"):
@@ -98,7 +98,7 @@ async def perm_contributor(client, botdata, conf=None, message=None, user=None, 
         if (user is None) or (conf is None):
             return(2, "An internal error occurred.")
 
-        (execerror, msg) = await permFuncs["managers"][0](client, botdata, conf, message, user, server)
+        (execerror, msg) = await permFuncs["manager"][0](client, botdata, conf, message, user, server)
         if execerror == 0:
             return (execerror, msg)
         if int(userid) not in conf.getintlist("contributors"):
