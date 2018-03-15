@@ -49,6 +49,25 @@ async def perm_exec(client, botdata, conf=None, message=None, user=None, server=
         return (1, msg)
     return (0, "")
 
+    
+@perm_func("Developer")
+async def perm_developer(client, botdata, conf=None, message=None, user=None, server=None):
+        if message is not None:
+            user = message.author
+            server = message.server
+        if user is not None:
+            userid = user.id
+        if (user is None) or (conf is None):
+            return(2, "An internal error occurred.")
+
+        (execerror, msg) = await permFuncs["exec"][0](client, botdata, conf, message, user, server)
+        if execerror == 0:
+            return (execerror, msg)
+        if int(userid) not in conf.getintlist("contributors"):
+            msg = "You lack the required developer perms to do this!"
+            return (1, msg)
+        return (0, "")
+
 
 @perm_func("Manager")
 async def perm_manager(client, botdata, conf=None, message=None, user=None, server=None):

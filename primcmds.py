@@ -439,7 +439,8 @@ async def prim_cmd_profile(message, cargs, client, conf, botdata):
         user = message.author
     badge_dict = {"master": "botowner",
                   "manager": "botmanager",
-                  "contributor": "contributor",}
+                  "contributor": "contributor",
+                  "developer": "developer"}
     badges = ""
     for badge in badge_dict:
         (code, msg)= await permFuncs[badge][0](client, botdata, user=user, conf=conf)
