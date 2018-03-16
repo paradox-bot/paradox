@@ -790,13 +790,13 @@ async def prim_cmd_serverinfo(message, cargs, client, conf, botdata):
         .add_field(name="Owner", value="{} ({})".format(message.server.owner, message.server.owner.id), inline=True) \
         .add_field(name="Members", value="{} humans, {} bots | {} total".format(str(len([m for m in message.server.members if not m.bot])), str(len([m for m in message.server.members if m.bot])), message.server.member_count), inline=True) \
         .add_field(name="ID", value="{}".format(message.server.id), inline=False) \
-        .add_field(name="Region", value=regions[message.server.region], inline=False) \
+        .add_field(name="Region", value="{}".format(str(regions[message.server.region]))), inline=False) \
         .add_field(name="Created at", value="{}".format(message.server.created_at), inline=False) \
         .add_field(name="Channels", value="{} text, {} voice | {} total".format(text, voice, total), inline=False) \
-        .add_field(name="Roles", value="{}".format(message.server.roles), inline=False) \
+        .add_field(name="Roles", value="{}".format(len(message.server.roles)), inline=False) \
         .add_field(name="Large server", value="{}".format(message.server.large), inline=False) \
-        .add_field(name="Verification", value=ver[message.server], inline=False) \
-        .add_field(name="2-Factor Authentication", value=mfa[message.server.mfa_level], inline=False) \
+        .add_field(name="Verification", value="{}".format(str(ver[message.server])), inline=False) \
+        .add_field(name="2-Factor Authentication", value="{}".format(str(mfa[message.server.mfa_level])), inline=False) \
         .add_field(name="Filter", value="idk", inline=False) \
         .add_field(name="Members", value="({} online/ {} idle/ {} dnd/ {} offline or invisible)".format(online, idle, dnd, offline), inline = False)
     await client.send_message(message.channel, embed=embed)
