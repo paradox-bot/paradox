@@ -170,107 +170,6 @@ async def prim_cmd_logs(message, cargs, client, conf, botdata):
 
 # Bot exec commands
 
-async def _async(message, cargs, client, conf, botdata):
-    if cargs == '':
-        return (primCmds['async'][3], 1)
-    env = {'message': message,
-           'args': cargs,
-           'client': client,
-           'conf': conf,
-           'botdata': botdata,
-           'channel': message.channel,
-           'author': message.author,
-           'server': message.server}
-    env.update(globals())
-    old_stdout = sys.stdout
-    redirected_output = sys.stdout = StringIO()
-    result = None
-    exec_string = "async def _temp_exec():\n"
-    exec_string += '\n'.join(' ' * 4 + line for line in cargs.split('\n'))
-    try:
-        exec(exec_string, env)
-        result = (redirected_output.getvalue(), 0)
-    except Exception:
-        traceback.print_exc()
-        result = (str(traceback.format_exc()), 2)
-    _temp_exec = env['_temp_exec']
-    try:
-        returnval = await _temp_exec()
-        value = redirected_output.getvalue()
-        if returnval is None:
-            result = (value, 0)
-        else:
-            result = (value + '\n' + str(returnval), 0)
-    except Exception:
-        traceback.print_exc()
-        result = (str(traceback.format_exc()), 2)
-    finally:
-        sys.stdout = old_stdout
-    return result
-
-
-@prim_cmd("async", "Bot admin",
-          "Executes async code and shows the output",
-          "Usage: async <code>\
-          \n\nRuns <code> as an asyncronous coroutine and prints the output or error.")
-@require_perm("Exec")
-async def prim_cmd_async(message, cargs, client, conf, botdata):
-    output, error = await _async(message, cargs, client, conf, botdata)
-    if error == 1:
-        await reply(client, message, output)
-    elif error == 2:
-        await reply(client, message,
-                    "**Async input:**\
-                    \n```py\n{}\n```\
-                    \n**Output (error):** \
-                    \n```py\n{}\n```".format(cargs, output))
-    else:
-        await reply(client, message,
-                    "**Async input:**\
-                    \n```py\n{}\n```\
-                    \n**Output:**\
-                    \n```py\n{}\n```".format(cargs, output))
-
-
-async def _exec(message, cargs, client, conf, botdata):
-    if cargs == '':
-        return (primCmds['exec'][3], 1)
-    old_stdout = sys.stdout
-    redirected_output = sys.stdout = StringIO()
-    result = None
-    try:
-        exec(cargs)
-        result = (redirected_output.getvalue(), 0)
-    except Exception:
-        traceback.print_exc()
-        result = (str(traceback.format_exc()), 2)
-    finally:
-        sys.stdout = old_stdout
-    return result
-
-
-@prim_cmd("exec", "Bot admin",
-          "Executes code and shows the output",
-          "Usage: exec <code>\
-          \n\nRuns <code> in current environment using exec() and prints the output or error.")
-@require_perm("Exec")
-async def prim_cmd_exec(message, cargs, client, conf, botdata):
-    output, error = await _exec(message, cargs, client, conf, botdata)
-    if error == 1:
-        await reply(client, message, output)
-    elif error == 2:
-        await reply(client, message,
-                    "**Exec input:** \
-                    \n```py\n{}\n```\
-                    \n**Output (error):** \
-                    \n```py\n{}\n```".format(cargs, output))
-    else:
-        await reply(client, message,
-                    "**Exec input:**\
-                    \n```py\n{}\n```\
-                    \n**Output:**\
-                    \n```py\n{}\n```".format(cargs, output))
-
 # -----End Bot manager commands-----
 
 
@@ -482,16 +381,6 @@ async def prim_cmd_profile(message, cargs, client, conf, botdata):
 # General utility commands
 
 
-@prim_cmd("echo", "General",
-          "Sends what you tell me to!",
-          "Usage: echo <text>\n\nReplies to the message with <text>")
-async def prim_cmd_echo(message, cargs, client, conf, botdata):
-    if cargs == "":
-        await reply(client, message, "I can't send an empty message!")
-    else:
-        await reply(client, message, cargs)
-
-
 @prim_cmd("about", "General",
           "Provides information about the bot",
           "Usage: about\n\nSends a message containing information about the bot.")
@@ -519,14 +408,6 @@ async def prim_cmd_discrim(message, cargs, client, conf, botdata):
      max_len = len(max(list(zip(*user_info))[0],key=len))
      user_strs = [ "{0[0]:^{max_len}} {0[1]:^25}".format(user, max_len = max_len) for user in user_info]
      await reply(client, message, "```asciidoc\n= Users found =\n{}\n```".format('\n'.join(user_strs)))
-
-
-@prim_cmd("invite", "General",
-          "Sends the bot's invite link",
-          "Usage: invite\
-          \n\nSends the link to invite the bot to your server.")
-async def prim_cmd_invite(message, cargs, client, conf, userdata):
-    await reply(client, message, 'Here\'s my invite link! \n <https://discordapp.com/api/oauth2/authorize?client_id=401613224694251538&permissions=8&scope=bot>')
 
 @prim_cmd("lenny", "Fun stuff",
           "( ͡° ͜ʖ ͡°)",
@@ -596,21 +477,6 @@ async def prim_cmd_rep(message, cargs, client, conf, botdata):
 
 
 
-
-@prim_cmd("ping", "General",
-          "Checks the bot's latency",
-          "Usage: ping\
-          \n\nChecks the response delay of the bot. Usually used to test whether the bot is responsive or not.")
-async def prim_cmd_ping(message, cargs, client, conf, botdata):
-    sentMessage = await client.send_message(message.channel, 'Beep')
-    mainMsg = sentMessage.timestamp
-    editedMessage = await client.edit_message(sentMessage, 'Boop')
-    editMsg = editedMessage.edited_timestamp
-    latency = editMsg - mainMsg
-    latency = latency.microseconds // 1000
-    latency = str(latency)
-    await client.edit_message(sentMessage, 'Ping: ' + latency + 'ms')
-
 @prim_cmd("userinfo", "User info",
           "Shows the user's information",
           "Usage: userinfo (mention)\n\nSends information on the mentioned user, or yourself if no one is provided.")
@@ -647,13 +513,6 @@ async def prim_cmd_userinfo(message, cargs, client, conf, botdata):
     roles = [r.name for r in user.roles if r.name != "@everyone"]
     embed.add_field(name="Roles", value=('`'+ '`, `'.join(roles) + '`'), inline=False)
     await client.send_message(message.channel, embed=embed)
-
-@prim_cmd("support", "General",
-          "Sends the link to the bot guild",
-          "Usage: support\
-          \n\nSends the invite link to the Paradøx support guild.")
-async def prim_cmd_support(message, cargs, client, conf, botdata):
-    await reply(client, message, 'Join my server here!\n\n<https://discord.gg/ECbUu8u>')
 
 @prim_cmd("list", "General",
           "Lists all my commands!",
@@ -755,21 +614,6 @@ async def prim_cmd_dog(message, cargs, client, conf, botdata):
             embed = discord.Embed(title="Woof!", color=discord.Colour.light_grey())
             embed.set_image(url="https://random.dog/"+dog)
             await client.send_message(message.channel, embed=embed)
-
-@prim_cmd("testembed", "testing",
-          "Sends a test embed.",
-          "Usage: testembed\
-          \n\nSends a test embed, what more do you want?")
-@require_perm("Exec")
-async def prim_cmd_testembed(message, cargs, client, conf, botdata):
-    embed = discord.Embed(title="This is a title", color=discord.Colour.teal()) \
-        .set_author(name="I am an Author") \
-        .add_field(name="This is a field1 title", value="This is field1 content", inline=True) \
-        .add_field(name="This is a field2 title", value="This is field2 content", inline=True) \
-        .add_field(name="This is a field3 title", value="This is field3 content", inline=False) \
-        .set_footer(text="This is a footer")
-    await client.send_message(message.channel, embed=embed)
-
 
 # Misc
 """
