@@ -4,6 +4,7 @@ import discord
 class Context:
     def __init__(self, **kwargs):
         self.cmd_err = (0, "")
+        self.bot_err = (0, "")
         self.err = (0, None, "")
 
         self.bot = kwargs["bot"] if ("bot" in kwargs) else None
@@ -101,14 +102,15 @@ class MessageContext(Context):
         message (str): The message to reply with. Must be a string or castable to a string.
         """
         if message is None:
-            self.cmd_err = (-1, "Tried to reply with a None message")
+            self.bot_err = (-1, "Tried to reply with a None message")
         if message == "":
-            self.cmd_err = (-1, "Tried to reply with an empty message")
+            self.bot_err = (-1, "Tried to reply with an empty message")
         if self.ch is None:
-            self.cmd_err = (2, "Require channel for reply")
+            self.bot_err = (2, "Require channel for reply")
         if self.client is None:
-            self.cmd_err = (2, "Require client for reply")
-        if self.cmd_err[0] != 0:
+            self.bot_err = (2, "Require client for reply")
+        if self.bot_err[0] != 0:
+            await self.log("Caught error in reply, code {0[0]} message \"{0[1]}\"".format(self.bot_err))
             return None
         message = str(message)
         return await self.client.send_message(self.ch, message)

@@ -32,7 +32,7 @@ class Bot:
             """
             prefix = 0
             msgctx = MessageContext(bot=self, message=message, serv_conf=self.serv_conf)
-            if self.DEBUG > 0:
+            if self.DEBUG > 2:
                 await self.log("Available prefixes are:" + str(msgctx.get_prefixes()))
             for prfx in msgctx.get_prefixes():
                 if message.content.startswith(prfx):

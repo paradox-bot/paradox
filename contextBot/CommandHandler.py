@@ -12,6 +12,8 @@ class CommandHandler:
     def __init__(self):
         self.cmds = {}
 
+    def __repr__(self):
+        return self.name + " command handler with {} commands".format(len(self.cmds))
     # Command loading
 
     def load_into(self, bot):
@@ -76,7 +78,7 @@ class CommandHandler:
 
         ctx (MessageContext): Context to read and modify.
         """
-        await ctx.log("Caught a command error with code {0[0]} and message {0[1]}".format(ctx.cmd_err))
+        await ctx.log("Caught a command error with code {0[0]} and message \"{0[1]}\"".format(ctx.cmd_err))
         await ctx.reply(ctx.cmd_err[1])
 
     async def on_fail(self, ctx):

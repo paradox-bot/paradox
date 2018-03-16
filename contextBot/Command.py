@@ -8,5 +8,8 @@ class Command:
         self.category = kwargs["category"] if "category" in kwargs else None
         self.aliases = kwargs["aliases"] if "aliases" in kwargs else None
 
+    def __repr__(self):
+        return "Command object for command \"{}\"".format(self.name)
+
     async def run(self, cmd_ctx):
         await self.func(cmd_ctx)
