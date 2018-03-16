@@ -785,6 +785,10 @@ async def prim_cmd_serverinfo(message, cargs, client, conf, botdata):
      elif m.status == discord.Status.offline:
         offline = offline + 1
 
+    Online = discord.utils.get(client.get_all_emojis(), name='ParaOn')
+    Idle = discord.utils.get(client.get_all_emojis(), name='ParaIdle')
+    Dnd = discord.utils.get(client.get_all_emojis(), name='ParaDND')
+    Offline = discord.utils.get(client.get_all_emojis(), name='ParaInvis')
     embed = discord.Embed(color=discord.Colour.teal()) \
         .set_author(name="{}".format(message.server)) \
         .add_field(name="Owner", value="{} ({})".format(message.server.owner, message.server.owner.id), inline=False) \
@@ -798,7 +802,7 @@ async def prim_cmd_serverinfo(message, cargs, client, conf, botdata):
         .add_field(name="Verification", value="{}".format(ver[str(message.server.verification_level)]), inline=False) \
         .add_field(name="2-Factor Authentication", value="{}".format(mfa[message.server.mfa_level]), inline=False) \
         .add_field(name="Filter", value="idk", inline=False) \
-        .add_field(name="Members", value="({} online/ {} idle/ {} dnd/ {} offline or invisible)".format(online, idle, dnd, offline), inline = False)
+        .add_field(name="Member Status", value="({}:{} \n {}:{} \n {}:{} \n {}:{})".format(Online, online, Idle, idle, Dnd, dnd, Offline, offline), inline = False)
     await client.send_message(message.channel, embed=embed)
 
 
