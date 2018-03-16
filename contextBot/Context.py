@@ -171,4 +171,4 @@ class CommandContext(MessageContext):
         if snip_str not in self.CH.snippets:
             self.cmd_err = ("3", "There was an internal error: ERR_BAD_SNIP")
             return self.cmd_err
-        return await self.CH.snippets[snip_str]
+        return await self.CH.snippets[snip_str](self, **kwargs)
