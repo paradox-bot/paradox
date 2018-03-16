@@ -109,9 +109,9 @@ class MessageContext(Context):
         if self.client is None:
             self.cmd_err = (2, "Require client for reply")
         if self.cmd_err[0] != 0:
-            return
+            return None
         message = str(message)
-        await self.client.send_message(self.ch, message)
+        return await self.client.send_message(self.ch, message)
 
     def get_prefixes(self):
         """
