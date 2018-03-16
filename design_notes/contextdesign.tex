@@ -13,15 +13,21 @@
     \item Data handling still done via the old system, no internal caching.
     \item No caching or nice handling of the user or server custom defined commands.
     \item The implementation of the prefix checking gives the bot a lot of work to do when people type for instance the global prefix in a server with a different custom prefix set. Not sure if this can be avoided.
+    \item servconf, userconf and botconf should not exist at bot and context level, at least not in that form. Maybe conf exists and has, say, conf.bot, conf.user and conf.server. The actual configuration could then be in an enumeration, so we have conf.bot.prefix or conf.server.prefix, which are objects with known interfaces (e.g. get, read etc).
+    \item All errors will be handled by attributes of context, which should later be changed to actual exceptions for some things.
 \end{itemize}
 
 
 \section{General Notes}
 \begin{itemize}
     \item To handle user defined commands, we shall use a possibly temporary method, prefixing the userid or serverid in front of the command name to give it a unique identification key. If a server defines the command ``hello'' for instance, the bot writes the name of the command as ``server1235432:hello''. Use a separate command cache for the server and user defined commands, which gets checked after the global command cache.
+    \item The blacklisted users info goes in the global command handler checks, in the subclassed CommandHandler specifically for para. This is inefficient however we can assume that most messages will not be from blacklisted sources or contexts.
 \end{itemize}
 
-
+\section{Thoughts}
+\begin{itemize}
+    \item Can eliminate the user and server separate command lists by using different command handlers with loading priorities. When checking for the command iterate through the command handlers.
+\end{itemize}
 
 \section{Bot}
 
