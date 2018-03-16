@@ -31,3 +31,43 @@ async def cmd_invite(ctx):
     Sends the link to invite the bot to your server.
     """
     await ctx.reply("Here's my invite link! \n<{}>".format(ctx.bot.objects["invite link"]))
+
+
+@cmds.cmd("echo",
+          category="General",
+          short_help="Sends what you tell me to!")
+async def cmd_echo(ctx):
+    """
+    Usage: {prefix}echo <text>
+
+    Replies to the message with <text>.
+    """
+    await ctx.reply(ctx.arg_str if ctx.arg_str else "I can't send an empty message!")
+
+
+@cmds.cmd("secho",
+          category="General",
+          short_help="Like echo but deletes.")
+async def cmd_secho(ctx):
+    """
+    Usage: {prefix}secho <text>
+
+    Replies to the message with <text> and deletes your message.
+    """
+    try:
+        await ctx.client.delete_message(ctx.message)
+    except Exception:
+        pass
+    await ctx.reply(ctx.arg_str if ctx.arg_str else "I can't send an empty message!")
+
+
+@cmds.cmd("support",
+          category="General",
+          short_help="Sends the link to the bot guild")
+async def cmd_support(ctx):
+    """
+    Usage: {prefix}support
+
+    Sends the invite link to the Paradøx support guild.
+    """
+    await ctx.reply("Join my server here!\n\n<{}>".format(ctx.bot.objects["support guild"]))

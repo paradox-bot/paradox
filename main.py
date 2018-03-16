@@ -35,7 +35,7 @@ bot.load_cmds("commands/util_cmds.py")
 bot.load_cmds("commands/exec_cmds.py")
 
 bot.objects["invite_link"] = "https://discordapp.com/api/oauth2/authorize?client_id=401613224694251538&permissions=8&scope=bot"
-
+bot.objects["support guild"] = "https://discord.gg/ECbUu8u"
 # ----Discord event handling----
 
 

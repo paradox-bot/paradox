@@ -33,3 +33,8 @@ async def check_manager_perm(ctx):
     if int(ctx.authid) not in ctx.bot.bot_conf.getintlist("managers"):
         return (1, "You lack the required bot manager perms to do this!")
     return (0, "")
+
+
+@check("can_embed")
+async def check_can_embed(ctx):
+    pass
