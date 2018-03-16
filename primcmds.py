@@ -796,7 +796,7 @@ async def prim_cmd_serverinfo(message, cargs, client, conf, botdata):
         .add_field(name="Roles", value="{}".format(len(message.server.roles)), inline=False) \
         .add_field(name="Large server", value="{}".format(message.server.large), inline=False) \
         .add_field(name="Verification", value="{}".format(ver[str(message.server.verification_level)]), inline=False) \
-        .add_field(name="2-Factor Authentication", value="{}".format(mfa[message.server.mfa_leve]), inline=False) \
+        .add_field(name="2-Factor Authentication", value="{}".format(mfa[message.server.mfa_level]), inline=False) \
         .add_field(name="Filter", value="idk", inline=False) \
         .add_field(name="Members", value="({} online/ {} idle/ {} dnd/ {} offline or invisible)".format(online, idle, dnd, offline), inline = False)
     await client.send_message(message.channel, embed=embed)
