@@ -81,6 +81,8 @@ class MessageContext(Context):
             self.ch = self.msg.channel
             self.server = self.msg.server
             self.cntnt = self.msg.content
+            self.id = self.msg.id
+            self.authid = self.author.id
 
     async def reply(self, message):
         """
@@ -104,7 +106,10 @@ class MessageContext(Context):
 
 class CommandContext(MessageContext):
     async def __init__(self, **kwargs):
-        await super.__init(**kwargs)
+        if "ctx" in kwargs:
+            self = kwargs["ctx"]
+        else:
+            await super.__init(**kwargs)
         self.cmd, self.CH = None
 
         self.arg_str = kwargs["arg_str"] if ("arg_str" in kwargs) else None
