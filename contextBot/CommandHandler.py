@@ -1,4 +1,4 @@
-from Command import Command
+from contextBot.Command import Command
 import traceback
 
 
@@ -20,10 +20,18 @@ class CommandHandler:
 
         bot (BotContext): The global bot context to load the commands into.
         """
-        bot.cmd_cache = bot.cmd_cache + self.cmds
-        if self.name in bot.handler_list:
-            bot.handlers[self.name].append(self)
-            bot.handlers.sort(key=lambda CH: CH.priority)
+        if bot.DEBUG > 0:
+            bot.sync_log("Loading command handler \"{}\" with commands {}".format(self.name,
+                                                                                  str(self.cmds)))
+        bot.cmd_cache = [*(bot.cmd_cache), *(self.cmds.keys())]
+
+        for CH in bot.handlers:
+            if CH.name == self.name:
+                CH.append(self)
+                bot.handlers.sort(key=lambda CH: CH.priority)
+                return bot
+        bot.handlers.append(self)
+        bot.handlers.sort(key=lambda CH: CH.priority)
         return bot
 
     def append(self, CH):
@@ -33,8 +41,8 @@ class CommandHandler:
         CH (CommandHandler): The command handler object to load in.
         """
         for cmd in CH.cmds:
-            cmd.handler = self
-            self.cmds.append(cmd)
+            CH.cmds[cmd].handler = self
+            self.cmds[cmd] = CH.cmds[cmd]
 
     # Global rules for building command
 
@@ -68,6 +76,7 @@ class CommandHandler:
 
         ctx (MessageContext): Context to read and modify.
         """
+        await ctx.log("Caught a command error with code {0[0]} and message {0[1]}".format(ctx.cmd_err))
         await ctx.reply(ctx.cmd_err[1])
 
     async def on_fail(self, ctx):
@@ -113,7 +122,7 @@ class CommandHandler:
             finally:
                 await self.after_exec(ctx)
                 await self._after(ctx)
-            if ctx.err[0]:
+            if ctx.cmd_err[0]:
                 await self.on_error(ctx)
             await self.on_complete(ctx)
 
@@ -142,8 +151,9 @@ class CommandHandler:
         """
         def decorator(func):
             cmd = self.build_cmd(name, func, **kwargs)
-            self.cmds.append(cmd)
+            self.cmds[name] = cmd
             return func
+        return decorator
 
     def require(self, req_str):
         """

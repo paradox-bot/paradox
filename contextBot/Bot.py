@@ -2,9 +2,9 @@
 Currently a weak implementation, aiming for a working prototype.
 Needs to be completed ASAP.
 """
-import importlib
+import imp
 import traceback
-from Context import CommandContext, MessageContext
+from contextBot.Context import CommandContext, MessageContext
 
 
 class Bot:
@@ -17,9 +17,10 @@ class Bot:
         self.bot_conf = bot_conf
         self.log_file = log_file
         self.DEBUG = DEBUG
+        self.LOGFILE = log_file
 
-        self.cmd_cache = {}
-        self.handlers = {}
+        self.cmd_cache = []
+        self.handlers = []
         # For lack of a better place to put it, define incoming event stuff here with the standard decorators
 
         # Not using the caching system for now, just straight up checking.
@@ -31,6 +32,8 @@ class Bot:
             """
             prefix = 0
             msgctx = MessageContext(bot=self, message=message, serv_conf=self.serv_conf)
+            if self.DEBUG > 0:
+                await self.log("Available prefixes are:" + str(msgctx.get_prefixes()))
             for prfx in msgctx.get_prefixes():
                 if message.content.startswith(prfx):
                     prefix = prfx
@@ -40,7 +43,7 @@ class Bot:
                     return
                 else:
                     prefix = message.content.split('>')[0] + '>'
-            self.parse_cmd(prefix, msgctx)
+            await self.parse_cmd(prefix, msgctx)
 
     async def parse_cmd(self, used_prefix, ctx):
         if self.DEBUG > 0:
@@ -59,7 +62,8 @@ class Bot:
                 break
         if not cmd:
             return
-        cmdCtx = CommandContext(ctx=ctx, cmd=cmd, arg_str=arg_str)
+        # Very ugly, want a way to instantiate commandContext using Message context
+        cmdCtx = CommandContext(bot=self, message=ctx.msg, serv_conf=self.serv_conf, cmd=cmd, arg_str=arg_str)
         try:
             await cmd.run(cmdCtx)
         except Exception:
@@ -80,6 +84,15 @@ class Bot:
             logfile.write("\n" + logMessage + "\n")
         return
 
+    def sync_log(self, logMessage):
+        '''
+        Logs logMessage synchronously
+        '''
+        print(logMessage)
+        with open(self.LOGFILE, 'a+') as logfile:
+            logfile.write("\n" + logMessage + "\n")
+        return
+
     def load_cmds(self, filepath):
         """
         Loads commands from a provided command file. Command loading logic is handled by the CH.
@@ -87,7 +100,9 @@ class Bot:
         TODO: Not really sure how to dynamically import, may need to redo this.
         Also want to be able to handle directories here
         """
-        module = importlib.import_module(filepath)
+        if self.DEBUG > 0:
+            self.sync_log("Loading command file from path: " + filepath)
+        module = imp.load_source("cmds", filepath)
         module.cmds.load_into(self)
 
     def load_events(self, filepath):

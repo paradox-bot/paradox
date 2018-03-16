@@ -4,8 +4,8 @@ from botdata import BotData
 from botconf import Conf
 from serverconfig import serv_conf
 
-from Context import Context
-from Bot import Bot
+from contextBot.Context import Context
+from contextBot.Bot import Bot
 
 # Global constants/ environment variables
 
@@ -28,6 +28,9 @@ bot = Bot(client=client,
           bot_conf=conf,
           log_file="paralog.log")
 
+bot.DEBUG = 1
+
+bot.load_cmds("commands/testcmds.py")
 
 # ----Discord event handling----
 

@@ -1,5 +1,5 @@
 class Command:
-    def __init__(name, func, CH, **kwargs):
+    def __init__(self, name, func, CH, **kwargs):
         self.name = name
         self.func = func
         self.handler = CH
@@ -8,7 +8,5 @@ class Command:
         self.category = kwargs["category"] if "category" in kwargs else None
         self.aliases = kwargs["aliases"] if "aliases" in kwargs else None
 
-    async def run(cmd_ctx):
+    async def run(self, cmd_ctx):
         await self.func(cmd_ctx)
-
-
