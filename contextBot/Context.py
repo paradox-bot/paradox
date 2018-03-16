@@ -2,9 +2,10 @@ import discord
 
 
 class Context:
-    async def __init__(self, **kwargs):
+    def __init__(self, **kwargs):
         self.cmd_err = (0, "")
-        self.err = (0, "")
+        self.bot_err = (0, "")
+        self.err = (0, None, "")
 
         self.bot = kwargs["bot"] if ("bot" in kwargs) else None
         self.ch = kwargs["channel"] if ("channel" in kwargs) else None
@@ -22,6 +23,11 @@ class Context:
             self.server = self.ch.server
         if self.member and not self.user:
             self.user = self.member
+
+        if self.bot:
+            self.log = self.bot.log
+            self.client = self.bot.client
+            self.serv_conf = self.bot.serv_conf
 
     async def para_format(self, string):
         client = self.client
@@ -66,9 +72,12 @@ class Context:
 
 
 class MessageContext(Context):
-    async def __init__(self, **kwargs):
-        await super.__init__(**kwargs)
-        self.author, self.message = None
+    def __init__(self, **kwargs):
+        if "msgctx" in kwargs:
+            self = kwargs["msgctx"]
+        super().__init__(**kwargs)
+        self.author = None
+        self.message = None
 
         if "author" in kwargs:
             self.author = kwargs["author"]
@@ -93,17 +102,18 @@ class MessageContext(Context):
         message (str): The message to reply with. Must be a string or castable to a string.
         """
         if message is None:
-            self.err = (-1, "Tried to reply with a None message")
+            self.bot_err = (-1, "Tried to reply with a None message")
         if message == "":
-            self.err = (-1, "Tried to reply with an empty message")
+            self.bot_err = (-1, "Tried to reply with an empty message")
         if self.ch is None:
-            self.err = (-2, "Require channel for reply")
+            self.bot_err = (2, "Require channel for reply")
         if self.client is None:
-            self.err = (-2, "Require client for reply")
-        if self.err[0] != 0:
-            return
+            self.bot_err = (2, "Require client for reply")
+        if self.bot_err[0] != 0:
+            await self.log("Caught error in reply, code {0[0]} message \"{0[1]}\"".format(self.bot_err))
+            return None
         message = str(message)
-        await self.client.send_message(self.ch, message)
+        return await self.client.send_message(self.ch, message)
 
     def get_prefixes(self):
         """
@@ -119,35 +129,48 @@ class MessageContext(Context):
 
 
 class CommandContext(MessageContext):
-    async def __init__(self, **kwargs):
-        if "ctx" in kwargs:
-            self = kwargs["ctx"]
-        else:
-            await super.__init(**kwargs)
-        self.cmd, self.CH = None
+    def __init__(self, **kwargs):
+        if "cmdctx" in kwargs:
+            self = kwargs["cmdctx"]
+        super().__init__(**kwargs)
+
+        self.cmd = None
+        self.CH = None
 
         self.arg_str = kwargs["arg_str"] if ("arg_str" in kwargs) else None
         self.used_prefix = kwargs["arg_str"] if ("arg_str" in kwargs) else None
 
         if "cmd" in kwargs:
             self.cmd = kwargs["cmd"]
-            self.CH = self.cmd.CH
+            self.CH = self.cmd.handler
 
         self.params = kwargs["params"] if ("params" in kwargs) else None
         if self.params is None:
             if self.arg_str is None:
                 if self.msg is None:
-                    self.err = (-2, "Require message for initialising cmd context from message")
+                    self.cmd_err = (2, "Require message for initialising cmd context from message")
                     return
                 if self.used_prefix is None:
-                    self.err = (-2, "Require used prefix for initialising cmd context from message")
+                    self.cmd_err = (2, "Require used prefix for initialising cmd context from message")
                     return
                 self.arg_str = self.cntnt[len(self.used_prefix):].strip()[len(self.cmd.name):]
-            self.params = await self.parse_args(self.arg_str)
+            self.params = self.parse_args(self.arg_str)
 
-    async def parse_args(self, arg_str):
+    def parse_args(self, arg_str):
         """
         Takes in the arg_str and returns a list of params.
         If quotes are used, this is where they are understood.
         """
         return arg_str.strip().split(' ')
+
+    async def check(self, check_str, **kwargs):
+        if check_str not in self.CH.checks:
+            self.cmd_err = ("3", "There was an internal error: ERR_BAD_CHECK")
+            return self.cmd_err
+        return await self.CH.checks[check_str]
+
+    async def run(self, snip_str, **kwargs):
+        if snip_str not in self.CH.snippets:
+            self.cmd_err = ("3", "There was an internal error: ERR_BAD_SNIP")
+            return self.cmd_err
+        return await self.CH.snippets[snip_str](self, **kwargs)
