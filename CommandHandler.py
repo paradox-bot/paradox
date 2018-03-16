@@ -1,4 +1,5 @@
 from Command import Command
+import traceback
 
 
 class CommandHandler:
@@ -7,6 +8,7 @@ class CommandHandler:
     checks = {}
     cmds = {}
     priority = 0
+    CmdCls = Command
 
     def __init__():
         pass
@@ -37,15 +39,15 @@ class CommandHandler:
 
     # Global rules for building command
 
-    def before_exec(ctx):
+    async def before_exec(self, ctx):
         """
-        code to run befoe any command is executed.
+        code to run before any command is executed.
 
         ctx (messagecontext): context to read and modify.
         """
         pass
 
-    def _after(ctx):
+    async def _after(self, ctx):
         """
         Code to run after any command is executed.
 
@@ -53,7 +55,7 @@ class CommandHandler:
         """
         pass
 
-    def after_exec(ctx):
+    async def after_exec(self, ctx):
         """
         Executes after command completes, before any on_* methods.
 
@@ -61,24 +63,27 @@ class CommandHandler:
         """
         pass
 
-    def on_error(ctx):
+    async def on_error(self, ctx):
         """
         Runs if the ctx.cmd_err context flag is set.
 
         ctx (MessageContext): Context to read and modify.
         """
-        pass
+        await ctx.reply(ctx.cmd_err[1])
 
-    def on_fail(ctx):
+    async def on_fail(self, ctx):
         """
         Runs if the command fails (i.e. we catch an exception)
 
         ctx (MessageContext): Context to read and modify.
-        Expects ctx.cmd_exception to be set.
+        Expects ctx.cmd_err to be set.
         """
-        pass
+        await ctx.log("There was an exception while running the command \n{}\nStack trace:{}".format(ctx.cmd.name, ctx.err[2]))
+        await ctx.reply("Something went wrong while running your command. The wrror has been logged and will be fixed soon!")
+        if ctx.bot.DEBUG > 0:
+            await ctx.reply("Stack trace:\n{}".format(ctx.err[2]))
 
-    def on_complete(ctx):
+    async def on_complete(self, ctx):
         """
         Runs if the command completes (regardless of error status).
         Executes after "after_exec" and "on_error".
@@ -97,23 +102,31 @@ class CommandHandler:
 
         func (async Function): function to build into a command object.
         """
-        def cmd(ctx, **kwargs):
-            self.before(ctx)
+        async def cmd(ctx, **kwargs):
+            await self.before_exec(ctx)
             try:
-                func(ctx, **kwargs)
-            except Exception:
+                await func(ctx, **kwargs)
+            except Exception as e:
+                trace = traceback.format_exc()
+                ctx.err = (1, e, trace)
+                await self.on_fail(ctx)
+                return
+            finally:
+                await self.after_exec(ctx)
+                await self._after(ctx)
+            if ctx.err[0]:
+                await self.on_error(ctx)
+            await self.on_complete(ctx)
 
+        return self.CmdCls(name, cmd, self, **kwargs)
 
-        return Command(name, func, self, **kwargs)
-        pass
-
-    def help_fmt(help_str):
+    def help_fmt(self, help_str):
         """
         Holds the rules for building a help format string.
 
         help_str (Str): Naked user-written help stirng.
         """
-        pass
+        return "```"+help_str+"```"
 
     # Decorators for command specification
 
@@ -133,31 +146,74 @@ class CommandHandler:
             self.cmds.append(cmd)
             return func
 
-        pass
-
-    def require(req_str):
+    def require(self, req_str):
         """
         Decorator to add a required "check" to a command function from checks.
 
         req_str (String): Name of the check function in the check dict.
         """
         def decorator(func):
-            def wrapper(**kwargs):
+            if req_str not in self.checks:
+                async def unknown_check(ctx):
+                    await ctx.log("Attempted to run the check {} which does not exist".format(req_str))
+                    return ("3", "There was an internal error: ERR_BAD_CHECK")
+                check = unknown_check
+            else:
+                check = self.checks[req_str]
 
-        pass
+            async def wrapper(ctx, **kwargs):
+                (err_code, err_msg) = await check(ctx)
+                if not err_code:
+                    await func(ctx, **kwargs)
+                else:
+                    ctx.cmd_err = (err_code, err_msg)
+            return wrapper
+        return decorator
 
-    def execute(snip):
+    def execute(self, snip, **kwargs):
         """
         Decorator to run a snippet before a command function executes.
 
         snip (String): name of the snippet to execute.
         """
+        def decorator(func):
+            if snip not in self.snippets:
+                async def unknown_snip(ctx):
+                    await ctx.log("Attempted to run the snippet {} which does not exist".format(snip))
+                    return ("3", "There was an internal error: ERR_BAD_SNIP")
+                snippet = unknown_snip
+            else:
+                snippet = self.snippets[snip]
+            snipargs = kwargs
 
-    def after(snip):
+            async def wrapper(ctx, **kwargs):
+                await snippet(ctx, **snipargs)
+                if not ctx.cmd_err[0]:
+                    await func(ctx, **kwargs)
+                else:
+                    return
+            return wrapper
+        return decorator
+
+    def after(self, snip, **kwargs):
         """
         Decorator to add a snippet to execute after function completes.
         Note that this is executed regardless of exit status.
 
         snip (String): name of the snippet to execute.
         """
-        pass
+        def decorator(func):
+            if snip not in self.snippets:
+                async def unknown_snip(ctx):
+                    await ctx.log("Attempted to run the snippet {} which does not exist".format(snip))
+                    return ("3", "There was an internal error: ERR_BAD_SNIP")
+                snippet = unknown_snip
+            else:
+                snippet = self.snippets[snip]
+            snipargs = kwargs
+
+            async def wrapper(ctx, **kwargs):
+                await func(ctx, **kwargs)
+                await snippet(ctx, **snipargs)
+            return wrapper
+        return decorator

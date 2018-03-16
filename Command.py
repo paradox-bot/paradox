@@ -1,12 +1,14 @@
 class Command:
-    def __init__(name, func, short_help=None, long_help=None, CH=CH):
+    def __init__(name, func, CH, **kwargs):
         self.name = name
         self.func = func
-        self.short_help = short_help
-        self.long_help = long_help
         self.handler = CH
+        self.short_help = kwargs["short_help"] if "short_help" in kwargs else None
+        self.long_help = kwargs["long_help"] if "long_help" in kwargs else None
+        self.category = kwargs["category"] if "category" in kwargs else None
+        self.aliases = kwargs["aliases"] if "aliases" in kwargs else None
 
-    def run(cmd_ctx):
-        self.func(cmd_ctx)
+    async def run(cmd_ctx):
+        await self.func(cmd_ctx)
 
 

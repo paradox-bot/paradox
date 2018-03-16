@@ -4,7 +4,7 @@ import discord
 class Context:
     async def __init__(self, **kwargs):
         self.cmd_err = (0, "")
-        self.err = (0, "")
+        self.err = (0, None, "")
 
         self.bot = kwargs["bot"] if ("bot" in kwargs) else None
         self.ch = kwargs["channel"] if ("channel" in kwargs) else None
@@ -22,6 +22,9 @@ class Context:
             self.server = self.ch.server
         if self.member and not self.user:
             self.user = self.member
+
+        if self.bot:
+            self.log = self.bot.log
 
     async def para_format(self, string):
         client = self.client
