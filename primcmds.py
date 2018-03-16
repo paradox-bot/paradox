@@ -733,6 +733,74 @@ async def prim_cmd_cr(message, cargs, client, conf, botdata):
         .set_footer(text="Guild name|Timestamp")
     await client.send_message(message.channel, embed=embed)
 
+@prim_cmd("serverinfo", "General",
+          "Shows server info.",
+          "Usage: serverinfo\
+          \n\nShows all information about the server")
+async def prim_cmd_serverinfo(message, cargs, client, conf, botdata):
+    regions = {
+"brazil": "Brazil",
+"eu-central": "Central Europe",
+"hongkong": "Hong Kong",
+"japan": "Japan",
+"russia": "Russia",
+"singapore": "Singapore",
+"sydney": "Sydney",
+"us-central": "Central United States",
+"us-east": "Eastern United States",
+"us-south": "Southern United States",
+"us-west": "Western United States",
+"eu-west": "Western Europe",
+"vip-amsterdam": "Amsterdam (VIP)",
+"vip-us-east": "Eastern United States (VIP)",
+  }
+
+    ver = {
+  "none": "None",
+  "low": "1 - Must have a verified email",
+  "medium": "2 - Must also be registered for more than 5 minutes",
+  "high": "3 - Must also be member of the server for more than 10 minutes",
+  4: "4 - Must have a verified phone number"
+  }
+
+    mfa = {
+0: "Disabled",
+1: "Enabled"
+    }
+
+    text = len([c for c in message.server.channels if c.type == discord.ChannelType.text])
+    total = len(message.server.channels)
+    voice = total - text
+
+    online = 0
+    idle = 0
+    offline = 0
+    dnd = 0
+    total = len(message.server.members)
+    for m in message.server.members:
+     if m.status == discord.Status.online:
+        online = online + 1
+     elif m.status == discord.Status.idle:
+        idle = idle + 1
+     elif m.status == discord.Status.offline:
+        offline = offline + 1
+
+    embed = discord.Embed("{}".format(message.server), color=discord.Colour.teal()) \
+        .add_field(name="Owner", value="{} ({})".format(message.server.owner, message.server.owner.id), inline=True) \
+        .add_field(name="Members", value="{} humans, {} bots | {} total".format(str(len([m for m in message.server.members if not m.bot])), str(len([m for m in message.server.members if m.bot])), message.server.member_count), inline=True) \
+        .add_field(name="ID", value="{}".format(message.server.id), inline=False) \
+        .add_field(name="Region", value=regions[message.server.region], inline=False) \
+        .add_field(name="Created at", value="{}".format(message.server.created_at), inline=False) \
+        .add_field(name="Channels", value="{} text, {} voice | {} total".format(text, voice, total), inline=False) \
+        .add_field(name="Roles", value="{}".format(message.server.roles), inline=False) \
+        .add_field(name="Large server", value="{}".format(message.server.large), inline=False) \
+        .add_field(name="Verification", value=ver[message.server], inline=False) \
+        .add_field(name="2-Factor Authentication", value=mfa[message.server.mfa_level], inline=False) \
+        .add_field(name="Filter", value="idk", inline=False) \
+        .add_field(name="Members", value="({} online/ {} idle/ {} dnd/ {} offline or invisible)".format(online, idle, dnd, offline), inline = False)
+    await client.send_message(message.channel, embed=embed)
+
+
 @prim_cmd("cat", "Fun stuff",
           "Sends a random cat image",
           "Usage cat\
