@@ -13,7 +13,7 @@ class CommandHandler:
         self.cmds = {}
 
     def __repr__(self):
-        return self.name + " command handler with {} commands".format(len(self.cmds))
+        return "\"{}\" command handler with {} commands".format(self.name, len(self.cmds))
     # Command loading
 
     def load_into(self, bot):
@@ -24,7 +24,7 @@ class CommandHandler:
         """
         if bot.DEBUG > 0:
             bot.sync_log("Loading command handler \"{}\" with commands {}".format(self.name,
-                                                                                  str(self.cmds)))
+                                                                                  str(list(self.cmds.keys()))))
         bot.cmd_cache = [*(bot.cmd_cache), *(self.cmds.keys())]
 
         for CH in bot.handlers:
@@ -88,10 +88,10 @@ class CommandHandler:
         ctx (MessageContext): Context to read and modify.
         Expects ctx.cmd_err to be set.
         """
-        await ctx.log("There was an exception while running the command \n{}\nStack trace:```{}```".format(ctx.cmd.name, ctx.err[2]))
+        await ctx.log("There was an exception while running the command \n{}\nStack trace:{}".format(ctx.cmd.name, ctx.err[2]))
         await ctx.reply("Something went wrong while running your command. The error has been logged and will be fixed soon!")
         if ctx.bot.DEBUG > 0:
-            await ctx.reply("Stack trace:\n{}".format(ctx.err[2]))
+            await ctx.reply("Stack trace:\n```{}```".format(ctx.err[2]))
 
     async def on_complete(self, ctx):
         """

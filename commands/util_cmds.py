@@ -19,3 +19,15 @@ async def cmd_ping(ctx):
     emsg_tstamp = emsg.edited_timestamp
     latency = ((emsg_tstamp - msg_tstamp).microseconds) // 1000
     await ctx.client.edit_message(msg, "Ping: {}ms".format(str(latency)))
+
+
+@cmds.cmd("invite",
+          category="General",
+          short_help="Sends the bot's invite link")
+async def cmd_invite(ctx):
+    """
+    Usage: {prefix}invite
+
+    Sends the link to invite the bot to your server.
+    """
+    await ctx.reply("Here's my invite link! \n<{}>".format(ctx.bot.objects["invite link"]))
