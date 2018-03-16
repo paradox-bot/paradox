@@ -6,12 +6,11 @@ class CommandHandler:
     name = "global"
     snippets = {}
     checks = {}
-    cmds = {}
     priority = 0
     CmdCls = Command
 
-    def __init__():
-        pass
+    def __init__(self):
+        self.cmds = {}
 
     # Command loading
 
