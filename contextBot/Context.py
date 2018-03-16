@@ -160,3 +160,15 @@ class CommandContext(MessageContext):
         If quotes are used, this is where they are understood.
         """
         return arg_str.strip().split(' ')
+
+    async def check(self, check_str, **kwargs):
+        if check_str not in self.CH.checks:
+            self.cmd_err = ("3", "There was an internal error: ERR_BAD_CHECK")
+            return self.cmd_err
+        return await self.CH.checks[check_str]
+
+    async def run(self, snip_str, **kwargs):
+        if snip_str not in self.CH.snippets:
+            self.cmd_err = ("3", "There was an internal error: ERR_BAD_SNIP")
+            return self.cmd_err
+        return await self.CH.snippets[snip_str]

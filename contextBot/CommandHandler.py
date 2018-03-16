@@ -86,8 +86,8 @@ class CommandHandler:
         ctx (MessageContext): Context to read and modify.
         Expects ctx.cmd_err to be set.
         """
-        await ctx.log("There was an exception while running the command \n{}\nStack trace:{}".format(ctx.cmd.name, ctx.err[2]))
-        await ctx.reply("Something went wrong while running your command. The wrror has been logged and will be fixed soon!")
+        await ctx.log("There was an exception while running the command \n{}\nStack trace:```{}```".format(ctx.cmd.name, ctx.err[2]))
+        await ctx.reply("Something went wrong while running your command. The error has been logged and will be fixed soon!")
         if ctx.bot.DEBUG > 0:
             await ctx.reply("Stack trace:\n{}".format(ctx.err[2]))
 

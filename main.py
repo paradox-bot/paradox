@@ -31,7 +31,8 @@ bot = Bot(client=client,
 bot.DEBUG = 1
 
 bot.load_cmds("commands/testcmds.py")
-bot.load_cmds("commands/utils.py")
+bot.load_cmds("commands/util_cmds.py")
+bot.load_cmds("commands/exec_cmds.py")
 
 # ----Discord event handling----
 
