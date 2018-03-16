@@ -1,4 +1,7 @@
 from contextBot.Command import Command
+
+from functools import wraps
+
 import traceback
 
 
@@ -50,7 +53,7 @@ class CommandHandler:
 
     async def before_exec(self, ctx):
         """
-        code to run before any command is executed.
+        Code to run before any command is executed.
 
         ctx (messagecontext): context to read and modify.
         """
@@ -79,7 +82,8 @@ class CommandHandler:
         ctx (MessageContext): Context to read and modify.
         """
         await ctx.log("Caught a command error with code {0[0]} and message \"{0[1]}\"".format(ctx.cmd_err))
-        await ctx.reply(ctx.cmd_err[1])
+        if ctx.cmd_err[1] != "":
+            await ctx.reply(ctx.cmd_err[1])
 
     async def on_fail(self, ctx):
         """
@@ -112,8 +116,13 @@ class CommandHandler:
 
         func (async Function): function to build into a command object.
         """
+        @wraps(func)
         async def cmd(ctx, **kwargs):
             await self.before_exec(ctx)
+            if ctx.cmd_err[0] != 0:
+                await self.on_error(ctx)
+                await self._after(ctx)
+                return
             try:
                 await func(ctx, **kwargs)
             except Exception as e:
@@ -172,6 +181,7 @@ class CommandHandler:
             else:
                 check = self.checks[req_str]
 
+            @wraps(func)
             async def wrapper(ctx, **kwargs):
                 (err_code, err_msg) = await check(ctx)
                 if not err_code:
@@ -197,6 +207,7 @@ class CommandHandler:
                 snippet = self.snippets[snip]
             snipargs = kwargs
 
+            @wraps(func)
             async def wrapper(ctx, **kwargs):
                 await snippet(ctx, **snipargs)
                 if not ctx.cmd_err[0]:
@@ -223,6 +234,7 @@ class CommandHandler:
                 snippet = self.snippets[snip]
             snipargs = kwargs
 
+            @wraps(func)
             async def wrapper(ctx, **kwargs):
                 await func(ctx, **kwargs)
                 await snippet(ctx, **snipargs)
