@@ -29,6 +29,22 @@
     \item Can eliminate the user and server separate command lists by using different command handlers with loading priorities. When checking for the command iterate through the command handlers.
 \end{itemize}
 
+\section{General Docs}
+\subsection{Error Codes}
+\begin{itemize}
+    \item 0 means there were no errors and the process completed
+    \item 1 means there was a user level error, e.g. permissions
+    \item 2 means there was insufficient data in the context to run the process
+    \item 3 means something bad happened which didn't make sense
+\end{itemize}
+\subsection{Check functions}
+\begin{itemize}
+    \item The check function will return a tuple (n, msg), where $n$ is the error code and msg is the error message to be reported to the user if they requested something which needs this check to pass
+    \item The check function takes a context, and possibly unspecified other keyword arguments
+\end{itemize}
+
+
+
 \section{Bot}
 
 \subsection{Initialisation of Bot}
