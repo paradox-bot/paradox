@@ -18,9 +18,8 @@ class Bot:
         self.log_file = log_file
         self.DEBUG = DEBUG
 
-        self.global_cmd_list = {}
-        self.user_cmd_list = {}
-        self.server_cmd_list = {}
+        self.cmd_cache = {}
+        self.handlers = {}
         # For lack of a better place to put it, define incoming event stuff here with the standard decorators
 
         # Not using the caching system for now, just straight up checking.
@@ -31,7 +30,7 @@ class Bot:
             TODO: Actually curently done with a raw check on the data.
             """
             prefix = 0
-            msgctx = MessageContext(bot=self, message=message)
+            msgctx = MessageContext(bot=self, message=message, serv_conf=self.serv_conf)
             for prfx in msgctx.get_prefixes():
                 if message.content.startswith(prfx):
                     prefix = prfx
@@ -52,12 +51,14 @@ class Bot:
         arg_str = cmd_msg[len(cmd_name):].strip()
         cmd_name = cmd_name.strip().lower()
         cmd = 0
-        if "user:{}:{}".format(ctx.authid, cmd_name) in self.user_cmd_list:
-            cmd = self.user_cmd_list["user:{}:{}".format(ctx.authid, cmd_name)]
-        elif "server:{}:{}".format(ctx.server.id, cmd_name) in self.server_cmd_list:
-            cmd = self.server_cmd_list["server:{}:{}".format(ctx.server.id, cmd_name)]
-        elif cmd_name in self.global_cmd_list:
-            cmd = self.global_cmd_list[cmd_name]
+        if cmd_name not in self.cmd_cache:
+            return
+        for CH in self.handlers:
+            if cmd_name in CH.cmds:
+                cmd = CH.cmds[cmd_name]
+                break
+        if not cmd:
+            return
         cmdCtx = CommandContext(ctx=ctx, cmd=cmd, arg_str=arg_str)
         try:
             await cmd.run(cmdCtx)

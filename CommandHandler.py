@@ -1,29 +1,39 @@
+from Command import Command
+
+
 class CommandHandler:
     name = "global"
     snippets = {}
     checks = {}
     cmds = {}
+    priority = 0
 
     def __init__():
         pass
 
     # Command loading
 
-    def load(bot):
+    def load_into(self, bot):
         """
         Loads the commands associated to this command handler object into bot.
 
         bot (BotContext): The global bot context to load the commands into.
         """
-        pass
+        bot.cmd_cache = bot.cmd_cache + self.cmds
+        if self.name in bot.handler_list:
+            bot.handlers[self.name].append(self)
+            bot.handlers.sort(key=lambda CH: CH.priority)
+        return bot
 
-    def append(CH):
+    def append(self, CH):
         """
         Appends the commands from another CH object into this one.
 
         CH (CommandHandler): The command handler object to load in.
         """
-        pass
+        for cmd in CH.cmds:
+            cmd.handler = self
+            self.cmds.append(cmd)
 
     # Global rules for building command
 
@@ -37,7 +47,7 @@ class CommandHandler:
 
     def _after(ctx):
         """
-        Code to run before any command is executed.
+        Code to run after any command is executed.
 
         ctx (MessageContext): Context to read and modify.
         """
@@ -79,7 +89,7 @@ class CommandHandler:
 
     # Building command object
 
-    def build_cmd(func):
+    def build_cmd(self, name, func, **kwargs):
         """
         Builds a command from a command function.
         Builds using the rules defined in the class, no local rules.
@@ -87,6 +97,14 @@ class CommandHandler:
 
         func (async Function): function to build into a command object.
         """
+        def cmd(ctx, **kwargs):
+            self.before(ctx)
+            try:
+                func(ctx, **kwargs)
+            except Exception:
+
+
+        return Command(name, func, self, **kwargs)
         pass
 
     def help_fmt(help_str):
@@ -99,7 +117,7 @@ class CommandHandler:
 
     # Decorators for command specification
 
-    def cmd(name, short_help=""):
+    def cmd(self, name, **kwargs):
         """
         Decorator for a command function.
         Defines command data, builds the command object, adds it to cmds.
@@ -110,6 +128,11 @@ class CommandHandler:
         aliases (strlist): List of global aliases.
         category (str): command category name.
         """
+        def decorator(func):
+            cmd = self.build_cmd(name, func, **kwargs)
+            self.cmds.append(cmd)
+            return func
+
         pass
 
     def require(req_str):
@@ -118,6 +141,9 @@ class CommandHandler:
 
         req_str (String): Name of the check function in the check dict.
         """
+        def decorator(func):
+            def wrapper(**kwargs):
+
         pass
 
     def execute(snip):

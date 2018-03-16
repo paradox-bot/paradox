@@ -14,6 +14,8 @@ class Context:
         self.user = kwargs["user"] if ("user" in kwargs) else None
         self.member = kwargs["member"] if ("member" in kwargs) else None
 
+        self.serv_conf = kwargs["serv_conf"] if ("serv_conf" in kwargs) else None
+
         if self.bot and not self.data:
             self.data = self.bot.data
         if self.ch and not self.server:
@@ -102,6 +104,18 @@ class MessageContext(Context):
             return
         message = str(message)
         await self.client.send_message(self.ch, message)
+
+    def get_prefixes(self):
+        """
+        Returns a list of valid prefixes in this context.
+
+        TODO: Currently just grabs the default prefix and the server prefix.
+        """
+        prefix_conf = self.serv_conf["prefix"]
+        if self.server:
+            prefix = prefix_conf.get(self.data, self.server)
+            prefix = prefix if prefix else self.bot.bot_conf.get("PREFIX")
+        return [prefix]
 
 
 class CommandContext(MessageContext):
