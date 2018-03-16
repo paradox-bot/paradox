@@ -785,7 +785,8 @@ async def prim_cmd_serverinfo(message, cargs, client, conf, botdata):
      elif m.status == discord.Status.offline:
         offline = offline + 1
 
-    embed = discord.Embed("{}".format(message.server), color=discord.Colour.teal()) \
+    embed = discord.Embed(color=discord.Colour.teal()) \
+        .set_author(name="{}".format(message.server)) \
         .add_field(name="Owner", value="{} ({})".format(message.server.owner, message.server.owner.id), inline=True) \
         .add_field(name="Members", value="{} humans, {} bots | {} total".format(str(len([m for m in message.server.members if not m.bot])), str(len([m for m in message.server.members if m.bot])), message.server.member_count), inline=True) \
         .add_field(name="ID", value="{}".format(message.server.id), inline=False) \
