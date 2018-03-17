@@ -108,10 +108,14 @@ class Bot:
         module = imp.load_source("cmds", filepath)
         module.cmds.load_into(self)
 
-    def load_events(self, filepath):
+    def load_module(self, filepath):
         """
-        Loads an event handler from the provided file.
-        Should loading logic be done by the files? Probably not.
-        Maybe use a function to load a single event, and pass the files a bot instance
+        Loads a module from the provided file path.
+        (E.g. for loading event handlers)
+
+        Expects the module to have a method load_into(bot).
         """
-        pass
+        if self.DEBUG > 0:
+            self.sync_log("Loading module from path: " + filepath)
+        module = imp.load_source("load_into", filepath)
+        module.load_into(self)

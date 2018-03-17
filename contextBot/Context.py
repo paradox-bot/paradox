@@ -24,6 +24,8 @@ class Context:
             self.server = self.ch.server
         if self.member and not self.user:
             self.user = self.member
+        if self.member and not self.server:
+            self.server = self.member.server
 
         if self.bot:
             self.log = self.bot.log
@@ -113,6 +115,26 @@ class Context:
             await self.log("Completed the shell command:\n{}\n{}".format(to_run, "with errors." if process.returncode != 0 else ""))
         return stdout.decode().strip()
 
+    async def msg_split(self, msg, code=False):
+        LEN = 1800
+        if len(msg) < LEN:
+            return ["```"+msg+"```"] if code else [msg]
+        lines = msg.strip().split('\n')
+
+        split_len = 0
+        splits = []
+        split = ""
+        for line in lines:
+            if split_len + len(line) > LEN:
+                splits.append(split)
+                split_len = 0
+                split = ""
+            split = split + "\n" + line
+            split_len = split_len + len(line) + 1
+        splits.append(split)
+        if code:
+            splits = ["```\n"+split+"\n```" for split in splits]
+        return splits
 
 
 class MessageContext(Context):
@@ -139,7 +161,7 @@ class MessageContext(Context):
             self.id = self.msg.id
             self.authid = self.author.id
 
-    async def reply(self, message=None, embed=None, file_name=None, dm=False):
+    async def reply(self, message=None, embed=None, file_name=None, dm=False, split=False, code=False):
         """
         Replies with message. If dm is False, replies in the channel. Otherwise, replies in dm.
 
@@ -161,7 +183,14 @@ class MessageContext(Context):
         if file_name:
             return await self.client.send_file(self.author if dm else self.ch, file_name, content=message)
         if message:
-            return await self.client.send_message(self.author if dm else self.ch, str(message), embed=embed)
+            if split and (not embed):
+                splits = await self.msg_split(str(message), code)
+                out = []
+                for split in splits:
+                    out.append(await self.client.send_message(self.author if dm else self.ch, split))
+                return out
+            else:
+                return await self.client.send_message(self.author if dm else self.ch, str(message), embed=embed)
         elif embed:
             return await self.client.send_message(self.author if dm else self.ch, embed=embed)
 

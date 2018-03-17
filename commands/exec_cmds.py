@@ -110,11 +110,17 @@ async def cmd_shell(ctx):
         await ctx.reply("You must give me something to run!")
         return
     output = await ctx.run_sh(ctx.arg_str)
-    await ctx.reply("**Command:**\
-                    \n```sh\n{}\n```\
-                    \n**Output:** \
-                    \n```\n{}\n```".format(ctx.arg_str,
-                                           output))
+    if len(output) < 1800:
+        await ctx.reply("**Command:**\
+                        \n```sh\n{}\n```\
+                        \n**Output:** \
+                        \n```\n{}\n```".format(ctx.arg_str,
+                                               output))
+    else:
+        await ctx.reply("**Command:**\
+                        \n```sh\n{}\n```\
+                        \n**Output:**".format(ctx.arg_str))
+        await ctx.reply("{}".format(output), code=True, split=True)
 
 
 async def _eval(ctx):
