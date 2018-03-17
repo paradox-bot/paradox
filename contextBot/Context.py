@@ -129,31 +129,41 @@ class MessageContext(Context):
             self.id = self.msg.id
             self.authid = self.author.id
 
-    async def reply(self, message=None, embed=None, dm=False):
+    async def reply(self, message=None, embed=None, file_name=None, dm=False):
         """
         Replies with message. If dm is False, replies in the channel. Otherwise, replies in dm.
 
         message (str): The message to reply with. Must be a string or castable to a string.
         """
-        if not dm:
-            if (message is None) and (embed is None):
-                self.bot_err = (-1, "Tried to reply with a None message")
-            if self.ch is None:
-                self.bot_err = (2, "Require channel for reply")
-
         if message == "":
             self.bot_err = (-1, "Tried to reply with an empty message")
         if self.client is None:
             self.bot_err = (2, "Require client for reply")
+        if (not file_name) and (message is None) and (embed is None):
+            self.bot_err = (-1, "Tried to reply without anything to reply with")
+
+        if (not dm) and (self.ch is None):
+            self.bot_err = (2, "Require channel for non dm reply")
+
         if self.bot_err[0] != 0:
             await self.log("Caught error in reply, code {0[0]} message \"{0[1]}\"".format(self.bot_err))
             return None
+        if file_name:
+            return await self.client.send_file(self.author if dm else self.ch, file_name, content=message)
         if message:
             return await self.client.send_message(self.author if dm else self.ch, str(message), embed=embed)
-        else:
+        elif embed:
             return await self.client.send_message(self.author if dm else self.ch, embed=embed)
 
-
+    async def del_src(self):
+        """
+        Attempts to delete the sending message.
+        Fails silently if it can't delete.
+        """
+        try:
+            return await self.client.delete_message(self.msg)
+        except Exception:
+            pass
 
 
 class CommandContext(MessageContext):
