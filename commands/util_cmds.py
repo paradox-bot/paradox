@@ -55,7 +55,7 @@ async def cmd_secho(ctx):
     Replies to the message with <text> and deletes your message.
     """
     try:
-        await ctx.client.delete_message(ctx.message)
+        await ctx.client.delete_message(ctx.msg)
     except Exception:
         pass
     await ctx.reply(ctx.arg_str if ctx.arg_str else "I can't send an empty message!")
