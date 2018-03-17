@@ -70,6 +70,26 @@ class Context:
             member = discord.utils.find(is_user, self.client.get_all_members)
         return member
 
+    async def get_cmds(self):
+        handlers = self.bot.handlers
+        cmds = {}
+        for CH in handlers:
+            cmds = dict(cmds, **(await CH.get_cmds(self)))
+        return cmds
+
+    def get_prefixes(self):
+        """
+        Returns a list of valid prefixes in this context.
+
+        TODO: Currently just grabs the default prefix and the server prefix.
+        """
+        prefix = 0
+        prefix_conf = self.serv_conf["prefix"]
+        if self.server:
+            prefix = prefix_conf.get(self.data, self.server)
+        prefix = prefix if prefix else self.bot.bot_conf.get("PREFIX")
+        return [prefix]
+
 
 class MessageContext(Context):
     def __init__(self, **kwargs):
@@ -115,17 +135,24 @@ class MessageContext(Context):
         message = str(message)
         return await self.client.send_message(self.ch, message)
 
-    def get_prefixes(self):
+    async def dmreply(self, message):
         """
-        Returns a list of valid prefixes in this context.
+        Replies to self.ch with message.
 
-        TODO: Currently just grabs the default prefix and the server prefix.
+        message (str): The message to reply with. Must be a string or castable to a string.
         """
-        prefix_conf = self.serv_conf["prefix"]
-        if self.server:
-            prefix = prefix_conf.get(self.data, self.server)
-            prefix = prefix if prefix else self.bot.bot_conf.get("PREFIX")
-        return [prefix]
+        if message is None:
+            self.bot_err = (-1, "Tried to dmreply with a None message")
+        if message == "":
+            self.bot_err = (-1, "Tried to dmreply with an empty message")
+        if self.client is None:
+            self.bot_err = (2, "Require client for reply")
+        if self.bot_err[0] != 0:
+            await self.log("Caught error in dmreply, code {0[0]} message \"{0[1]}\"".format(self.bot_err))
+            return None
+        message = str(message)
+        return await self.client.send_message(self.author, message)
+
 
 
 class CommandContext(MessageContext):

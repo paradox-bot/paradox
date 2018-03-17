@@ -49,6 +49,14 @@ class CommandHandler:
             CH.cmds[cmd].handler = self
             self.cmds[cmd] = CH.cmds[cmd]
 
+    async def get_cmds(self, ctx):
+        return self.cmds
+
+    async def is_cmd(self, ctx, cmd_name):
+        return cmd_name in self.cmds
+
+    async def get_cmd(self, ctx, cmd_name):
+        return self.cmds[cmd_name] if cmd_name in self.cmds else None
     # Global rules for building command
 
     async def before_exec(self, ctx):

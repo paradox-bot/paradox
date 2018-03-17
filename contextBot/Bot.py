@@ -20,6 +20,7 @@ class Bot:
         self.LOGFILE = log_file
 
         self.cmd_cache = []
+        self.cmds = []
         self.handlers = []
         # For lack of a better place to put it, define incoming event stuff here with the standard decorators
 
@@ -53,15 +54,12 @@ class Bot:
         cmd_name = cmd_msg.split(' ')[0]
         arg_str = cmd_msg[len(cmd_name):].strip()
         cmd_name = cmd_name.strip().lower()
-        cmd = 0
         if cmd_name not in self.cmd_cache:
             return
-        for CH in self.handlers:
-            if cmd_name in CH.cmds:
-                cmd = CH.cmds[cmd_name]
-                break
-        if not cmd:
+        cmds = await ctx.get_cmds()
+        if cmd_name not in cmds:
             return
+        cmd = cmds[cmd_name]
         # Very ugly, want a way to instantiate commandContext using Message context
         cmdCtx = CommandContext(bot=self, message=ctx.msg, serv_conf=self.serv_conf, cmd=cmd, arg_str=arg_str)
         try:
