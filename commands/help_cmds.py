@@ -30,7 +30,7 @@ async def cmd_help(ctx):
                 continue
             cat_msgs[cat] += "```"
             msg += cat_msgs[cat]
-        await ctx.dmreply(msg)
+        await ctx.reply(msg, dm=True)
         await ctx.reply("I have messaged you a detailed listing of my commands! Use `list` to obtain a more succinct listing.")
         return
     else:

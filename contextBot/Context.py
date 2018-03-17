@@ -1,11 +1,12 @@
 import discord
-
+import asyncio
 
 class Context:
     def __init__(self, **kwargs):
         self.cmd_err = (0, "")
         self.bot_err = (0, "")
         self.err = (0, None, "")
+        self.objs = {}
 
         self.bot = kwargs["bot"] if ("bot" in kwargs) else None
         self.ch = kwargs["channel"] if ("channel" in kwargs) else None
@@ -90,6 +91,19 @@ class Context:
         prefix = prefix if prefix else self.bot.bot_conf.get("PREFIX")
         return [prefix]
 
+    async def run_sh(self, to_run):
+        """
+        Runs a command asynchronously in a subproccess shell.
+        """
+        process = await asyncio.create_subprocess_shell(to_run, stdout=asyncio.subprocess.PIPE)
+        if self.bot.DEBUG > 1:
+            await self.log("Running the shell command:\n{}\nwith pid {}".format(to_run, str(process.pid)))
+        stdout, stderr = await process.communicate()
+        if self.bot.DEBUG > 1:
+            await self.log("Completed the shell command:\n{}\n{}".format(to_run, "with errors." if process.returncode != 0 else ""))
+        return stdout.decode().strip()
+
+
 
 class MessageContext(Context):
     def __init__(self, **kwargs):
@@ -115,46 +129,30 @@ class MessageContext(Context):
             self.id = self.msg.id
             self.authid = self.author.id
 
-    async def reply(self, message=None, embed=None):
+    async def reply(self, message=None, embed=None, dm=False):
         """
-        Replies to self.ch with message.
+        Replies with message. If dm is False, replies in the channel. Otherwise, replies in dm.
 
         message (str): The message to reply with. Must be a string or castable to a string.
         """
-        if (message is None) and (embed is None):
-            self.bot_err = (-1, "Tried to reply with a None message")
+        if not dm:
+            if (message is None) and (embed is None):
+                self.bot_err = (-1, "Tried to reply with a None message")
+            if self.ch is None:
+                self.bot_err = (2, "Require channel for reply")
+
         if message == "":
             self.bot_err = (-1, "Tried to reply with an empty message")
-        if self.ch is None:
-            self.bot_err = (2, "Require channel for reply")
         if self.client is None:
             self.bot_err = (2, "Require client for reply")
         if self.bot_err[0] != 0:
             await self.log("Caught error in reply, code {0[0]} message \"{0[1]}\"".format(self.bot_err))
             return None
         if message:
-            return await self.client.send_message(self.ch, str(message), embed=embed)
+            return await self.client.send_message(self.author if dm else self.ch, str(message), embed=embed)
         else:
-            return await self.client.send_message(self.ch, embed=embed)
+            return await self.client.send_message(self.author if dm else self.ch, embed=embed)
 
-
-    async def dmreply(self, message):
-        """
-        Replies to self.ch with message.
-
-        message (str): The message to reply with. Must be a string or castable to a string.
-        """
-        if message is None:
-            self.bot_err = (-1, "Tried to dmreply with a None message")
-        if message == "":
-            self.bot_err = (-1, "Tried to dmreply with an empty message")
-        if self.client is None:
-            self.bot_err = (2, "Require client for reply")
-        if self.bot_err[0] != 0:
-            await self.log("Caught error in dmreply, code {0[0]} message \"{0[1]}\"".format(self.bot_err))
-            return None
-        message = str(message)
-        return await self.client.send_message(self.author, message)
 
 
 
