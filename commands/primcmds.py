@@ -93,13 +93,6 @@ def prim_cmd(cmdName, category, desc="No description", helpDesc="No help has yet
 
 # Bot admin commands
 
-@prim_cmd("shutdown", "Bot admin")
-@require_perm("Master")
-async def prim_cmd_shutdown(message, cargs, client, conf, botdata):
-    await reply(client, message, "Shutting down, cya another day~")
-    await client.logout()
-
-
 @prim_cmd("restart", "Bot admin",
           "Restart the bot without pulling from git first",
           "Usage: restart\n\nRestarts the bot without pulling from git first")
