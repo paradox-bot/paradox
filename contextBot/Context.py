@@ -29,6 +29,16 @@ class Context:
             self.log = self.bot.log
             self.client = self.bot.client
             self.serv_conf = self.bot.serv_conf
+        else:
+            self.log = None
+            self.serv_conf = None
+
+        if self.server:
+            self.me = self.server.me
+        elif self.client:
+            self.me = self.client.user
+        else:
+            self.me = None
 
     async def para_format(self, string):
         client = self.client

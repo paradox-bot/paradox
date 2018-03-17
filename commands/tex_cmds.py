@@ -13,31 +13,29 @@ async def cmd_tex(ctx):
     Use the reactions to show your code/ edit your code/ delete the message respectively.
     """
     texcomp(cargs)
-    try:
-        await client.delete_message(message)
-    except Exception:
-        pass
-    out_msg = await client.send_file(message.channel, 'tex/out.png', content=message.author.name + ":")
-#    edit_emoj = discord.utils.get(client.get_all_emojis(), name='edit')
+    await ctx.del_src()
+    out_msg = await ctx.reply(file_name='tex/out.png', content=ctx.author.name + ":")
+
     del_emoji = ctx.bot.objects["emoji_tex_del"]
     show_emoji = ctx.bot.objects["emoji_tex_show"]
     await client.add_reaction(out_msg, del_emoji)
     await client.add_reaction(out_msg, show_emoji)
     show = False
     while True:
-        res = await client.wait_for_reaction(message=out_msg,
-                                             timeout=120,
+        res = await ctx.client.wait_for_reaction(message=out_msg,
+                                             timeout=300,
                                              emoji=[del_emoji, show_emoji])
         if res is None:
             break
-        res.reaction
-        if res.reaction.emoji == del_emoji and res.user == message.author:
-            await client.delete_message(out_msg)
+        if res.reaction.emoji == del_emoji and res.user == ctx.author:
+            await ctx.client.delete_message(out_msg)
             break
         if res.reaction.emoji == show_emoji and (res.user != client.user):
             show = 1 - show
-            await client.edit_message(out_msg, message.author.name + ":\n" +
-                                      ("```tex\n{}\n```".format(cargs) if show else ""))
+            await client.edit_message(out_msg, ctx.author.name + ":\n" +
+                                      ("```tex\n{}\n```".format(ctx.arg_str) if show else ""))
+    await client.remove_reaction(out_msg, del_emoji)
+    await client.remove_reaction(out_msg, show_emoji)
 
 
 def texcomp(tex):
