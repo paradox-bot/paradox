@@ -65,6 +65,7 @@ async def on_ready():
 
     bot.objects["emoji_tex_del"] = discord.utils.get(client.get_all_emojis(), name='delete')
     bot.objects["emoji_tex_show"] = discord.utils.get(client.get_all_emojis(), name='showtex')
+    bot.objects["emoji_bot"] = discord.utils.get(client.get_all_emojis(), name='parabot')
 
 
 """

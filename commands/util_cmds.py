@@ -1,6 +1,6 @@
 from paraCH import paraCH
 import discord
-import datetime
+from datetime import datetime
 
 cmds = paraCH()
 
@@ -78,12 +78,27 @@ async def cmd_support(ctx):
 @cmds.cmd("userinfo",
           category="User info",
           short_help="Shows the user's information")
-         # "Usage: userinfo (mention)\n\nSends information on the mentioned user, or yourself if no one is provided.")
-@cmds.require("in server")
-async def cmd_userinfo(ctx, message, cargs, client, conf, botdata):
-    user = await ctx.find_user(client, cargs, message.server, in_server=True)
-    user = user if user else message.author
-    bot_emoji = discord.utils.get(client.get_all_emojis(), name='parabot')
+@cmds.require("in_server")
+@cmds.execute("user_lookup", in_server=True)
+async def cmd_userinfo(ctx):
+    """
+    Usage: {prefix}userinfo (mention)
+
+    Sends information on the mentioned user, or yourself if no one is provided.
+    """
+    if ctx.arg_str == "":
+        user = ctx.author
+    else:
+        user = ctx.objs["found_user"]
+        if not user:
+            await ctx.reply("I couldn't find any matching users in this server sorry!")
+            return
+
+    bot_emoji = ctx.bot.objects["emoji_bot"]
+    statusdict = {"offline": "Offline/Invisible",
+                  "dnd": "Do Not Disturb",
+                  "online": "Online",
+                  "idle": "Idle/Away"}
 
     embed = discord.Embed(type="rich", color=(user.colour if user.colour.value else discord.Colour.light_grey()))
     embed.set_author(name="{user.name} ({user.id})".format(user=user), icon_url=user.avatar_url, url=user.avatar_url)
@@ -91,24 +106,20 @@ async def cmd_userinfo(ctx, message, cargs, client, conf, botdata):
     embed.add_field(name="Full name", value=("{} ".format(bot_emoji) if user.bot else "")+str(user), inline=False)
 
     game = "Playing {}".format(user.game if user.game else "nothing")
-    statusdict = {"offline": "Offline/Invisible",
-                  "dnd": "Do Not Disturb",
-                  "online": "Online",
-                  "idle": "Idle/Away"}
     embed.add_field(name="Status", value="{}, {}".format(statusdict[str(user.status)], game), inline=False)
 
     embed.add_field(name="Nickname", value=str(user.display_name), inline=False)
 
-    shared = len(list(filter(lambda m: m.id == user.id, client.get_all_members())))
+    shared = len(list(filter(lambda m: m.id == user.id, ctx.client.get_all_members())))
     embed.add_field(name="Shared servers", value=str(shared), inline=False)
 
-    joined_ago = ctx.strfdelta(datetime.datetime.utcnow()-user.joined_at)
+    joined_ago = ctx.strfdelta(datetime.utcnow()-user.joined_at)
     joined = user.joined_at.strftime("%-I:%M %p, %d/%m/%Y")
-    created_ago = ctx.strfdelta(datetime.datetime.utcnow()-user.created_at)
+    created_ago = ctx.strfdelta(datetime.utcnow()-user.created_at)
     created = user.created_at.strftime("%-I:%M %p, %d/%m/%Y")
     embed.add_field(name="Joined at", value="{} ({} ago)".format(joined, joined_ago), inline=False)
     embed.add_field(name="Created at", value="{} ({} ago)".format(created, created_ago), inline=False)
 
     roles = [r.name for r in user.roles if r.name != "@everyone"]
-    embed.add_field(name="Roles", value=('`'+ '`, `'.join(roles) + '`'), inline=False)
+    embed.add_field(name="Roles", value=('`' + '`, `'.join(roles) + '`'), inline=False)
     await ctx.reply(embed=embed)

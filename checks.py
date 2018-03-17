@@ -38,3 +38,9 @@ async def check_manager_perm(ctx):
 @check("can_embed")
 async def check_can_embed(ctx):
     pass
+
+@check("in_server")
+async def check_in_server(ctx):
+    if not ctx.server:
+        return (1, "This can only be used in a server!")
+    return (0, "")

@@ -136,6 +136,24 @@ class Context:
             splits = ["```\n"+split+"\n```" for split in splits]
         return splits
 
+    def strfdelta(self, delta, sec = False):
+        output = [[delta.days, 'day'],
+                [delta.seconds // 3600, 'hour'],
+                [delta.seconds // 60 % 60, 'minute']]
+        if sec:
+            output.append([delta.seconds % 60, 'second'])
+        for i in range(len(output)):
+            if output[i][0] != 1:
+                output[i][1] += 's'
+        reply_msg = ''
+        if output[0][0] != 0:
+            reply_msg += "{} {} ".format(output[0][0], output[0][1])
+        for i in range(1, len(output)-1):
+            reply_msg += "{} {} ".format(output[i][0], output[i][1])
+        reply_msg += "and {} {}".format(output[len(output)-1][0], output[len(output)-1][1])
+        return reply_msg
+
+
 
 class MessageContext(Context):
     def __init__(self, **kwargs):

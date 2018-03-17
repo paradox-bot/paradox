@@ -182,7 +182,7 @@ class CommandHandler:
         """
         def decorator(func):
             if req_str not in self.checks:
-                async def unknown_check(ctx):
+                async def unknown_check(ctx, **kwargs):
                     await ctx.log("Attempted to run the check {} which does not exist".format(req_str))
                     return ("3", "There was an internal error: ERR_BAD_CHECK")
                 check = unknown_check
@@ -207,9 +207,10 @@ class CommandHandler:
         """
         def decorator(func):
             if snip not in self.snippets:
-                async def unknown_snip(ctx):
+                async def unknown_snip(ctx, **kwargs):
                     await ctx.log("Attempted to run the snippet {} which does not exist".format(snip))
-                    return ("3", "There was an internal error: ERR_BAD_SNIP")
+                    ctx.cmd_err = ("3", "There was an internal error: ERR_BAD_SNIP")
+                    return
                 snippet = unknown_snip
             else:
                 snippet = self.snippets[snip]
@@ -234,9 +235,10 @@ class CommandHandler:
         """
         def decorator(func):
             if snip not in self.snippets:
-                async def unknown_snip(ctx):
+                async def unknown_snip(ctx, **kwargs):
                     await ctx.log("Attempted to run the snippet {} which does not exist".format(snip))
-                    return ("3", "There was an internal error: ERR_BAD_SNIP")
+                    ctx.cmd_err = ("3", "There was an internal error: ERR_BAD_SNIP")
+                    return
                 snippet = unknown_snip
             else:
                 snippet = self.snippets[snip]
