@@ -513,56 +513,6 @@ async def prim_cmd_userinfo(message, cargs, client, conf, botdata):
     roles = [r.name for r in user.roles if r.name != "@everyone"]
     embed.add_field(name="Roles", value=('`'+ '`, `'.join(roles) + '`'), inline=False)
     await client.send_message(message.channel, embed=embed)
-
-@prim_cmd("list", "General",
-          "Lists all my commands!",
-          "Usage: list\
-          \n\nReplies with an embed containing all my visible commands.")
-async def prim_cmd_list(message, cargs, client, conf, botdata):
-    sorted_cats = ["General", "Fun stuff", "User info", "Server setup", "Bot admin", "Misc"]
-    if cargs == "":
-        cats = {}
-        for cmd in sorted(primCmds):
-            cat = primCmds[cmd][1]
-            if cat not in cats:
-                cats[cat] = []
-            cats[cat].append(cmd)
-    embed = discord.Embed(title="Paradøx's commands!", color=discord.Colour.green())
-    for cat in sorted_cats:
-        embed.add_field(name=cat, value="`{}`".format('`, `'.join(cats[cat])), inline=False)
-    embed.set_footer(text="Use ~help or ~help <command> for detailed help or get support with ~support.")
-    await client.send_message(message.channel, embed=embed)
-
-@prim_cmd("help", "General",
-          "Provides some detailed help on a command",
-          "Usage: help [command name]\
-          \n\nShows detailed help on the requested command, or lists all the commands.")
-async def prim_cmd_help(message, cargs, client, conf, botdata):
-    msg = ""
-    sorted_cats = ["General", "Fun stuff", "User info", "Server setup", "Bot admin", "Misc"]
-    if cargs == "":
-        cat_msgs = {}
-        for cmd in sorted(primCmds):
-            cat = primCmds[cmd][1]
-            if cat not in cat_msgs or not cat_msgs[cat]:
-                cat_msgs[cat] = "```ini\n [ {}: ]\n".format(cat)
-            cat_msgs[cat] += "; {}{}:\t{}\n".format(" " * (12 - len(cmd)), cmd, primCmds[cmd][2])
-        for cat in sorted_cats:
-            cat_msgs[cat] += "```"
-            msg += cat_msgs[cat]
-        await client.send_message(message.author, msg)
-        await reply(client, message, "I have messaged you a detailed listing of my commands! Use `list` to obtain a more succinct listing.")
-        return
-    else:
-        params = cargs.split(' ')
-        for cmd in params:
-            if cmd in primCmds:
-                msg += "```{}```\n".format(primCmds[cmd][3])
-            else:
-                msg += "I couldn't find a command named `{}`. Please make sure you have spelled the command correctly. \n".format(cmd)
-    await reply(client, message, msg)
-
-
 @prim_cmd("binasc", "Fun stuff",
           "Converts binary to ascii",
           "Usage: binasc <binary string>")
