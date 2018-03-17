@@ -115,13 +115,13 @@ class MessageContext(Context):
             self.id = self.msg.id
             self.authid = self.author.id
 
-    async def reply(self, message):
+    async def reply(self, message=None, embed=None):
         """
         Replies to self.ch with message.
 
         message (str): The message to reply with. Must be a string or castable to a string.
         """
-        if message is None:
+        if (message is None) and (embed is None):
             self.bot_err = (-1, "Tried to reply with a None message")
         if message == "":
             self.bot_err = (-1, "Tried to reply with an empty message")
@@ -132,8 +132,11 @@ class MessageContext(Context):
         if self.bot_err[0] != 0:
             await self.log("Caught error in reply, code {0[0]} message \"{0[1]}\"".format(self.bot_err))
             return None
-        message = str(message)
-        return await self.client.send_message(self.ch, message)
+        if message:
+            return await self.client.send_message(self.ch, str(message), embed=embed)
+        else:
+            return await self.client.send_message(self.ch, embed=embed)
+
 
     async def dmreply(self, message):
         """
@@ -165,7 +168,7 @@ class CommandContext(MessageContext):
         self.CH = None
 
         self.arg_str = kwargs["arg_str"] if ("arg_str" in kwargs) else None
-        self.used_prefix = kwargs["arg_str"] if ("arg_str" in kwargs) else None
+        self.used_prefix = kwargs["used_prefix"] if ("used_prefix" in kwargs) else None
 
         if "cmd" in kwargs:
             self.cmd = kwargs["cmd"]

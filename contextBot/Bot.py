@@ -61,7 +61,12 @@ class Bot:
             return
         cmd = cmds[cmd_name]
         # Very ugly, want a way to instantiate commandContext using Message context
-        cmdCtx = CommandContext(bot=self, message=ctx.msg, serv_conf=self.serv_conf, cmd=cmd, arg_str=arg_str)
+        cmdCtx = CommandContext(bot=self,
+                                message=ctx.msg,
+                                serv_conf=self.serv_conf,
+                                cmd=cmd,
+                                arg_str=arg_str,
+                                used_prefix=used_prefix)
         try:
             await cmd.run(cmdCtx)
         except Exception:
