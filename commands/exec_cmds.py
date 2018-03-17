@@ -96,6 +96,27 @@ async def cmd_seval(ctx):
                                                  output))
 
 
+@cmds.cmd("shell",
+          category="Bot Admin",
+          short_help="Runs a command in the operating environment.")
+@cmds.require("exec_perm")
+async def cmd_shell(ctx):
+    """
+    Usage: {prefix}shell <command>
+
+    Runs <command> in the operating environment and returns the output in a codeblock.
+    """
+    if ctx.arg_str == "":
+        await ctx.reply("You must give me something to run!")
+        return
+    output = await ctx.run_sh(ctx.arg_str)
+    await ctx.reply("**Command:**\
+                    \n```sh\n{}\n```\
+                    \n**Output:** \
+                    \n```\n{}\n```".format(ctx.arg_str,
+                                           output))
+
+
 async def _eval(ctx):
     output = None
     try:
