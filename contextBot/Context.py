@@ -1,11 +1,12 @@
 import discord
-
+import asyncio
 
 class Context:
     def __init__(self, **kwargs):
         self.cmd_err = (0, "")
         self.bot_err = (0, "")
         self.err = (0, None, "")
+        self.objs = {}
 
         self.bot = kwargs["bot"] if ("bot" in kwargs) else None
         self.ch = kwargs["channel"] if ("channel" in kwargs) else None
@@ -28,6 +29,16 @@ class Context:
             self.log = self.bot.log
             self.client = self.bot.client
             self.serv_conf = self.bot.serv_conf
+        else:
+            self.log = None
+            self.serv_conf = None
+
+        if self.server:
+            self.me = self.server.me
+        elif self.client:
+            self.me = self.client.user
+        else:
+            self.me = None
 
     async def para_format(self, string):
         client = self.client
@@ -70,6 +81,39 @@ class Context:
             member = discord.utils.find(is_user, self.client.get_all_members)
         return member
 
+    async def get_cmds(self):
+        handlers = self.bot.handlers
+        cmds = {}
+        for CH in handlers:
+            cmds = dict(cmds, **(await CH.get_cmds(self)))
+        return cmds
+
+    def get_prefixes(self):
+        """
+        Returns a list of valid prefixes in this context.
+
+        TODO: Currently just grabs the default prefix and the server prefix.
+        """
+        prefix = 0
+        prefix_conf = self.serv_conf["prefix"]
+        if self.server:
+            prefix = prefix_conf.get(self.data, self.server)
+        prefix = prefix if prefix else self.bot.bot_conf.get("PREFIX")
+        return [prefix]
+
+    async def run_sh(self, to_run):
+        """
+        Runs a command asynchronously in a subproccess shell.
+        """
+        process = await asyncio.create_subprocess_shell(to_run, stdout=asyncio.subprocess.PIPE)
+        if self.bot.DEBUG > 1:
+            await self.log("Running the shell command:\n{}\nwith pid {}".format(to_run, str(process.pid)))
+        stdout, stderr = await process.communicate()
+        if self.bot.DEBUG > 1:
+            await self.log("Completed the shell command:\n{}\n{}".format(to_run, "with errors." if process.returncode != 0 else ""))
+        return stdout.decode().strip()
+
+
 
 class MessageContext(Context):
     def __init__(self, **kwargs):
@@ -95,37 +139,41 @@ class MessageContext(Context):
             self.id = self.msg.id
             self.authid = self.author.id
 
-    async def reply(self, message):
+    async def reply(self, message=None, embed=None, file_name=None, dm=False):
         """
-        Replies to self.ch with message.
+        Replies with message. If dm is False, replies in the channel. Otherwise, replies in dm.
 
         message (str): The message to reply with. Must be a string or castable to a string.
         """
-        if message is None:
-            self.bot_err = (-1, "Tried to reply with a None message")
         if message == "":
             self.bot_err = (-1, "Tried to reply with an empty message")
-        if self.ch is None:
-            self.bot_err = (2, "Require channel for reply")
         if self.client is None:
             self.bot_err = (2, "Require client for reply")
+        if (not file_name) and (message is None) and (embed is None):
+            self.bot_err = (-1, "Tried to reply without anything to reply with")
+
+        if (not dm) and (self.ch is None):
+            self.bot_err = (2, "Require channel for non dm reply")
+
         if self.bot_err[0] != 0:
             await self.log("Caught error in reply, code {0[0]} message \"{0[1]}\"".format(self.bot_err))
             return None
-        message = str(message)
-        return await self.client.send_message(self.ch, message)
+        if file_name:
+            return await self.client.send_file(self.author if dm else self.ch, file_name, content=message)
+        if message:
+            return await self.client.send_message(self.author if dm else self.ch, str(message), embed=embed)
+        elif embed:
+            return await self.client.send_message(self.author if dm else self.ch, embed=embed)
 
-    def get_prefixes(self):
+    async def del_src(self):
         """
-        Returns a list of valid prefixes in this context.
-
-        TODO: Currently just grabs the default prefix and the server prefix.
+        Attempts to delete the sending message.
+        Fails silently if it can't delete.
         """
-        prefix_conf = self.serv_conf["prefix"]
-        if self.server:
-            prefix = prefix_conf.get(self.data, self.server)
-            prefix = prefix if prefix else self.bot.bot_conf.get("PREFIX")
-        return [prefix]
+        try:
+            return await self.client.delete_message(self.msg)
+        except Exception:
+            pass
 
 
 class CommandContext(MessageContext):
@@ -138,7 +186,7 @@ class CommandContext(MessageContext):
         self.CH = None
 
         self.arg_str = kwargs["arg_str"] if ("arg_str" in kwargs) else None
-        self.used_prefix = kwargs["arg_str"] if ("arg_str" in kwargs) else None
+        self.used_prefix = kwargs["used_prefix"] if ("used_prefix" in kwargs) else None
 
         if "cmd" in kwargs:
             self.cmd = kwargs["cmd"]

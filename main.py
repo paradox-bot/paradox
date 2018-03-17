@@ -33,9 +33,19 @@ bot.DEBUG = 1
 bot.load_cmds("commands/testcmds.py")
 bot.load_cmds("commands/util_cmds.py")
 bot.load_cmds("commands/exec_cmds.py")
+bot.load_cmds("commands/help_cmds.py")
+bot.load_cmds("commands/admin_cmds.py")
+bot.load_cmds("commands/tex_cmds.py")
 
 bot.objects["invite_link"] = "https://discordapp.com/api/oauth2/authorize?client_id=401613224694251538&permissions=8&scope=bot"
-
+bot.objects["support guild"] = "https://discord.gg/ECbUu8u"
+bot.objects["sorted cats"] = ["General",
+                              "Fun Stuff",
+                              "User info",
+                              "Server setup",
+                              "Bot admin",
+                              "Tex",
+                              "Misc"]
 # ----Discord event handling----
 
 
@@ -50,6 +60,9 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print("Logged into", len(client.servers), "servers")
+
+    bot.objects["emoji_tex_del"] = discord.utils.get(client.get_all_emojis(), name='delete')
+    bot.objects["emoji_tex_show"] = discord.utils.get(client.get_all_emojis(), name='showtex')
 
 
 """
