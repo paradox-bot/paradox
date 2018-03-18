@@ -24,7 +24,7 @@ async def cmd_dog(ctx):
             embed.set_image(url="https://random.dog/"+dog)
             await ctx.reply(embed=embed)
 
-@cmds.cmdd("cat",
+@cmds.cmd("cat",
            category="Fun stuff",
           short_help="Sends a random cat image")
           #"Usage cat\
