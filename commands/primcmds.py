@@ -433,19 +433,6 @@ async def prim_cmd_cr(message, cargs, client, conf, botdata):
         .set_footer(text="Guild name|Timestamp")
     await client.send_message(message.channel, embed=embed)
 
-@prim_cmd("cat", "Fun stuff",
-          "Sends a random cat image",
-          "Usage cat\
-          \n\nReplies with a random cat image!")
-async def prim_cmd_cat(message, cargs, client, conf, botdata):
-    async with aiohttp.get('http://random.cat/meow') as r:
-        if r.status == 200:
-            js = await r.json()
-            embed = discord.Embed(title="Meow!", color=discord.Colour.light_grey())
-            embed.set_image(url=js['file'])
-            await client.send_message(message.channel, embed=embed)
-
-
 # Misc
 """
 TODO: make this threadsafe
