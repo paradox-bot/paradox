@@ -25,12 +25,12 @@ async def cmd_dog(ctx):
             await ctx.reply(embed=embed)
 
 @cmds.cmd("cat",
-           category="Fun Stuff",
+          category="Fun Stuff",
           short_help="Sends a random cat image")
           #"Usage cat\
           #\n\nReplies with a random cat image!")
 async def cmd_cat(ctx):
-    async with aiohttp.get('http://random.cat/meow') as r:
+    async with aiohttp.get('http://aws.random.cat/meow') as r:
         if r.status == 200:
             js = await r.json()
             embed = discord.Embed(title="Meow!", color=discord.Colour.light_grey())
