@@ -59,14 +59,6 @@ class Context:
             string = string.replace(key, keydict[key])
         return string
 
-    def get_prefix(conf, serv_conf, botdata, server):
-        prefix_conf = serv_conf["prefix"]
-        prefix = conf.get("PREFIX")
-        if server:
-            prefix = prefix_conf.get(botdata, server)
-            prefix = prefix if prefix != prefix_conf.default else conf.get("PREFIX")
-        return prefix
-
     async def find_user(self, user_str, in_server=False):
         if user_str == "":
             return None
@@ -115,9 +107,8 @@ class Context:
             await self.log("Completed the shell command:\n{}\n{}".format(to_run, "with errors." if process.returncode != 0 else ""))
         return stdout.decode().strip()
 
-    async def msg_split(self, msg, code=False):
-        LEN = 1800
-        if len(msg) < LEN:
+    async def msg_split(self, msg, code=False, MAX_LEN = 1800):
+        if len(msg) < MAX_LEN:
             return ["```"+msg+"```"] if code else [msg]
         lines = msg.strip().split('\n')
 
@@ -125,7 +116,7 @@ class Context:
         splits = []
         split = ""
         for line in lines:
-            if split_len + len(line) > LEN:
+            if split_len + len(line) > MAX_LEN:
                 splits.append(split)
                 split_len = 0
                 split = ""
