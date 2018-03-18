@@ -12,7 +12,7 @@ async def cmd_lenny(ctx):
     await ctx.reply('( ͡° ͜ʖ ͡°)')
 
 @cmds.cmd("dog",
-          category="Fun stuff",
+          category="Fun Stuff",
           short_help="Sends a random dog image")
          # "Usage dog\
          # \n\nReplies with a random dog image!")
@@ -25,7 +25,7 @@ async def cmd_dog(ctx):
             await ctx.reply(embed=embed)
 
 @cmds.cmd("cat",
-           category="Fun stuff",
+           category="Fun Stuff",
           short_help="Sends a random cat image")
           #"Usage cat\
           #\n\nReplies with a random cat image!")
