@@ -123,3 +123,18 @@ async def cmd_userinfo(ctx):
     roles = [r.name for r in user.roles if r.name != "@everyone"]
     embed.add_field(name="Roles", value=('`' + '`, `'.join(roles) + '`'), inline=False)
     await ctx.reply(embed=embed)
+
+    @cmds.cmd("discrim",
+              category="General",
+              short_help="Searches for users with a given discrim")
+                 # "Usage: discrim [discriminator]\n\nSearches all guilds the bot is in for a user with the given discriminator.")
+    async def prim_cmd_discrim(ctx):
+         p = ctx.client.get_all_members()
+         found_members = set(filter(lambda m: m.discriminator.endswith(ctx.args), p))
+         if len(found_members) == 0:
+             await ctx.reply("No users with this discrim found!")
+             return
+         user_info = [ (str(m), "({})".format(m.id)) for m in found_members]
+         max_len = len(max(list(zip(*user_info))[0],key=len))
+         user_strs = [ "{0[0]:^{max_len}} {0[1]:^25}".format(user, max_len = max_len) for user in user_info]
+         await ctx.reply("```asciidoc\n= Users found =\n{}\n```".format('\n'.join(user_strs)))

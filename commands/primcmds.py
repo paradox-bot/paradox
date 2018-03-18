@@ -101,20 +101,6 @@ async def prim_cmd_restart(message, cargs, client, conf, botdata):
     await reply(client, message, os.system('./Nanny/scripts/redeploy.sh'))
 
 
-@prim_cmd("setgame", "Bot admin",
-          "Sets my playing status!",
-          "Usage: setgame <status>\
-          \n\nSets my playing status to <status>. The following keys may be used:\
-          \n\t$users$: Number of users I can see.\
-          \n\t$servers$: Number of servers I am in.\
-          \n\t$channels$: Number of channels I am in.")
-@require_perm("Master")
-async def prim_cmd_setgame(message, cargs, client, conf, botdata):
-    status = await para_format(client, cargs, message)
-    await client.change_presence(game=discord.Game(name=status))
-    await reply(client, message, "Game changed to: \'{}\'".format(status))
-
-
 @prim_cmd("masters", "Bot admin",
           "Modify or check the bot masters",
           "Usage: masters [list] | [+/add | -/remove] <userid/mention>\
@@ -374,41 +360,6 @@ async def prim_cmd_profile(message, cargs, client, conf, botdata):
 # General utility commands
 
 
-@prim_cmd("about", "General",
-          "Provides information about the bot",
-          "Usage: about\n\nSends a message containing information about the bot.")
-async def prim_cmd_about(message, cargs, client, conf, botdata):
-    devs = ["298706728856453121", "299175087389802496", "225773687037493258"]
-    devnames = ', '.join([str(discord.utils.get(client.get_all_members(), id = str(devs))) for devs in devs])
-#    await reply(client, message, 'Paradøx was coded in Discord.py by Pue, Retro, and nockia.')
-    embed = discord.Embed(title="About Paradøx", color=discord.Colour.red()) \
-        .add_field(name="Info", value="Paradøx is a Discord.py bot coded by {}.".format(devnames), inline=True) \
-        .add_field(name="Stats", value="(Soon)", inline=True) \
-        .add_field(name="Thanks to", value="(Soon)", inline=False) \
-        .add_field(name="Links", value="[Support Server](https://discord.gg/ECbUu8u)", inline=False)
-    await client.send_message(message.channel, embed=embed)
-
-@prim_cmd("discrim", "General",
-              "Searches for users with a given discrim",
-              "Usage: discrim [discriminator]\n\nSearches all guilds the bot is in for a user with the given discriminator.")
-async def prim_cmd_discrim(message, cargs, client, conf, botdata):
-     p = client.get_all_members()
-     found_members = set(filter(lambda m: m.discriminator.endswith(cargs), p))
-     if len(found_members) == 0:
-         await reply(client, message, "No users with this discrim found!")
-         return
-     user_info = [ (str(m), "({})".format(m.id)) for m in found_members]
-     max_len = len(max(list(zip(*user_info))[0],key=len))
-     user_strs = [ "{0[0]:^{max_len}} {0[1]:^25}".format(user, max_len = max_len) for user in user_info]
-     await reply(client, message, "```asciidoc\n= Users found =\n{}\n```".format('\n'.join(user_strs)))
-
-@prim_cmd("lenny", "Fun stuff",
-          "( ͡° ͜ʖ ͡°)",
-          "Usage: lenny\n\nSends lenny ( ͡° ͜ʖ ͡°)")
-async def prim_cmd_lenny(message, cargs, client, conf, botdata):
-    await client.delete_message(message)
-    await reply(client, message, '( ͡° ͜ʖ ͡°)')
-
 @prim_cmd("rep", "Fun stuff",
           "Give reputation to a user",
           "Usage: rep [mention] | rep stats\
@@ -466,57 +417,6 @@ async def prim_cmd_rep(message, cargs, client, conf, botdata):
         botdata.users.set(message.author.id, "last_rep_time", str(now.strftime('%s')))
         await reply(client, message, "You have given a reputation point to {}".format(user.mention))
 
-
-
-
-
-@prim_cmd("userinfo", "User info",
-          "Shows the user's information",
-          "Usage: userinfo (mention)\n\nSends information on the mentioned user, or yourself if no one is provided.")
-@require_perm("in server")
-async def prim_cmd_userinfo(message, cargs, client, conf, botdata):
-    user = await find_user(client, cargs, message.server, in_server=True)
-    user = user if user else message.author
-    bot_emoji = discord.utils.get(client.get_all_emojis(), name='parabot')
-
-    embed = discord.Embed(type="rich", color=(user.colour if user.colour.value else discord.Colour.light_grey()))
-    embed.set_author(name="{user.name} ({user.id})".format(user=user), icon_url=user.avatar_url, url=user.avatar_url)
-    embed.set_thumbnail(url=user.avatar_url)
-    embed.add_field(name="Full name", value=("{} ".format(bot_emoji) if user.bot else "")+str(user), inline=False)
-
-    game = "Playing {}".format(user.game if user.game else "nothing")
-    statusdict = {"offline": "Offline/Invisible",
-                  "dnd": "Do Not Disturb",
-                  "online": "Online",
-                  "idle": "Idle/Away"}
-    embed.add_field(name="Status", value="{}, {}".format(statusdict[str(user.status)], game), inline=False)
-
-    embed.add_field(name="Nickname", value=str(user.display_name), inline=False)
-
-    shared = len(list(filter(lambda m: m.id == user.id, client.get_all_members())))
-    embed.add_field(name="Shared servers", value=str(shared), inline=False)
-
-    joined_ago = strfdelta(datetime.datetime.utcnow()-user.joined_at)
-    joined = user.joined_at.strftime("%-I:%M %p, %d/%m/%Y")
-    created_ago = strfdelta(datetime.datetime.utcnow()-user.created_at)
-    created = user.created_at.strftime("%-I:%M %p, %d/%m/%Y")
-    embed.add_field(name="Joined at", value="{} ({} ago)".format(joined, joined_ago), inline=False)
-    embed.add_field(name="Created at", value="{} ({} ago)".format(created, created_ago), inline=False)
-
-    roles = [r.name for r in user.roles if r.name != "@everyone"]
-    embed.add_field(name="Roles", value=('`'+ '`, `'.join(roles) + '`'), inline=False)
-    await client.send_message(message.channel, embed=embed)
-@prim_cmd("binasc", "Fun stuff",
-          "Converts binary to ascii",
-          "Usage: binasc <binary string>")
-async def prim_cmd_binasc(message, cargs, client, conf, botdata):
-    bitstr = cargs.replace(' ', '')
-    if (not bitstr.isdigit()) or (len(bitstr) % 8 != 0):
-        await reply(client, message, "Not a valid binary string!")
-        return
-    bytelist = map(''.join, zip(*[iter(bitstr)] * 8))
-    asciilist = [chr(sum([int(b) << 7 - n for (n, b) in enumerate(byte)])) for byte in bytelist]
-    await reply(client, message, "Output: `{}`".format(''.join(asciilist)))
 
 @prim_cmd("cheatreport", "General",
           "Reports a user for cheating with rep/level/xp",
