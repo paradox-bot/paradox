@@ -36,6 +36,8 @@ bot.load_cmds("commands/exec_cmds.py")
 bot.load_cmds("commands/help_cmds.py")
 bot.load_cmds("commands/admin_cmds.py")
 bot.load_cmds("commands/tex_cmds.py")
+bot.load_cmds("commands/fun_cmds.py")
+bot.load_cmds("commands/general_cmds.py")
 
 bot.load_module("events/join_events.py")
 
