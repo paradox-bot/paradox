@@ -1,7 +1,7 @@
-from ParaCH import ParaCH
+from paraCH import paraCH
 import discord
 import aiohttp
-cmds = ParaCH()
+cmds = paraCH()
 
 @cmds.cmd("lenny",
           category="Fun stuff",

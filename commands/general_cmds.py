@@ -1,7 +1,7 @@
 import discord
-from ParaCH import ParaCH
+from paraCH import paraCH
 
-cmds = ParaCH()
+cmds = paraCH()
 
 @cmds.cmd("about",
           category="General",
