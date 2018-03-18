@@ -446,18 +446,6 @@ async def prim_cmd_cat(message, cargs, client, conf, botdata):
             await client.send_message(message.channel, embed=embed)
 
 
-@prim_cmd("dog", "Fun stuff",
-          "Sends a random dog image",
-          "Usage dog\
-          \n\nReplies with a random dog image!")
-async def prim_cmd_dog(message, cargs, client, conf, botdata):
-    async with aiohttp.get('http://random.dog/woof') as r:
-        if r.status == 200:
-            dog = await r.text()
-            embed = discord.Embed(title="Woof!", color=discord.Colour.light_grey())
-            embed.set_image(url="https://random.dog/"+dog)
-            await client.send_message(message.channel, embed=embed)
-
 # Misc
 """
 TODO: make this threadsafe
