@@ -1,4 +1,6 @@
-from paraperms import permFuncs
+from checks import checks
+
+permFuncs = {}
 
 """
 We will be wanting to do this for user settings as well at some point.
