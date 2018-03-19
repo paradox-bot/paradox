@@ -8,7 +8,7 @@ from discord import client
 from contextBot.Context import CommandContext, MessageContext
 
 
-class Bot(discord.Client):
+class Bot(Client):
     def __init__(self, data, serv_conf, user_conf, bot_conf, log_file="bot.log", DEBUG=0):
         super().__init__()
         self.client = self
