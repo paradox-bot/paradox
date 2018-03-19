@@ -7,7 +7,7 @@ cmds = paraCH()
 @cmds.require("Master")
 async def cmd_shutdown(ctx):
     await ctx.reply("Shutting down, cya another day~")
-    await ctx.client.logout()
+    await ctx.bot.logout()
 
 
 @cmds.cmd("setgame",
@@ -24,5 +24,5 @@ async def cmd_setgame(ctx):
         $channels$: Number of channels I am in.
     """
     status = await ctx.para_format(ctx.arg_str)
-    await ctx.client.change_presence(game=discord.Game(name=status))
+    await ctx.bot.change_presence(game=discord.Game(name=status))
     await ctx.reply("Game changed to: \'{}\'".format(status))

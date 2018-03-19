@@ -17,10 +17,10 @@ async def cmd_ping(ctx):
     """
     msg = await ctx.reply("Beep")
     msg_tstamp = msg.timestamp
-    emsg = await ctx.client.edit_message(msg, "Boop")
+    emsg = await ctx.bot.edit_message(msg, "Boop")
     emsg_tstamp = emsg.edited_timestamp
     latency = ((emsg_tstamp - msg_tstamp).microseconds) // 1000
-    await ctx.client.edit_message(msg, "Ping: {}ms".format(str(latency)))
+    await ctx.bot.edit_message(msg, "Ping: {}ms".format(str(latency)))
 
 
 @cmds.cmd("invite",
@@ -57,7 +57,7 @@ async def cmd_secho(ctx):
     Replies to the message with <text> and deletes your message.
     """
     try:
-        await ctx.client.delete_message(ctx.msg)
+        await ctx.bot.delete_message(ctx.msg)
     except Exception:
         pass
     await ctx.reply(ctx.arg_str if ctx.arg_str else "I can't send an empty message!")
@@ -110,7 +110,7 @@ async def cmd_userinfo(ctx):
 
     embed.add_field(name="Nickname", value=str(user.display_name), inline=False)
 
-    shared = len(list(filter(lambda m: m.id == user.id, ctx.client.get_all_members())))
+    shared = len(list(filter(lambda m: m.id == user.id, ctx.bot.get_all_members())))
     embed.add_field(name="Shared servers", value=str(shared), inline=False)
 
     joined_ago = ctx.strfdelta(datetime.utcnow()-user.joined_at)
@@ -129,7 +129,7 @@ async def cmd_userinfo(ctx):
               short_help="Searches for users with a given discrim")
                  # "Usage: discrim [discriminator]\n\nSearches all guilds the bot is in for a user with the given discriminator.")
     async def prim_cmd_discrim(ctx):
-         p = ctx.client.get_all_members()
+         p = ctx.bot.get_all_members()
          found_members = set(filter(lambda m: m.discriminator.endswith(ctx.args), p))
          if len(found_members) == 0:
              await ctx.reply("No users with this discrim found!")

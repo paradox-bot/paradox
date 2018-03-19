@@ -11,7 +11,6 @@ class Context:
         self.bot = kwargs["bot"] if ("bot" in kwargs) else None
         self.ch = kwargs["channel"] if ("channel" in kwargs) else None
         self.server = kwargs["server"] if ("server" in kwargs) else None
-        self.client = kwargs["client"] if ("client" in kwargs) else None
         self.data = kwargs["data"] if ("data" in kwargs) else None
         self.user = kwargs["user"] if ("user" in kwargs) else None
         self.member = kwargs["member"] if ("member" in kwargs) else None
@@ -29,7 +28,6 @@ class Context:
 
         if self.bot:
             self.log = self.bot.log
-            self.client = self.bot.client
             self.serv_conf = self.bot.serv_conf
         else:
             self.log = None
@@ -37,18 +35,18 @@ class Context:
 
         if self.server:
             self.me = self.server.me
-        elif self.client:
-            self.me = self.client.user
+        elif self.bot:
+            self.me = self.bot.user
         else:
             self.me = None
 
     async def para_format(self, string):
-        client = self.client
+        bot = self.bot
         user = self.user
         server = self.server
-        keydict = {"$servers$": str(len(client.servers)),
-                   "$users$": str(len(list(client.get_all_members()))),
-                   "$channels$": str(len(list(client.get_all_channels()))),
+        keydict = {"$servers$": str(len(bot.servers)),
+                   "$users$": str(len(list(bot.get_all_members()))),
+                   "$channels$": str(len(list(bot.get_all_channels()))),
                    "$username$": user.name if user else "",
                    "$mention$": user.mention if user else "",
                    "$id$": user.id if user else "",
@@ -72,7 +70,7 @@ class Context:
         if self.server:
             member = discord.utils.find(is_user, self.server.members)
         if not (member or in_server):
-            member = discord.utils.find(is_user, self.client.get_all_members)
+            member = discord.utils.find(is_user, self.bot.get_all_members)
         return member
 
     async def get_cmds(self):
@@ -178,8 +176,8 @@ class MessageContext(Context):
         """
         if message == "":
             self.bot_err = (-1, "Tried to reply with an empty message")
-        if self.client is None:
-            self.bot_err = (2, "Require client for reply")
+        if self.bot is None:
+            self.bot_err = (2, "Require bot for reply")
         if (not file_name) and (message is None) and (embed is None):
             self.bot_err = (-1, "Tried to reply without anything to reply with")
 
@@ -190,18 +188,18 @@ class MessageContext(Context):
             await self.log("Caught error in reply, code {0[0]} message \"{0[1]}\"".format(self.bot_err))
             return None
         if file_name:
-            return await self.client.send_file(self.author if dm else self.ch, file_name, content=message)
+            return await self.bot.send_file(self.author if dm else self.ch, file_name, content=message)
         if message:
             if split and (not embed):
                 splits = await self.msg_split(str(message), code)
                 out = []
                 for split in splits:
-                    out.append(await self.client.send_message(self.author if dm else self.ch, split))
+                    out.append(await self.bot.send_message(self.author if dm else self.ch, split))
                 return out
             else:
-                return await self.client.send_message(self.author if dm else self.ch, str(message), embed=embed)
+                return await self.bot.send_message(self.author if dm else self.ch, str(message), embed=embed)
         elif embed:
-            return await self.client.send_message(self.author if dm else self.ch, embed=embed)
+            return await self.bot.send_message(self.author if dm else self.ch, embed=embed)
 
     async def del_src(self):
         """
@@ -209,7 +207,7 @@ class MessageContext(Context):
         Fails silently if it can't delete.
         """
         try:
-            return await self.client.delete_message(self.msg)
+            return await self.bot.delete_message(self.msg)
         except Exception:
             pass
 
