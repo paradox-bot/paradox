@@ -5,7 +5,7 @@ Needs to be completed ASAP.
 import imp
 import traceback
 from discord import Client
-from contextBot.Context import CommandContext, MessageContext
+from contextBot.Context import Context, CommandContext, MessageContext
 
 
 class Bot(Client):
@@ -123,5 +123,5 @@ class Bot(Client):
         """
         Decorator to make the method available as a method of Context.
         """
-        setattr(Contxt, func.__name__, func)
+        setattr(Context, func.__name__, func)
         return func
