@@ -4,12 +4,14 @@ Needs to be completed ASAP.
 """
 import imp
 import traceback
+from discord import client
 from contextBot.Context import CommandContext, MessageContext
 
 
-class Bot:
-    def __init__(self, client, data, serv_conf, user_conf, bot_conf, log_file="bot.log", DEBUG=0):
-        self.client = client
+class Bot(discord.Client):
+    def __init__(self, data, serv_conf, user_conf, bot_conf, log_file="bot.log", DEBUG=0):
+        super().__init__()
+        self.client = self
         self.data = data
         self.objects = {}
         self.serv_conf = serv_conf  # TODO: Why are these even here?
@@ -22,29 +24,27 @@ class Bot:
         self.cmd_cache = []
         self.cmds = []
         self.handlers = []
-        # For lack of a better place to put it, define incoming event stuff here with the standard decorators
 
-        # Not using the caching system for now, just straight up checking.
-        @client.event
-        async def on_message(message):
-            """
-            Do basic interp, check the message against the provided caches.
-            TODO: Actually curently done with a raw check on the data.
-            """
-            prefix = 0
-            msgctx = MessageContext(bot=self, message=message, serv_conf=self.serv_conf)
-            if self.DEBUG > 2:
-                await self.log("Available prefixes are:" + str(msgctx.get_prefixes()))
-            for prfx in msgctx.get_prefixes():
-                if message.content.startswith(prfx):
-                    prefix = prfx
-                    break
-            if not prefix:
-                if message.content.split('>')[0].strip(' <!@>') != client.user.id:
-                    return
-                else:
-                    prefix = message.content.split('>')[0] + '>'
-            await self.parse_cmd(prefix, msgctx)
+    # Not using the caching system for now, just straight up checking.
+    async def on_message(self, message):
+        """
+        Do basic interp, check the message against the provided caches.
+        TODO: Actually curently done with a raw check on the data.
+        """
+        prefix = 0
+        msgctx = MessageContext(bot=self, message=message, serv_conf=self.serv_conf)
+        if self.DEBUG > 2:
+            await self.log("Available prefixes are:" + str(msgctx.get_prefixes()))
+        for prfx in msgctx.get_prefixes():
+            if message.content.startswith(prfx):
+                prefix = prfx
+                break
+        if not prefix:
+            if message.content.split('>')[0].strip(' <!@>') != self.user.id:
+                return
+            else:
+                prefix = message.content.split('>')[0] + '>'
+        await self.parse_cmd(prefix, msgctx)
 
     async def parse_cmd(self, used_prefix, ctx):
         if self.DEBUG > 0:

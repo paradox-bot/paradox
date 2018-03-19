@@ -2,7 +2,7 @@ from contextBot.Context import Context
 
 
 def load_into(bot):
-    @bot.client.event
+    @bot.event
     async def on_member_join(member):
         ctx = Context(bot=bot, member=member)
         if not ctx.bot.serv_conf["join"].get(ctx.data, ctx.server):
@@ -22,7 +22,7 @@ def load_into(bot):
         msg = await ctx.para_format(msg)
         await ctx.client.send_message(ch, msg)
 
-    @bot.client.event
+    @bot.event
     async def on_member_remove(member):
         ctx = Context(bot=bot, member=member)
         if not ctx.bot.serv_conf["leave"].get(ctx.data, ctx.server):
