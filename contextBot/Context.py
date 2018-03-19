@@ -1,5 +1,4 @@
 import discord
-import asyncio
 
 class Context:
     def __init__(self, **kwargs):
