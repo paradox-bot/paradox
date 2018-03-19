@@ -11,7 +11,6 @@ from contextBot.Context import CommandContext, MessageContext
 class Bot(Client):
     def __init__(self, data, serv_conf, user_conf, bot_conf, log_file="bot.log", DEBUG=0):
         super().__init__()
-        self.client = self
         self.data = data
         self.objects = {}
         self.serv_conf = serv_conf  # TODO: Why are these even here?
@@ -119,3 +118,10 @@ class Bot(Client):
             self.sync_log("Loading module from path: " + filepath)
         module = imp.load_source("load_into", filepath)
         module.load_into(self)
+
+    def util(self, func):
+        """
+        Decorator to make the method available as a method of Context.
+        """
+        setattr(Contxt, func.__name__, func)
+        return func
