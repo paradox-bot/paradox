@@ -19,7 +19,7 @@ def load_into(bot):
         if not ch:
             return
 
-        msg = await ctx.para_format(msg)
+        msg = await ctx.ctx_format(msg)
         await ctx.client.send_message(ch, msg)
 
     @bot.event
@@ -39,5 +39,5 @@ def load_into(bot):
         if not ch:
             return
 
-        msg = await ctx.para_format(msg)
+        msg = await ctx.ctx_format(msg)
         await ctx.client.send_message(ch, msg)

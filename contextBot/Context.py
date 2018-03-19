@@ -39,7 +39,7 @@ class Context:
         else:
             self.me = None
 
-    async def para_format(self, string):
+    async def ctx_format(self, string):
         bot = self.bot
         user = self.user
         server = self.server

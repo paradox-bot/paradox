@@ -57,7 +57,7 @@ async def on_ready():
     GAME = conf.getStr("GAME")
     if GAME == "":
         GAME = "in $servers$ servers!"
-    GAME = await Context(bot=bot).para_format(GAME)
+    GAME = await Context(bot=bot).ctx_format(GAME)
     await bot.change_presence(status=discord.Status.online, game=discord.Game(name=GAME))
     print("Logged in as")
     print(bot.user.name)
@@ -82,7 +82,7 @@ async def on_member_join(member):
     channel = server.get_channel(join_channel)
     if not channel:
         return
-    msg = await para_format(bot, join_message, member=member)
+    msg = await ctx_format(bot, join_message, member=member)
     await bot.send_message(channel, msg)
 
 
@@ -98,7 +98,7 @@ async def on_member_remove(member):
     channel = server.get_channel(channel)
     if not channel:
         return
-    msg = await para_format(bot, message, member=member)
+    msg = await ctx_format(bot, message, member=member)
     await bot.send_message(channel, msg)
 
 
