@@ -6,17 +6,24 @@ cmds = paraCH()
 @cmds.cmd("lenny",
           category="Fun stuff",
           short_help="( ͡° ͜ʖ ͡°)")
-         # "Usage: lenny\n\nSends lenny ( ͡° ͜ʖ ͡°)")
 async def cmd_lenny(ctx):
+    """
+    Usage: {prefix}lenny
+
+    Sends lenny ( ͡° ͜ʖ ͡°).
+    """
     await ctx.bot.delete_message(ctx.message)
     await ctx.reply('( ͡° ͜ʖ ͡°)')
 
 @cmds.cmd("dog",
           category="Fun Stuff",
           short_help="Sends a random dog image")
-         # "Usage dog\
-         # \n\nReplies with a random dog image!")
 async def cmd_dog(ctx):
+    """
+    Usage: {prefix}dog
+
+    Replies with a random dog image!
+    """
     async with aiohttp.get('http://random.dog/woof') as r:
         if r.status == 200:
             dog = await r.text()
@@ -27,9 +34,12 @@ async def cmd_dog(ctx):
 @cmds.cmd("cat",
           category="Fun Stuff",
           short_help="Sends a random cat image")
-          #"Usage cat\
-          #\n\nReplies with a random cat image!")
 async def cmd_cat(ctx):
+    """
+    Usage: {prefix}cat
+
+    Replies with a random cat image!
+    """
     async with aiohttp.get('http://aws.random.cat/meow') as r:
         if r.status == 200:
             js = await r.json()
