@@ -64,8 +64,8 @@
         \end{itemize}
 \subsection{Attributes}
     \begin{itemize}
-        \item Prefix\_list:\\
-            Cached list of valid prefixes. Load them in the bot initialisation in on\_ready.
+        \item \verb|Prefix_list|:\\
+            Cached list of valid prefixes. Load them in the bot initialisation in \verb|on_ready|.
         \item 
     \end{itemize}
 
@@ -74,27 +74,27 @@
 Base Context class, the methods and attributes here are expected to be available to all snippets, checks, commands, in fact all pluggable bot modules.
 \subsubsection{Methods}
 \begin{itemize}
-    \item {str async ctx\_format(str string)}:\\
+    \item \verb|str async ctx_format(str string)|:\\
         Formats the given string by expanding certain keys based on the current context. Current support keys are:
         \begin{itemize}
-            \item[servers] The number of servers the client is in.
-            \item[users] The number of users the client can see.
-            \item[channels] The number of channels the client is in.
-            \item[username] The name of the user in the context, henceforth ctx.user (usually the author in a MessageContext).
-            \item[mention] A mention for ctx.user.
-            \item[id] The id of ctx.user.
-            \item[tag] The tag of ctx.user.
-            \item[displayname] The displayname of ctx.user.
-            \item[server] The name of the server context.
+            \item \verb|$servers$| The number of servers the client is in.
+            \item \verb|$users$| The number of users the client can see.
+            \item \verb|$channels$| The number of channels the client is in.
+            \item \verb|$username$| The name of the user in the context, henceforth ctx.user (usually the author in a MessageContext).
+            \item \verb|$mention$| A mention for ctx.user.
+            \item \verb|$id$| The id of ctx.user.
+            \item \verb|$tag$| The tag of ctx.user.
+            \item \verb|$displayname$| The displayname of ctx.user.
+            \item \verb|$server$| The name of the server context.
         \end{itemize}
-    \item {char** get\_prefixes()}:\\
+    \item \verb|char** get_prefixes()|:\\
         Returns a list of valid prefixes in the current context. \\
         Proper implementation remains TBD.
-    \item {dict async get\_cmds()}:\\
+    \item \verb|dict async get_cmds()|:\\
         Returns a dictionary of valid commands in the current context.\\
         Runs through each command handler loaded into ctx.bot, and requests the command list from the command handler, passing {self}.
         Expects the list of handlers in ctx.bot to be sorted by priority, so that higher priority commands will overwrite lower priority ones.
-    \item {char** async msg\_split(str msg, bool code=False, int MAX\_LEN = 1800)}:\\
+    \item \verb|char** async msg_split(str msg, bool code=False, int MAX_LEN = 1800)|:\\
         Takes a string {msg}, then splits it by newline into blocks of less than {MAX\_LEN} chars.
 
 \end{itemize}
