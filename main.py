@@ -20,9 +20,7 @@ botdata = BotData(BOT_DATA_FILE)
 
 PREFIX = conf.get("PREFIX")
 
-client = discord.Client()
-bot = Bot(client=client,
-          data=botdata,
+bot = Bot(data=botdata,
           serv_conf=serv_conf,
           user_conf=None,
           bot_conf=conf,
