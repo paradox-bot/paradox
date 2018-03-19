@@ -44,3 +44,12 @@ async def check_in_server(ctx):
     if not ctx.server:
         return (1, "This can only be used in a server!")
     return (0, "")
+
+@check("has_manage_server")
+async def perm_manage_server(ctx):
+    if (ctx.user is None) or (ctx.server is None):
+        return (2, "An internal error occurred.")
+    if not (ctx.user.server_permissions.manage_server or
+            ctx.user.server_permissions.administrator):
+        return (1, "You lack the `Manage Server` permission on this server!")
+    return (0, "")
