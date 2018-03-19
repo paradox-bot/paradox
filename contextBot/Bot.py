@@ -4,7 +4,7 @@ Needs to be completed ASAP.
 """
 import imp
 import traceback
-from discord import client
+from discord import Client
 from contextBot.Context import CommandContext, MessageContext
 
 

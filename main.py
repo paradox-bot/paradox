@@ -53,7 +53,7 @@ bot.objects["sorted cats"] = ["General",
 # ----Discord event handling----
 
 
-@client.event
+@bot.event
 async def on_ready():
     GAME = conf.getStr("GAME")
     if GAME == "":
@@ -114,4 +114,4 @@ async def on_server_join(server):
 
 
 # ----Everything is defined, start the client!----
-client.run(conf.get("TOKEN"))
+bot.run(conf.get("TOKEN"))
