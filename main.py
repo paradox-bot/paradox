@@ -38,6 +38,7 @@ bot.load_cmds("commands/fun_cmds.py")
 bot.load_cmds("commands/general_cmds.py")
 
 bot.load_module("events/join_events.py")
+bot.load_module("utils/utils.py")
 
 bot.objects["invite_link"] = "https://discordapp.com/api/oauth2/authorize?bot_id=401613224694251538&permissions=8&scope=bot"
 bot.objects["support guild"] = "https://discord.gg/ECbUu8u"
