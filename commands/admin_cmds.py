@@ -32,7 +32,7 @@ async def cmd_setgame(ctx):
 @cmds.cmd("restart",
           category="Bot admin",
           short_help="Restart the bot without pulling from git first")
-@cmds.check("manager_perm")
+@cmds.require("manager_perm")
 async def cmd_restart(ctx):
     """
     Usage: {prefix}restart
@@ -46,7 +46,7 @@ async def cmd_restart(ctx):
 @cmds.cmd("masters",
           category="Bot admin",
           short_help="Modify or check the bot masters")
-@cmds.check("master_perm")
+@cmds.require("master_perm")
 async def cmd_masters(ctx):
     """
     Usage: {prefix}masters [list] | [+/add | -/remove] <userid/mention>
@@ -65,7 +65,7 @@ async def cmd_masters(ctx):
 @cmds.cmd("blacklist",
           category="Bot admin",
           short_help="Modify or check the bot blacklist")
-@cmds.check("master_perm")
+@cmds.require("master_perm")
 async def cmd_blacklist(ctx):
     """
     Usage: {prefix}blacklist [list] | [+/add | -/remove] <userid/mention>
@@ -84,7 +84,7 @@ async def cmd_blacklist(ctx):
 @cmds.cmd("logs",
           category="Bot admin",
           short_help="Reads and returns the logs")
-@cmds.check("master_perm")
+@cmds.require("master_perm")
 async def cmd_logs(ctx):
     """
     Usage: {prefix}logs [number]
