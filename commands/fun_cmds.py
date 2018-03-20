@@ -27,7 +27,7 @@ async def cmd_dog(ctx):
     async with aiohttp.get('http://random.dog/woof') as r:
         if r.status == 200:
             dog = await r.text()
-            if not (dog.endswith("png") or dog.endswith("jpg") or dog.endswith("gif"))
+            if not (dog.endswith("png") or dog.endswith("jpg") or dog.endswith("gif")):
                 await cmd_dog(ctx)
                 return
             embed = discord.Embed(title="Woof!", color=discord.Colour.light_grey())
