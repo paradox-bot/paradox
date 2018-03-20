@@ -93,58 +93,6 @@ def prim_cmd(cmdName, category, desc="No description", helpDesc="No help has yet
 
 # Bot admin commands
 
-@prim_cmd("restart", "Bot admin",
-          "Restart the bot without pulling from git first",
-          "Usage: restart\n\nRestarts the bot without pulling from git first")
-@require_perm("Manager")
-async def prim_cmd_restart(message, cargs, client, conf, botdata):
-    await reply(client, message, os.system('./Nanny/scripts/redeploy.sh'))
-
-
-@prim_cmd("masters", "Bot admin",
-          "Modify or check the bot masters",
-          "Usage: masters [list] | [+/add | -/remove] <userid/mention>\
-          \n\nAdds or removes a bot master by id or mention, or lists all current masters.")
-@require_perm("Master")
-async def prim_cmd_masters(message, cargs, client, conf, botdata):
-    masters = await bot_conf["masters"].read(conf, None, message, client)
-    params = cargs.split(' ')
-    action = params[0]
-    if action in ['', 'list']:
-        await reply(client, message, "My masters are:\n{}".format(masters))
-    else:
-        errmsg = await bot_conf["masters"].write(conf, None, cargs, message, client, message.server, botdata)
-        await reply(client, message, errmsg)
-
-
-@prim_cmd("blacklist", "Bot admin",
-          "Modify or check the bot blacklist",
-          "Usage: blacklist [list] | [+/add | -/remove] <userid/mention>\
-          \n\nAdds or removes a blacklisted user by id or mention, or lists all current blacklisted users.")
-@require_perm("Master")
-async def prim_cmd_blacklist(message, cargs, client, conf, botdata):
-    blist = await bot_conf["blacklist"].read(conf, None, message, client)
-    params = cargs.split(' ')
-    action = params[0]
-    if action in ['', 'list']:
-        await reply(client, message, "I have blacklisted:\n{}".format(blist))
-    else:
-        errmsg = await bot_conf["blacklist"].write(conf, None, cargs, message, client, message.server, botdata)
-        await reply(client, message, errmsg)
-
-
-@prim_cmd("logs", "Bot admin",
-          "Reads and returns the logs",
-          "Usage: logs [number]\n\nSends the logfile or the last <number> lines of the log.")
-@require_perm("Master")
-async def prim_cmd_logs(message, cargs, client, conf, botdata):
-    logfile = LOGFILE  # Getting this from utils at the moment
-    params = cargs.split(' ')
-    if cargs == '':
-        await client.send_file(message.channel, logfile)
-    elif params[0].isdigit():
-        logs = await tail(logfile, params[0])
-        await reply(client, message, "Here are your logs:\n```{}```".format(logs))
 
 
 # Bot exec commands
