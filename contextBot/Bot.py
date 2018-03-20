@@ -117,7 +117,7 @@ class Bot(Client):
             return
         if os.path.isfile(fp):
             if fp.endswith(".py"):
-                module = imp.load_source("module", fp)
+                module = imp.load_source(os.path.basename, fp)
                 attrs = dir(module)
                 print(attrs)
                 if "cmds" in attrs:
