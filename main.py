@@ -28,20 +28,7 @@ bot = Bot(data=botdata,
 
 bot.DEBUG = 1
 
-#bot.load_cmds("commands/testcmds.py")
-#bot.load_cmds("commands/util_cmds.py")
-#bot.load_cmds("commands/exec_cmds.py")
-#bot.load_cmds("commands/help_cmds.py")
-#bot.load_cmds("commands/admin_cmds.py")
-#bot.load_cmds("commands/tex_cmds.py")
-#bot.load_cmds("commands/fun_cmds.py")
-#bot.load_cmds("commands/general_cmds.py")
-
-#bot.load_module("events/join_events.py")
-#bot.load_module("utils/utils.py")
-
 bot.load("commands", "config", "events", "utils")
-
 
 bot.objects["invite_link"] = "https://discordapp.com/api/oauth2/authorize?bot_id=401613224694251538&permissions=8&scope=bot"
 bot.objects["support guild"] = "https://discord.gg/ECbUu8u"
@@ -52,6 +39,8 @@ bot.objects["sorted cats"] = ["General",
                               "Bot admin",
                               "Tex",
                               "Misc"]
+
+
 # ----Discord event handling----
 
 
