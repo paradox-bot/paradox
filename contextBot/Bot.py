@@ -4,6 +4,7 @@ Needs to be completed ASAP.
 """
 import imp
 import traceback
+import os
 from discord import Client
 from contextBot.Context import Context, CommandContext, MessageContext
 
@@ -94,6 +95,41 @@ class Bot(Client):
         with open(self.LOGFILE, 'a+') as logfile:
             logfile.write("\n" + logMessage + "\n")
         return
+
+    def load(self, *argv):
+        """
+        Intelligently loads modules from the given filepath(s).
+        If given a directory, iterates over each file.
+        Looks for cmds and load_into, treats them as expected.
+        """
+        if len(argv) > 1:
+            for fp in argv:
+                self.load(fp)
+
+        fp = argv[0]
+        if self.DEBUG > 0:
+        self.sync_log("Loading modules from path: " + fp)
+
+        if os.path.isdir(fp):
+            self.sync_log(">Path appears to be a directory, going into it...")
+            for fn in os.listdir(fp):
+                self.load(os.path.join(fp,fn))
+            return
+        if os.path.isfile(fp):
+            if fp.endswith(".py"):
+                module = imp.load_source("module", fp)
+                if "cmds" in dir(module):
+                    self.sync_log(">>Found \"cmds\" object in file, loading as commands.")
+                    module.cmds.load_into(self)
+                if "load_into" in dir(module):
+                    self.sync_log(">>Found \"load_into\" method in file, loading as a module.")
+                    module.load_into(self)
+            else:
+                self.sync_log("File was not a python file, skipping")
+            return
+        else:
+            self.sync_log("File could not be found, skipping")
+
 
     def load_cmds(self, filepath):
         """
