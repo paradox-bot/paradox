@@ -118,10 +118,12 @@ class Bot(Client):
         if os.path.isfile(fp):
             if fp.endswith(".py"):
                 module = imp.load_source("module", fp)
-                if "cmds" in dir(module):
+                attrs = dir(module)
+                print(attrs)
+                if "cmds" in attrs:
                     self.sync_log(">>Found \"cmds\" object in file, loading as commands.")
                     module.cmds.load_into(self)
-                if "load_into" in dir(module):
+                if "load_into" in attrs:
                     self.sync_log(">>Found \"load_into\" method in file, loading as a module.")
                     module.load_into(self)
             else:
