@@ -56,7 +56,7 @@ async def cmd_masters(ctx):
     masters = await ctx.bot.conf["masters"].read(conf, None, message, client)
     action = ctx.params[0]
     if action in ['', 'list']:
-        await ctx.reply"My masters are:\n{}".format(masters))
+        await ctx.reply("My masters are:\n{}".format(masters))
     else:
         errmsg = await ctx.bot.conf["masters"].write(conf, None, cargs, message, client, message.server, botdata)
         await ctx.reply(errmsg)
