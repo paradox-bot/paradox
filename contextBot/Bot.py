@@ -122,7 +122,6 @@ class Bot(Client):
                 self.modules_loaded += 1
                 module = imp.load_source("bot_module_" + str(self.modules_loaded), fp)
                 attrs = dir(module)
-                print(attrs)
                 if "cmds" in attrs:
                     self.sync_log(">>Found \"cmds\" object in file, loading as commands.")
                     module.cmds.load_into(self)
