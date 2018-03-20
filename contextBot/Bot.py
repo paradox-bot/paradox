@@ -108,7 +108,7 @@ class Bot(Client):
 
         fp = argv[0]
         if self.DEBUG > 0:
-        self.sync_log("Loading modules from path: " + fp)
+            self.sync_log("Loading modules from path: " + fp)
 
         if os.path.isdir(fp):
             self.sync_log(">Path appears to be a directory, going into it...")
