@@ -5,7 +5,7 @@ import datetime
 
 def load_into(bot):
     @bot.util
-    def strfdelta(self, delta, sec = False):
+    def strfdelta(ctx, delta, sec = False):
         output = [[delta.days, 'day'],
                 [delta.seconds // 3600, 'hour'],
                 [delta.seconds // 60 % 60, 'minute']]
@@ -23,20 +23,20 @@ def load_into(bot):
         return reply_msg
 
     @bot.util
-    async def run_sh(self, to_run):
+    async def run_sh(ctx, to_run):
         """
         Runs a command asynchronously in a subproccess shell.
         """
         process = await asyncio.create_subprocess_shell(to_run, stdout=asyncio.subprocess.PIPE)
-        if self.bot.DEBUG > 1:
-            await self.log("Running the shell command:\n{}\nwith pid {}".format(to_run, str(process.pid)))
+        if ctx.bot.DEBUG > 1:
+            await ctx.log("Running the shell command:\n{}\nwith pid {}".format(to_run, str(process.pid)))
         stdout, stderr = await process.communicate()
-        if self.bot.DEBUG > 1:
-            await self.log("Completed the shell command:\n{}\n{}".format(to_run, "with errors." if process.returncode != 0 else ""))
+        if ctx.bot.DEBUG > 1:
+            await ctx.log("Completed the shell command:\n{}\n{}".format(to_run, "with errors." if process.returncode != 0 else ""))
         return stdout.decode().strip()
 
     @bot.util
-    async def tail(self, filename, n):
+    async def tail(ctx, filename, n):
         p1 = subprocess.Popen('tail -n ' + str(n) + ' ' + filename,
                             shell=True, stdin=None, stdout=subprocess.PIPE)
         out, err = p1.communicate()
@@ -44,7 +44,7 @@ def load_into(bot):
         return out.decode('utf-8')
 
     @bot.util
-    def convdatestring(self, datestring):
+    def convdatestring(ctx, datestring):
         datestring = datestring.strip(' ,')
         datearray = []
         funcs = {'d' : lambda x: x * 24 * 60 * 60,
