@@ -61,43 +61,6 @@ async def on_ready():
     bot.objects["emoji_bot"] = discord.utils.get(bot.get_all_emojis(), name='parabot')
 
 
-"""
-@bot.event
-async def on_member_join(member):
-    server = member.server
-    if not serv_conf["join"].get(botdata, server):
-        return
-    join_channel = serv_conf["join_ch"].get(botdata, server)
-    join_message = serv_conf["join_msg"].get(botdata, server)
-    if join_channel == 0:
-        return
-    channel = server.get_channel(join_channel)
-    if not channel:
-        return
-    msg = await ctx_format(bot, join_message, member=member)
-    await bot.send_message(channel, msg)
-
-
-@bot.event
-async def on_member_remove(member):
-    server = member.server
-    if not serv_conf["leave"].get(botdata, server):
-        return
-    channel = serv_conf["leave_ch"].get(botdata, server)
-    message = serv_conf["leave_msg"].get(botdata, server)
-    if channel == 0:
-        return
-    channel = server.get_channel(channel)
-    if not channel:
-        return
-    msg = await ctx_format(bot, message, member=member)
-    await bot.send_message(channel, msg)
-
-
-@bot.event
-async def on_server_join(server):
-    pass
-"""
 # ----End Discord event handling----
 
 # ----Event loops----
