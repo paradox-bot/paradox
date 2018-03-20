@@ -53,12 +53,12 @@ async def cmd_masters(ctx):
 
     Adds or removes a bot master by id or mention, or lists all current masters.
     """
-    masters = await ctx.bot.conf["masters"].read(conf, None, message, client)
+    masters = await ctx.bot.bot_conf["masters"].read(conf, None, message, client)
     action = ctx.params[0]
     if action in ['', 'list']:
         await ctx.reply("My masters are:\n{}".format(masters))
     else:
-        errmsg = await ctx.bot.conf["masters"].write(conf, None, cargs, message, client, message.server, botdata)
+        errmsg = await ctx.bot.bot_conf["masters"].write(conf, None, cargs, message, client, message.server, botdata)
         await ctx.reply(errmsg)
 
 
@@ -72,12 +72,12 @@ async def cmd_blacklist(ctx):
 
     Adds or removes a blacklisted user by id or mention, or lists all current blacklisted users.
     """
-    blist = await ctx.bot.conf["blacklist"].read(conf, None, message, client)
+    blist = await ctx.bot.bot_conf["blacklist"].read(conf, None, message, client)
     action = ctx.params[0]
     if action in ['', 'list']:
         await ctx.reply("I have blacklisted:\n{}".format(blist))
     else:
-        errmsg = await ctx.conf["blacklist"].write(conf, None, cargs, message, client, message.server, botdata)
+        errmsg = await ctx.bot.bot_conf["blacklist"].write(conf, None, cargs, message, client, message.server, botdata)
         await ctx.reply(errmsg)
 
 
