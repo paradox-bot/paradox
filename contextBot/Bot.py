@@ -25,6 +25,8 @@ class Bot(Client):
         self.cmds = []
         self.handlers = []
 
+        self.modules_loaded = 0
+
     # Not using the caching system for now, just straight up checking.
     async def on_message(self, message):
         """
@@ -117,7 +119,8 @@ class Bot(Client):
             return
         if os.path.isfile(fp):
             if fp.endswith(".py"):
-                module = imp.load_source(os.path.basename, fp)
+                self.modules_loaded += 1
+                module = imp.load_source("bot_module_" + str(self.modules_loaded), fp)
                 attrs = dir(module)
                 print(attrs)
                 if "cmds" in attrs:
