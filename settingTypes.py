@@ -16,10 +16,12 @@ class BOOL(paraSetting):
     outputs = {True: "",
                False: ""}
 
-    def humanise(cls, ctx, raw):
+    @classmethod
+    async def humanise(cls, ctx, raw):
         return cls.outputs[raw]
 
-    def understand(cls, ctx, userstr):
+    @classmethod
+    async def understand(cls, ctx, userstr):
         for pattern in cls.inputexps:
             if re.match(pattern, userstr, re.I):
                 return cls.inputexps[pattern]
@@ -33,10 +35,12 @@ class STR(paraSetting):
     """
     accept = "Any text"
 
-    def humanise(cls, ctx, raw):
+    @classmethod
+    async def humanise(cls, ctx, raw):
         return "\"{}\"".format(str(raw))
 
-    def understand(cls, ctx, userstr):
+    @classmethod
+    async def understand(cls, ctx, userstr):
         return userstr
 
 
@@ -55,7 +59,8 @@ class CHANNEL(paraSetting):
     """
     accept = "Channel mention/id/name"
 
-    def humanise(self, ctx, raw):
+    @classmethod
+    async def humanise(self, ctx, raw):
         """
         Expect raw to be channel id or 0, an empty.
         """
@@ -63,7 +68,8 @@ class CHANNEL(paraSetting):
             return "None"
         return "<#{}>".format(raw)
 
-    def understand(self, ctx, userstr):
+    @classmethod
+    async def understand(self, ctx, userstr):
         """
         User can enter a channel mention or an id, or even a name.
         TODO: Check if the channel actually exists given an id.

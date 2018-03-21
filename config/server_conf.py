@@ -1,12 +1,23 @@
 from contextBot.Conf import Conf
-# from paraSetting import paraSetting
+from paraSetting import paraSetting
 import settingTypes
 
 server_conf = Conf("s_conf")
 
 
-@server_conf.Setting
-class Server_Setting_Prefix(settingTypes.STR):
+class Server_Setting(paraSetting):
+    @classmethod
+    async def read(cls, ctx):
+        value = await ctx.data.server.get(cls.name)
+        return (value if value else (await cls.dyn_default()))
+
+    @classmethod
+    async def write(cls, ctx, value):
+        return await ctx.data.server.set(cls.name, value)
+
+
+@server_conf.setting
+class Server_Setting_Prefix(Server_Setting, settingTypes.STR):
     name = "guild_prefix"
     vis_name = "prefix"
     desc = "Custom server prefix"
@@ -21,8 +32,8 @@ class Server_Setting_Prefix(settingTypes.STR):
 # Join and leave message settings
 
 
-@server_conf.Setting
-class Server_Setting_Join(settingTypes.BOOL):
+@server_conf.setting
+class Server_Setting_Join(Server_Setting, settingTypes.BOOL):
     name = "join_msgs_enabled"
     vis_name = "join"
     desc = "Enables/Disables join messages"
@@ -33,8 +44,8 @@ class Server_Setting_Join(settingTypes.BOOL):
                False: "Disabled"}
 
 
-@server_conf.Setting
-class Server_Setting_Join_Msg(settingTypes.FMTSTR):
+@server_conf.setting
+class Server_Setting_Join_Msg(Server_Setting, settingTypes.FMTSTR):
     name = "join_msgs_msg"
     vis_name = "join_msg"
     desc = "Join message"
@@ -42,8 +53,8 @@ class Server_Setting_Join_Msg(settingTypes.FMTSTR):
     category = "Join message"
 
 
-@server_conf.Setting
-class Server_Setting_Join_Ch(settingTypes.CHANNEL):
+@server_conf.setting
+class Server_Setting_Join_Ch(Server_Setting, settingTypes.CHANNEL):
     name = "join_ch"
     vis_name = "join_ch"
     desc = "Channel to post in when a user joins"
@@ -51,8 +62,8 @@ class Server_Setting_Join_Ch(settingTypes.CHANNEL):
     category = "Join message"
 
 
-@server_conf.Setting
-class Server_Setting_Leave(settingTypes.BOOL):
+@server_conf.setting
+class Server_Setting_Leave(Server_Setting, settingTypes.BOOL):
     name = "leave_msgs_enabled"
     vis_name = "leave"
     desc = "Enables/Disables leave messages"
@@ -63,8 +74,8 @@ class Server_Setting_Leave(settingTypes.BOOL):
                False: "Disabled"}
 
 
-@server_conf.Setting
-class Server_Setting_Leave_Msg(settingTypes.FMTSTR):
+@server_conf.setting
+class Server_Setting_Leave_Msg(Server_Setting, settingTypes.FMTSTR):
     name = "leave_msgs_msg"
     vis_name = "leave_msg"
     desc = "Leave message"
@@ -72,8 +83,8 @@ class Server_Setting_Leave_Msg(settingTypes.FMTSTR):
     category = "Leave message"
 
 
-@server_conf.Setting
-class Server_Setting_Leave_Ch(settingTypes.CHANNEL):
+@server_conf.setting
+class Server_Setting_Leave_Ch(Server_Setting, settingTypes.CHANNEL):
     name = "leave_ch"
     vis_name = "leave_ch"
     desc = "Channel to post in when a user leaves"

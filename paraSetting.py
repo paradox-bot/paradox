@@ -71,12 +71,11 @@ class paraSetting(ConfSetting):
 
     @classmethod
     async def read(cls, ctx):
-        value = await ctx.data.get(cls.name)
-        return (value if value else (await cls.dyn_default()))
+        pass
 
     @classmethod
     async def write(cls, ctx, value):
-        return await ctx.data.set(cls.name, value)
+        pass
 
     # Helper functions for setting info
 
