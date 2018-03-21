@@ -1,98 +1,11 @@
-
-"""
-Able to initialise from user given string or from raw data.
-Main job is to transform between raw data, user string input, visible output, and to give sensible error messages (optional, the configSetting class can have a default) when stuff doesn't look right.
-values:
-    readable option list/string
-    raw
-"""
 import re
-import discord
 from paraSetting import paraSetting
-
-
-class _settingType:
-    name = ""
-    accept = ""
-
-    def __init__(self, userstr=None, raw=None, message=None, server=None, botdata=None, client=None):
-        """
-        Initialise either empty (then must use constructors), or with userstr or raw.
-        Keyword args are available if a type requires them
-        """
-        self.message = message
-        self.server = server
-        self.botdata = botdata
-        self.client = client
-        if message is not None:
-            self.server = message.server
-
-        self.error = 0
-        self.hr = ""
-        self.errmsg = ""
-        self.raw = raw
-        if userstr is not None:
-            self.fromUser(userstr)
-            return
-        elif raw is not None:
-            self.fromRaw(raw)
-            return
-
-    def fromRaw(self, raw):
-        """
-        Initialise from raw data. Probably want to get the human readable version.
-        Define both raw value and human readable value
-        """
-        if not self.error:
-            self.raw = raw
-            self.hr = self.humanise(raw)
-        return self
-
-    def fromUser(self, userstr):
-        """
-        Initialise from human input. Complicated interpretation involved.
-        Probably want to get raw, and possibly human readable.
-        """
-        if not self.error:
-            raw = self.understand(userstr)
-            self.fromRaw(raw)
-        return self
-
-    def understand(self, userstr):
-        """
-        This is where the complicated interpretation happens.
-        Takes in a user entered string, attempts to turn it into raw data.
-        Returns raw data
-        Writes the error string if it can't
-        """
-        pass
-
-    def humanise(self, raw):
-        """
-        Take in raw data and humanise it to be user readable.
-        Can be an alternative to initialising and getting the raw data.
-        """
-        pass
-
-
-class TIMEZONE(paraSetting):
-    """
-    Wrapper for timezone stuff
-    """
-    name = "Timezone"
-    accept = "A timezone in the form Country/City, some short-hands are accepted. More options coming soon!"
-    def humanise(self, raw):
-        return "\"{}\"".format(str(raw))
-
-    def understand(self, raw):
-        pass
 
 
 class BOOL(paraSetting):
     """
     A sort of boolean type, more like a wrapper for a boolean.
     """
-    name = ""
     accept = "Yes/No, True/False, Enabled/Disabled"
     inputexps = {"^yes$": True,
                  "^true$": True,
@@ -103,45 +16,54 @@ class BOOL(paraSetting):
     outputs = {True: "",
                False: ""}
 
-    def humanise(self, raw):
-        return self.outputs[raw]
+    def humanise(cls, ctx, raw):
+        return cls.outputs[raw]
 
-    def understand(self, userstr):
-        for pattern in self.inputexps:
+    def understand(cls, ctx, userstr):
+        for pattern in cls.inputexps:
             if re.match(pattern, userstr, re.I):
-                return self.inputexps[pattern]
-        self.errmsg = "I don't understand this value. Acceptable values are: {}".format(self.accept)
-        self.error = 1
+                return cls.inputexps[pattern]
+        ctx.cmd_err = (1, "I don't understand this value. Acceptable values are: {}".format(cls.accept))
         return None
 
-class YES_BOOL(paraSetting):
-    name = "Yes/No"
-    outputs = {True: "Yes",
-               False: "No"}
+
+class STR(paraSetting):
+    """
+    Just a plain string, nothing special
+    """
+    accept = "Any text"
+
+    def humanise(cls, ctx, raw):
+        return "\"{}\"".format(str(raw))
+
+    def understand(cls, ctx, userstr):
+        return userstr
 
 
-class ENABLED_BOOL(paraSetting):
-    name = "Enabled/Disabled"
-    outputs = {True: "Enabled",
-               False: "Disabled"}
+class FMTSTR(STR):
+    """
+    Formatable string
+    TODO: accepted keys in variable from somewhere
+    """
+    accept = "Formatted string, accepted keys are:\n"
+    accept += "\t $username$, $mention$, $id$, $tag$, $displayname$, $server$"
 
 
 class CHANNEL(paraSetting):
     """
     Channel type.
     """
-    name = "Channel"
     accept = "Channel mention/id/name"
 
-    def humanise(self, raw):
+    def humanise(self, ctx, raw):
         """
         Expect raw to be channel id or 0, an empty.
         """
-        if raw == 0:
+        if not raw:
             return "None"
         return "<#{}>".format(raw)
 
-    def understand(self, userstr):
+    def understand(self, ctx, userstr):
         """
         User can enter a channel mention or an id, or even a name.
         TODO: Check if the channel actually exists given an id.
@@ -150,18 +72,29 @@ class CHANNEL(paraSetting):
         chid = userstr.strip('<#!>')
         if chid.isdigit():
             return chid
-        if not self.server:
-            self.error = 2
-            self.errmsg = "No server context, please provide channel id or mention."
+        if not ctx.server:
+            ctx.cmd_err = (1, "Not in a server, please provide channel id or mention.")
             return None
-        for ch in self.server.channels:
+        for ch in ctx.server.channels:
             if ch.name.lower() == userstr.lower():
                 return ch.id
-        self.error = 1
-        self.errmsg = "I can't find this channel, please provide an id or mention."
+        ctx.cmd_err = (1, "I can't find this channel, please provide an id or mention.")
         return None
 
 
+"""
+class YES_BOOL(BOOL):
+    name = "Yes/No"
+    outputs = {True: "Yes",
+               False: "No"}
+
+
+class ENABLED_BOOL(BOOL):
+    name = "Enabled/Disabled"
+    outputs = {True: "Enabled",
+               False: "Disabled"}
+"""
+'''
 class userList(paraSetting):
     name = "List of users"
     accept = "[+/add | -/remove] <userid/mention>"
@@ -205,6 +138,8 @@ class userList(paraSetting):
         else:
             (self.error, self.errmsg) = (1, "I don't understand your input. Valid input is: `{}`".format(self.accept))
             return self.raw
+'''
+
 
 """
 class userBlackList(userList):
@@ -225,30 +160,8 @@ class userMasterList(userList):
     str_added_to_list = "I accept this user as a new master."
 """
 
-class STR(_settingType):
-    """
-    Just a plain string, nothing special
-    """
-    name = "string"
-    accept = "Any text"
 
-    def humanise(self, raw):
-        return "\"{}\"".format(str(raw))
-
-    def understand(self, userstr):
-        return userstr
-
-
-class FMTSTR(STR):
-    """
-    Formatable string
-    TODO: accepted keys in variable from somewhere
-    """
-    name = "Formatted string"
-    accept = "Formatted string, accepted keys are:\n"
-    accept += "\t $username$, $mention$, $id$, $tag$, $displayname$, $server$"
-
-
+'''
 class SERVER(_settingType):
     """
     Server type.
@@ -256,3 +169,4 @@ class SERVER(_settingType):
     """
     name = "server"
     accept = "Server name/ server id"
+'''
