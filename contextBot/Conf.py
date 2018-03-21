@@ -4,5 +4,5 @@ class Conf:
         self.settings = {}
 
     def setting(self, cls):
-        settings[cls.name] = cls
+        self.settings[cls.name] = cls
         setattr(self, cls.name, cls)

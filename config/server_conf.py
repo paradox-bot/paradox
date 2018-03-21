@@ -91,5 +91,5 @@ class Server_Setting_Leave_Ch(Server_Setting, settingTypes.CHANNEL):
 
 
 def load_into(bot):
-    bot.add_to_ctx(server_conf)
+    bot.add_to_ctx(server_conf, name="server_conf")
     bot.s_conf = server_conf

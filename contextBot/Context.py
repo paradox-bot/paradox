@@ -14,8 +14,6 @@ class Context:
         self.user = kwargs["user"] if ("user" in kwargs) else None
         self.member = kwargs["member"] if ("member" in kwargs) else None
 
-        self.serv_conf = kwargs["serv_conf"] if ("serv_conf" in kwargs) else None
-
         if self.bot and not self.data:
             self.data = self.bot.data
         if self.ch and not self.server:
@@ -27,10 +25,8 @@ class Context:
 
         if self.bot:
             self.log = self.bot.log
-            self.serv_conf = self.bot.serv_conf
         else:
             self.log = None
-            self.serv_conf = None
 
         if self.server:
             self.me = self.server.me
@@ -86,7 +82,7 @@ class Context:
         TODO: Currently just grabs the default prefix and the server prefix.
         """
         prefix = 0
-        prefix_conf = self.serv_conf["prefix"]
+        # prefix_conf = self.server_conf["prefix"]
         if self.server:
             prefix = prefix_conf.get(self.data, self.server)
         prefix = prefix if prefix else self.bot.bot_conf.get("PREFIX")

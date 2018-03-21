@@ -165,6 +165,6 @@ class Bot(Client):
         self.add_to_ctx(func)
         return func
 
-    def add_to_ctx(self, attr):
-        setattr(Context, attr.__name__, attr)
+    def add_to_ctx(self, attr, name=None):
+        setattr(Context, name if name else attr.__name__, attr)
 
