@@ -182,7 +182,7 @@ class CommandHandler:
         """
         def decorator(func):
             if req_str not in self.checks:
-                async def unknown_check(ctx, **kwargs):
+                async def unknown_check(ctx, **checkargs):
                     await ctx.log("Attempted to run the check {} which does not exist".format(req_str))
                     return ("3", "There was an internal error: ERR_BAD_CHECK")
                 check = unknown_check
@@ -191,7 +191,7 @@ class CommandHandler:
 
             @wraps(func)
             async def wrapper(ctx, **kwargs):
-                (err_code, err_msg) = await check(ctx)
+                (err_code, err_msg) = await check(ctx, **checkargs)
                 if not err_code:
                     await func(ctx, **kwargs)
                 else:

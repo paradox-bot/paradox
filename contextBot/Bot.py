@@ -161,7 +161,11 @@ class Bot(Client):
 
     def util(self, func):
         """
-        Decorator to make the method available as a method of Context.
+        Decorator to make a util method available as a method of Context.
         """
-        setattr(Context, func.__name__, func)
+        self.add_to_ctx(func)
         return func
+
+    def add_to_ctx(self, attr):
+        setattr(Context, attr.__name__, attr)
+

@@ -26,6 +26,15 @@ bot = Bot(data=botdata,
           bot_conf=conf,
           log_file="paralog.log")
 
+"""
+bot = Bot(data=botdata,
+          prefixes=[conf.get("PREFIX")]
+          log_file="paralog.log")
+"""
+
+
+
+
 bot.DEBUG = 1
 
 bot.load("commands", "config", "events", "utils")
