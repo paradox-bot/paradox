@@ -2,6 +2,7 @@ from paraCH import paraCH
 import discord
 cmds = paraCH()
 
+
 @cmds.cmd("shutdown",
           category="Bot admin")
 @cmds.require("Master")
@@ -28,7 +29,6 @@ async def cmd_setgame(ctx):
     await ctx.reply("Game changed to: \'{}\'".format(status))
 
 
-
 @cmds.cmd("restart",
           category="Bot admin",
           short_help="Restart the bot without pulling from git first")
@@ -42,7 +42,7 @@ async def cmd_restart(ctx):
     msg = await ctx.run_sh('./Nanny/scripts/redeploy.sh')
     await ctx.reply(msg)
 
-
+'''
 @cmds.cmd("masters",
           category="Bot admin",
           short_help="Modify or check the bot masters")
@@ -79,6 +79,7 @@ async def cmd_blacklist(ctx):
     else:
         errmsg = await ctx.bot.bot_conf["blacklist"].write(conf, None, cargs, message, client, message.server, botdata)
         await ctx.reply(errmsg)
+'''
 
 
 @cmds.cmd("logs",
@@ -92,7 +93,7 @@ async def cmd_logs(ctx):
     Sends the logfile or the last <number> lines of the log.
     """
     if ctx.arg_str == '':
-        await ctx.reply(file=logfile)
+        await ctx.reply(file=ctx.bot.log_file)
     elif ctx.params[0].isdigit():
-        logs = await ctx.tail(logfile, ctx.params[0])
+        logs = await ctx.tail(ctx.bot.log_file, ctx.params[0])
         await ctx.reply("Here are your logs:\n```{}```".format(logs))
