@@ -10,6 +10,7 @@ class paraSetting(ConfSetting):
     default = ""  # What the default value is. Returned by read when no value is found
     desc = ""  # Human readable description of the setting.
     accept = ""  # Human readable string describing what the acceptable values are.
+    category = ""  # Setting category
 
     checks = checks  # Default checks dict is just checks
 
