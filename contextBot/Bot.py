@@ -10,7 +10,7 @@ from contextBot.Context import Context, CommandContext, MessageContext
 
 
 class Bot(Client):
-    def __init__(self, data, bot_conf, log_file="bot.log", DEBUG=0, prefix=""):
+    def __init__(self, data, bot_conf, log_file="bot.log", DEBUG=0, prefix="", prefix_func=None):
         super().__init__()
         self.data = data
         self.objects = {}
@@ -19,6 +19,10 @@ class Bot(Client):
         self.DEBUG = DEBUG
         self.LOGFILE = log_file
         self.prefix = prefix
+        self.get_prefixes = prefix_func
+
+        if prefix_func is not None:
+            self.add_to_ctx(prefix_func, "get_prefixes")
 
         self.cmd_cache = []
         self.cmds = []

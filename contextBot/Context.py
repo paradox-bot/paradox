@@ -78,14 +78,9 @@ class Context:
     def get_prefixes(self):
         """
         Returns a list of valid prefixes in this context.
-
-        TODO: Currently just grabs the default prefix and the server prefix.
+        Expect to be overriden from bot initialisation.
         """
-        prefix = 0
-        # prefix_conf = self.server_conf["prefix"]
-        if self.server:
-            prefix = prefix_conf.get(self.data, self.server)
-        prefix = prefix if prefix else self.bot.bot_conf.get("PREFIX")
+        prefix = self.bot.prefix
         return [prefix]
 
     async def msg_split(self, msg, code=False, MAX_LEN = 1800):
