@@ -10,16 +10,15 @@ from contextBot.Context import Context, CommandContext, MessageContext
 
 
 class Bot(Client):
-    def __init__(self, data, serv_conf, user_conf, bot_conf, log_file="bot.log", DEBUG=0):
+    def __init__(self, data, bot_conf, log_file="bot.log", DEBUG=0, prefix=""):
         super().__init__()
         self.data = data
         self.objects = {}
-        self.serv_conf = serv_conf  # TODO: Why are these even here?
-        self.user_conf = user_conf
         self.bot_conf = bot_conf
         self.log_file = log_file
         self.DEBUG = DEBUG
         self.LOGFILE = log_file
+        self.prefix = prefix
 
         self.cmd_cache = []
         self.cmds = []

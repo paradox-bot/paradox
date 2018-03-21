@@ -23,11 +23,9 @@ class Server_Setting_Prefix(Server_Setting, settingTypes.STR):
     desc = "Custom server prefix"
     category = "Guild settings"
 
-    '''
     @classmethod
     async def dyn_default(cls, ctx):
         return ctx.bot.prefix
-    '''
 
 # Join and leave message settings
 

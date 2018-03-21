@@ -2,7 +2,6 @@ import discord
 
 from botdata import BotData
 from botconf import Conf
-from serverconfig import serv_conf
 
 from contextBot.Context import Context
 from contextBot.Bot import Bot
@@ -21,14 +20,13 @@ botdata = BotData(BOT_DATA_FILE)
 PREFIX = conf.get("PREFIX")
 
 bot = Bot(data=botdata,
-          serv_conf=serv_conf,
-          user_conf=None,
           bot_conf=conf,
+          prefix=conf.get("PREFIX"),
           log_file="paralog.log")
 
 """
 bot = Bot(data=botdata,
-          prefixes=[conf.get("PREFIX")]
+          prefix=conf.get("PREFIX")
           log_file="paralog.log")
 """
 
