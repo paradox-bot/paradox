@@ -19,16 +19,16 @@ botdata = BotData(BOT_DATA_FILE)
 
 PREFIX = conf.get("PREFIX")
 
-def get_prefixes(ctx):
+async def get_prefixes(ctx):
         """
         Returns a list of valid prefixes in this context.
         Currently just bot and server prefixes
         """
         prefix = 0
-        prefix_conf = ctx.server_conf,guild_prefix
-        if self.server:
-            prefix = prefix_conf.get(self.data, self.server)
-        prefix = prefix if prefix else self.bot.prefix
+        prefix_conf = ctx.server_conf.guild_prefix
+        if ctx.server:
+            prefix = await prefix_conf.get(ctx)
+        prefix = prefix if prefix else ctx.bot.prefix
         return [prefix]
 
 bot = Bot(data=botdata,

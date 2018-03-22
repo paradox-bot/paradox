@@ -75,7 +75,7 @@ class Context:
             cmds = dict(cmds, **(await CH.get_cmds(self)))
         return cmds
 
-    def get_prefixes(self):
+    async def get_prefixes(self):
         """
         Returns a list of valid prefixes in this context.
         Expect to be overriden from bot initialisation.

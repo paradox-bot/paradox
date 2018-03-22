@@ -37,10 +37,10 @@ class Bot(Client):
         TODO: Actually curently done with a raw check on the data.
         """
         prefix = 0
-        msgctx = MessageContext(bot=self, message=message, serv_conf=self.serv_conf)
+        msgctx = MessageContext(bot=self, message=message)
         if self.DEBUG > 2:
-            await self.log("Available prefixes are:" + str(msgctx.get_prefixes()))
-        for prfx in msgctx.get_prefixes():
+            await self.log("Available prefixes are:" + str(await msgctx.get_prefixes()))
+        for prfx in (await msgctx.get_prefixes()):
             if message.content.startswith(prfx):
                 prefix = prfx
                 break

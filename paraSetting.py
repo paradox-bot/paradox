@@ -57,7 +57,7 @@ class paraSetting(ConfSetting):
         Obtains a raw value using read, returns a useable value
         """
         raw = await cls.read(ctx)
-        return raw
+        return raw if raw else (await cls.dyn_default(ctx))
 
     @classmethod
     async def set(cls, ctx, value):
@@ -66,16 +66,6 @@ class paraSetting(ConfSetting):
         """
         raw = value  # Most values should be understood by the db interface, so we can send it on
         return await cls.write(ctx, raw)
-
-    # Reading and writing raw values from the data object
-
-    @classmethod
-    async def read(cls, ctx):
-        pass
-
-    @classmethod
-    async def write(cls, ctx, value):
-        pass
 
     # Helper functions for setting info
 

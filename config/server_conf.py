@@ -8,12 +8,12 @@ server_conf = Conf("s_conf")
 class Server_Setting(paraSetting):
     @classmethod
     async def read(cls, ctx):
-        value = await ctx.data.server.get(cls.name)
-        return (value if value else (await cls.dyn_default()))
+        value = await ctx.data.servers.get(ctx.server.id, cls.name)
+        return value
 
     @classmethod
     async def write(cls, ctx, value):
-        return await ctx.data.server.set(cls.name, value)
+        return await ctx.data.servers.set(ctx.server.id, cls.name, value)
 
 
 @server_conf.setting
