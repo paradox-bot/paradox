@@ -2,7 +2,7 @@ from paraCH import paraCH
 import discord
 import aiohttp
 from datetime import datetime
-from pytz imprt timezone
+from pytz import timezone
 cmds = paraCH()
 
 @cmds.cmd("lenny",
