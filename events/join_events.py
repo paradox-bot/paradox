@@ -1,4 +1,5 @@
 from contextBot.Context import Context
+import discord
 
 
 def load_into(bot):
@@ -7,6 +8,17 @@ def load_into(bot):
         ctx = Context(bot=bot, member=member)
         if not (await ctx.server_conf.join.get(ctx.data, ctx.server)):
             return
+
+        autorole = await ctx.server_conf.guild_autorole.get(ctx)
+        autorole = discord.utils.get(ctx.server.roles, id=autorole)
+        if autorole:
+            try:
+                await ctx.bot.add_roles(ctx.member, autorole)
+            except Exception:
+                """
+                TODO: Alert whoever gets bot errors in this server.
+                """
+                pass
 
         ch = await ctx.server_conf.join_ch.get(ctx)
         msg = await ctx.server_conf.join_msg.get(ctx)

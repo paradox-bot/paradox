@@ -1,4 +1,5 @@
 import re
+import discord
 from paraSetting import paraSetting
 
 
@@ -41,6 +42,10 @@ class STR(paraSetting):
 
     @classmethod
     async def understand(cls, ctx, userstr):
+        if userstr.startswith("\"") and userstr.endswith("\""):
+            return userstr.strip("\"")
+        if userstr.startswith("'") and userstr.endswith("'"):
+            return userstr.strip("'")
         return userstr
 
 
@@ -51,6 +56,48 @@ class FMTSTR(STR):
     """
     accept = "Formatted string, accepted keys are:\n"
     accept += "\t $username$, $mention$, $id$, $tag$, $displayname$, $server$"
+
+
+class ROLE(paraSetting):
+    """
+    ROLE type.
+    """
+    accept = "ROLE mention/id/name"
+
+    @classmethod
+    async def humanise(self, ctx, raw):
+        """
+        Expect raw to be role id or 0, an empty.
+        """
+        if not raw:
+            return "None"
+        role = discord.utils.get(ctx.server.roles, id=raw)
+        if role:
+            return "{}".format(role.name)
+        return "{}(Role not found)".format(raw)
+
+    @classmethod
+    async def understand(self, ctx, userstr):
+        """
+        User can enter a role mention or an id, or even a partial name.
+        """
+        if not ctx.server:
+            ctx.cmd_err = (1, "This is not valid outside of a server!")
+            return None
+        userstr = str(userstr)
+        chid = userstr.strip('<#@!>')
+        if chid.isdigit():
+            def is_role(role):
+                return role.id == chid
+        else:
+            def is_role(role):
+                return userstr.lower() in role.name.lower()
+        role = discord.utils.find(is_role, ctx.server.roles)
+        if role:
+            return role.id
+        else:
+            ctx.cmd_err = (1, "I can't find this role in this server!")
+            return None
 
 
 class CHANNEL(paraSetting):

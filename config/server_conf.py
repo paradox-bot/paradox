@@ -27,6 +27,16 @@ class Server_Setting_Prefix(Server_Setting, settingTypes.STR):
     async def dyn_default(cls, ctx):
         return ctx.bot.prefix
 
+
+@server_conf.setting
+class Server_Setting_Autorole(Server_Setting, settingTypes.ROLE):
+    name = "guild_autorole"
+    vis_name = "autorole"
+    desc = "Role automatically given to new members"
+    category = "Guild settings"
+    default = 0
+
+
 # Join and leave message settings
 
 
