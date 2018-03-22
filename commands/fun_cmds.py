@@ -66,7 +66,7 @@ async def cmd_piggybank(ctx):
     bank_amount = bank_amount if bank_amount else 0
     transactions = transactions if transactions else {}
     if ctx.arg_str == "":
-        await ctx.reply("You have {} in your piggybank!".format(bank_amount))
+        await ctx.reply("You have ${} in your piggybank!".format(bank_amount))
         return
     elif (ctx.params[0] in ["+", "-"]) and len(ctx.params) == 2:
         action = ctx.params[0]
@@ -81,7 +81,7 @@ async def cmd_piggybank(ctx):
         bank_amount += amount if action == "+" else -amount
         await ctx.data.users.set(ctx.authid, "piggybank_amount", bank_amount)
         await ctx.data.users.set(ctx.authid, "piggybank_history", transactions)
-        await ctx.reply("{} has been {} your piggybank. You now have {}!".format(amount,
+        await ctx.reply("${} has been {} your piggybank. You now have ${}!".format(amount,
                                                                                  "added to" if action == "+" else "removed from",
                                                                                  bank_amount))
     else:
