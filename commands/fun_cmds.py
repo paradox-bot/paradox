@@ -95,7 +95,7 @@ async def cmd_piggybank(ctx):
                                                                         bank_amount)
         if goal:
             if bank_amount >= goal:
-                msg += "\nYou have achieved your goal! Congratulations!"
+                msg += "\nYou have achieved your goal!"
             else:
                 msg += "\nYou have now achieved {:.1%} of your goal (${:.2f}).".format(bank_amount/goal, goal)
         await ctx.reply(msg)
@@ -110,7 +110,7 @@ async def cmd_piggybank(ctx):
             await ctx.reply("The amount must be a number!")
             return
         await ctx.data.users.set(ctx.authid, "piggybank_goal", amount)
-        await ctx.reply("Your goal has been set! Good luck")
+        await ctx.reply("Your goal has been set to ${}. ".format(amount))
     elif (ctx.params[0] == "list"):
         if len(transactions) == 0:
             await ctx.reply("No transactions to show! Start adding money to your piggy bank with `{}piggybank + <amount>`".format(ctx.used_prefix))
