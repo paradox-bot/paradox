@@ -45,7 +45,7 @@ bot.objects["invite_link"] = "https://discordapp.com/api/oauth2/authorize?bot_id
 bot.objects["support guild"] = "https://discord.gg/ECbUu8u"
 bot.objects["sorted cats"] = ["General",
                               "Fun Stuff",
-                              "User info",
+                              "Utility",
                               "Server setup",
                               "Bot admin",
                               "Tex",

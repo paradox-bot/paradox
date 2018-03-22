@@ -1,42 +1,13 @@
 from paraCH import paraCH
 import discord
 from datetime import datetime
+from pytz import timezone
 
 cmds = paraCH()
 
 
-@cmds.cmd("ping",
-          category="General",
-          short_help="Checks the bot's latency")
-async def cmd_ping(ctx):
-    """
-    Usage: {prefix}ping
-
-    Checks the response delay of the bot.
-    Usually used to test whether the bot is responsive or not.
-    """
-    msg = await ctx.reply("Beep")
-    msg_tstamp = msg.timestamp
-    emsg = await ctx.bot.edit_message(msg, "Boop")
-    emsg_tstamp = emsg.edited_timestamp
-    latency = ((emsg_tstamp - msg_tstamp).microseconds) // 1000
-    await ctx.bot.edit_message(msg, "Ping: {}ms".format(str(latency)))
-
-
-@cmds.cmd("invite",
-          category="General",
-          short_help="Sends the bot's invite link")
-async def cmd_invite(ctx):
-    """
-    Usage: {prefix}invite
-
-    Sends the link to invite the bot to your server.
-    """
-    await ctx.reply("Here's my invite link! \n<{}>".format(ctx.bot.objects["invite link"]))
-
-
 @cmds.cmd("echo",
-          category="General",
+          category="Utility",
           short_help="Sends what you tell me to!")
 async def cmd_echo(ctx):
     """
@@ -48,7 +19,7 @@ async def cmd_echo(ctx):
 
 
 @cmds.cmd("secho",
-          category="General",
+          category="Utility",
           short_help="Like echo but deletes.")
 async def cmd_secho(ctx):
     """
@@ -63,20 +34,8 @@ async def cmd_secho(ctx):
     await ctx.reply(ctx.arg_str if ctx.arg_str else "I can't send an empty message!")
 
 
-@cmds.cmd("support",
-          category="General",
-          short_help="Sends the link to the bot guild")
-async def cmd_support(ctx):
-    """
-    Usage: {prefix}support
-
-    Sends the invite link to the Paradøx support guild.
-    """
-    await ctx.reply("Join my server here!\n\n<{}>".format(ctx.bot.objects["support guild"]))
-
-
 @cmds.cmd("userinfo",
-          category="User info",
+          category="Utility",
           short_help="Shows the user's information")
 @cmds.require("in_server")
 @cmds.execute("user_lookup", in_server=True)
@@ -125,7 +84,7 @@ async def cmd_userinfo(ctx):
     await ctx.reply(embed=embed)
 
     @cmds.cmd("discrim",
-              category="General",
+              category="Utility",
               short_help="Searches for users with a given discrim")
                  # "Usage: discrim [discriminator]\n\nSearches all guilds the bot is in for a user with the given discriminator.")
     async def prim_cmd_discrim(ctx):
@@ -138,3 +97,88 @@ async def cmd_userinfo(ctx):
          max_len = len(max(list(zip(*user_info))[0],key=len))
          user_strs = [ "{0[0]:^{max_len}} {0[1]:^25}".format(user, max_len = max_len) for user in user_info]
          await ctx.reply("```asciidoc\n= Users found =\n{}\n```".format('\n'.join(user_strs)))
+
+
+@cmds.cmd("piggybank",
+          category="Utility",
+          short_help="Keep track of money added towards a goal.")
+async def cmd_piggybank(ctx):
+    """
+    Usage: {prefix}piggybank [+|- <amount>] | [list [clear]] | [goal <amount>|none]
+
+    [+|- <amount>]: Adds or removes an amount to your piggybank.
+    [list [clear]]: Sends you a DM with your previous transactions or clears your history.
+    [goal <amount>|none]: Sets your goal!
+    Or with no arguments, lists your current amount and progress to the goal.
+    """
+    bank_amount = await ctx.data.users.get(ctx.authid, "piggybank_amount")
+    transactions = await ctx.data.users.get(ctx.authid, "piggybank_history")
+    goal = await ctx.data.users.get(ctx.authid, "piggybank_goal")
+    bank_amount = bank_amount if bank_amount else 0
+    transactions = transactions if transactions else {}
+    goal = goal if goal else 0
+    if ctx.arg_str == "":
+        msg = "You have ${:.2f} in your piggybank!".format(bank_amount)
+        if goal:
+            msg += "\nYou have achieved {:.1%} of your goal (${:.2f})".format(bank_amount/goal, goal)
+        await ctx.reply(msg)
+        return
+    elif (ctx.params[0] in ["+", "-"]) and len(ctx.params) == 2:
+        action = ctx.params[0]
+        now = datetime.utcnow().strftime('%s')
+        try:
+            amount = float(ctx.params[1].strip("$#"))
+        except ValueError:
+            await ctx.reply("The amount must be a number!")
+            return
+        transactions[now] = {}
+        transactions[now]["amount"] = "{}{:.2f}".format(action, amount)
+        bank_amount += amount if action == "+" else -amount
+        await ctx.data.users.set(ctx.authid, "piggybank_amount", bank_amount)
+        await ctx.data.users.set(ctx.authid, "piggybank_history", transactions)
+        msg = "${:.2f} has been {} your piggybank. You now have ${:.2f}!".format(amount,
+                                                                        "added to" if action == "+" else "removed from",
+                                                                        bank_amount)
+        if goal:
+            if bank_amount >= goal:
+                msg += "\nYou have achieved your goal!"
+            else:
+                msg += "\nYou have now achieved {:.1%} of your goal (${:.2f}).".format(bank_amount/goal, goal)
+        await ctx.reply(msg)
+    elif (ctx.params[0] == "goal") and len(ctx.params) == 2:
+        if ctx.params[1].lower() in ["none", "remove", "clear"]:
+            await ctx.data.users.set(ctx.authid, "piggybank_goal", amount)
+            await ctx.reply("Your goal has been cleared")
+            return
+        try:
+            amount = float(ctx.params[1].strip("$#"))
+        except ValueError:
+            await ctx.reply("The amount must be a number!")
+            return
+        await ctx.data.users.set(ctx.authid, "piggybank_goal", amount)
+        await ctx.reply("Your goal has been set to ${}. ".format(amount))
+    elif (ctx.params[0] == "list"):
+        if len(transactions) == 0:
+            await ctx.reply("No transactions to show! Start adding money to your piggy bank with `{}piggybank + <amount>`".format(ctx.used_prefix))
+            return
+        if (len(ctx.params) == 2) and (ctx.params[1] == "clear"):
+            await ctx.data.users.set(ctx.authid, "piggybank_history", {})
+            await ctx.reply("Your transaction history has been cleared!")
+
+        msg = "```\n"
+        for trans in sorted(transactions):
+            trans_time = datetime.utcfromtimestamp(int(trans))
+            tz = await ctx.data.users.get(ctx.authid, "tz")
+            if tz:
+                try:
+                    TZ = timezone(tz)
+                except Exception:
+                    pass
+            else:
+                TZ = timezone("UTC")
+            timestr = '%-I:%M %p, %d/%m/%Y (%Z)'
+            timestr = TZ.localize(trans_time).strftime(timestr)
+            msg += "{}\t {:^10}\n".format(timestr, str(transactions[trans]["amount"]))
+            await ctx.reply(msg + "```", dm=True)
+    else:
+        await ctx.reply("Usage: {}piggybank [+|- <amount>] | [list] | [goal <amount>|none]".format(ctx.used_prefix))

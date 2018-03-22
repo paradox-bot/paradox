@@ -32,3 +32,45 @@ async def cmd_cr(ctx):
         .add_field(name="Evidence", value="(Evidence from args)", inline=False) \
         .set_footer(text="Guild name|Timestamp")
     await ctx.reply(embed=embed)
+
+
+@cmds.cmd("ping",
+          category="General",
+          short_help="Checks the bot's latency")
+async def cmd_ping(ctx):
+    """
+    Usage: {prefix}ping
+
+    Checks the response delay of the bot.
+    Usually used to test whether the bot is responsive or not.
+    """
+    msg = await ctx.reply("Beep")
+    msg_tstamp = msg.timestamp
+    emsg = await ctx.bot.edit_message(msg, "Boop")
+    emsg_tstamp = emsg.edited_timestamp
+    latency = ((emsg_tstamp - msg_tstamp).microseconds) // 1000
+    await ctx.bot.edit_message(msg, "Ping: {}ms".format(str(latency)))
+
+
+@cmds.cmd("invite",
+          category="General",
+          short_help="Sends the bot's invite link")
+async def cmd_invite(ctx):
+    """
+    Usage: {prefix}invite
+
+    Sends the link to invite the bot to your server.
+    """
+    await ctx.reply("Here's my invite link! \n<{}>".format(ctx.bot.objects["invite link"]))
+
+
+@cmds.cmd("support",
+          category="General",
+          short_help="Sends the link to the bot guild")
+async def cmd_support(ctx):
+    """
+    Usage: {prefix}support
+
+    Sends the invite link to the Paradøx support guild.
+    """
+    await ctx.reply("Join my server here!\n\n<{}>".format(ctx.bot.objects["support guild"]))
