@@ -47,6 +47,7 @@ bot.objects["sorted cats"] = ["General",
                               "Fun Stuff",
                               "Social",
                               "Utility",
+                              "User info",
                               "Server setup",
                               "Bot admin",
                               "Tex",
@@ -73,6 +74,8 @@ async def on_ready():
     bot.objects["emoji_tex_del"] = discord.utils.get(bot.get_all_emojis(), name='delete')
     bot.objects["emoji_tex_show"] = discord.utils.get(bot.get_all_emojis(), name='showtex')
     bot.objects["emoji_bot"] = discord.utils.get(bot.get_all_emojis(), name='parabot')
+    bot.objects["emoji_botowner"] = discord.utils.get(bot.get_all_emojis(), name='botowner')
+    bot.objects["emoji_botmanager"] = discord.utils.get(bot.get_all_emojis(), name='botmanager')
 
 
 # ----End Discord event handling----

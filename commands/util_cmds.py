@@ -2,6 +2,9 @@ from paraCH import paraCH
 import discord
 from datetime import datetime
 from pytz import timezone
+import iso8601
+import traceback
+
 
 cmds = paraCH()
 
@@ -188,3 +191,138 @@ async def cmd_piggybank(ctx):
         await ctx.reply(msg + "```", dm=True)
     else:
         await ctx.reply("Usage: {}piggybank [+|- <amount>] | [list] | [goal <amount>|none]".format(ctx.used_prefix))
+
+
+@cmds.cmd("set",
+          category="User info",
+          short_help="Shows or sets a user setting")
+async def cmd_set(ctx):
+    """
+    "Usage: {prefix}set [settingname [value]]
+
+    Sets <settingname> to <value>, shows the value of <settingname>, or lists your available settings.
+    Temporary implementation, more is coming soon!
+    """
+    if ctx.arg_str == '':
+        await ctx.reply("```timezone: Country/City, some short-hands are accepted, use ETC/+10 etc to set to GMT-10.```")
+        return
+    action = ctx.params[0]
+    if action == "timezone":
+        if len(ctx.params) == 1:
+            tz = await ctx.data.users.get(ctx.authid, "tz")
+            if tz:
+                msg = "Your current timezone is `{}`".format(tz)
+            else:
+                msg = "You haven't set your timezone! Use `{prefix}set timezone <timezone>` to set it!".format(ctx.used_prefix)
+            await ctx.reply(msg)
+            return
+        tz = ' '.join(ctx.params[1:])
+        try:
+            timezone(tz)
+        except Exception:
+            await ctx.reply("Unfortunately, I don't understand this timezone. More options will be available soon.")
+            return
+        await ctx.data.users.set(ctx.authid, "tz", tz)
+        await ctx.reply("Your timezone has been set to `{}`".format(tz))
+
+# User info commands
+
+
+@cmds.cmd("time",
+          category="User info",
+          short_help="Shows the current time for a user")
+@cmds.execute("user_lookup", in_server=True)
+async def cmd_time(ctx):
+    """
+    Usage: {prefix}time [mention | id | partial name]
+
+    Gives the time for the mentioned user or yourself.
+    Requires the user to have set the usersetting "timezone".
+    """
+    if ctx.arg_str == "":
+        user = ctx.author
+    else:
+        user = ctx.objs["found_user"]
+        if not user:
+            await ctx.reply("I couldn't find any matching users in this server sorry!")
+            return
+    user = user.id
+    tz = await ctx.data.users.get(user, "tz")
+    if not tz:
+        if user == ctx.authid:
+            await ctx.reply("You haven't set your timezone! Set it using \"{}set timezone <timezone>\"!".format(ctx.used_prefix))
+        else:
+            await ctx.reply("This user hasn't set their timezone. Ask them to set it using \"{}set timezone <timezone>\"!".format(ctx.used_prefix))
+        return
+    try:
+        TZ = timezone(tz)
+    except Exception:
+        await ctx.reply("An invalid timezone was provided in the database. Aborting... \n **Error Code:** `ERR_OBSTRUCTED_DB`")
+        trace = traceback.format_exc()
+        await ctx.log(trace)
+        return
+    timestr = 'The current time for **{}** is **%-I:%M %p (%Z(%z))** on **%a, %d/%m/%Y**'\
+        .format(ctx.server.get_member(user).display_name)
+    timestr = TZ.localize(datetime.utcnow()).strftime(timestr)
+#    timestr = iso8601.parse_date(datetime.now().isoformat()).astimezone(TZ).strftime(timestr)
+    await ctx.reply(timestr)
+
+
+@cmds.cmd("profile",
+          category="User info",
+          short_help="Displays a user profile")
+@cmds.execute("user_lookup", in_server=True)
+async def cmd_profile(ctx):
+    """
+    Usage: {prefix}profile [mention]
+
+    Displays the mentioned user's profile, or your own.
+    """
+    if ctx.arg_str == "":
+        user = ctx.author
+    else:
+        user = ctx.objs["found_user"]
+        if not user:
+            await ctx.reply("I couldn't find any matching users in this server sorry!")
+            return
+
+    badge_dict = {"master_perm": "botowner",
+                  "manager_perm": "botmanager"}
+    badges = ""
+    for badge in badge_dict:
+        (code, msg) = await cmds.checks[badge](ctx)
+        if code == 0:
+            badge_emoj = ctx.bot.objects["emoji_"+badge_dict[badge]]
+            if badge_emoj is not None:
+                badges += str(badge_emoj) + " "
+
+    created_ago = ctx.strfdelta(datetime.utcnow()-user.created_at)
+    created = user.created_at.strftime("%-I:%M %p, %d/%m/%Y")
+    rep = await ctx.data.users.get(user.id, "rep")
+    embed = discord.Embed(type="rich", color=user.colour) \
+        .set_author(name="{user} ({user.id})".format(user=user),
+                    icon_url=user.avatar_url)
+    if badges:
+        embed.add_field(name="Badges", value=badges, inline=False)
+
+    embed.add_field(name="Level",
+                    value="(Coming Soon!)", inline=True) \
+        .add_field(name="XP",
+                   value="(Coming Soon!)", inline=True) \
+        .add_field(name="Reputation",
+                   value=rep, inline=True) \
+        .add_field(name="Premium",
+                   value="No", inline=True)
+    tz = await ctx.data.users.get(user.id, "tz")
+    if tz:
+        try:
+            TZ = timezone(tz)
+        except Exception:
+            await ctx.reply("An invalid timezone was provided in the database. Aborting... \n **Error Code:** `ERR_CORRUPTED_DB`")
+            return
+        timestr = '%-I:%M %p on %a, %d/%m/%Y'
+        timestr = iso8601.parse_date(datetime.now().isoformat()).astimezone(TZ).strftime(timestr)
+        embed.add_field(name="Current Time", value="{}".format(timestr), inline=False)
+    embed.add_field(name="Created at",
+                    value="{} ({} ago)".format(created, created_ago), inline=False)
+    await ctx.reply(embed=embed)
