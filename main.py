@@ -31,21 +31,11 @@ def get_prefixes(ctx):
         prefix = prefix if prefix else self.bot.prefix
         return [prefix]
 
-
 bot = Bot(data=botdata,
           bot_conf=conf,
-          prefix=conf.get("PREFIX"),
+          prefix=PREFIX,
           prefix_func=get_prefixes,
           log_file="paralog.log")
-
-"""
-bot = Bot(data=botdata,
-          prefix=conf.get("PREFIX")
-          log_file="paralog.log")
-"""
-
-
-
 
 bot.DEBUG = 1
 
