@@ -137,7 +137,7 @@ async def cmd_piggybank(ctx):
             await ctx.reply("The amount must be a number!")
             return
         transactions[now] = {}
-        transactions[now]["amount"] = "{}{:.2f}".format(action, amount)
+        transactions[now]["amount"] = "{}${:.2f}".format(action, amount)
         bank_amount += amount if action == "+" else -amount
         await ctx.data.users.set(ctx.authid, "piggybank_amount", bank_amount)
         await ctx.data.users.set(ctx.authid, "piggybank_history", transactions)
@@ -169,6 +169,7 @@ async def cmd_piggybank(ctx):
         if (len(ctx.params) == 2) and (ctx.params[1] == "clear"):
             await ctx.data.users.set(ctx.authid, "piggybank_history", {})
             await ctx.reply("Your transaction history has been cleared!")
+            return
 
         msg = "```\n"
         for trans in sorted(transactions):
