@@ -58,10 +58,10 @@ async def cmd_cat(ctx):
           short_help="Keep track of money added towards a goal.")
 async def cmd_piggybank(ctx):
     """
-    Usage: {prefix}piggybank [+|- <amount>] | [list] | [goal <amount>|none]
+    Usage: {prefix}piggybank [+|- <amount>] | [list [clear]] | [goal <amount>|none]
 
     [+|- <amount>]: Adds or removes an amount to your piggybank.
-    [list]: Sends you a DM with your previous transactions.
+    [list [clear]]: Sends you a DM with your previous transactions or clears your history.
     [goal <amount>|none]: Sets your goal!
     Or with no arguments, lists your current amount and progress to the goal.
     """
@@ -86,7 +86,7 @@ async def cmd_piggybank(ctx):
             await ctx.reply("The amount must be a number!")
             return
         transactions[now] = {}
-        transactions[now]["amount"] = action + str(amount)
+        transactions[now]["amount"] = "{}{:.2f}".format(action, amount)
         bank_amount += amount if action == "+" else -amount
         await ctx.data.users.set(ctx.authid, "piggybank_amount", bank_amount)
         await ctx.data.users.set(ctx.authid, "piggybank_history", transactions)
@@ -112,10 +112,13 @@ async def cmd_piggybank(ctx):
         await ctx.data.users.set(ctx.authid, "piggybank_goal", amount)
         await ctx.reply("Your goal has been set! Good luck")
     elif (ctx.params[0] == "list"):
-        await ctx.reply("In progress", dm=True)
         if len(transactions) == 0:
             await ctx.reply("No transactions to show! Start adding money to your piggy bank with `{}piggybank + <amount>`".format(ctx.used_prefix))
             return
+        it (len(ctx.params) == 2) and (ctx.params[1] == "clear"):
+            await ctx.data.users.set(ctx.authid, "piggybank_history", {})
+            await ctx.reply("Your transaction history has been cleared!")
+
         msg = "```\n"
         for trans in sorted(transactions):
             trans_time = datetime.utcfromtimestamp(int(trans))
@@ -129,7 +132,7 @@ async def cmd_piggybank(ctx):
                 TZ = timezone("UTC")
             timestr = '%-I:%M %p, %d/%m/%Y (%Z)'
             timestr = TZ.localize(trans_time).strftime(timestr)
-
-            msg += "{}\t {:^10.2f}\n".format(timestr, transactions[trans]["amount"])
+            msg += "{}\t {:^10}\n".format(timestr, str(transactions[trans]["amount"]))
+            await ctx.reply(msg + "```", dm=True)
     else:
         await ctx.reply("Usage: {}piggybank [+|- <amount>] | [list] | [goal <amount>|none]".format(ctx.used_prefix))
