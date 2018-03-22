@@ -90,9 +90,9 @@ async def cmd_piggybank(ctx):
         bank_amount += amount if action == "+" else -amount
         await ctx.data.users.set(ctx.authid, "piggybank_amount", bank_amount)
         await ctx.data.users.set(ctx.authid, "piggybank_history", transactions)
-            msg = "${:.2} has been {:.2} your piggybank. You now have ${:.2}!".format(amount,
-                                                                         "added to" if action == "+" else "removed from",
-                                                                         bank_amount)
+        msg = "${:.2} has been {:.2} your piggybank. You now have ${:.2}!".format(amount,
+                                                                        "added to" if action == "+" else "removed from",
+                                                                        bank_amount)
         if goal:
             if bank_amount >= goal:
                 msg += "\nYou have chieved your goal! Congratulations!"
@@ -127,7 +127,5 @@ async def cmd_piggybank(ctx):
             timestr = trans_time.astimezone(TZ).strftime(timestr)
 
             msg += "{}\t {:^10}\n".format(timestr, transactions[trans][amount])
-
-
     else:
         await ctx.reply("Usage: {}piggybank [+|- <amount>] | [list] | [goal <amount>]".format(ctx.used_prefix))
