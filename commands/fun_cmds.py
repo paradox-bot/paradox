@@ -115,7 +115,7 @@ async def cmd_piggybank(ctx):
         msg = "```\n"
         for trans in sorted(transactions):
             trans_time = datetime.utcfromtimestamp(int(trans))
-            tz = botdata.users.get(user.id, "tz")
+            tz = await ctx.data.users.get(ctx.authid, "tz")
             if tz:
                 try:
                     TZ = timezone(tz)
