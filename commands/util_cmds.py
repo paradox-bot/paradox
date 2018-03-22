@@ -263,8 +263,7 @@ async def cmd_time(ctx):
         return
     timestr = 'The current time for **{}** is **%-I:%M %p (%Z(%z))** on **%a, %d/%m/%Y**'\
         .format(ctx.server.get_member(user).display_name)
-    timestr = TZ.localize(datetime.utcnow()).strftime(timestr)
-#    timestr = iso8601.parse_date(datetime.now().isoformat()).astimezone(TZ).strftime(timestr)
+    timestr = iso8601.parse_date(datetime.now().isoformat()).astimezone(TZ).strftime(timestr)
     await ctx.reply(timestr)
 
 
