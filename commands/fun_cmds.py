@@ -1,7 +1,7 @@
 from paraCH import paraCH
 import discord
 import aiohttp
-import datetime
+from datetime import datetime
 cmds = paraCH()
 
 @cmds.cmd("lenny",
