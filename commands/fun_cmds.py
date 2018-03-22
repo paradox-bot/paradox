@@ -115,7 +115,7 @@ async def cmd_piggybank(ctx):
         if len(transactions) == 0:
             await ctx.reply("No transactions to show! Start adding money to your piggy bank with `{}piggybank + <amount>`".format(ctx.used_prefix))
             return
-        it (len(ctx.params) == 2) and (ctx.params[1] == "clear"):
+        if (len(ctx.params) == 2) and (ctx.params[1] == "clear"):
             await ctx.data.users.set(ctx.authid, "piggybank_history", {})
             await ctx.reply("Your transaction history has been cleared!")
 
