@@ -9,7 +9,7 @@ cmds = paraCH()
 
 
 @cmds.cmd("async",
-          category="Bot Admin",
+          category="Bot admin",
           short_help="Executes async code and displays the output")
 @cmds.require("exec_perm")
 async def cmd_async(ctx):
@@ -31,7 +31,7 @@ async def cmd_async(ctx):
 
 
 @cmds.cmd("exec",
-          category="Bot Admin",
+          category="Bot admin",
           short_help="Executes python code using exec and displays the output")
 @cmds.require("exec_perm")
 async def cmd_exec(ctx):
@@ -53,7 +53,7 @@ async def cmd_exec(ctx):
 
 
 @cmds.cmd("eval",
-          category="Bot Admin",
+          category="Bot admin",
           short_help="Executes python code using eval and displays the output")
 @cmds.require("exec_perm")
 async def cmd_eval(ctx):
@@ -75,7 +75,7 @@ async def cmd_eval(ctx):
 
 
 @cmds.cmd("seval",
-          category="Bot Admin",
+          category="Bot admin",
           short_help="Silent version of eval.")
 @cmds.require("exec_perm")
 async def cmd_seval(ctx):
@@ -97,7 +97,7 @@ async def cmd_seval(ctx):
 
 
 @cmds.cmd("shell",
-          category="Bot Admin",
+          category="Bot admin",
           short_help="Runs a command in the operating environment.")
 @cmds.require("exec_perm")
 async def cmd_shell(ctx):
