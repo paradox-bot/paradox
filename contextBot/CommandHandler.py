@@ -174,7 +174,7 @@ class CommandHandler:
             return func
         return decorator
 
-    def require(self, req_str):
+    def require(self, req_str, **checkargs):
         """
         Decorator to add a required "check" to a command function from checks.
 
