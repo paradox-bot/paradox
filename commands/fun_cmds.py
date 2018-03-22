@@ -61,8 +61,8 @@ async def cmd_piggybank(ctx):
 
     Adds or removes an amount to your piggybank, or lists your current value.
     """
-    bank_amount = await ctx.data.users.get("piggybank_amount")
-    transactions = await ctx.data.users.get("piggybank_history")
+    bank_amount = await ctx.data.users.get(ctx.authid, "piggybank_amount")
+    transactions = await ctx.data.users.get(ctx.authid, "piggybank_history")
     bank_amount = bank_amount if bank_amount else 0
     transactions = transactions if transactions else {}
     if ctx.arg_str == "":
@@ -79,8 +79,8 @@ async def cmd_piggybank(ctx):
         transactions[now] = {}
         transactions[now]["amount"] = action + str(amount)
         bank_amount += amount if action == "+" else -amount
-        await ctx.data.users.set("piggybank_amount", bank_amount)
-        await ctx.data.users.set("piggybank_history", transactions)
+        await ctx.data.users.set(ctx.authid, "piggybank_amount", bank_amount)
+        await ctx.data.users.set(ctx.authid, "piggybank_history", transactions)
         await ctx.reply("{} has been {} your piggybank. You now have {}!".format(amount,
                                                                                  "added to" if action == "+" else "removed from",
                                                                                  bank_amount))
