@@ -49,3 +49,41 @@ async def cmd_cat(ctx):
             embed = discord.Embed(title="Meow!", color=discord.Colour.light_grey())
             embed.set_image(url=js['file'])
             await ctx.reply(embed=embed)
+
+
+@cmds.cmd("piggybank",
+          category="Fun Stuff",
+          short_help="Keep track of money added towards a goal.")
+async def cmd_piggybank(ctx):
+    """
+    Usage: {prefix}piggybank [+|- <amount>]
+
+    Adds or removes an amount to your piggybank, or lists your current value.
+    """
+    bank_amount = await ctx.data.users.get("piggybank_amount")
+    transactions = await ctx.data.users.get("piggybank_history")
+    bank_amount = bank_amount if bank_amount else 0
+    transactions = transactions if transactions else {}
+    if ctx.arg_str == "":
+        await ctx.reply("You have {} in your piggybank!".format(bank_amount))
+        return
+    elif (ctx.params[0] in ["+", "-"]) and len(ctx.params) == 2:
+        action = ctx.params[0]
+        now = datetime.utcnow().strftime('%s')
+        try:
+            amount = float(ctx.params[1])
+        except ValueError:
+            await ctx.reply("The amount must be a number!")
+            return
+        transactions[now] = {}
+        transactions[now]["amount"] = action + str(amount)
+        bank_amount += amount if action == "+" else -amount
+        await ctx.data.users.set("piggybank_amount", bank_amount)
+        await ctx.data.users.set("piggybank_history", transactions)
+        await ctx.reply("{} has been {} your piggybank. You now have {}!".format(amount,
+                                                                                 "added to" if action == "+" else "removed from",
+                                                                                 bank_amount))
+    else:
+        await ctx.reply("Usage: {}piggybank [+|- <amount>]".format(ctx.used_prefix))
+
+
