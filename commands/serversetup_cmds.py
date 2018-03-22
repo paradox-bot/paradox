@@ -14,7 +14,7 @@ async def cmd_config(ctx):
     Lists your current server configuration, shows option help, or sets an option.
     For example, "config join_ch #general" could be used to set your join message channel.
     """
-    serv_conf = ctx.server_conf.settings()
+    serv_conf = ctx.server_conf.settings
     if (ctx.params[0] in ["", "help"]) and len(ctx.params) == 1:
         """
         Print all config categories, their options, and descriptions or values in a pretty way.
@@ -36,7 +36,8 @@ async def cmd_config(ctx):
                     option_line = await serv_conf[option].hr_get(ctx)
                 else:
                     option_line = serv_conf[option].desc
-                cat_msg += "`​{}{}`:\t {}\n".format(" " * (12 - len(option)), option, option_line)
+                cat_msg += "`​{}{}`:\t {}\n".format(" " * (12 - len(serv_conf[option].vis_name)),
+                                                    serv_conf[option].vis_name, option_line)
             cat_msg += "\n"
             embed.add_field(name=cat, value=cat_msg, inline=False)
         embed.set_footer(text="Use config <option> [value] to see or set an option.")
