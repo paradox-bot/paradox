@@ -2,6 +2,7 @@ from paraCH import paraCH
 import discord
 import aiohttp
 from datetime import datetime
+from pytz imprt timezone
 cmds = paraCH()
 
 @cmds.cmd("lenny",
@@ -73,7 +74,7 @@ async def cmd_piggybank(ctx):
     if ctx.arg_str == "":
         msg = "You have ${} in your piggybank!".format(bank_amount)
         if goal:
-            msg += "\nYou have achieved {:.1%} of your goal (${})".format(bank_amount/goal, goal)
+            msg += "\nYou have achieved {:.1%} of your goal (${:.2})".format(bank_amount/goal, goal)
         await ctx.reply(msg)
         return
     elif (ctx.params[0] in ["+", "-"]) and len(ctx.params) == 2:
@@ -89,9 +90,15 @@ async def cmd_piggybank(ctx):
         bank_amount += amount if action == "+" else -amount
         await ctx.data.users.set(ctx.authid, "piggybank_amount", bank_amount)
         await ctx.data.users.set(ctx.authid, "piggybank_history", transactions)
-        await ctx.reply("${} has been {} your piggybank. You now have ${}!".format(amount,
-                                                                                 "added to" if action == "+" else "removed from",
-                                                                                 bank_amount))
+            msg = "${:.2} has been {:.2} your piggybank. You now have ${:.2}!".format(amount,
+                                                                         "added to" if action == "+" else "removed from",
+                                                                         bank_amount)
+        if goal:
+            if bank_amount >= goal:
+                msg += "\nYou have chieved your goal! Congratulations!"
+            else:
+                msg += "\nYou have now achieved {:.1%} of your goal (${:.2}).".format(bank_amount/goal, goal)
+        await ctx.reply(msg)
     elif (ctx.params[0] == "goal") and len(ctx.params) == 2:
         try:
             amount = float(ctx.params[1].strip("$#"))
@@ -99,7 +106,28 @@ async def cmd_piggybank(ctx):
             await ctx.reply("The amount must be a number!")
             return
         await ctx.data.users.set(ctx.authid, "piggybank_goal", amount)
+        await ctx.reply("Your goal has been set! Good luck")
     elif (ctx.params[0] == "list"):
         await ctx.reply("In progress", dm=True)
+        if len(transactions) == 0:
+            await ctx.reply("No transactions to show! Start adding money to your piggy bank with `{}piggybank + <amount>`".format(ctx.used_prefix))
+            return
+        msg = "```\n"
+        for trans in sorted(transactions):
+            trans_time = datetime.utcfromtimestamp(int(trans))
+            tz = botdata.users.get(user.id, "tz")
+            if tz:
+                try:
+                    TZ = timezone(tz)
+                except Exception:
+                    pass
+            else:
+                TZ = timezone("UTC")
+            timestr = '%-I:%M %p, %d/%m/%Y (%Z)'
+            timestr = trans_time.astimezone(TZ).strftime(timestr)
+
+            msg += "{}\t {:^10}\n".format(timestr, transactions[trans][amount])
+
+
     else:
         await ctx.reply("Usage: {}piggybank [+|- <amount>] | [list] | [goal <amount>]".format(ctx.used_prefix))
