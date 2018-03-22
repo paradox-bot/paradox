@@ -57,9 +57,12 @@ async def cmd_cat(ctx):
           short_help="Keep track of money added towards a goal.")
 async def cmd_piggybank(ctx):
     """
-    Usage: {prefix}piggybank [+|- <amount>]
+    Usage: {prefix}piggybank [+|- <amount>] | [list] | [goal <amount>]
 
-    Adds or removes an amount to your piggybank, or lists your current value.
+    [+|- <amount>]: Adds or removes an amount to your piggybank.
+    [list]: Sends you a DM with your previous transactions.
+    [goal <amount>]: Sets your goal!
+    Or with no arguments, lists your current amount and progress to the goal.
     """
     bank_amount = await ctx.data.users.get(ctx.authid, "piggybank_amount")
     transactions = await ctx.data.users.get(ctx.authid, "piggybank_history")
@@ -68,7 +71,10 @@ async def cmd_piggybank(ctx):
     transactions = transactions if transactions else {}
     goal = goal if goal else 0
     if ctx.arg_str == "":
-        await ctx.reply("You have ${} in your piggybank! \n Your goal is ${}/{}".format(bank_amount, bank_amount, goal))
+        msg = "You have ${} in your piggybank!".format(bank_amount)
+        if goal:
+            msg += "\nYou have achieved {:.1%} of your goal (${})".format(bank_amount/goal, goal)
+        await ctx.reply(msg)
         return
     elif (ctx.params[0] in ["+", "-"]) and len(ctx.params) == 2:
         action = ctx.params[0]
@@ -86,5 +92,14 @@ async def cmd_piggybank(ctx):
         await ctx.reply("${} has been {} your piggybank. You now have ${}!".format(amount,
                                                                                  "added to" if action == "+" else "removed from",
                                                                                  bank_amount))
+    elif (ctx.params[0] == "goal") and len(ctx.params) == 2:
+        try:
+            amount = float(ctx.params[1].strip("$#"))
+        except ValueError:
+            await ctx.reply("The amount must be a number!")
+            return
+        await ctx.data.users.set(ctx.authid, "piggybank_goal", amount)
+    elif (ctx.params[0] == "list"):
+        await ctx.reply("In progress", dm=True)
     else:
-        await ctx.reply("Usage: {}piggybank [+|- <amount>]".format(ctx.used_prefix))
+        await ctx.reply("Usage: {}piggybank [+|- <amount>] | [list] | [goal <amount>]".format(ctx.used_prefix))
