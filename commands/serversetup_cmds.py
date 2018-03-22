@@ -19,7 +19,7 @@ async def cmd_config(ctx):
         """
         Print all config categories, their options, and descriptions or values in a pretty way.
         """
-        sorted_cats = ["Guild settings", "Join message", "Leave message"]
+        sorted_cats = ctx.bot.objects["sorted_conf_cats"]
         cats = {}
         for option in sorted(serv_conf):
             cat = serv_conf[option].category
