@@ -76,6 +76,10 @@ async def on_ready():
     bot.objects["emoji_bot"] = discord.utils.get(bot.get_all_emojis(), name='parabot')
     bot.objects["emoji_botowner"] = discord.utils.get(bot.get_all_emojis(), name='botowner')
     bot.objects["emoji_botmanager"] = discord.utils.get(bot.get_all_emojis(), name='botmanager')
+    bot.objects["emoji_online"] = discord.utils.get(bot.get_all_emojis(), name='ParaOn')
+    bot.objects["emoji_idle"] = discord.utils.get(bot.get_all_emojis(), name='ParaIdle')
+    bot.objects["emoji_dnd"] = discord.utils.get(bot.get_all_emojis(), name='ParaDND')
+    bot.objects["emoji_offline"] = discord.utils.get(bot.get_all_emojis(), name='ParaInvis')
 
 
 # ----End Discord event handling----
