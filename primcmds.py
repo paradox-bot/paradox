@@ -113,8 +113,4 @@ TODO: Timezone setting type
 """
 
 
-
-
-# General utility commands
-
 # ------END COMMANDS------

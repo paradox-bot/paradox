@@ -82,7 +82,6 @@ async def on_ready():
     bot.objects["emoji_offline"] = discord.utils.get(bot.get_all_emojis(), name='ParaInvis')
 
 
-# ----End Discord event handling----
 
 # ----Event loops----
 # ----End event loops----

@@ -24,6 +24,24 @@ async def check_exec_perm(ctx):
         return (1, "You don't have the required Exec perms to do this!")
     return (0, "")
 
+@check("dev_perm")
+async def check_dev_perm(ctx):
+    (code, msg) = await checks["exec_perm"](ctx)
+    if code == 0:
+        return (code, msg)
+    if int(ctx.authid) not in ctx.bot.bot_conf.getintlist("developers"):
+        return (1, "You need to be one of my developers to do this!")
+    return (0, "")
+
+@check("contrib_perm")
+async def check_contrib_perm(ctx):
+    (code, msg) = await checks["manager_perm"](ctx)
+    if code == 0:
+        return (code, msg)
+    if int(ctx.authid) not in ctx.bot.bot_conf.getintlist("contributors"):
+        return (1, "You need to be a bot contributor to do this!")
+    return (0, "")
+
 
 @check("manager_perm")
 async def check_manager_perm(ctx):
