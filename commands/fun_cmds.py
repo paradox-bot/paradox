@@ -58,11 +58,11 @@ async def cmd_cat(ctx):
           short_help="Keep track of money added towards a goal.")
 async def cmd_piggybank(ctx):
     """
-    Usage: {prefix}piggybank [+|- <amount>] | [list] | [goal <amount>]
+    Usage: {prefix}piggybank [+|- <amount>] | [list] | [goal <amount>|none]
 
     [+|- <amount>]: Adds or removes an amount to your piggybank.
     [list]: Sends you a DM with your previous transactions.
-    [goal <amount>]: Sets your goal!
+    [goal <amount>|none]: Sets your goal!
     Or with no arguments, lists your current amount and progress to the goal.
     """
     bank_amount = await ctx.data.users.get(ctx.authid, "piggybank_amount")
@@ -100,6 +100,10 @@ async def cmd_piggybank(ctx):
                 msg += "\nYou have now achieved {:.1%} of your goal (${:.2f}).".format(bank_amount/goal, goal)
         await ctx.reply(msg)
     elif (ctx.params[0] == "goal") and len(ctx.params) == 2:
+        if ctx.params[1].lower() in ["none", "remove", "clear"]:
+            await ctx.data.users.set(ctx.authid, "piggybank_goal", amount)
+            await ctx.reply("Your goal has been cleared")
+            return
         try:
             amount = float(ctx.params[1].strip("$#"))
         except ValueError:
@@ -126,6 +130,6 @@ async def cmd_piggybank(ctx):
             timestr = '%-I:%M %p, %d/%m/%Y (%Z)'
             timestr = TZ.localize(trans_time).strftime(timestr)
 
-            msg += "{}\t {:.2f^10}\n".format(timestr, transactions[trans][amount])
+            msg += "{}\t {:.2f^10}\n".format(timestr, transactions[trans]["amount"])
     else:
-        await ctx.reply("Usage: {}piggybank [+|- <amount>] | [list] | [goal <amount>]".format(ctx.used_prefix))
+        await ctx.reply("Usage: {}piggybank [+|- <amount>] | [list] | [goal <amount>|none]".format(ctx.used_prefix))
