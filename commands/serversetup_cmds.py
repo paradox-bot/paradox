@@ -70,6 +70,6 @@ async def cmd_config(ctx):
             msg += "Currently set to: {}".format(await op_conf.hr_get(ctx))
             await ctx.reply(msg)
         else:
-            await serv_conf[ctx.params[0]].hr_set(' '.join(ctx.params[1:]))
-            if not ctx.cmd_err:
+            await serv_conf[ctx.params[0]].hr_set(ctx, ' '.join(ctx.params[1:]))
+            if not ctx.cmd_err[0]:
                 await ctx.reply("The setting was set successfully")
