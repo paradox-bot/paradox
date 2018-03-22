@@ -84,6 +84,8 @@ class Context:
         return [prefix]
 
     async def msg_split(self, msg, code=False, MAX_LEN = 1800):
+        if code:
+            msg = msg.strip("```")
         if len(msg) < MAX_LEN:
             return ["```"+msg+"```"] if code else [msg]
         lines = msg.strip().split('\n')

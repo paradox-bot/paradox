@@ -10,10 +10,10 @@ def snip(name):
 
 @snip("serverlist")
 async def snip_serverlist(ctx):
-    servs = [(s.name, s.owner.name) for s in ctx.client.servers]
+    servs = [(s.name, s.owner.name) for s in ctx.bot.servers]
     servs.sort(key=lambda tup: tup[1].lower())
     servlist = ["{:^25} - {:^15}".format(st[0], st[1]) for st in servs]
-    await ctx.reply("```" + "\n".join(servlist) + "```")
+    await ctx.reply("```" + "\n".join(servlist) + "```", split=True, code=True)
 
 
 @snip("user_lookup")
