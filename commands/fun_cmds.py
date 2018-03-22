@@ -130,6 +130,6 @@ async def cmd_piggybank(ctx):
             timestr = '%-I:%M %p, %d/%m/%Y (%Z)'
             timestr = TZ.localize(trans_time).strftime(timestr)
 
-            msg += "{}\t {:.2f^10}\n".format(timestr, transactions[trans]["amount"])
+            msg += "{}\t {:^10.2f}\n".format(timestr, transactions[trans]["amount"])
     else:
         await ctx.reply("Usage: {}piggybank [+|- <amount>] | [list] | [goal <amount>|none]".format(ctx.used_prefix))
