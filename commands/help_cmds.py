@@ -22,14 +22,15 @@ async def cmd_help(ctx):
         for cmd in sorted(commands):
             command = commands[cmd]
             cat = command.category if command.category else "Misc"
-            if cat not in cat_msgs or not cat_msgs[cat]:
-                cat_msgs[cat] = "```ini\n [ {}: ]\n".format(cat)
-            cat_msgs[cat] += "; {}{}:\t{}\n".format(" " * (12 - len(cmd)), cmd, command.short_help)
+            lower_cat = cat.lower()
+            if lower_cat not in cat_msgs or not cat_msgs[lower_cat]:
+                cat_msgs[lower_cat] = "```ini\n [ {}: ]\n".format(cat)
+            cat_msgs[lower_cat] += "; {}{}:\t{}\n".format(" " * (12 - len(cmd)), cmd, command.short_help)
         for cat in sorted_cats:
-            if cat not in cat_msgs:
+            if cat.lower() not in cat_msgs:
                 continue
-            cat_msgs[cat] += "```"
-            msg += cat_msgs[cat]
+            cat_msgs[cat.lower()] += "```"
+            msg += cat_msgs[cat.lower()]
         await ctx.reply(msg, dm=True)
         await ctx.reply("I have messaged you a detailed listing of my commands! Use `list` to obtain a more succinct listing.")
         return
@@ -58,13 +59,14 @@ async def cmd_list(ctx):
         for cmd in sorted(commands):
             command = commands[cmd]
             cat = command.category if command.category else "Misc"
-            if cat not in cats:
-                cats[cat] = []
-            cats[cat].append(cmd)
+            lower_cat = cat.lower()
+            if lower_cat not in cats:
+                cats[lower_cat] = []
+            cats[lower_cat].append(cmd)
         embed = discord.Embed(title="Paradøx's commands!", color=discord.Colour.green())
         for cat in sorted_cats:
-            if cat not in cats:
+            if cat.lower() not in cats:
                 continue
-            embed.add_field(name=cat, value="`{}`".format('`, `'.join(cats[cat])), inline=False)
+            embed.add_field(name=cat, value="`{}`".format('`, `'.join(cats[cat.lower()])), inline=False)
         embed.set_footer(text="Use ~help or ~help <command> for detailed help or get support with ~support.")
         await ctx.reply(embed=embed)
