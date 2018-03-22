@@ -85,10 +85,10 @@ class ROLE(paraSetting):
             ctx.cmd_err = (1, "This is not valid outside of a server!")
             return None
         userstr = str(userstr)
-        chid = userstr.strip('<#@!>')
-        if chid.isdigit():
+        roleid = userstr.strip('<#@!>')
+        if roleid.isdigit():
             def is_role(role):
-                return role.id == chid
+                return role.id == roleid
         else:
             def is_role(role):
                 return userstr.lower() in role.name.lower()
@@ -113,26 +113,33 @@ class CHANNEL(paraSetting):
         """
         if not raw:
             return "None"
+        channel = ctx.server.get_channel(raw)
+        if channel:
+            return "{}".format(channel.name)
         return "<#{}>".format(raw)
 
     @classmethod
     async def understand(self, ctx, userstr):
         """
-        User can enter a channel mention or an id, or even a name.
-        TODO: Check if the channel actually exists given an id.
+        User can enter a channel mention or an id, or even a partial name.
         """
-        userstr = str(userstr)
-        chid = userstr.strip('<#!>')
-        if chid.isdigit():
-            return chid
         if not ctx.server:
-            ctx.cmd_err = (1, "Not in a server, please provide channel id or mention.")
+            ctx.cmd_err = (1, "This is not valid outside of a server!")
             return None
-        for ch in ctx.server.channels:
-            if ch.name.lower() == userstr.lower():
-                return ch.id
-        ctx.cmd_err = (1, "I can't find this channel, please provide an id or mention.")
-        return None
+        userstr = str(userstr)
+        chid = userstr.strip('<#@!>')
+        if chid.isdigit():
+            def is_ch(ch):
+                return ch.id == chid
+        else:
+            def is_ch(ch):
+                return userstr.lower() in ch.name.lower()
+        ch = discord.utils.find(is_ch, ctx.server.channels)
+        if ch:
+            return ch.id
+        else:
+            ctx.cmd_err = (1, "I can't find this channel in this server!")
+            return None
 
 
 """
