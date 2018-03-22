@@ -62,7 +62,7 @@ class ROLE(paraSetting):
     """
     ROLE type.
     """
-    accept = "ROLE mention/id/name"
+    accept = "Role mention/id/name"
 
     @classmethod
     async def humanise(self, ctx, raw):
