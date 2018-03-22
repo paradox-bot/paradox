@@ -72,7 +72,7 @@ async def cmd_piggybank(ctx):
         action = ctx.params[0]
         now = datetime.utcnow().strftime('%s')
         try:
-            amount = float(ctx.params[1])
+            amount = float(ctx.params[1].strip("$#"))
         except ValueError:
             await ctx.reply("The amount must be a number!")
             return
