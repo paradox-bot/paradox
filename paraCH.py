@@ -14,6 +14,6 @@ class paraCH(CommandHandler):
 
     async def before_exec(self, ctx):
         if ctx.author.bot:
-            ctx.cmd_err = (1, "I don't listen to bots!")
+            return
         if int(ctx.authid) in ctx.bot.bot_conf.getintlist("blacklisted_users"):
             ctx.cmd_err = (1, "")
