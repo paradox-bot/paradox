@@ -72,9 +72,9 @@ async def cmd_piggybank(ctx):
     transactions = transactions if transactions else {}
     goal = goal if goal else 0
     if ctx.arg_str == "":
-        msg = "You have ${} in your piggybank!".format(bank_amount)
+        msg = "You have ${:.2f} in your piggybank!".format(bank_amount)
         if goal:
-            msg += "\nYou have achieved {:.1%} of your goal (${:.2})".format(bank_amount/goal, goal)
+            msg += "\nYou have achieved {:.1%} of your goal (${:.2f})".format(bank_amount/goal, goal)
         await ctx.reply(msg)
         return
     elif (ctx.params[0] in ["+", "-"]) and len(ctx.params) == 2:
@@ -90,14 +90,14 @@ async def cmd_piggybank(ctx):
         bank_amount += amount if action == "+" else -amount
         await ctx.data.users.set(ctx.authid, "piggybank_amount", bank_amount)
         await ctx.data.users.set(ctx.authid, "piggybank_history", transactions)
-        msg = "${:.2} has been {:.2} your piggybank. You now have ${:.2}!".format(amount,
+        msg = "${:.2f} has been {} your piggybank. You now have ${:.2f}!".format(amount,
                                                                         "added to" if action == "+" else "removed from",
                                                                         bank_amount)
         if goal:
             if bank_amount >= goal:
-                msg += "\nYou have chieved your goal! Congratulations!"
+                msg += "\nYou have achieved your goal! Congratulations!"
             else:
-                msg += "\nYou have now achieved {:.1%} of your goal (${:.2}).".format(bank_amount/goal, goal)
+                msg += "\nYou have now achieved {:.1%} of your goal (${:.2f}).".format(bank_amount/goal, goal)
         await ctx.reply(msg)
     elif (ctx.params[0] == "goal") and len(ctx.params) == 2:
         try:
@@ -126,6 +126,6 @@ async def cmd_piggybank(ctx):
             timestr = '%-I:%M %p, %d/%m/%Y (%Z)'
             timestr = trans_time.astimezone(TZ).strftime(timestr)
 
-            msg += "{}\t {:^10}\n".format(timestr, transactions[trans][amount])
+            msg += "{}\t {:.2f^10}\n".format(timestr, transactions[trans][amount])
     else:
         await ctx.reply("Usage: {}piggybank [+|- <amount>] | [list] | [goal <amount>]".format(ctx.used_prefix))
