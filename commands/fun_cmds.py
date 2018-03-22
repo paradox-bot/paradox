@@ -124,7 +124,7 @@ async def cmd_piggybank(ctx):
             else:
                 TZ = timezone("UTC")
             timestr = '%-I:%M %p, %d/%m/%Y (%Z)'
-            timestr = trans_time.astimezone(TZ).strftime(timestr)
+            timestr = TZ.localize(trans_time).strftime(timestr)
 
             msg += "{}\t {:.2f^10}\n".format(timestr, transactions[trans][amount])
     else:
