@@ -63,10 +63,12 @@ async def cmd_piggybank(ctx):
     """
     bank_amount = await ctx.data.users.get(ctx.authid, "piggybank_amount")
     transactions = await ctx.data.users.get(ctx.authid, "piggybank_history")
+    goal = await ctx.data.users.get(ctx.authid, "piggybank_goal")
     bank_amount = bank_amount if bank_amount else 0
     transactions = transactions if transactions else {}
+    goal = goal if goal else 0
     if ctx.arg_str == "":
-        await ctx.reply("You have ${} in your piggybank!".format(bank_amount))
+        await ctx.reply("You have ${} in your piggybank! \n Your goal is ${}/{}".format(bank_amount, bank_amount, goal))
         return
     elif (ctx.params[0] in ["+", "-"]) and len(ctx.params) == 2:
         action = ctx.params[0]
