@@ -186,7 +186,7 @@ def load_into(bot):
             return None
         if len(select_from) == 1:
             return 0
-        lines = ["{:>3}:\t{}".format(i, line) for (i, line) in enumerate(select_from)]
+        lines = ["{:>3}:\t{}".format(i + 1, line) for (i, line) in enumerate(select_from)]
         msg = message
         msg += "```\n"
         msg += "\n".join(lines)
