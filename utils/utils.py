@@ -88,8 +88,8 @@ def load_into(bot):
                 await ctx.reply("Over {} users found! Please refine your search".format(limit))
                 ctx.cmd_err =(-1, "")
                 return
-            selected = await ctx.selector("Multiple users found! Please select one.",
-                                          ["{0.display_name} ({0.name})".format(user) for user in users])
+            names = ["{} {}".format(user.display_name, ("({})".format(user.name)) if user.nick else "") for user in users]
+            selected = await ctx.selector("Multiple users found! Please select one.", names)
             if selected is None:
                 return None
             return users[selected]
