@@ -24,5 +24,5 @@ async def snip_user_lookup(ctx, in_server=False):
     Expected to interactively ask and select if multiple users are found.
     Sets ctx.objs["found_user"]
     """
-    ctx.objs["found_user"] = await ctx.find_user(ctx.params[0], in_server)
+    ctx.objs["found_user"] = await ctx.find_user(ctx.params[0], in_server, interactive=True)
     return ctx.objs["found_user"]

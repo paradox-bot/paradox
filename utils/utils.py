@@ -71,26 +71,31 @@ def load_into(bot):
         return datetime.timedelta(seconds=seconds)
 
     @bot.util
-    async def find_user(ctx, user_str, in_server=False):
+    async def find_user(ctx, user_str, in_server=False, interactive=False):
         if user_str == "":
             return None
         maybe_user_id = user_str.strip('<@!> ')
-        if maybe_user_id.isdigit():
-            def is_user(member):
-                return member.id == maybe_user_id
+        def is_user(member):
+            return ((member.id == maybe_user_id) or
+                    (user_str.lower() in member.display_name.lower()) or
+                    (user_str.lower() in member.name.lower()))
+        collection = ctx.server.members if in_server else ctx.bot.get_all_members
+        if interactive:
+            users = list(filter(is_user, collection))
+            if len(users) == 0:
+                return None
+            selected = await ctx.selector("Multiple users found! Please select one.",
+                                          [user.name for user in users])
+            if selected is None:
+                return None
+            return users[selected]
         else:
-            def is_user(member):
-                return ((user_str.lower() in member.display_name.lower()) or (user_str.lower() in member.name.lower()))
-        if ctx.server:
-            member = discord.utils.find(is_user, ctx.server.members)
-        if not (member or in_server):
-            member = discord.utils.find(is_user, ctx.bot.get_all_members)
-        return member
+            return discord.utils.find(is_user, collection)
 
     @bot.util
-    async def listen_for(ctx, chars=[], timeout=30):
+    async def listen_for(ctx, chars=[], timeout=30, lower=True):
         def check(message):
-            return (message.content in chars)
+            return ((message.content.lower() if lower else message.content) in chars)
         msg = await ctx.bot.wait_for_message(author=ctx.author, check=check, timeout=timeout)
         return msg
 

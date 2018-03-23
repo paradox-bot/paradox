@@ -143,6 +143,9 @@ class MessageContext(Context):
                     out.append(await self.bot.send_message(self.author if dm else self.ch, split))
                 return out
             else:
+                if len(message) >= 2000:
+                    self.bot_err = (3, "Tried to send a message which was too long")
+                    return
                 return await self.bot.send_message(self.author if dm else self.ch, str(message), embed=embed)
         elif embed:
             return await self.bot.send_message(self.author if dm else self.ch, embed=embed)
