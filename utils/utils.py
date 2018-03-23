@@ -143,11 +143,14 @@ def load_into(bot):
             def check(role):
                 return (role.id == roleid) or (userstr in role.name)
             roles = filter(check, ctx.server.roles)
-            selected = await ctx.selector("Multiple roles found! Please select one.",
-                                          [role.name for role in roles])
-            if selected is None:
-                return None
-            role = roles[selected]
+            if len(roles) == 0:
+                role = None
+            else:
+                selected = await ctx.selector("Multiple roles found! Please select one.",
+                                            [role.name for role in roles])
+                if selected is None:
+                    return None
+                role = roles[selected]
         else:
             if roleid.isdigit():
                 def is_role(role):
