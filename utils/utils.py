@@ -200,8 +200,8 @@ def load_into(bot):
             return None
         result = result_msg.content
         try:
-            await ctx.bot.delete_msg(result_msg)
-        except:
+            await ctx.bot.delete_message(result_msg)
+        except discord.Forbidden:
             pass
         if result == "c":
             await ctx.reply("Cancelling")
