@@ -93,3 +93,26 @@ def load_into(bot):
             return (message.content in chars)
         msg = await ctx.bot.wait_for_message(author=ctx.author, check=check, timeout=timeout)
         return msg
+
+    @bot.util
+    async def offer_create_role(ctx, input):
+        offer_msg = await ctx.reply("Would you like to create this role? `y(es)`/`n(o)`")
+        result_msg = await ctx.listen_for(["y", "yes", "n", "no"])
+        if result_msg is None:
+            return None
+        result = result_msg.content.lower()
+        if result in ["n", "no"]:
+            return None
+        try:
+            await ctx.bot.delete_message(offer_msg)
+            await ctx.bot.delete_message(result_msg)
+        except Exception:
+            pass
+        try:
+            # TODO: Lots of fancy stuff, move this out to an interactive create role utility
+            role = await ctx.bot.create_role(ctx.server, name=input)
+        except discord.Forbidden:
+            await ctx.reply("Sorry, it seems I don't have permissions to create a role!")
+            return None
+        await ctx.reply("You have created the role `{}`!".format(input))
+        return role

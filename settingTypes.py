@@ -74,7 +74,7 @@ class ROLE(paraSetting):
         role = discord.utils.get(ctx.server.roles, id=raw)
         if role:
             return "{}".format(role.name)
-        return "{}(Role not found)".format(raw)
+        return "{} (Role not found!)".format(raw)
 
     @classmethod
     async def understand(self, ctx, userstr):
@@ -96,8 +96,11 @@ class ROLE(paraSetting):
         if role:
             return role.id
         else:
-            ctx.cmd_err = (1, "I can't find this role in this server!")
-            return None
+            role = await ctx.offer_create_role(userstr)
+            if not role:
+                ctx.cmd_err = (1, "I can't find this role in this server!")
+                return None
+            return role.id
 
 
 class CHANNEL(paraSetting):

@@ -18,7 +18,7 @@ def load_into(bot):
                 """
                 pass
 
-        if (await ctx.server_conf.join_msgs_enabled.get(ctx.data, ctx.server)):
+        if (await ctx.server_conf.join_msgs_enabled.get(ctx)):
             ch = await ctx.server_conf.join_ch.get(ctx)
             msg = await ctx.server_conf.join_msg.get(ctx)
 
