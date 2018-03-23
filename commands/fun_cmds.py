@@ -91,6 +91,8 @@ async def cmd_rep(ctx):
         return
     else:
         user = await ctx.find_user(ctx.arg_str, in_server=True, interactive=True)
+        if ctx.cmd_err[0] == -1:
+            return
         if not user:
             await ctx.reply("I couldn't find that user in this server sorry.")
             return

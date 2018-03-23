@@ -202,6 +202,7 @@ def load_into(bot):
         await ctx.bot.delete_message(out_msg)
         if not result_msg:
             await ctx.reply("Question timed out, aborting...")
+            ctx.cmd_err = (-1,"")  # User cancelled or didn't respond
             return None
         result = result_msg.content
         try:
@@ -210,5 +211,6 @@ def load_into(bot):
             pass
         if result == "c":
             await ctx.reply("Cancelling")
+            ctx.cmd_err = (-1,"")  # User cancelled or didn't respond
             return None
         return int(result_msg.content)-1
