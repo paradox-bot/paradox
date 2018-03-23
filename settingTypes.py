@@ -96,10 +96,12 @@ class ROLE(paraSetting):
         if role:
             return role.id
         else:
+            msg = await ctx.reply("I can't find this role in this server!")
             role = await ctx.offer_create_role(userstr)
             if not role:
-                ctx.cmd_err = (1, "I can't find this role in this server!")
+                ctx.cmd_err = (1, "Aborting...")
                 return None
+            await ctx.bot.delete_message(msg)
             return role.id
 
 

@@ -101,13 +101,13 @@ def load_into(bot):
         if result_msg is None:
             return None
         result = result_msg.content.lower()
-        if result in ["n", "no"]:
-            return None
         try:
             await ctx.bot.delete_message(offer_msg)
             await ctx.bot.delete_message(result_msg)
         except Exception:
             pass
+        if result in ["n", "no"]:
+            return None
         try:
             # TODO: Lots of fancy stuff, move this out to an interactive create role utility
             role = await ctx.bot.create_role(ctx.server, name=input)
