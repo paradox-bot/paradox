@@ -73,3 +73,42 @@ async def cmd_config(ctx):
             await serv_conf[ctx.params[0]].hr_set(ctx, ' '.join(ctx.params[1:]))
             if not ctx.cmd_err[0]:
                 await ctx.reply("The setting was set successfully")
+
+
+@cmds.cmd("rmrole",
+          category="Server setup",
+          short_help="Deletes a role")
+@cmds.require("has_manage_server")
+async def cmd_rmrole(ctx):
+    """
+    Usage: {prefix}rmrole <rolename>
+
+    Deletes a role given by partial name or mention.
+    """
+    if ctx.arg_str.strip() == "":
+        await ctx.reply("You must give me a role to delete!")
+        return
+    # TODO: Letting find_role handle all input and output for finding.
+    role = await ctx.find_role(ctx.arg_str, create=False)
+    if role is None:
+        return
+    msg = await ctx.reply("Are you sure you want to delete the role `{}`? `y(es)`/`n(o)`".format(role.name))
+    result_msg = await ctx.listen_for(["y", "yes", "n", "no"])
+    if result_msg is None:
+        await ctx.reply("Question timed out, aborting")
+        return
+    result = result_msg.content.lower()
+    try:
+        await ctx.bot.delete_message(msg)
+        await ctx.bot.delete_message(result_msg)
+    except Exception:
+        pass
+    if result in ["n", "no"]:
+        await ctx.reply("Aborting!")
+        return
+    try:
+        await ctx.bot.delete_role(ctx.server, role)
+    except Exception:
+        await ctx.reply("Sorry, it seems I can't delete that role!")
+        return
+    await ctx.reply("Successfully deleted the role!")

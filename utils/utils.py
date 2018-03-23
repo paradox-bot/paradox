@@ -116,3 +116,29 @@ def load_into(bot):
             return None
         await ctx.reply("You have created the role `{}`!".format(input))
         return role
+
+    @bot.util
+    async def find_role(ctx, userstr, create=False):
+        if not ctx.server:
+            ctx.cmd_err = (1, "This is not valid outside of a server!")
+            return None
+        roleid = userstr.strip('<#@!>')
+        if roleid.isdigit():
+            def is_role(role):
+                return role.id == roleid
+        else:
+            def is_role(role):
+                return userstr.lower() in role.name.lower()
+        role = discord.utils.find(is_role, ctx.server.roles)
+        if role:
+            return role
+        else:
+            msg = await ctx.reply("I can't find this role in this server!")
+            if create:
+                role = await ctx.offer_create_role(userstr)
+                if not role:
+                    ctx.cmd_err = (1, "Aborting...")
+                    return None
+                await ctx.bot.delete_message(msg)
+                return role
+            return None
