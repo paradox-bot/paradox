@@ -108,7 +108,10 @@ async def cmd_rmrole(ctx):
         return
     try:
         await ctx.bot.delete_role(ctx.server, role)
+    except discord.Forbidden:
+        await ctx.reply("Sorry, it seems I don't have permissions to delete that role!")
+        return
     except Exception:
-        await ctx.reply("Sorry, it seems I can't delete that role!")
+        await ctx.reply("Sorry, I am not able to delete that role!")
         return
     await ctx.reply("Successfully deleted the role!")
