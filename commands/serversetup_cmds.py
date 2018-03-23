@@ -89,7 +89,7 @@ async def cmd_rmrole(ctx):
         await ctx.reply("You must give me a role to delete!")
         return
     # TODO: Letting find_role handle all input and output for finding.
-    role = await ctx.find_role(ctx.arg_str, create=False)
+    role = await ctx.find_role(ctx.arg_str, create=False, interactive=True)
     if role is None:
         return
     result = await ctx.ask("Are you sure you want to delete the role `{}`?".format(role.name))

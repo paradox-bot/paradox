@@ -134,18 +134,28 @@ def load_into(bot):
         return role
 
     @bot.util
-    async def find_role(ctx, userstr, create=False):
+    async def find_role(ctx, userstr, create=False, interactive=False):
         if not ctx.server:
             ctx.cmd_err = (1, "This is not valid outside of a server!")
             return None
         roleid = userstr.strip('<#@!>')
-        if roleid.isdigit():
-            def is_role(role):
-                return role.id == roleid
+        if interactive:
+            def check(role):
+                return (role.id == roleid) or (userstr in role.name)
+            roles = filter(check, ctx.server.roles)
+            selected = await ctx.selector("Multiple roles found! Please select one.",
+                                          [role.name for role in roles])
+            if selected is None:
+                return None
+            role = roles[selected]
         else:
-            def is_role(role):
-                return userstr.lower() in role.name.lower()
-        role = discord.utils.find(is_role, ctx.server.roles)
+            if roleid.isdigit():
+                def is_role(role):
+                    return role.id == roleid
+            else:
+                def is_role(role):
+                    return userstr.lower() in role.name.lower()
+            role = discord.utils.find(is_role, ctx.server.roles)
         if role:
             return role
         else:
@@ -158,3 +168,39 @@ def load_into(bot):
                 await ctx.bot.delete_message(msg)
                 return role
             return None
+
+    @bot.util
+    async def selector(ctx, message, select_from, timeout=30):
+        """
+        Interactive method to ask the user to select an entry from a list.
+        Returns the index of the list which was selected,
+        or None if the request timed out or was cancelled.
+        TODO: Some sort of class integration for paging.
+
+        list select_from: List to select from
+        """
+        if len(select_from) == 0:
+            return None
+        if len(select_from) == 1:
+            return 0
+        lines = ["{:>3}:\t{}".format(i, line) for (i, line) in enumerate(select_from)]
+        msg = message
+        msg += "```\n"
+        msg += "\n".join(lines)
+        msg += "```\n"
+        msg += "Type the number of your selection or `c` to cancel."
+        out_msg = await ctx.reply(msg)
+        result_msg = await ctx.listen_for([str(i+1) for i in range(0,len(select_from))] + ["c"], timeout=timeout)
+        await ctx.bot.delete_message(out_msg)
+        if not result_msg:
+            await ctx.reply("Question timed out, aborting...")
+            return None
+        result = result_msg.content
+        try:
+            await ctx.bot.delete_msg(result_msg)
+        except:
+            pass
+        if result == "c":
+            await ctx.reply("Cancelling")
+            return None
+        return int(result_msg.content)-1

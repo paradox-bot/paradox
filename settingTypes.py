@@ -81,7 +81,7 @@ class ROLE(paraSetting):
         """
         User can enter a role mention or an id, or even a partial name.
         """
-        role = await ctx.find_role(userstr, create=True)
+        role = await ctx.find_role(userstr, create=True, interactive=True)
         return role.id if role else None
 
 
