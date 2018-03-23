@@ -92,18 +92,11 @@ async def cmd_rmrole(ctx):
     role = await ctx.find_role(ctx.arg_str, create=False)
     if role is None:
         return
-    msg = await ctx.reply("Are you sure you want to delete the role `{}`? `y(es)`/`n(o)`".format(role.name))
-    result_msg = await ctx.listen_for(["y", "yes", "n", "no"])
-    if result_msg is None:
+    result = await ctx.ask("Are you sure you want to delete th role `{}`?".format(role.name))
+    if result is None:
         await ctx.reply("Question timed out, aborting")
         return
-    result = result_msg.content.lower()
-    try:
-        await ctx.bot.delete_message(msg)
-        await ctx.bot.delete_message(result_msg)
-    except Exception:
-        pass
-    if result in ["n", "no"]:
+    if result == "no":
         await ctx.reply("Aborting!")
         return
     try:

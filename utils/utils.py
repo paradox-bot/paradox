@@ -95,6 +95,22 @@ def load_into(bot):
         return msg
 
     @bot.util
+    async def ask(ctx, msg, timeout=30):
+        offer_msg = await ctx.reply(msg+" `y(es)`/`n(o)`")
+        result_msg = await ctx.listen_for(["y", "yes", "n", "no"])
+        if result_msg is None:
+            return None
+        result = result_msg.content.lower()
+        try:
+            await ctx.bot.delete_message(offer_msg)
+            await ctx.bot.delete_message(result_msg)
+        except Exception:
+            pass
+        if result in ["n", "no"]:
+            return 0
+        return 1
+
+    @bot.util
     async def offer_create_role(ctx, input):
         offer_msg = await ctx.reply("Would you like to create this role? `y(es)`/`n(o)`")
         result_msg = await ctx.listen_for(["y", "yes", "n", "no"])
