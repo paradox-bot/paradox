@@ -142,7 +142,7 @@ def load_into(bot):
         if interactive:
             def check(role):
                 return (role.id == roleid) or (userstr in role.name)
-            roles = filter(check, ctx.server.roles)
+            roles = list(filter(check, ctx.server.roles))
             if len(roles) == 0:
                 role = None
             else:
