@@ -52,22 +52,6 @@ class Context:
             string = string.replace(key, keydict[key])
         return string
 
-    async def find_user(self, user_str, in_server=False):
-        if user_str == "":
-            return None
-        maybe_user_id = user_str.strip('<@!> ')
-        if maybe_user_id.isdigit():
-            def is_user(member):
-                return member.id == maybe_user_id
-        else:
-            def is_user(member):
-                return ((user_str.lower() in member.display_name.lower()) or (user_str.lower() in member.name.lower()))
-        if self.server:
-            member = discord.utils.find(is_user, self.server.members)
-        if not (member or in_server):
-            member = discord.utils.find(is_user, self.bot.get_all_members)
-        return member
-
     async def get_cmds(self):
         handlers = self.bot.handlers
         cmds = {}
@@ -104,8 +88,6 @@ class Context:
         if code:
             splits = ["```\n"+split+"\n```" for split in splits]
         return splits
-
-
 
 
 class MessageContext(Context):

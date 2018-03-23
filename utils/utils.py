@@ -1,14 +1,16 @@
 import asyncio
 import subprocess
 import datetime
+import discord
 
 
 def load_into(bot):
+
     @bot.util
-    def strfdelta(ctx, delta, sec = False):
+    def strfdelta(ctx, delta, sec=False):
         output = [[delta.days, 'day'],
-                [delta.seconds // 3600, 'hour'],
-                [delta.seconds // 60 % 60, 'minute']]
+                  [delta.seconds // 3600, 'hour'],
+                  [delta.seconds // 60 % 60, 'minute']]
         if sec:
             output.append([delta.seconds % 60, 'second'])
         for i in range(len(output)):
@@ -38,7 +40,7 @@ def load_into(bot):
     @bot.util
     async def tail(ctx, filename, n):
         p1 = subprocess.Popen('tail -n ' + str(n) + ' ' + filename,
-                            shell=True, stdin=None, stdout=subprocess.PIPE)
+                              shell=True, stdin=None, stdout=subprocess.PIPE)
         out, err = p1.communicate()
         p1.stdout.close()
         return out.decode('utf-8')
@@ -47,10 +49,10 @@ def load_into(bot):
     def convdatestring(ctx, datestring):
         datestring = datestring.strip(' ,')
         datearray = []
-        funcs = {'d' : lambda x: x * 24 * 60 * 60,
-                'h' : lambda x: x * 60 * 60,
-                'm' : lambda x: x * 60,
-                's' : lambda x: x}
+        funcs = {'d': lambda x: x * 24 * 60 * 60,
+                 'h': lambda x: x * 60 * 60,
+                 'm': lambda x: x * 60,
+                 's': lambda x: x}
         currentnumber = ''
         for char in datestring:
             if char.isdigit():
@@ -67,3 +69,20 @@ def load_into(bot):
             if i[1] in funcs:
                 seconds += funcs[i[1]](i[0])
         return datetime.timedelta(seconds=seconds)
+
+    @bot.util
+    async def find_user(ctx, user_str, in_server=False):
+        if user_str == "":
+            return None
+        maybe_user_id = user_str.strip('<@!> ')
+        if maybe_user_id.isdigit():
+            def is_user(member):
+                return member.id == maybe_user_id
+        else:
+            def is_user(member):
+                return ((user_str.lower() in member.display_name.lower()) or (user_str.lower() in member.name.lower()))
+        if ctx.server:
+            member = discord.utils.find(is_user, ctx.server.members)
+        if not (member or in_server):
+            member = discord.utils.find(is_user, ctx.bot.get_all_members)
+        return member
