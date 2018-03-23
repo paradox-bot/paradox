@@ -81,7 +81,7 @@ def load_into(bot):
                     (user_str.lower() in member.name.lower()))
         collection = ctx.server.members if in_server else ctx.bot.get_all_members
         if interactive:
-            users = sorted(list(filter(is_user, collection)))
+            users = list(filter(is_user, collection))
             if len(users) == 0:
                 return None
             if len(users) > limit:
