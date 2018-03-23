@@ -71,7 +71,7 @@ def load_into(bot):
         return datetime.timedelta(seconds=seconds)
 
     @bot.util
-    async def find_user(ctx, user_str, in_server=False, interactive=False):
+    async def find_user(ctx, user_str, in_server=False, interactive=False, limit=20):
         if user_str == "":
             return None
         maybe_user_id = user_str.strip('<@!> ')
@@ -84,6 +84,10 @@ def load_into(bot):
             users = list(filter(is_user, collection))
             if len(users) == 0:
                 return None
+            if len(selected) > limit:
+                await ctx.reply("Over {} users found! Please refine your search".format(limit))
+                ctx.cmd_err =(-1, "")
+                return
             selected = await ctx.selector("Multiple users found! Please select one.",
                                           [user.name for user in users])
             if selected is None:
