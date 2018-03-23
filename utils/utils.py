@@ -81,7 +81,7 @@ def load_into(bot):
                     (user_str.lower() in member.name.lower()))
         collection = ctx.server.members if in_server else ctx.bot.get_all_members
         if interactive:
-            users = list(filter(is_user, collection))
+            users = sorted(list(filter(is_user, collection)))
             if len(users) == 0:
                 return None
             if len(users) > limit:
@@ -214,7 +214,7 @@ def load_into(bot):
         except discord.Forbidden:
             pass
         if result == "c":
-            await ctx.reply("Cancelling")
+            await ctx.reply("Cancelled selection.")
             ctx.cmd_err = (-1,"")  # User cancelled or didn't respond
             return None
         return int(result_msg.content)-1
