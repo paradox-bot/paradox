@@ -84,7 +84,7 @@ def load_into(bot):
             users = list(filter(is_user, collection))
             if len(users) == 0:
                 return None
-            if len(selected) > limit:
+            if len(users) > limit:
                 await ctx.reply("Over {} users found! Please refine your search".format(limit))
                 ctx.cmd_err =(-1, "")
                 return
