@@ -89,7 +89,7 @@ def load_into(bot):
                 ctx.cmd_err =(-1, "")
                 return
             selected = await ctx.selector("Multiple users found! Please select one.",
-                                          [user.name for user in users])
+                                          ["{0.display_name} ({0.name})".format(user) for user in users])
             if selected is None:
                 return None
             return users[selected]
