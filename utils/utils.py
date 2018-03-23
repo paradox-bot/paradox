@@ -86,3 +86,10 @@ def load_into(bot):
         if not (member or in_server):
             member = discord.utils.find(is_user, ctx.bot.get_all_members)
         return member
+
+    @bot.util
+    async def listen_for(ctx, chars=[], timeout=30):
+        def check(message):
+            return (message.content in chars)
+        msg = await ctx.bot.wait_for_message(author=ctx.author, check=check, timeout=timeout)
+        return msg
