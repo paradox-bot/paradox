@@ -26,3 +26,14 @@ async def snip_user_lookup(ctx, in_server=False):
     """
     ctx.objs["found_user"] = await ctx.find_user(ctx.params[0], in_server, interactive=True)
     return ctx.objs["found_user"]
+
+
+@snip("rep cooldown")
+async def snip_rep_cooldown(ctx, userid=None):
+    """
+    Quick rep cooldown, for testing.
+    """
+    if not userid:
+        userid = ctx.authid
+    await ctx.data.users.set(userid, "last_rep_time", "0")
+    await ctx.reply("The cooldown has been reset")
