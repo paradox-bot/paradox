@@ -87,11 +87,11 @@ def load_into(bot):
             if len(users) == 0:
                 return None
             if len(users) > limit:
-                await ctx.reply("Over {} users found! Please refine your search".format(limit))
+                await ctx.reply("Over {} users found matching `{}`! Please refine your search".format(limit, user_str))
                 ctx.cmd_err = (-1, "")
-                return
+                return None
             names = ["{} {}".format(user.display_name, ("({})".format(user.name)) if user.nick else "") for user in users]
-            selected = await ctx.selector("Multiple users found! Please select one.", names)
+            selected = await ctx.selector("Multiple users found matching `{}`! Please select one.".format(user_str), names)
             if selected is None:
                 return None
             return users[selected]
@@ -104,6 +104,20 @@ def load_into(bot):
             return ((message.content.lower() if lower else message.content) in chars)
         msg = await ctx.bot.wait_for_message(author=ctx.author, check=check, timeout=timeout)
         return msg
+
+    @bot.util
+    async def input(ctx, msg, timeout=120):
+        offer_msg = await ctx.reply(msg)
+        result_msg = await ctx.bot.wait_for_message(author=ctx.author, timeout=timeout)
+        if result_msg is None:
+            return None
+        result = result_msg.content.lower()
+        try:
+            await ctx.bot.delete_message(offer_msg)
+            await ctx.bot.delete_message(result_msg)
+        except Exception:
+            pass
+        return result
 
     @bot.util
     async def ask(ctx, msg, timeout=30):

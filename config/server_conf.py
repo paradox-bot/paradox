@@ -39,7 +39,7 @@ class Server_Setting_Autorole(Server_Setting, settingTypes.ROLE):
 # Moderation settings
 
 @server_conf.setting
-class Server_Setting_Join_Ch(Server_Setting, settingTypes.CHANNEL):
+class Server_Setting_modlog_ch(Server_Setting, settingTypes.CHANNEL):
     name = "modlog_ch"
     vis_name = "modlog_ch"
     desc = "Channel to report moderation events in"
