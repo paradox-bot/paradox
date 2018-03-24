@@ -37,3 +37,15 @@ async def snip_rep_cooldown(ctx, userid=None):
         userid = ctx.authid
     await ctx.data.users.set(userid, "last_rep_time", "0")
     await ctx.reply("The cooldown has been reset")
+
+@snip("flags")
+async def snip_flags(ctx, flags=[], override=True):
+    params, arg_str, flags = ctx.parse_flags(ctx.arg_str, flags)
+    ctx.flags = flags
+    if override:
+        ctx.params = params
+        ctx.arg_str = arg_str
+    else:
+        ctx.flagged_params = params
+        ctx.flagged_arg_str = arg_str
+    return flags

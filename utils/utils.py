@@ -75,10 +75,12 @@ def load_into(bot):
         if user_str == "":
             return None
         maybe_user_id = user_str.strip('<@!> ')
+
         def is_user(member):
             return ((member.id == maybe_user_id) or
                     (user_str.lower() in member.display_name.lower()) or
                     (user_str.lower() in member.name.lower()))
+
         collection = ctx.server.members if in_server else ctx.bot.get_all_members
         if interactive:
             users = list(filter(is_user, collection))
@@ -86,7 +88,7 @@ def load_into(bot):
                 return None
             if len(users) > limit:
                 await ctx.reply("Over {} users found! Please refine your search".format(limit))
-                ctx.cmd_err =(-1, "")
+                ctx.cmd_err = (-1, "")
                 return
             names = ["{} {}".format(user.display_name, ("({})".format(user.name)) if user.nick else "") for user in users]
             selected = await ctx.selector("Multiple users found! Please select one.", names)
@@ -156,7 +158,7 @@ def load_into(bot):
                 role = None
             else:
                 selected = await ctx.selector("Multiple roles found! Please select one.",
-                                            [role.name for role in roles])
+                                              [role.name for role in roles])
                 if selected is None:
                     return None
                 role = roles[selected]
@@ -202,11 +204,11 @@ def load_into(bot):
         msg += "```\n"
         msg += "Type the number of your selection or `c` to cancel."
         out_msg = await ctx.reply(msg)
-        result_msg = await ctx.listen_for([str(i+1) for i in range(0,len(select_from))] + ["c"], timeout=timeout)
+        result_msg = await ctx.listen_for([str(i+1) for i in range(0, len(select_from))] + ["c"], timeout=timeout)
         await ctx.bot.delete_message(out_msg)
         if not result_msg:
             await ctx.reply("Question timed out, aborting...")
-            ctx.cmd_err = (-1,"")  # User cancelled or didn't respond
+            ctx.cmd_err = (-1, "")  # User cancelled or didn't respond
             return None
         result = result_msg.content
         try:
@@ -215,6 +217,67 @@ def load_into(bot):
             pass
         if result == "c":
             await ctx.reply("Cancelled selection.")
-            ctx.cmd_err = (-1,"")  # User cancelled or didn't respond
+            ctx.cmd_err = (-1, "")  # User cancelled or didn't respond
             return None
-        return int(result_msg.content)-1
+        return int(result_msg.content) - 1
+
+    @bot.util
+    async def parse_flags(ctx, args, flags=[]):
+        """
+        Parses flags in args from the flags given in flags.
+        Flag formats:
+            'a': boolean flag, checks if present.
+            'a=': Eats one "word", which may be in quotes
+            'a==': Eats all words up until next flag
+        Returns a tuple (params, args, flags_present).
+        flags_present is a dictionary {flag: value} with value being:
+            False if a flag isn't present,
+            the value of the flag for a long flag,
+        If -- is present in the input as a word, all flags afterwards are ignored.
+        TODO: Make this more efficient
+        """
+        params = args.split(' ')
+        final_params = []
+        final_flags = {}
+        indexes = []
+        end_params = []
+        if "--" in params:
+            end_params = params[params.index("--") + 1:]
+            params = params[:params.index("--")]
+        for flag in flags:
+            clean_flag = flag.strip("=")
+            index = None
+            if (("-" + clean_flag) in params):
+                index = params.index("-" + clean_flag)
+            elif (("--" + clean_flag) in params):
+                index = params.index("--" + clean_flag)
+
+            if index is None:
+                final_flags[clean_flag] = False
+                continue
+            indexes.append((index, flag))
+        indexes = sorted(indexes)
+        if len(indexes) > 0:
+            final_params = params[0:indexes[0][0]]
+        else:
+            final_params = params
+        for (i, index) in enumerate(indexes):
+            if i == len(indexes) - 1:
+                flag_arg = " ".join(params[index[0]+1:])
+            else:
+                flag_arg = " ".join(params[index[0]+1:indexes[i+1][0]])
+            flag_arg = flag_arg.strip()
+            if index[1].endswith("=="):
+                final_flags[index[1][:-2]] = flag_arg
+            elif index[1].endswith("="):
+                flag_split_arg = flag_arg.split(" ")
+                final_flags[index[1][:-1]] = flag_split_arg[0]
+                if len(flag_split_arg) > 1:
+                    final_params += flag_split_arg[1:]
+            else:
+                final_flags[index[1]] = True
+                final_params += flag_arg.split(" ")
+        final_params += end_params
+        final_args = " ".join(final_params).strip()
+        final_params = final_args.split(" ")
+        return (final_params, " ".join(final_params), final_flags)
