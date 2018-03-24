@@ -28,8 +28,6 @@ async def cmd_tex(ctx):
         res = await ctx.bot.wait_for_reaction(message=out_msg,
                                         timeout=300,
                                         emoji=[del_emoji, show_emoji])
-        # done, pending = await asyncio.wait([res_added, res_removed], return_when=asyncio.FIRST_COMPLETED)
-        # res = done[0]
         if res is None:
             break
         if res.reaction.emoji == del_emoji and res.user == ctx.author:
