@@ -111,7 +111,7 @@ def load_into(bot):
         result_msg = await ctx.bot.wait_for_message(author=ctx.author, timeout=timeout)
         if result_msg is None:
             return None
-        result = result_msg.content.lower()
+        result = result_msg.content
         try:
             await ctx.bot.delete_message(offer_msg)
             await ctx.bot.delete_message(result_msg)
