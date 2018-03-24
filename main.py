@@ -54,7 +54,8 @@ bot.objects["sorted cats"] = ["General",
                               "Misc"]
 bot.objects["sorted_conf_cats"] = ["Guild settings",
                                    "Join message",
-                                   "Leave message"]
+                                   "Leave message",
+                                   "Moderation"]
 
 # ----Discord event handling----
 

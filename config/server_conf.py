@@ -36,6 +36,16 @@ class Server_Setting_Autorole(Server_Setting, settingTypes.ROLE):
     category = "Guild settings"
     default = 0
 
+# Moderation settings
+
+@server_conf.setting
+class Server_Setting_Join_Ch(Server_Setting, settingTypes.CHANNEL):
+    name = "modlog_ch"
+    vis_name = "modlog_ch"
+    desc = "Channel to report moderation events in"
+    default = None
+    category = "Moderation"
+
 
 # Join and leave message settings
 
