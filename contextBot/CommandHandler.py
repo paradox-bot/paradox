@@ -199,7 +199,7 @@ class CommandHandler:
             return wrapper
         return decorator
 
-    def execute(self, snip, **kwargs):
+    def execute(self, snip, **snipargs):
         """
         Decorator to run a snippet before a command function executes.
 
@@ -214,7 +214,6 @@ class CommandHandler:
                 snippet = unknown_snip
             else:
                 snippet = self.snippets[snip]
-            snipargs = kwargs
 
             @wraps(func)
             async def wrapper(ctx, **kwargs):

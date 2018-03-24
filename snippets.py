@@ -40,7 +40,7 @@ async def snip_rep_cooldown(ctx, userid=None):
 
 @snip("flags")
 async def snip_flags(ctx, flags=[], override=True):
-    params, arg_str, flags = ctx.parse_flags(ctx.arg_str, flags)
+    (params, arg_str, flags) = await ctx.parse_flags(ctx.arg_str, flags)
     ctx.flags = flags
     if override:
         ctx.params = params
