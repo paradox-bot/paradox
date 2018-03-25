@@ -20,7 +20,7 @@ def load_into(bot):
 
         if (await ctx.server_conf.join_msgs_enabled.get(ctx)):
             ch = await ctx.server_conf.join_ch.get(ctx)
-            msg = await ctx.server_conf.join_msg.get(ctx)
+            msg = await ctx.server_conf.join_msgs_msg.get(ctx)
 
             if not ch:
                 return
@@ -38,7 +38,7 @@ def load_into(bot):
         ctx = Context(bot=bot, member=member)
         if (await ctx.server_conf.leave_msgs_enabled.get(ctx)):
             ch = await ctx.server_conf.leave_ch.get(ctx)
-            msg = await ctx.server_conf.leave_msg.get(ctx)
+            msg = await ctx.server_conf.leave_msgs_msg.get(ctx)
 
             if not ch:
                 return
