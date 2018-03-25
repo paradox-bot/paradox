@@ -92,7 +92,7 @@ async def cmd_ban(ctx):
     TODO: Too many edits?
     TODO: When switching to rewrite, include reason in ban
     """
-    if ctx.arg_str.strip() = "":
+    if ctx.arg_str.strip() == "":
         await ctx.reply("You must give me a user to ban!")
     reason = ctx.flags["r"]
     purge_days = ctx.flags["p"]
