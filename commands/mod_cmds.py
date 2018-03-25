@@ -94,6 +94,7 @@ async def cmd_ban(ctx):
     """
     if ctx.arg_str.strip() == "":
         await ctx.reply("You must give me a user to ban!")
+        return
     reason = ctx.flags["r"]
     purge_days = ctx.flags["p"]
     if not reason:
