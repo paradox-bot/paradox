@@ -25,13 +25,15 @@ PREFIX = conf.get("PREFIX")
 LOG_CHANNEL = "428159039831146506"
 
 LOGFILE = "logs/paralog.log"
+LOGFILE_LAST = "logs/paralog.last.log"
+
 
 ## Log file
 
-if os.path.isfile("logs/paralog.log"):
-    if os.path.isfile("logs/paralog.last.log"):
-        shutil.move("logs/paralog.last.log", "logs/{}paralog.log".format(datetime.utcnow().strftime("%s")))
-    shutil.move("logs/paralog.log", "logs/paralog.last.log")
+if os.path.isfile(LOGFILE):
+    if os.path.isfile(LOGFILE_LAST):
+        shutil.move(LOGFILE_LAST, "logs/{}paralog.log".format(datetime.utcnow().strftime("%s")))
+    shutil.move(LOGFILE, LOGFILE_LAST)
 
 
 async def get_prefixes(ctx):
