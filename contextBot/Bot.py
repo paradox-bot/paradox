@@ -20,6 +20,7 @@ class Bot(Client):
         self.LOGFILE = log_file
         self.prefix = prefix
         self.get_prefixes = prefix_func
+        self.loading_leader = ""
 
         if prefix_func is not None:
             self.add_to_ctx(prefix_func, "get_prefixes")
@@ -88,7 +89,7 @@ class Bot(Client):
         # For now just print it.
         print(logMessage)
         with open(self.LOGFILE, 'a+') as logfile:
-            logfile.write("\n" + logMessage + "\n")
+            logfile.write(logMessage + "\n")
         return
 
     def sync_log(self, logMessage):
@@ -97,44 +98,67 @@ class Bot(Client):
         '''
         print(logMessage)
         with open(self.LOGFILE, 'a+') as logfile:
-            logfile.write("\n" + logMessage + "\n")
+            logfile.write(logMessage + '\n')
         return
 
-    def load(self, *argv):
+    def load(self, *argv, depth=0, ignore=[]):
         """
         Intelligently loads modules from the given filepath(s).
         If given a directory, iterates over each file.
         Looks for cmds and load_into, treats them as expected.
         """
+        leader = ">.."
         if len(argv) > 1:
             for fp in argv:
-                self.load(fp)
+                self.load(fp, depth=depth, ignore=ignore)
+            return
 
         fp = argv[0]
         if self.DEBUG > 0:
-            self.sync_log("Loading modules from path: " + fp)
+            self.sync_log("\n"+self.loading_leader+"Loading modules from path: " + fp)
+        for ignored in ignore:
+            if fp.endswith("/"+ignored):
+                self.sync_log(self.loading_leader+"-Path was in ignored list, skipping")
+                return
 
         if os.path.isdir(fp):
-            self.sync_log(">Path appears to be a directory, going into it...")
+            self.sync_log(self.loading_leader+">Path appears to be a directory, going in")
             for fn in os.listdir(fp):
-                self.load(os.path.join(fp,fn))
+                old_leader = self.loading_leader
+                self.loading_leader += leader
+                self.load(os.path.join(fp,fn), depth=depth+1, ignore=ignore)
+                self.loading_leader = old_leader
+            self.sync_log(leader*depth+">Going out of {}\n".format(fp))
             return
         if os.path.isfile(fp):
             if fp.endswith(".py"):
                 self.modules_loaded += 1
                 module = imp.load_source("bot_module_" + str(self.modules_loaded), fp)
                 attrs = dir(module)
+                is_module = 0
+                old_leader = self.loading_leader
                 if "cmds" in attrs:
-                    self.sync_log(">>Found \"cmds\" object in file, loading as commands.")
+                    is_module += 1
+                    self.loading_leader += "++"
+                    self.sync_log(self.loading_leader+" Found \"cmds\" object in file, loading as commands.")
                     module.cmds.load_into(self)
                 if "load_into" in attrs:
-                    self.sync_log(">>Found \"load_into\" method in file, loading as a module.")
+                    is_module += 1
+                    self.loading_leader += "++"
+                    self.sync_log(self.loading_leader+" Found \"load_into\" method in file, loading as a module.")
                     module.load_into(self)
+                if not is_module:
+                    self.loading_leader += "--"
+                    self.sync_log(self.loading_leader+" File does not appear to be a valid module. Moving on.")
+                self.loading_loader = old_leader
+
+
+
             else:
-                self.sync_log("File was not a python file, skipping")
+                self.sync_log(leader*depth+">File was not a python file, skipping")
             return
         else:
-            self.sync_log("File could not be found, skipping")
+            self.sync_log(leader*depth+">File could not be found, skipping")
 
 
     def load_cmds(self, filepath):
@@ -169,5 +193,7 @@ class Bot(Client):
         return func
 
     def add_to_ctx(self, attr, name=None):
+        if self.DEBUG:
+            self.sync_log(self.loading_leader+"+ Adding context attribute: {}".format(name if name else attr.__name__))
         setattr(Context, name if name else attr.__name__, attr)
 

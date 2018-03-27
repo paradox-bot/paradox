@@ -26,7 +26,10 @@ class CommandHandler:
         bot (BotContext): The global bot context to load the commands into.
         """
         if bot.DEBUG > 0:
-            bot.sync_log("Loading command handler \"{}\" with commands {}".format(self.name,
+            bot.sync_log(bot.loading_leader+"+ Loading {1} commands into command handler \"{0}\"".format(self.name,
+                                                                                  len(list(self.cmds.keys()))))
+        elif bot.DEBUG > 2:
+            bot.sync_log(bot.loading_leader+"+ Loading command handler \"{}\" with commands {}".format(self.name,
                                                                                   str(list(self.cmds.keys()))))
         bot.cmd_cache = [*(bot.cmd_cache), *(self.cmds.keys())]
 
