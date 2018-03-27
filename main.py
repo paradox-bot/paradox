@@ -54,6 +54,19 @@ bot = Bot(data=botdata,
 
 bot.DEBUG = 1
 
+
+async def log(bot, logMessage):
+    print(logMessage)
+    with open(bot.LOGFILE, 'a+') as logfile:
+        logfile.write(logMessage + "\n")
+    ctx = Context(bot=bot)
+    log_splits = await ctx.msg_split(logMessage, True)
+    for log in log_splits:
+        await bot.send_message(discord.utils.get(bot.get_all_channels(), id=LOG_CHANNEL), log)
+Bot.log = log
+
+## Loading and initial objects
+
 bot.load("commands", "config", "events", "utils", ignore=["RCS", "__pycache__"])
 
 bot.objects["invite_link"] = "https://discordapp.com/api/oauth2/authorize?bot_id=401613224694251538&permissions=8&scope=bot"
@@ -83,10 +96,10 @@ async def on_ready():
         GAME = "in $servers$ servers!"
     GAME = await Context(bot=bot).ctx_format(GAME)
     await bot.change_presence(status=discord.Status.online, game=discord.Game(name=GAME))
-    await bot.log("Logged in as")
-    await bot.log(bot.user.name)
-    await bot.log(bot.user.id)
-    await bot.log("Logged into {} servers".format(len(bot.servers)))
+    bot.sync_log("Logged in as")
+    bot.sync_log(bot.user.name)
+    bot.sync_log(bot.user.id)
+    bot.sync_log("Logged into {} servers".format(len(bot.servers)))
 
     ctx = Context(bot=bot)
     with open(LOGFILE, "r") as f:

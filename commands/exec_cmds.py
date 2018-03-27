@@ -128,7 +128,7 @@ async def _eval(ctx):
     try:
         output = eval(ctx.arg_str)
     except Exception:
-        traceback.print_exc()
+        await ctx.bot.log(str(traceback.format_exc()))
         return (str(traceback.format_exc()), 1)
     if asyncio.iscoroutine(output):
         output = await output
@@ -143,7 +143,7 @@ async def _exec(ctx):
         exec(ctx.arg_str)
         result = (redirected_output.getvalue(), 0)
     except Exception:
-        traceback.print_exc()
+        await ctx.bot.log(str(traceback.format_exc()))
         result = (str(traceback.format_exc()), 1)
     finally:
         sys.stdout = old_stdout
@@ -162,7 +162,7 @@ async def _async(ctx):
         exec(exec_string, env)
         result = (redirected_output.getvalue(), 0)
     except Exception:
-        traceback.print_exc()
+        await ctx.bot.log(str(traceback.format_exc()))
         result = (str(traceback.format_exc()), 1)
     _temp_exec = env['_temp_exec']
     try:
@@ -173,7 +173,7 @@ async def _async(ctx):
         else:
             result = (value + '\n' + str(returnval), 0)
     except Exception:
-        traceback.print_exc()
+        await ctx.bot.log(str(traceback.format_exc()))
         result = (str(traceback.format_exc()), 1)
     finally:
         sys.stdout = old_stdout

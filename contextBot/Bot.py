@@ -53,9 +53,6 @@ class Bot(Client):
         await self.parse_cmd(prefix, msgctx)
 
     async def parse_cmd(self, used_prefix, ctx):
-        if self.DEBUG > 0:
-            await self.log("Got the command \n{}\nfrom \"{}\" with id \"{}\""
-                           .format(ctx.cntnt, ctx.author, ctx.authid))
         cmd_msg = ctx.cntnt[len(used_prefix):].strip()
         cmd_name = cmd_msg.split(' ')[0]
         arg_str = cmd_msg[len(cmd_name):].strip()
@@ -65,6 +62,9 @@ class Bot(Client):
         cmds = await ctx.get_cmds()
         if cmd_name not in cmds:
             return
+        if self.DEBUG > 0:
+            await self.log("Got the command \n{}\nfrom \"{}\" with id \"{}\""
+                           .format(ctx.cntnt, ctx.author, ctx.authid))
         cmd = cmds[cmd_name]
         # Very ugly, want a way to instantiate commandContext using Message context
         cmdCtx = CommandContext(bot=self,
