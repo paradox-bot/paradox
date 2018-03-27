@@ -40,8 +40,7 @@ async def cmd_help(ctx):
                 msg += "```{}```\n".format((commands[cmd].long_help).format(**help_keys))
             else:
                 msg += "I couldn't find a command named `{}`. Please make sure you have spelled the command correctly. \n".format(cmd)
-            await ctx.reply(msg)
-            return
+        await ctx.reply(msg, split=True, code=False)
 
 
 @cmds.cmd("list",
