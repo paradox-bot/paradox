@@ -141,11 +141,13 @@ class Bot(Client):
                     is_module += 1
                     self.loading_leader += "++"
                     self.sync_log(self.loading_leader+" Found \"cmds\" object in file, loading as commands.")
+                    self.loading_leader += "+ "
                     module.cmds.load_into(self)
                 if "load_into" in attrs:
                     is_module += 1
                     self.loading_leader += "++"
                     self.sync_log(self.loading_leader+" Found \"load_into\" method in file, loading as a module.")
+                    self.loading_leader += "+ "
                     module.load_into(self)
                 if not is_module:
                     self.loading_leader += "--"
@@ -194,6 +196,6 @@ class Bot(Client):
 
     def add_to_ctx(self, attr, name=None):
         if self.DEBUG:
-            self.sync_log(self.loading_leader+"+ Adding context attribute: {}".format(name if name else attr.__name__))
+            self.sync_log(self.loading_leader+"Adding context attribute: {}".format(name if name else attr.__name__))
         setattr(Context, name if name else attr.__name__, attr)
 
