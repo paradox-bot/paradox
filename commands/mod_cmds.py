@@ -113,7 +113,7 @@ async def cmd_ban(ctx):
         await ctx.reply("Number of days to purge must be a number!")
         return
     if int(purge_days) > 7:
-        await ctx.reply("Number of days to burge must be less than 7")
+        await ctx.reply("Number of days to purge must be less than 7")
         return
     bans = []
     msg = "Banning...\n"
