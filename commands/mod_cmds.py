@@ -98,22 +98,22 @@ async def cmd_ban(ctx):
     reason = ctx.flags["r"]
     purge_days = ctx.flags["p"]
     if not reason:
-        reason = await ctx.input("Please provide a reason! (`no` for no reason or `c` to abort ban)")
+        reason = await ctx.input("📋 Please provide a reason! (`no` for no reason or `c` to abort ban)")
         if reason.lower() == "no":
             reason = "None"
         elif reason.lower() == "c":
-            await ctx.reply("Aborting!")
+            await ctx.reply("📋 Aborting!")
             return
         elif reason is None:
-            await ctx.reply("Request timed out, aborting.")
+            await ctx.reply("📋 Request timed out, aborting.")
             return
     if not purge_days:
         purge_days = "1"
     if not purge_days.isdigit():
-        await ctx.reply("Number of days to purge must be a number!")
+        await ctx.reply("⚠ Number of days to purge must be a number!")
         return
     if int(purge_days) > 7:
-        await ctx.reply("Number of days to purge must be less than 7")
+        await ctx.reply("⚠ Number of days to purge must be less than 7")
         return
     bans = []
     msg = "Banning...\n"
@@ -125,20 +125,20 @@ async def cmd_ban(ctx):
         user = await ctx.find_user(userstr, in_server=True, interactive=True)
         if user is None:
             if ctx.cmd_err[0] != -1:
-                msg = old_msg + "\tCouldn't find user `{}`, skipping\n".format(userstr)
+                msg = old_msg + "\t⚠ Couldn't find user `{}`, skipping\n".format(userstr)
             else:
-                msg = old_msg + "\tUser selection aborted for `{}`, skipping\n".format(userstr)
+                msg = old_msg + "\t🗑 User selection aborted for `{}`, skipping\n".format(userstr)
                 ctx.cmd_err = (0, "")
             await ctx.bot.edit_message(out_msg, msg)
             continue
         result = await ban(ctx, user, days=int(purge_days), reason=reason)
         if result == 0:
-            msg = old_msg + "\tSuccessfully banned `{}`! ".format(user)
+            msg = old_msg + "\t🔨 Successfully banned `{}`! ".format(user)
             bans.append(user)
         elif result == 1:
-            msg = old_msg + "\tFailed to ban `{}`! (Insufficient Permissions) ".format(user.name)
+            msg = old_msg + "\t🚨 Failed to ban `{}`! (Insufficient Permissions) ".format(user.name)
         else:
-            msg = old_msg + "\tEncountered an unexpected fatal error banning `{}`!Aborting ban sequence...".format(user.name)
+            msg = old_msg + "\t🚨 Encountered an unexpected fatal error banning `{}`!Aborting ban sequence...".format(user.name)
             await ctx.bot.edit_message(out_msg, msg)
             break
         await ctx.bot.edit_message(out_msg, msg)
