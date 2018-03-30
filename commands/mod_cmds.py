@@ -87,9 +87,10 @@ async def cmd_ban(ctx):
 
     Bans the users listed with an optional reason.
     If -p is provided, purges <days> days of message history for each user.
+    """
+    """
     TODO: Emojis for ban messages
     TODO: Useful switch on permission errors etc
-    TODO: Too many edits?
     TODO: When switching to rewrite, include reason in ban
     """
     if ctx.arg_str.strip() == "":
@@ -119,6 +120,8 @@ async def cmd_ban(ctx):
     msg = "Banning...\n"
     out_msg = await ctx.reply(msg)
     for userstr in ctx.params:
+        if userstr == "":
+            continue
         old_msg = msg
         msg += "\t{}".format(userstr)
         await ctx.bot.edit_message(out_msg, msg)
@@ -129,7 +132,6 @@ async def cmd_ban(ctx):
             else:
                 msg = old_msg + "\tUser selection aborted for `{}`, skipping\n".format(userstr)
                 ctx.cmd_err = (0, "")
-            await ctx.bot.edit_message(out_msg, msg)
             continue
         result = await ban(ctx, user, days=int(purge_days), reason=reason)
         if result == 0:
@@ -139,9 +141,7 @@ async def cmd_ban(ctx):
             msg = old_msg + "\tFailed to ban `{}`! (Insufficient Permissions) ".format(user.name)
         else:
             msg = old_msg + "\tEncountered an unexpected fatal error banning `{}`!Aborting ban sequence...".format(user.name)
-            await ctx.bot.edit_message(out_msg, msg)
             break
-        await ctx.bot.edit_message(out_msg, msg)
         """
         if purge_days:
             old_msg = msg
@@ -156,6 +156,7 @@ async def cmd_ban(ctx):
             await ctx.bot.edit_message(out_msg, msg)
         """
         msg += "\n"
+    await ctx.bot.edit_message(out_msg, msg)
     if len(bans) == 0:
         return
     action = "ban" if len(bans) == 1 else "multi-ban"
