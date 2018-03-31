@@ -124,6 +124,8 @@ async def multi_mod_action(ctx, user_strs, action_func, strings, reason, *kwargs
           category="Moderation",
           short_help="Bans users")
 @cmds.execute("flags", flags=["r==", "p="])
+@cmds.require("in_server")
+@cmds.require("in_server_can_ban")
 async def cmd_ban(ctx):
     """
     Usage: {prefix}ban <user1> [user2] [user3]... [-r <reason>] [-p <days>]
