@@ -34,9 +34,10 @@ class Server_Setting_Autorole(Server_Setting, settingTypes.ROLE):
     vis_name = "autorole"
     desc = "Role automatically given to new members"
     category = "Guild settings"
-    default = 0
+    default = "0"
 
 # Moderation settings
+
 
 @server_conf.setting
 class Server_Setting_modlog_ch(Server_Setting, settingTypes.CHANNEL):

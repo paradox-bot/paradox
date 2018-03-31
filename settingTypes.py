@@ -62,14 +62,14 @@ class ROLE(paraSetting):
     """
     ROLE type.
     """
-    accept = "Role mention/id/name"
+    accept = "Role mention/id/name, or 'none' to unset"
 
     @classmethod
     async def humanise(self, ctx, raw):
         """
         Expect raw to be role id or 0, an empty.
         """
-        if not raw:
+        if (not raw) or raw == "0":
             return "None"
         role = discord.utils.get(ctx.server.roles, id=raw)
         if role:
@@ -81,6 +81,8 @@ class ROLE(paraSetting):
         """
         User can enter a role mention or an id, or even a partial name.
         """
+        if userstr.lower() in ["0", "none"]:
+            return "0"
         role = await ctx.find_role(userstr, create=True, interactive=True)
         return role.id if role else None
 
