@@ -12,8 +12,15 @@ class ModEvent:
     actions = {"ban": "User Banned!",
                "multi-ban": "Multiple-User Ban!",
                "kick": "User Kicked!",
+               "multi-kick": "Users Kicked!",
+               "unban": "User Unbanned",
+               "multi-unban": "Users Unbanned",
                "mute": "User Muted!",
-               "softban": "User Softbanned!"}
+               "multi-mute": "Users Muted!",
+               "unmute": "User unmuted!",
+               "multi-unmute": "Users unmuted!",
+               "softban": "User Softbanned!",
+               "multi-softban": "Users Softbanned!"}
 
     def __init__(self, ctx, action, mod, users, reason="None", timeout=0):
         self.ctx = ctx
@@ -60,7 +67,7 @@ class ModEvent:
         return 0
 
 
-async def ban(ctx, user, ban_reason="None", days=1):
+async def ban(ctx, user, ban_reason="None", days=0):
     """
     Todo: on rewrite, make this post reason
     """
@@ -73,7 +80,31 @@ async def ban(ctx, user, ban_reason="None", days=1):
     return 0
 
 
-async def test_ban(ctx, user, ban_reason="None", days=1):
+async def softban(ctx, user, ban_reason="None", days=1):
+    """
+    Todo: on rewrite, make this post reason
+    """
+    try:
+        await ctx.bot.ban(user, int(days))
+        await ctx.bot.unban(ctx.server, user)
+    except discord.Forbidden:
+        return 1
+    except Exception:
+        return 2
+    return 0
+
+
+async def kick(ctx, user):
+    try:
+        await ctx.bot.kick(user)
+    except discord.Forbidden:
+        return 1
+    except Exception:
+        return 2
+    return 0
+
+
+async def test_action(ctx, user, **kwargs):
     return 0
 
 
@@ -123,43 +154,44 @@ async def multi_mod_action(ctx, user_strs, action_func, strings, reason, **kwarg
         await ctx.reply("An unexpected error occurred while trying to post to the modlog.")
 
 
+async def request_reason(ctx):
+    reason = await ctx.input("📋 Please provide a reason! (`no` for no reason or `c` to abort ban)")
+    if reason.lower() == "no":
+        reason = "None"
+    elif reason.lower() == "c":
+        await ctx.reply("📋 Aborting!")
+        return None
+    elif reason is None:
+        await ctx.reply("📋 Request timed out, aborting.")
+        return None
+    return reason
+
+
 @cmds.cmd("ban",
           category="Moderation",
           short_help="Bans users")
-@cmds.execute("flags", flags=["r==", "p=", "t"])
+@cmds.execute("flags", flags=["r==", "p=", "f"])
 @cmds.require("in_server")
 @cmds.require("in_server_can_ban")
 async def cmd_ban(ctx):
     """
-    Usage: {prefix}ban <user1> [user2] [user3]... [-r <reason>] [-p <days>] [-t]
+    Usage: {prefix}ban <user1> [user2] [user3]... [-r <reason>] [-p <days>] [-f]
 
     Bans the users listed with an optional reason.
     If -p (purge) is provided, purges <days> days of message history for each user.
-    If -t (test) is provided, doesn't actually ban, but does everything else. For testing and perm checking.
-    """
-    """
-    TODO: Emojis for ban messages
-    TODO: Useful switch on permission errors etc
-    TODO: When switching to rewrite, include reason in ban
+    If -f (fake) is provided, only pretends to ban.
     """
     if ctx.arg_str.strip() == "":
         await ctx.reply("You must give me a user to ban!")
         return
     reason = ctx.flags["r"]
     purge_days = ctx.flags["p"]
-    action_func = test_ban if ctx.flags["t"] else ban
+    action_func = test_action if ctx.flags["f"] else ban
+    reason = reason if reason else (await request_reason(ctx))
     if not reason:
-        reason = await ctx.input("📋 Please provide a reason! (`no` for no reason or `c` to abort ban)")
-        if reason.lower() == "no":
-            reason = "None"
-        elif reason.lower() == "c":
-            await ctx.reply("📋 Aborting!")
-            return
-        elif reason is None:
-            await ctx.reply("📋 Request timed out, aborting.")
-            return
+        return
     if not purge_days:
-        purge_days = "1"
+        purge_days = "0"
     if not purge_days.isdigit():
         await ctx.reply("⚠ Number of days to purge must be a number!")
         return
@@ -170,11 +202,82 @@ async def cmd_ban(ctx):
                "action_multi_name": "multi-ban",
                "start": "Banning... \n",
                "fail_unknown": "🚨 Encountered an unexpected fatal error banning `{user.name}`!Aborting ban sequence..."}
-    strings["results"] = {0: "🔨 Successfully banned `{user.name}`!",
+    strings["results"] = {0: "🔨 Successfully banned `{user.name}`" + (" and purged `{}` days of messages".format(purge_days) if int(purge_days) > 0 else "!"),
                           1: "🚨 Failed to ban `{user.name}`! (Insufficient Permissions)"}
     await multi_mod_action(ctx, ctx.params, action_func, strings, reason, days=int(purge_days), ban_reason="{}: {}".format(ctx.author, reason))
 
 
+@cmds.cmd("softban",
+          category="Moderation",
+          short_help="Softbans users")
+@cmds.execute("flags", flags=["r==", "p=", "f"])
+@cmds.require("in_server")
+@cmds.require("in_server_can_softban")
+async def cmd_softban(ctx):
+    """
+    Usage: {prefix}softban <user1> [user2] [user3]... [-r <reason>] [-p <days>] [-f]
+
+    Softbans (bans and unbans) the users listed with an optional reason.
+    If -p (purge) is provided, purges <days> days of message history for each user. Otherwise purges 1 day.
+    If -f (fake) is provided, only pretends to softban.
+    """
+    if ctx.arg_str.strip() == "":
+        await ctx.reply("You must give me a user to softban!")
+        return
+    reason = ctx.flags["r"]
+    purge_days = ctx.flags["p"]
+    action_func = test_action if ctx.flags["f"] else softban
+    reason = reason if reason else (await request_reason(ctx))
+    if not reason:
+        return
+    if not purge_days:
+        purge_days = "1"
+    if not purge_days.isdigit():
+        await ctx.reply("⚠ Number of days to purge must be a number!")
+        return
+    if int(purge_days) > 7:
+        await ctx.reply("⚠ Number of days to purge must be less than 7")
+        return
+    strings = {"action_name": "softban",
+               "action_multi_name": "multi-softban",
+               "start": "Softbanning... \n",
+               "fail_unknown": "🚨 Encountered an unexpected fatal error softbanning `{user.name}`!Aborting ban sequence..."}
+    strings["results"] = {0: "🔨 Softbanned `{user.name}`" + " and purged `{}` days of messages!".format(purge_days),
+                          1: "🚨 Failed to softban `{user.name}`! (Insufficient Permissions)"}
+    await multi_mod_action(ctx, ctx.params, action_func, strings, reason, days=int(purge_days), ban_reason="{}: {}".format(ctx.author, reason))
+
+
+@cmds.cmd("kick",
+          category="Moderation",
+          short_help="Kicks users")
+@cmds.execute("flags", flags=["r==", "f"])
+@cmds.require("in_server")
+@cmds.require("in_server_can_kick")
+async def cmd_kick(ctx):
+    """
+    Usage: {prefix}kick <user1> [user2] [user3]... [-r <reason>] [-f]
+
+    Kicks the users listed with an optional reason.
+    If -f (fake) is provided,  only pretends to kick.
+    """
+    if ctx.arg_str.strip() == "":
+        await ctx.reply("You must give me a user to kick!")
+        return
+    reason = ctx.flags["r"]
+    action_func = test_action if ctx.flags["f"] else kick
+    reason = reason if reason else (await request_reason(ctx))
+    if not reason:
+        return
+    strings = {"action_name": "kick",
+               "action_multi_name": "multi-kick",
+               "start": "Kicking... \n",
+               "fail_unknown": "🚨 Encountered an unexpected fatal error kicking `{user.name}`! Aborting kick sequence..."}
+    strings["results"] = {0: "🔨 Kicked `{user.name}`!",
+                          1: "🚨 Failed to kick `{user.name}`! (Insufficient Permissions)"}
+    await multi_mod_action(ctx, ctx.params, action_func, strings, reason)
+
+
+'''
 @cmds.cmd("hackban",
           category="Moderation",
           short_help="Pre-bans users by id")
@@ -186,16 +289,4 @@ async def cmd_hackban(ctx):
     Bans the user ids listed with an optional reason.
     """
     pass
-
-
-@cmds.cmd("softban",
-          category="Moderation",
-          short_help="Softbans a user to delete messages")
-@cmds.execute("flags", flags=["r==", "p="])
-async def cmd_softban(ctx):
-    """
-    Usage: {prefix}ban <user1> [user2] [user3]... [-r <reason>] [-p <days>]
-
-    Bans the users listed with an optional reason.
-    """
-    pass
+'''
