@@ -69,7 +69,7 @@ async def cmd_invite(ctx):
 
     Sends the link to invite the bot to your server.
     """
-    await ctx.reply("Here's my invite link! \n<{}>".format(ctx.bot.objects["invite link"]))
+    await ctx.reply("Here's my invite link! \n<{}>".format(ctx.bot.objects["invite_link"]))
 
 
 @cmds.cmd("support",
