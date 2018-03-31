@@ -97,14 +97,13 @@ async def multi_mod_action(ctx, user_strs, action_func, strings, reason, *kwargs
                 ctx.cmd_err = (0, "")
             continue
         result = await action_func(ctx, user, *kwargs)
-        if result == 0:
-            msg = old_msg + "\t{}".format(strings["success"].format(user=user))
-            users.append(user)
-        elif result == 1:
-            msg = old_msg + "\t{}".format(strings["fail_perm"].format(user=user))
+        if result in strings["results"]:
+            msg = old_msg + "\t{}".format(strings["results"][result].format(user=user))
         else:
             msg = old_msg + "\t{}".format(strings["fail_unknown"].format(user=user))
             break
+        if result == 0:
+            users.append(user)
         msg += "\n"
     await ctx.bot.edit_message(out_msg, msg)
     if len(users) == 0:
@@ -164,9 +163,9 @@ async def cmd_ban(ctx):
     strings = {"action_name": "ban",
                "action_multi_name": "multi-ban",
                "start": "Banning... \n",
-               "success": "🔨 Successfully banned `{user.name}`!",
-               "fail_perm": "🚨 Failed to ban `{user.name}`! (Insufficient Permissions)",
                "fail_unknown": "🚨 Encountered an unexpected fatal error banning `{user.name}`!Aborting ban sequence..."}
+    strings["results"] = {0: "🔨 Successfully banned `{user.name}`!",
+                          1: "🚨 Failed to ban `{user.name}`! (Insufficient Permissions)"}
     await multi_mod_action(ctx, ctx.params, ban, strings, reason, days=int(purge_days), ban_reason="{}: {}".format(ctx.author, reason))
 
 
