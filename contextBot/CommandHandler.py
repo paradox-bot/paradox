@@ -3,6 +3,7 @@ from contextBot.Command import Command
 from functools import wraps
 
 import traceback
+import discord
 
 
 class CommandHandler:
@@ -27,10 +28,10 @@ class CommandHandler:
         """
         if bot.DEBUG > 0:
             bot.sync_log(bot.loading_leader+"Loading {1} commands into command handler \"{0}\"".format(self.name,
-                                                                                  len(list(self.cmds.keys()))))
+                                                                                                       len(list(self.cmds.keys()))))
         elif bot.DEBUG > 2:
             bot.sync_log(bot.loading_leader+"Loading command handler \"{}\" with commands {}".format(self.name,
-                                                                                  str(list(self.cmds.keys()))))
+                                                                                                     str(list(self.cmds.keys()))))
         bot.cmd_cache = [*(bot.cmd_cache), *(self.cmds.keys())]
 
         for CH in bot.handlers:
@@ -104,7 +105,10 @@ class CommandHandler:
         Expects ctx.cmd_err to be set.
         """
         await ctx.log("There was an exception while running the command \n{}\nStack trace:{}".format(ctx.cmd.name, ctx.err[2]))
-        await ctx.reply("Something went wrong while running your command. The error has been logged and will be fixed soon!")
+        if isinstance(ctx.err[1], discord.Forbidden):
+            await ctx.reply("I just attempted to do something I don't have permissions for in this server! Aborting!")
+        else:
+            await ctx.reply("Something went wrong while running your command. The error has been logged and will be fixed soon!")
         if ctx.bot.DEBUG > 0:
             await ctx.reply("Stack trace:\n```{}```".format(ctx.err[2]))
 
