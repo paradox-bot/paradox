@@ -31,7 +31,7 @@ async def cmd_setgame(ctx):
 
 @cmds.cmd("restart",
           category="Bot admin",
-          short_help="Restart the bot without pulling from git first")
+          short_help="Restart the bot.")
 @cmds.require("manager_perm")
 async def cmd_restart(ctx):
     """
@@ -39,6 +39,7 @@ async def cmd_restart(ctx):
 
     Redeploys the bot from github.
     """
+    await ctx.reply("Restarting! Hold your horses...")
     msg = await ctx.run_sh('./Nanny/scripts/redeploy.sh')
     await ctx.reply(msg)
 
@@ -93,7 +94,10 @@ async def cmd_logs(ctx):
     Sends the logfile or the last <number> lines of the log.
     """
     if ctx.arg_str == '':
-        await ctx.reply(file=ctx.bot.log_file)
+        try:
+            await ctx.reply(file_name=ctx.bot.log_file)
+        except Exception:
+            await ctx.reply("I couldn't send you the logfile! Perhaps it is too big")
     elif ctx.params[0].isdigit():
         logs = await ctx.tail(ctx.bot.log_file, ctx.params[0])
         await ctx.reply("Here are your logs:\n```{}```".format(logs))
