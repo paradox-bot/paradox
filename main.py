@@ -23,7 +23,7 @@ botdata = BotData(BOT_DATA_FILE)
 PREFIX = conf.get("PREFIX")
 
 CHEAT_CH = "429507856908419074"
-
+FEEDBACK_CH = "429514404418289684"
 
 LOG_CHANNEL = "428159039831146506"
 
@@ -123,6 +123,7 @@ async def on_ready():
     bot.objects["emoji_offline"] = discord.utils.get(bot.get_all_emojis(), name='ParaInvis')
 
     bot.objects["cheat_report_channel"] = discord.utils.get(bot.get_all_channels(), id=CHEAT_CH)
+    bot.objects["feedback_channel"] = discord.utils.get(bot.get_all_channels(), id=FEEDBACK_CH)
 
 # ----Event loops----
 # ----End event loops----

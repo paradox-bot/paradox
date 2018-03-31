@@ -21,6 +21,42 @@ async def cmd_about(ctx):
         .add_field(name="Links", value="[Support Server](https://discord.gg/ECbUu8u)", inline=False)
     await ctx.reply(embed=embed)
 
+# TODO: Interactive bug reporting
+
+# TODO: cooldown on feedback
+
+
+@cmds.cmd("feedback",
+          category="General",
+          short_help="Send feedback to my creators")
+async def cmd_feedback(ctx):
+    """
+    Usage {prefix}feedback [msg]
+
+    Sends a message back to the developers of the bot.
+    This can be used for suggestions, bug reporting, or general feedback.
+    Note that abuse or overuse of this command will lead to blacklisting.
+    """
+    response = ctx.arg_str
+    if response == "":
+        response = await ctx.input("What message would you like to send? (`c` to cancel)", timeout=240)
+        if response.lower() == "c":
+            await ctx.reply("User cancelled, aborting!")
+        if not response:
+            await ctx.reply("Question timed out, aborting!")
+    embed = discord.Embed(title="Feedback", color=discord.Colour.green()) \
+        .set_author(name="{} ({})".format(ctx.author, ctx.authid),
+                    icon_url=ctx.author.avatar_url) \
+        .add_field(name="Message", value=response, inline=False) \
+        .set_footer(text=datetime.utcnow().strftime("Sent from {} at %-I:%M %p, %d/%m/%Y".format(ctx.server.name if ctx.server else "private message")))
+    await ctx.reply(embed=embed)
+    response = await ctx.ask("Are you sure you wish to send the above message to the developers?")
+    if not response:
+        await ctx.reply("User cancelled, aborting.")
+        return
+    await ctx.bot.send_message(ctx.bot.objects["feedback_channel"], embed=embed)
+    await ctx.reply("Thank you! Your feedback has been sent.")
+
 
 @cmds.cmd("cheatreport",
           category="General",
@@ -55,7 +91,7 @@ async def cmd_cr(ctx):
         .add_field(name="Reported User", value="`{0}` (`{0.id}`)".format(user), inline=True) \
         .add_field(name="Cheat", value=cheat, inline=True) \
         .add_field(name="Evidence", value=evidence, inline=False) \
-        .set_footer(text=datetime.utcnow().strftime("Reported in \"{}\" at %-I:%M %p, %d/%m/%Y".format(ctx.server.name if ctx.server else "private message")))
+        .set_footer(text=datetime.utcnow().strftime("Reported in {} at %-I:%M %p, %d/%m/%Y".format(ctx.server.name if ctx.server else "private message")))
     await ctx.reply(embed=embed)
     response = await ctx.ask("Are you sure you wish to send the above cheat report?")
     if not response:
