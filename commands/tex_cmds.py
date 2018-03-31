@@ -16,9 +16,13 @@ async def cmd_tex(ctx):
     Renders and displays LaTeX code.
     Use the reactions to show your code/ edit your code/ delete the message respectively.
     """
-    await texcomp(ctx)
+    error = await texcomp(ctx)
+    err_msg = ""
+    if error != "":
+        err_msg = "\nCompile error! Output:\n```\n{}\n```".format(error)
+
     await ctx.del_src()
-    out_msg = await ctx.reply(file_name='tex/{}.png'.format(ctx.authid), message=ctx.author.name + ":")
+    out_msg = await ctx.reply(file_name='tex/{}.png'.format(ctx.authid), message=ctx.author.name + ":" + err_msg)
 
     del_emoji = ctx.bot.objects["emoji_tex_del"]
     show_emoji = ctx.bot.objects["emoji_tex_show"]
@@ -63,4 +67,4 @@ async def texcomp(ctx):
         work.write(ctx.arg_str)
         work.write('\n' + '\\end{document}' + '\n')
         work.close()
-    await ctx.run_sh("tex/texcompile.sh "+ctx.authid)
+    return await ctx.run_sh("tex/texcompile.sh "+ctx.authid)
