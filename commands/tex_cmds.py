@@ -26,13 +26,12 @@ async def cmd_tex(ctx):
 
     def check(reaction, user):
         return ((reaction.emoji == del_emoji) or (reaction.emoji == show_emoji)) and (not (user == ctx.me))
-    while True:
-        try:
-            await ctx.bot.clear_reactions(out_msg)
-        except discord.Forbidden:
-            pass
+    try:
         await ctx.bot.add_reaction(out_msg, del_emoji)
         await ctx.bot.add_reaction(out_msg, show_emoji)
+    except discord.Forbidden:
+        return
+    while True:
         res = await ctx.bot.wait_for_reaction(message=out_msg,
                                               timeout=300,
                                               check=check)
@@ -40,19 +39,21 @@ async def cmd_tex(ctx):
             break
         if res.reaction.emoji == del_emoji and res.user == ctx.author:
             await ctx.bot.delete_message(out_msg)
-            break
+            return
         if res.reaction.emoji == show_emoji and (res.user != ctx.me):
+            try:
+                await ctx.bot.remove_reaction(out_msg, show_emoji, res.user)
+            except discord.Forbidden:
+                pass
             show = 1 - show
             await ctx.bot.edit_message(out_msg, ctx.author.name + ":\n" +
                                        ("```tex\n{}\n```".format(ctx.arg_str) if show else ""))
     try:
+        await ctx.bot.remove_reaction(out_msg, del_emoji, ctx.me)
+        await ctx.bot.remove_reaction(out_msg, show_emoji, ctx.me)
         await ctx.bot.clear_reactions(out_msg)
-    except Exception:
-        try:
-            await ctx.bot.remove_reaction(out_msg, del_emoji, ctx.me)
-            await ctx.bot.remove_reaction(out_msg, show_emoji, ctx.me)
-        except Exception:
-            pass
+    except discord.Forbidden:
+        pass
 
 
 async def texcomp(ctx):
