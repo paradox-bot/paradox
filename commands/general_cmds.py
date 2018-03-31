@@ -1,5 +1,6 @@
 import discord
 from paraCH import paraCH
+from datetime import datetime
 
 cmds = paraCH()
 
@@ -23,23 +24,45 @@ async def cmd_about(ctx):
 
 @cmds.cmd("cheatreport",
           category="General",
-          short_help="Reports a user for cheating with rep/level/xp. (WIP)")
+          short_help="Reports a user for cheating with rep/level/xp.")
+@cmds.execute("flags", flags=["e=="])
 async def cmd_cr(ctx):
     """
-    Usage: {prefix}report [user] [cheat] [evidence]
+    Usage: {prefix}report <user> <cheat> [-e <evidence>]
 
     Reports a user for cheating on a social system.
-    Please provide the user you wish to report, the form of cheat, and your evidence.
-    (TBD)
+    Please provide the user you wish to report, the way they cheated, and your evidence.
+    If reporting the user in DM or another server, please use their user id.
+    Note that abuse or overuse of this command will lead to your account being blacklisted.
     """
+    if len(ctx.params) < 2:
+        await ctx.reply("Insufficient arguments, see help for usage")
+    user = ctx.params[0]
+    cheat = ' '.join(ctx.params[1:])
+    evidence = ctx.flags['e'] if ctx.flags['e'] else "None. (Note that cheat reports without evidence are not recommended)"
+    if not user.isdigit():
+        user = await ctx.find_user(ctx.params[0], in_server=True, interactive=True)
+        if ctx.cmd_err[0]:
+            return
+    else:
+        user = discord.utils.get(ctx.bot.get_all_members(), id=user)
+    if not user:
+        await ctx.reply("Couldn't find this user!")
+        return
     embed = discord.Embed(title="Cheat Report", color=discord.Colour.red()) \
-        .set_author(name="{} ({})".format(ctx.message.author, ctx.message.author.id),
-                    icon_url=ctx.message.author.avatar_url) \
-        .add_field(name="User", value=".", inline=True) \
-        .add_field(name="Cheat", value="Alt Repping|Chatbot|Spamming", inline=True) \
-        .add_field(name="Evidence", value="(Evidence from args)", inline=False) \
-        .set_footer(text="Guild name|Timestamp")
+        .set_author(name="{} ({})".format(ctx.author, ctx.authid),
+                    icon_url=ctx.author.avatar_url) \
+        .add_field(name="Reported User", value="`{0}` (`{0.id}`)".format(user), inline=True) \
+        .add_field(name="Cheat", value=cheat, inline=True) \
+        .add_field(name="Evidence", value=evidence, inline=False) \
+        .set_footer(text=datetime.utcnow().strftime("Reported in \"{}\" at %-I:%M %p, %d/%m/%Y".format(ctx.server.name if ctx.server else "private message")))
     await ctx.reply(embed=embed)
+    response = await ctx.ask("Are you sure you wish to send the above cheat report?")
+    if not response:
+        await ctx.reply("User cancelled, aborting.")
+        return
+    await ctx.bot.send_message(ctx.bot.objects["cheat_report_channel"], embed=embed)
+    await ctx.reply("Thank you. Your cheat report has been sent.")
 
 
 @cmds.cmd("ping",

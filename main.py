@@ -22,13 +22,16 @@ botdata = BotData(BOT_DATA_FILE)
 
 PREFIX = conf.get("PREFIX")
 
+CHEAT_CH = "429507856908419074"
+
+
 LOG_CHANNEL = "428159039831146506"
 
 LOGFILE = "logs/paralog.log"
 LOGFILE_LAST = "logs/paralog.last.log"
 
 
-## Log file
+# Log file
 
 if os.path.isfile(LOGFILE):
     if os.path.isfile(LOGFILE_LAST):
@@ -67,7 +70,7 @@ async def log(bot, logMessage):
         await bot.send_message(discord.utils.get(bot.get_all_channels(), id=LOG_CHANNEL), log)
 Bot.log = log
 
-## Loading and initial objects
+# Loading and initial objects
 
 bot.load("commands", "config", "events", "utils", ignore=["RCS", "__pycache__"])
 
@@ -109,7 +112,6 @@ async def on_ready():
         for log in log_splits:
             await bot.send_message(discord.utils.get(bot.get_all_channels(), id=LOG_CHANNEL), log)
 
-
     bot.objects["emoji_tex_del"] = discord.utils.get(bot.get_all_emojis(), name='delete')
     bot.objects["emoji_tex_show"] = discord.utils.get(bot.get_all_emojis(), name='showtex')
     bot.objects["emoji_bot"] = discord.utils.get(bot.get_all_emojis(), name='parabot')
@@ -120,11 +122,10 @@ async def on_ready():
     bot.objects["emoji_dnd"] = discord.utils.get(bot.get_all_emojis(), name='ParaDND')
     bot.objects["emoji_offline"] = discord.utils.get(bot.get_all_emojis(), name='ParaInvis')
 
-
+    bot.objects["cheat_report_channel"] = discord.utils.get(bot.get_all_channels(), id=CHEAT_CH)
 
 # ----Event loops----
 # ----End event loops----
-
 
 # ----Everything is defined, start the bot!----
 bot.run(conf.get("TOKEN"))
