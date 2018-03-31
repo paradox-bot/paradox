@@ -1,4 +1,5 @@
 import shutil
+import discord
 
 from paraCH import paraCH
 
@@ -21,13 +22,20 @@ async def cmd_tex(ctx):
 
     del_emoji = ctx.bot.objects["emoji_tex_del"]
     show_emoji = ctx.bot.objects["emoji_tex_show"]
-    await ctx.bot.add_reaction(out_msg, del_emoji)
-    await ctx.bot.add_reaction(out_msg, show_emoji)
-    show = False
+    show = 0
+
+    def check(reaction, user):
+        return ((reaction.emoji == del_emoji) or (reaction.emoji == show_emoji)) and (not (user == ctx.me))
     while True:
+        try:
+            await ctx.bot.clear_reactions(out_msg)
+        except discord.Forbidden:
+            pass
+        await ctx.bot.add_reaction(out_msg, del_emoji)
+        await ctx.bot.add_reaction(out_msg, show_emoji)
         res = await ctx.bot.wait_for_reaction(message=out_msg,
-                                        timeout=300,
-                                        emoji=[del_emoji, show_emoji])
+                                              timeout=300,
+                                              check=check)
         if res is None:
             break
         if res.reaction.emoji == del_emoji and res.user == ctx.author:
@@ -36,7 +44,7 @@ async def cmd_tex(ctx):
         if res.reaction.emoji == show_emoji and (res.user != ctx.me):
             show = 1 - show
             await ctx.bot.edit_message(out_msg, ctx.author.name + ":\n" +
-                                          ("```tex\n{}\n```".format(ctx.arg_str) if show else ""))
+                                       ("```tex\n{}\n```".format(ctx.arg_str) if show else ""))
     try:
         await ctx.bot.clear_reactions(out_msg)
     except Exception:
