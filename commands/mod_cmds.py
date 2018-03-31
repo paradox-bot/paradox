@@ -73,6 +73,10 @@ async def ban(ctx, user, ban_reason="None", days=1):
     return 0
 
 
+async def test_ban(ctx, user, ban_reason="None", days=1):
+    return 0
+
+
 async def purge(ctx, user, hours):
     pass
 
@@ -122,15 +126,16 @@ async def multi_mod_action(ctx, user_strs, action_func, strings, reason, **kwarg
 @cmds.cmd("ban",
           category="Moderation",
           short_help="Bans users")
-@cmds.execute("flags", flags=["r==", "p="])
+@cmds.execute("flags", flags=["r==", "p=", "t"])
 @cmds.require("in_server")
 @cmds.require("in_server_can_ban")
 async def cmd_ban(ctx):
     """
-    Usage: {prefix}ban <user1> [user2] [user3]... [-r <reason>] [-p <days>]
+    Usage: {prefix}ban <user1> [user2] [user3]... [-r <reason>] [-p <days>] [-t]
 
     Bans the users listed with an optional reason.
-    If -p is provided, purges <days> days of message history for each user.
+    If -p (purge) is provided, purges <days> days of message history for each user.
+    If -t (test) is provided, doesn't actually ban, but does everything else. For testing and perm checking.
     """
     """
     TODO: Emojis for ban messages
@@ -142,6 +147,7 @@ async def cmd_ban(ctx):
         return
     reason = ctx.flags["r"]
     purge_days = ctx.flags["p"]
+    action_func = test_ban if ctx.flags["t"] else ban
     if not reason:
         reason = await ctx.input("📋 Please provide a reason! (`no` for no reason or `c` to abort ban)")
         if reason.lower() == "no":
@@ -166,7 +172,7 @@ async def cmd_ban(ctx):
                "fail_unknown": "🚨 Encountered an unexpected fatal error banning `{user.name}`!Aborting ban sequence..."}
     strings["results"] = {0: "🔨 Successfully banned `{user.name}`!",
                           1: "🚨 Failed to ban `{user.name}`! (Insufficient Permissions)"}
-    await multi_mod_action(ctx, ctx.params, ban, strings, reason, days=int(purge_days), ban_reason="{}: {}".format(ctx.author, reason))
+    await multi_mod_action(ctx, ctx.params, action_func, strings, reason, days=int(purge_days), ban_reason="{}: {}".format(ctx.author, reason))
 
 
 @cmds.cmd("hackban",
