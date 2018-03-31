@@ -15,7 +15,7 @@ class ModEvent:
                "mute": "User Muted!",
                "softban": "User Softbanned!"}
 
-    def __init__(self, ctx, action, mod, users, reason, timeout=0):
+    def __init__(self, ctx, action, mod, users, reason="None", timeout=0):
         self.ctx = ctx
         self.action = action
         self.mod = mod
@@ -60,7 +60,7 @@ class ModEvent:
         return 0
 
 
-async def ban(ctx, user, reason, days):
+async def ban(ctx, user, ban_reason="None", days=1):
     """
     Todo: on rewrite, make this post reason
     """
@@ -75,6 +75,49 @@ async def ban(ctx, user, reason, days):
 
 async def purge(ctx, user, hours):
     pass
+
+
+async def multi_mod_action(ctx, user_strs, action_func, strings, reason, *kwargs):
+    users = []
+    msg = strings["start"]
+    out_msg = await ctx.reply(msg)
+
+    for user_str in user_strs:
+        if user_str == "":
+            continue
+        old_msg = msg
+        msg += "\t{}".format(user_str)
+        await ctx.bot.edit_message(out_msg, msg)
+        user = await ctx.find_user(user_str, in_server=True, interactive=True)
+        if user is None:
+            if ctx.cmd_err[0] != -1:
+                msg = old_msg + "\t⚠ Couldn't find user `{}`, skipping\n".format(user_str)
+            else:
+                msg = old_msg + "\t🗑 User selection aborted for `{}`, skipping\n".format(user_str)
+                ctx.cmd_err = (0, "")
+            continue
+        result = await action_func(ctx, user, *kwargs)
+        if result == 0:
+            msg = old_msg + "\t{}".format(strings["success"].format(user=user))
+            users.append(user)
+        elif result == 1:
+            msg = old_msg + "\t{}".format(strings["fail_perm"].format(user=user))
+        else:
+            msg = old_msg + "\t{}".format(strings["fail_unknown"].format(user=user))
+            break
+        msg += "\n"
+    await ctx.bot.edit_message(out_msg, msg)
+    if len(users) == 0:
+        return
+    action = strings["action_name"] if len(users) == 1 else strings["action_multi_name"]
+    mod_event = ModEvent(ctx, action, ctx.author, users, reason)
+    result = await mod_event.modlog_post()
+    if result == 1:
+        await ctx.reply("I tried to post to the modlog, but lack the permissions!")  # TODO: Offer to repost after modlog works.
+    elif result == 2:
+        await ctx.reply("I can't see the set modlog channel!")
+    elif result == 3:
+        await ctx.reply("An unexpected error occurred while trying to post to the modlog.")
 
 
 @cmds.cmd("ban",
@@ -116,58 +159,13 @@ async def cmd_ban(ctx):
     if int(purge_days) > 7:
         await ctx.reply("⚠ Number of days to purge must be less than 7")
         return
-    bans = []
-    msg = "Banning...\n"
-    out_msg = await ctx.reply(msg)
-    for userstr in ctx.params:
-        if userstr == "":
-            continue
-        old_msg = msg
-        msg += "\t{}".format(userstr)
-        await ctx.bot.edit_message(out_msg, msg)
-        user = await ctx.find_user(userstr, in_server=True, interactive=True)
-        if user is None:
-            if ctx.cmd_err[0] != -1:
-                msg = old_msg + "\t⚠ Couldn't find user `{}`, skipping\n".format(userstr)
-            else:
-                msg = old_msg + "\t🗑 User selection aborted for `{}`, skipping\n".format(userstr)
-                ctx.cmd_err = (0, "")
-            continue
-        result = await ban(ctx, user, days=int(purge_days), reason=reason)
-        if result == 0:
-            msg = old_msg + "\t🔨 Successfully banned `{}`! ".format(user)
-            bans.append(user)
-        elif result == 1:
-            msg = old_msg + "\t🚨 Failed to ban `{}`! (Insufficient Permissions) ".format(user.name)
-        else:
-            msg = old_msg + "\t🚨 Encountered an unexpected fatal error banning `{}`!Aborting ban sequence...".format(user.name)
-            break
-        """
-        if purge_days:
-            old_msg = msg
-            msg += "\t Purging messages"
-            await ctx.bot.edit_message(out_msg, msg)
-            result = await purge(ctx, user, purge_days)
-            if result == 0:
-                msg = old_msg + "\t Purged `{}` hour{} of messages".format(str(purge_days),
-                                                                           "s" if purge_days > 1 else "")
-            else:
-                msg = old_msg + "\t Failed to purge messages!"
-            await ctx.bot.edit_message(out_msg, msg)
-        """
-        msg += "\n"
-    await ctx.bot.edit_message(out_msg, msg)
-    if len(bans) == 0:
-        return
-    action = "ban" if len(bans) == 1 else "multi-ban"
-    mod_event = ModEvent(ctx, action, ctx.author, bans, reason)
-    result = await mod_event.modlog_post()
-    if result == 1:
-        await ctx.reply("I tried to post to the modlog, but lack the permissions!")  # TODO: Offer to repost after modlog works.
-    elif result == 2:
-        await ctx.reply("I can't see the set modlog channel!")
-    elif result == 3:
-        await ctx.reply("An unexpected error occurred while trying to post to the modlog.")
+    strings = {"action_name": "ban",
+               "action_multi_name": "multi-ban",
+               "start": "Banning... \n",
+               "success": "🔨 Successfully banned `{user.name}`!",
+               "fail_perm": "🚨 Failed to ban `{user.name}`! (Insufficient Permissions)",
+               "fail_unknown": "🚨 Encountered an unexpected fatal error banning `{user.name}`!Aborting ban sequence..."}
+    await multi_mod_action(ctx, ctx.params, ban, strings, reason, days=int(purge_days), ban_reason="{}: {}".format(ctx.author, reason))
 
 
 @cmds.cmd("hackban",
