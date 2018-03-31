@@ -77,7 +77,7 @@ async def purge(ctx, user, hours):
     pass
 
 
-async def multi_mod_action(ctx, user_strs, action_func, strings, reason, *kwargs):
+async def multi_mod_action(ctx, user_strs, action_func, strings, reason, **kwargs):
     users = []
     msg = strings["start"]
     out_msg = await ctx.reply(msg)
@@ -96,7 +96,7 @@ async def multi_mod_action(ctx, user_strs, action_func, strings, reason, *kwargs
                 msg = old_msg + "\t🗑 User selection aborted for `{}`, skipping\n".format(user_str)
                 ctx.cmd_err = (0, "")
             continue
-        result = await action_func(ctx, user, *kwargs)
+        result = await action_func(ctx, user, **kwargs)
         if result in strings["results"]:
             msg = old_msg + "\t{}".format(strings["results"][result].format(user=user))
         else:
