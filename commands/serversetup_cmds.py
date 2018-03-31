@@ -7,6 +7,7 @@ cmds = paraCH()
 @cmds.cmd("config",
           category="Server setup",
           short_help="Server configuration")
+@cmds.require("in_server")
 async def cmd_config(ctx):
     """
     Usage: {prefix}config | config help | config <option> [value]
