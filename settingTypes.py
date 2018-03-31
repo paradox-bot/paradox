@@ -43,9 +43,9 @@ class STR(paraSetting):
     @classmethod
     async def understand(cls, ctx, userstr):
         if userstr.startswith("\"") and userstr.endswith("\""):
-            return userstr.strip("\"")
+            return userstr[1:-1]
         if userstr.startswith("'") and userstr.endswith("'"):
-            return userstr.strip("'")
+            return userstr[1:-1]
         return userstr
 
 
