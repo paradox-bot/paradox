@@ -173,6 +173,7 @@ async def cmd_support(ctx):
 @cmds.cmd("serverinfo",
           category="General",
           short_help="Shows server info.")
+@cmds.require("in_server")
 async def cmd_serverinfo(ctx):
     regions = {
         "brazil": "Brazil",
@@ -188,7 +189,7 @@ async def cmd_serverinfo(ctx):
         "us-west": "Western United States",
         "eu-west": "Western Europe",
         "vip-amsterdam": "Amsterdam (VIP)",
-        "vip-us-east": "Eastern United States (VIP)",
+        "vip-us-east": "Eastern United States (VIP)"
     }
 
     ver = {
@@ -212,7 +213,7 @@ async def cmd_serverinfo(ctx):
     idle = 0
     offline = 0
     dnd = 0
-    total = len(ctx.server.members)
+    total = len(ctx.server.channels)
     for m in ctx.server.members:
         if m.status == discord.Status.online:
             online = online + 1
@@ -227,20 +228,30 @@ async def cmd_serverinfo(ctx):
     Idle = ctx.bot.objects["emoji_idle"]
     Dnd = ctx.bot.objects["emoji_dnd"]
     Offline = ctx.bot.objects["emoji_offline"]
+    server_owner = ctx.server.owner
+    owner = "{} ({})".format(server_owner, server_owner.id)
+    members = "{} humans, {} bots | {} total".format(str(len([m for m in ctx.server.members if not m.bot])),
+                                                     str(len([m for m in ctx.server.members if m.bot])),
+                                                     ctx.server.member_count)
+    created = ctx.server.created_at.strftime("%-I:%M %p, %d/%m/%Y")
+    created_ago = ctx.strfdelta(datetime.utcnow()-ctx.server.created_at)
+    channels = "{} text, {} voice | {} total".format(text, voice, total)
+    status = "{} - **{}**\n{} - **{}**\n{} - **{}**\n{} - **{}**".format(Online, online, Idle, idle, Dnd, dnd, Offline, offline)
 
-    embed = discord.Embed(color=discord.Colour.teal()) \
-        .set_author(name="{}".format(ctx.server)) \
-        .add_field(name="Owner", value="{} ({})".format(ctx.server.owner, ctx.server.owner.id), inline=False) \
-        .add_field(name="Members", value="{} humans, {} bots | {} total".format(str(len([m for m in ctx.server.members if not m.bot])),
-                                                                                str(len([m for m in ctx.server.members if m.bot])),
-                                                                                ctx.server.member_count), inline=False) \
-        .add_field(name="ID", value="{}".format(ctx.server.id), inline=False) \
-        .add_field(name="Region", value="{}".format(regions[str(ctx.server.region)]), inline=False) \
-        .add_field(name="Created at", value="{}".format(ctx.server.created_at), inline=False) \
-        .add_field(name="Channels", value="{} text, {} voice | {} total".format(text, voice, total), inline=False) \
-        .add_field(name="Roles", value="{}".format(len(ctx.server.roles)), inline=False) \
-        .add_field(name="Large server", value="{}".format(ctx.server.large), inline=False) \
-        .add_field(name="Verification", value="{}".format(ver[str(ctx.server.verification_level)]), inline=False) \
-        .add_field(name="2FA", value="{}".format(mfa[ctx.server.mfa_level]), inline=False) \
-        .add_field(name="Member Status", value="{} - **{}**\n{} - **{}**\n{} - **{}**\n{} - **{}**".format(Online, online, Idle, idle, Dnd, dnd, Offline, offline), inline=False)
+    emb_fields = [("Owner", owner, 0),
+                  ("Members", members, 0),
+                  ("ID", ctx.server.id, 0),
+                  ("Region", regions[str(ctx.server.region)], 0),
+                  ("Created at", "{} ({} ago)".format(created, created_ago), 0),
+                  ("Channels", channels, 0),
+                  ("Roles", len(ctx.server.roles), 0),
+                  ("Large Server", ctx.server.large, 0),
+                  ("Verification", ver[str(ctx.server.verification_level)], 0),
+                  ("2FA", mfa[ctx.server.mfa_level], 0),
+                  ("Member Status", status, 0)]
+
+    embed = discord.Embed(color=server_owner.colour if server_owner.colour.value else discord.Colour.teal())
+    embed.set_author(name="{}".format(ctx.server))
+
+    await ctx.emb_add_fields(embed, emb_fields)
     await ctx.reply(embed=embed)
