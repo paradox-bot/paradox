@@ -1,6 +1,7 @@
 from paraCH import paraCH
 import discord
 import aiohttp
+import asyncio
 from datetime import datetime, timedelta
 
 cmds = paraCH()
@@ -45,7 +46,7 @@ async def cmd_dog(ctx):
 @cmds.cmd("cat",
           category="Fun Stuff",
           short_help="Sends a random cat image")
-async def cmd_cat(ctx):
+async def cmd_cat(ctx, recursion=0):
     """
     Usage: {prefix}cat
 
@@ -56,7 +57,17 @@ async def cmd_cat(ctx):
             js = await r.json()
             embed = discord.Embed(title="Meow!", color=discord.Colour.light_grey())
             embed.set_image(url=js['file'])
-            await ctx.reply(embed=embed)
+            try:
+                await ctx.reply(embed=embed)
+                return
+            except Exception:
+                pass
+        else:
+            if recursion < 10:
+                asyncio.sleep(1)
+                await cmd_cat(ctx, recursion=recursion+1)
+                return
+        await ctx.reply("Sorry! The cats are too poweful right now. Please try again later!")
 
 
 @cmds.cmd("rep",
