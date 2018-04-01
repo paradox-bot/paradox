@@ -61,10 +61,12 @@ async def cmd_feedback(ctx):
     response = ctx.arg_str
     if response == "":
         response = await ctx.input("What message would you like to send? (`c` to cancel)", timeout=240)
-        if response.lower() == "c":
-            await ctx.reply("User cancelled, aborting!")
         if not response:
             await ctx.reply("Question timed out, aborting!")
+            return
+        elif response.lower() == "c":
+            await ctx.reply("User cancelled, aborting!")
+            return
     embed = discord.Embed(title="Feedback", color=discord.Colour.green()) \
         .set_author(name="{} ({})".format(ctx.author, ctx.authid),
                     icon_url=ctx.author.avatar_url) \
