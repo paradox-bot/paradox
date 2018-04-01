@@ -97,14 +97,22 @@ async def prim_cmd_discrim(ctx):
     Searches all guilds the bot is in for users matching the given discriminator.
     """
     p = ctx.bot.get_all_members()
-    found_members = set(filter(lambda m: m.discriminator.endswith(ctx.args), p))
+    args = ctx.arg_str
+    if (len(args) > 4) or not args.isdigit():
+        await ctx.reply("You must give me at most four digits to find!")
+        return
+    discrim = "0"*(4-len(args)) + args
+    found_members = set(filter(lambda m: m.discriminator == discrim, p))
     if len(found_members) == 0:
         await ctx.reply("No users with this discrim found!")
         return
     user_info = [(str(m), "({})".format(m.id)) for m in found_members]
     max_len = len(max(list(zip(*user_info))[0], key=len))
     user_strs = ["{0[0]:^{max_len}} {0[1]:^25}".format(user, max_len=max_len) for user in user_info]
-    await ctx.reply("```asciidoc\n= Users found =\n{}\n```".format('\n'.join(user_strs)))
+    await ctx.reply("`{2}` user{1} found:```asciidoc\n= Users found =\n{0}\n```".format('\n'.join(user_strs),
+                                                                                               "s" if len(user_strs) > 1 else "",
+                                                                                               len(user_strs)))
+    # TODO: Make this splittable across codeblocks
 
 
 @cmds.cmd("piggybank",
