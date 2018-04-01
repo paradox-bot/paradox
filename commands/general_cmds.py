@@ -18,12 +18,12 @@ async def cmd_about(ctx):
 
     Sends a message containing information about the bot.
     """
-    devs = ["298706728856453121", "299175087389802496", "225773687037493258"]  #TODO: Don't hard code these here!!
+    devs = ["298706728856453121", "299175087389802496", "225773687037493258", "300992784020668416"]  #TODO: Don't hard code these here!!
     devnames = ', '.join([str(discord.utils.get(ctx.bot.get_all_members(), id=str(devs))) for devs in devs])
     pform = platform.platform()
     py_vers = sys.version
     mem = psutil.virtual_memory()
-    mem_str = "{0:.2f}GB used out of {1:.2f}GB ({mem.percent}\%)".format(mem.used/(1024^3), mem.total/(1024*3), mem=mem)
+    mem_str = "{0:.2f}GB used out of {1:.2f}GB ({mem.percent}\%)".format(mem.used/(1024 ** 3), mem.total/(1024 ** 3), mem=mem)
     cpu_usage_str = "{}\%".format(psutil.cpu_percent())
     info = "I am a multi-purpose guild automation bot from Team Paradøx, coded in Discord.py!\
         \nI am under active development and constantly evolving with new commands and features."
@@ -41,7 +41,7 @@ async def cmd_about(ctx):
     await ctx.emb_add_fields(embed, emb_fields)
     await ctx.reply(embed=embed)
     # Uptime as well, of system and bot
-
+    # Commands used? Or that goes in stats
 # TODO: Interactive bug reporting
 
 # TODO: cooldown on feedback
