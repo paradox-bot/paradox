@@ -49,6 +49,7 @@ async def cmd_cat(ctx):
     Replies with a random cat image!
     """
     async with aiohttp.get('http://aws.random.cat/meow') as r:
+        if r.status == 200:
             js = await r.json()
             embed = discord.Embed(title="Meow!", color=discord.Colour.light_grey())
             embed.set_image(url=js['file'])
