@@ -85,7 +85,7 @@ async def cmd_feedback(ctx):
 @cmds.execute("flags", flags=["e=="])
 async def cmd_cr(ctx):
     """
-    Usage: {prefix}report <user> <cheat> [-e <evidence>]
+    Usage: {prefix}cheatreport <user> <cheat> [-e <evidence>]
 
     Reports a user for cheating on a social system.
     Please provide the user you wish to report, the way they cheated, and your evidence.
@@ -94,10 +94,14 @@ async def cmd_cr(ctx):
     """
     if len(ctx.params) < 2:
         await ctx.reply("Insufficient arguments, see help for usage")
+        return
     user = ctx.params[0]
     cheat = ' '.join(ctx.params[1:])
     evidence = ctx.flags['e'] if ctx.flags['e'] else "None. (Note that cheat reports without evidence are not recommended)"
     if not user.isdigit():
+        if not ctx.server:
+            await ctx.reply("Please provide a valid userid when reporting from private message")
+            return
         user = await ctx.find_user(ctx.params[0], in_server=True, interactive=True)
         if ctx.cmd_err[0]:
             return
