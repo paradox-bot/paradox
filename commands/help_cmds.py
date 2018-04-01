@@ -53,20 +53,19 @@ async def cmd_list(ctx):
     Replies with an embed containing all my visible commands.
     """
     sorted_cats = ctx.bot.objects["sorted cats"]
-    if ctx.arg_str == "":
-        cats = {}
-        commands = await ctx.get_cmds()
-        for cmd in sorted(commands):
-            command = commands[cmd]
-            cat = command.category if command.category else "Misc"
-            lower_cat = cat.lower()
-            if lower_cat not in cats:
-                cats[lower_cat] = []
-            cats[lower_cat].append(cmd)
-        embed = discord.Embed(title="Paradøx's commands!", color=discord.Colour.green())
-        for cat in sorted_cats:
-            if cat.lower() not in cats:
-                continue
-            embed.add_field(name=cat, value="`{}`".format('`, `'.join(cats[cat.lower()])), inline=False)
-        embed.set_footer(text="Use ~help or ~help <command> for detailed help or get support with ~support.")
-        await ctx.reply(embed=embed)
+    cats = {}
+    commands = await ctx.get_cmds()
+    for cmd in sorted(commands):
+        command = commands[cmd]
+        cat = command.category if command.category else "Misc"
+        lower_cat = cat.lower()
+        if lower_cat not in cats:
+            cats[lower_cat] = []
+        cats[lower_cat].append(cmd)
+    embed = discord.Embed(title="Paradøx's commands!", color=discord.Colour.green())
+    for cat in sorted_cats:
+        if cat.lower() not in cats:
+            continue
+        embed.add_field(name=cat, value="`{}`".format('`, `'.join(cats[cat.lower()])), inline=False)
+    embed.set_footer(text="Use {0}help or {0}help <command> for detailed help or get support with {0}support.".format(ctx.used_prefix))
+    await ctx.reply(embed=embed)
