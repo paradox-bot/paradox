@@ -15,8 +15,11 @@ async def cmd_lenny(ctx):
 
     Sends lenny ( ͡° ͜ʖ ͡°).
     """
-    await ctx.bot.delete_message(ctx.message)
-    await ctx.reply('( ͡° ͜ʖ ͡°)')
+    try:
+        await ctx.bot.delete_message(ctx.msg)
+    except discord.Forbidden:
+        pass
+    await ctx.reply("( ͡° ͜ʖ ͡°)")
 
 
 @cmds.cmd("dog",
