@@ -6,7 +6,7 @@ cmds = paraCH()
 
 @cmds.cmd("help",
           category="General",
-          short_help="Provides some detailed help on a command")
+          short_help="Provides some detailed help on a command.")
 async def cmd_help(ctx):
     """
     Usage: {prefix}help [command name]
@@ -32,7 +32,7 @@ async def cmd_help(ctx):
             cat_msgs[cat.lower()] += "```"
             msg += cat_msgs[cat.lower()]
         await ctx.reply(msg, dm=True)
-        await ctx.reply("I have messaged you a detailed listing of my commands! Use `list` to obtain a more succinct listing.")
+        await ctx.reply("I have messaged you a detailed listing of my commands! Use `{0.used_prefix}list` to obtain a more succinct listing.".format(ctx))
         return
     else:
         for cmd in ctx.params:
