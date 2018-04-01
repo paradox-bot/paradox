@@ -295,3 +295,8 @@ def load_into(bot):
         final_args = " ".join(final_params).strip()
         final_params = final_args.split(" ")
         return (final_params, " ".join(final_params), final_flags)
+
+    @bot.util
+    async def emb_add_fields(ctx, embed, emb_fields):
+        for field in emb_fields:
+            embed.add_field(name=field[0], value=field[1], inline=bool(field[2]))

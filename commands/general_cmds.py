@@ -1,25 +1,46 @@
 import discord
 from paraCH import paraCH
 from datetime import datetime
+import sys
+import platform
+import psutil
+
 
 cmds = paraCH()
 
 
 @cmds.cmd("about",
           category="General",
-          short_help="Provides information about the bot. (WIP)")
+          short_help="Provides information about the bot.")
 async def cmd_about(ctx):
     """
     Usage: {prefix}about
 
     Sends a message containing information about the bot.
     """
-    devs = ["298706728856453121", "299175087389802496", "225773687037493258"]
+    devs = ["298706728856453121", "299175087389802496", "225773687037493258"]  #TODO: Don't hard code these here!!
     devnames = ', '.join([str(discord.utils.get(ctx.bot.get_all_members(), id=str(devs))) for devs in devs])
-    embed = discord.Embed(title="About Paradøx", color=discord.Colour.red()) \
-        .add_field(name="Info", value="Paradøx is a Discord.py bot coded by {}.".format(devnames), inline=True) \
-        .add_field(name="Links", value="[Support Server](https://discord.gg/ECbUu8u)", inline=False)
+    pform = platform.platform()
+    py_vers = sys.version
+    mem = psutil.virtual_memory()
+    mem_str = "{0:.2f}GB used out of {1:.2f}GB ({mem.percent}\%)".format(mem.used/(1024^3), mem.total/(1024*3), mem=mem)
+    cpu_usage_str = "{}\%".format(psutil.cpu_percent())
+    info = "I am a multi-purpose guild automation bot from Team Paradøx, coded in Discord.py!\
+        \nI am under active development and constantly evolving with new commands and features."
+    links = "[Support Server]({sprt}), [Invite Me]({invite})".format(sprt=ctx.bot.objects["support guild"],
+                                                                     invite=ctx.bot.objects["invite_link"])
+
+    emb_fields = [("Info", info, 1),
+                  ("Developed by", devnames, 0),
+                  ("Python version", py_vers, 0),
+                  ("Platform", pform, 0),
+                  ("Memory", mem_str, 0),
+                  ("CPU usage", cpu_usage_str, 0),
+                  ("Links", links, 0)]
+    embed = discord.Embed(title="About Me", color=discord.Colour.red())
+    await ctx.emb_add_fields(embed, emb_fields)
     await ctx.reply(embed=embed)
+    # Uptime as well, of system and bot
 
 # TODO: Interactive bug reporting
 
