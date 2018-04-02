@@ -100,28 +100,25 @@ class Context:
         if (not file_name) and (message is None) and (embed is None):
             self.bot_err = (-1, "Tried to reply without anything to reply with")
 
-        if (not dm) and (self.ch is None):
-            self.bot_err = (2, "Require channel for non dm reply")
-
         if self.bot_err[0] != 0:
             await self.log("Caught error in reply, code {0[0]} message \"{0[1]}\"".format(self.bot_err))
             return None
         if file_name:
-            return await self.bot.send_file(self.author if dm else self.ch, file_name, content=message)
+            return await self.bot.send_file(destination, file_name, content=message)
         if message:
             if split and (not embed):
                 splits = await self.msg_split(str(message), code)
                 out = []
                 for split in splits:
-                    out.append(await self.bot.send_message(self.author if dm else self.ch, split))
+                    out.append(await self.bot.send_message(destination, split))
                 return out
             else:
                 if len(message) >= 2000:
                     self.bot_err = (3, "Tried to send a message which was too long")
                     return
-                return await self.bot.send_message(self.author if dm else self.ch, str(message), embed=embed)
+                return await self.bot.send_message(destination, str(message), embed=embed)
         elif embed:
-            return await self.bot.send_message(self.author if dm else self.ch, embed=embed)
+            return await self.bot.send_message(destination, embed=embed)
 
 
 class MessageContext(Context):
@@ -155,12 +152,15 @@ class MessageContext(Context):
         If dm is true, replies in private message to the sending user.
         Otherwise reply in the same channel as the instantiating message.
         """
-        if not (dm or ctx.ch):
+        if not (dm or self.ch):
+            self.bot_err = (2, "Require channel for non dm reply")
+            return None
 
-        destination = ctx.author if dm else ctx.ch
+
+        destination = self.author if dm else self.ch
         try:
             return await self.send(destination, message=message, embed=embed, file_name=file_name, **kwargs)
-        except discord.Forbidden:
+        except discord.Forbidden as e:
             """
             Handles each of the following errors:
                 Can't DM user if dm is true
@@ -169,20 +169,20 @@ class MessageContext(Context):
             """
             if dm:
                 await self.reply("I can't DM you! Do you have me blocked or direct messages turned off?")
-                ctx.cmd_err = (1, "")
+                self.cmd_err = (1, "")
             else:
-                perms = ctx.ch.permissions_for(ctx.me)
+                perms = self.ch.permissions_for(self.me)
                 if not perms.send_messages:
                     try:
-                        await self.send(ctx.author, "I don't have permissions to reply in that channel! If you believe this is in error, please contact a server administrator.")
+                        await self.send(self.author, "I don't have permissions to reply in that channel! If you believe this is in error, please contact a server administrator.")
                         await self.reply(message, embed, file_name, dm=False)
                         return
                     except discord.Forbidden:
                         pass
                 elif file_name and not perms.attach_files:
                     await self.reply("I don't have permission to send files here!")
-            ctx.cmd_err = (1, "")
-            raise discord.Forbidden
+            self.cmd_err = (1, "")
+            raise e
             return
 
 
