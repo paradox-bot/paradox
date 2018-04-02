@@ -367,7 +367,7 @@ async def cmd_emoji(ctx):
                                 ("Link", link, 0)]
                     await ctx.emb_add_fields(embed, emb_fields)
                 try:
-                    await ctx.reply("I couldn't find the emoji in my servers, but here is what I have!", embed=embed)
+                    await ctx.reply(None if ctx.flags["e"] else "I couldn't find the emoji in my servers, but here is what I have!", embed=embed)
                 except Exception:
                     await ctx.reply("I couldn't understand or find the emoji in your message")
                 return
