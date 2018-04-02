@@ -110,8 +110,8 @@ async def prim_cmd_discrim(ctx):
     max_len = len(max(list(zip(*user_info))[0], key=len))
     user_strs = ["{0[0]:^{max_len}} {0[1]:^25}".format(user, max_len=max_len) for user in user_info]
     await ctx.reply("`{2}` user{1} found:```asciidoc\n= Users found =\n{0}\n```".format('\n'.join(user_strs),
-                                                                                               "s" if len(user_strs) > 1 else "",
-                                                                                               len(user_strs)))
+                                                                                        "s" if len(user_strs) > 1 else "",
+                                                                                        len(user_strs)))
     # TODO: Make this splittable across codeblocks
 
 
@@ -334,6 +334,7 @@ async def cmd_profile(ctx):
                     value="{} ({} ago)".format(created, created_ago), inline=False)
     await ctx.reply(embed=embed)
 
+
 @cmds.cmd(name="emoji",
           category="Utility",
           short_help="Displays info and enlarges a custom emoji")
@@ -350,19 +351,19 @@ async def cmd_emoji(ctx):
     id_str = 0
     em_str = 0
     emoji = None
-    embed=discord.Embed(title="Emoji info!", color=discord.Colour.light_grey())
+    embed = discord.Embed(title="Emoji info!", color=discord.Colour.light_grey())
     if ctx.arg_str.endswith(">") and ctx.arg_str.startswith("<"):
         id_str = ctx.arg_str[ctx.arg_str.rfind(":") + 1:-1]
         if id_str.isdigit():
             emoji = discord.utils.get(ctx.bot.get_all_emojis(), id=id_str)
             if emoji is None:
                 embed.set_image(url="https://cdn.discordapp.com/emojis/{}.png".format(id_str))
-                emb_fields = [("Name", ctx.arg_str[2:ctx.arg_str.rfind(":")], 0),
+                emb_fields = [("Name", ctx.arg_str[ctx.arg_str.find(":") + 1:ctx.arg_str.rfind(":")], 0),
                               ("ID", id_str, 0)]
                 await ctx.emb_add_fields(embed, emb_fields)
                 try:
                     await ctx.reply("I couldn't find the emoji in my servers, but here is what I have!", embed=embed)
-                except:
+                except Exception:
                     await ctx.reply("I couldn't understand or find the emoji in your message")
                 return
     else:
@@ -385,9 +386,3 @@ async def cmd_emoji(ctx):
         emb_fields.append(("Emojis I can see with the same name", emoj_same_str, 0))
     await ctx.emb_add_fields(embed, emb_fields)
     await ctx.reply(embed=embed)
-
-
-
-
-
-
