@@ -334,4 +334,60 @@ async def cmd_profile(ctx):
                     value="{} ({} ago)".format(created, created_ago), inline=False)
     await ctx.reply(embed=embed)
 
+@cmds.cmd(name="emoji",
+          category="Utility",
+          short_help="Displays info and enlarges a custom emoji")
+async def cmd_emoji(ctx):
+    """
+    Usage: {prefix}emoji <emoji>
+
+    Displays some information about the provided custom emoji, and sends an enlarged version.
+    Built in emoji support is coming soon!
+    """
+    # TODO: Handle the case where a builtin emoji has the same name as a custom emoji
+    # Any way of testing whether an emoji from get is a builtin?
+    # Emojis with the same name are shown
+    id_str = 0
+    em_str = 0
+    emoji = None
+    embed=discord.Embed(title="Emoji info!", color=discord.Colour.light_grey())
+    if ctx.arg_str.endswith(">") and ctx.arg_str.startswith("<"):
+        id_str = ctx.arg_str[ctx.arg_str.rfind(":") + 1:-1]
+        if id_str.isdigit():
+            emoji = discord.utils.get(ctx.bot.get_all_emojis(), id=id_str)
+            if emoji is None:
+                embed.set_image(url="https://cdn.discordapp.com/emojis/{}.png".format(id_str))
+                emb_fields = [("Name", ctx.arg_str[2:ctx.arg_str.rfind(":")], 0),
+                              ("ID", id_str, 0)]
+                await ctx.emb_add_fields(embed, emb_fields)
+                try:
+                    await ctx.reply("I couldn't find the emoji in my servers, but here is what I have!", embed=embed)
+                except:
+                    await ctx.reply("I couldn't understand or find the emoji in your message")
+                return
+    else:
+        em_str = ctx.arg_str.strip(":")
+        emoji = discord.utils.get(ctx.bot.get_all_emojis(), name=em_str)
+        if not emoji:
+            await ctx.reply("I couldn't understand or find the emoji in your message. Please note I cannot handle built in emojis at this time.")
+            return
+    embed.set_image(url=emoji.url)
+
+    created_ago = ctx.strfdelta(datetime.utcnow()-emoji.created_at)
+    created = emoji.created_at.strftime("%-I:%M %p, %d/%m/%Y")
+    same_emojis = filter(lambda e: (e.name == emoji.name) and (e != emoji), ctx.bot.get_all_emojis())
+    emoj_same_str = " ".join(map(str, same_emojis))
+    emb_fields = [("Name", emoji.name, 0),
+                  ("id", emoji.id, 0),
+                  ("Originating server", emoji.server.name if emoji.server else "Built in", 0),
+                  ("Created at", "{}({} ago)".format(created, created_ago), 0)]
+    if emoj_same_str:
+        emb_fields.append(("Emojis I can see with the same name", emoj_same_str, 0))
+    await ctx.emb_add_fields(embed, emb_fields)
+    await ctx.reply(embed=embed)
+
+
+
+
+
 
