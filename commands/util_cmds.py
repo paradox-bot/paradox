@@ -353,7 +353,7 @@ async def cmd_emoji(ctx):
     id_str = 0
     em_str = 0
     emoji = None
-    embed = discord.Embed(title="Emoji info!", color=discord.Colour.light_grey())
+    embed = discord.Embed(title="Enlarged Emoji!" if ctx.flags["e"] else "Emoji info!", color=discord.Colour.light_grey())
     if ctx.arg_str.endswith(">") and ctx.arg_str.startswith("<"):
         id_str = ctx.arg_str[ctx.arg_str.rfind(":") + 1:-1]
         if id_str.isdigit():
@@ -363,8 +363,8 @@ async def cmd_emoji(ctx):
                 embed.set_image(url=link)
                 if not ctx.flags["e"]:
                     emb_fields = [("Name", ctx.arg_str[ctx.arg_str.find(":") + 1:ctx.arg_str.rfind(":")], 0),
-                                ("ID", id_str, 0),
-                                ("Link", link, 0)]
+                                  ("ID", id_str, 0),
+                                  ("Link", link, 0)]
                     await ctx.emb_add_fields(embed, emb_fields)
                 try:
                     await ctx.reply(None if ctx.flags["e"] else "I couldn't find the emoji in my servers, but here is what I have!", embed=embed)
