@@ -365,7 +365,7 @@ async def cmd_emoji(ctx):
                     emb_fields = [("Name", ctx.arg_str[ctx.arg_str.find(":") + 1:ctx.arg_str.rfind(":")], 0),
                                 ("ID", id_str, 0),
                                 ("Link", link, 0)]
-                await ctx.emb_add_fields(embed, emb_fields)
+                    await ctx.emb_add_fields(embed, emb_fields)
                 try:
                     await ctx.reply("I couldn't find the emoji in my servers, but here is what I have!", embed=embed)
                 except Exception:
