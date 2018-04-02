@@ -89,36 +89,9 @@ class Context:
             splits = ["```\n"+split+"\n```" for split in splits]
         return splits
 
-
-class MessageContext(Context):
-    def __init__(self, **kwargs):
-        if "msgctx" in kwargs:
-            self = kwargs["msgctx"]
-        super().__init__(**kwargs)
-        self.author = None
-        self.message = None
-
-        if "author" in kwargs:
-            self.author = kwargs["author"]
-            self.member = self.author
-            self.user = self.member
-
-        if "message" in kwargs:
-            self.msg = kwargs["message"]
-            self.author = self.msg.author
-            self.member = self.msg.author
-            self.user = self.msg.author
-            self.ch = self.msg.channel
-            self.server = self.msg.server
-            self.cntnt = self.msg.content
-            self.id = self.msg.id
-            self.authid = self.author.id
-
-    async def reply(self, message=None, embed=None, file_name=None, dm=False, split=False, code=False):
+    async def send(self, destination, message=None, embed=None, file_name=None, split=False, code=False):
         """
-        Replies with message. If dm is False, replies in the channel. Otherwise, replies in dm.
-
-        message (str): The message to reply with. Must be a string or castable to a string.
+        Sends a message with the specified paramaters to the specified channel.
         """
         if message == "":
             self.bot_err = (-1, "Tried to reply with an empty message")
@@ -149,6 +122,69 @@ class MessageContext(Context):
                 return await self.bot.send_message(self.author if dm else self.ch, str(message), embed=embed)
         elif embed:
             return await self.bot.send_message(self.author if dm else self.ch, embed=embed)
+
+
+class MessageContext(Context):
+    def __init__(self, **kwargs):
+        if "msgctx" in kwargs:
+            self = kwargs["msgctx"]
+        super().__init__(**kwargs)
+        self.author = None
+        self.message = None
+
+        if "author" in kwargs:
+            self.author = kwargs["author"]
+            self.member = self.author
+            self.user = self.member
+
+        if "message" in kwargs:
+            self.msg = kwargs["message"]
+            self.author = self.msg.author
+            self.member = self.msg.author
+            self.user = self.msg.author
+            self.ch = self.msg.channel
+            self.server = self.msg.server
+            self.cntnt = self.msg.content
+            self.id = self.msg.id
+            self.authid = self.author.id
+
+
+    async def reply(self, message=None, embed=None, file_name=None, dm=False, **kwargs):
+        """
+        A wrapper for send used to reply to a message.
+        If dm is true, replies in private message to the sending user.
+        Otherwise reply in the same channel as the instantiating message.
+        """
+        if not (dm or ctx.ch):
+
+        destination = ctx.author if dm else ctx.ch
+        try:
+            return await self.send(destination, message=message, embed=embed, file_name=file_name, **kwargs)
+        except discord.Forbidden:
+            """
+            Handles each of the following errors:
+                Can't DM user if dm is true
+                Can't send embeds if embed exists
+                Can't send messages at all.
+            """
+            if dm:
+                await self.reply("I can't DM you! Do you have me blocked or direct messages turned off?")
+                ctx.cmd_err = (1, "")
+            else:
+                perms = ctx.ch.permissions_for(ctx.me)
+                if not perms.send_messages:
+                    try:
+                        await self.send(ctx.author, "I don't have permissions to reply in that channel! If you believe this is in error, please contact a server administrator.")
+                        await self.reply(message, embed, file_name, dm=False)
+                        return
+                    except discord.Forbidden:
+                        pass
+                elif file_name and not perms.attach_files:
+                    await self.reply("I don't have permission to send files here!")
+            ctx.cmd_err = (1, "")
+            raise discord.Forbidden
+            return
+
 
     async def del_src(self):
         """

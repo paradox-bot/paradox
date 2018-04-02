@@ -104,13 +104,19 @@ class CommandHandler:
         ctx (MessageContext): Context to read and modify.
         Expects ctx.cmd_err to be set.
         """
-        await ctx.log("There was an exception while running the command \n{}\nStack trace:{}".format(ctx.cmd.name, ctx.err[2]))
         if isinstance(ctx.err[1], discord.Forbidden):
-            await ctx.reply("I just attempted to do something I don't have permissions for in this server! Aborting!")
+            if ctx.cmd_err[0] != 1:
+                try:
+                    await ctx.reply("I just attempted to do something I don't have permissions for in this server! Aborting!")
+                except discord.Forbidden:
+                    pass
+            else:
+                await ctx.log("There was a permission error running the command \n{}".format(ctx.cmd.name, ctx.err[2]))
         else:
             await ctx.reply("Something went wrong while running your command. The error has been logged and will be fixed soon!")
-        if ctx.bot.DEBUG > 0:
-            await ctx.reply("Stack trace:\n```{}```".format(ctx.err[2]))
+            await ctx.log("There was an exception while running the command \n{}\nStack trace:{}".format(ctx.cmd.name, ctx.err[2]))
+            if ctx.bot.DEBUG > 0:
+                await ctx.reply("Stack trace:\n```{}```".format(ctx.err[2]))
 
     async def on_complete(self, ctx):
         """
