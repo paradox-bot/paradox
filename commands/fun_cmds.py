@@ -78,6 +78,7 @@ async def cmd_rep(ctx):
     Usage: {prefix}rep [mention] | rep stats
 
     Gives a reputation point to the mentioned user or shows your current reputation cooldown timer.
+    With stats, shows how many times you have repped and your last rep time.
     """
     cooldown = 24*60*60
     now = datetime.utcnow()
