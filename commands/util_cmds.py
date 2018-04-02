@@ -357,9 +357,11 @@ async def cmd_emoji(ctx):
         if id_str.isdigit():
             emoji = discord.utils.get(ctx.bot.get_all_emojis(), id=id_str)
             if emoji is None:
-                embed.set_image(url="https://cdn.discordapp.com/emojis/{}.png".format(id_str))
+                link = "https://cdn.discordapp.com/emojis/{}.png".format(id_str)
+                embed.set_image(url=link)
                 emb_fields = [("Name", ctx.arg_str[ctx.arg_str.find(":") + 1:ctx.arg_str.rfind(":")], 0),
-                              ("ID", id_str, 0)]
+                              ("ID", id_str, 0),
+                              ("Link", link, 0)]
                 await ctx.emb_add_fields(embed, emb_fields)
                 try:
                     await ctx.reply("I couldn't find the emoji in my servers, but here is what I have!", embed=embed)
@@ -379,7 +381,8 @@ async def cmd_emoji(ctx):
     same_emojis = filter(lambda e: (e.name == emoji.name) and (e != emoji), ctx.bot.get_all_emojis())
     emoj_same_str = " ".join(map(str, same_emojis))
     emb_fields = [("Name", emoji.name, 0),
-                  ("id", emoji.id, 0),
+                  ("ID", emoji.id, 0),
+                  ("Link", emoji.url, 0),
                   ("Originating server", emoji.server.name if emoji.server else "Built in", 0),
                   ("Created at", "{}({} ago)".format(created, created_ago), 0)]
     if emoj_same_str:
