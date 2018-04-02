@@ -353,7 +353,7 @@ async def cmd_emoji(ctx):
     id_str = 0
     em_str = 0
     emoji = None
-    embed = discord.Embed(title="Enlarged Emoji!" if ctx.flags["e"] else "Emoji info!", color=discord.Colour.light_grey())
+    embed = discord.Embed(title=None if ctx.flags["e"] else "Emoji info!", color=discord.Colour.light_grey())
     if ctx.arg_str.endswith(">") and ctx.arg_str.startswith("<"):
         id_str = ctx.arg_str[ctx.arg_str.rfind(":") + 1:-1]
         if id_str.isdigit():
