@@ -1,4 +1,6 @@
-from paraperms import permFuncs
+from checks import checks
+
+permFuncs = {}
 
 """
 We will be wanting to do this for user settings as well at some point.
@@ -64,6 +66,7 @@ class serverConfigSetting(_configSetting):
     def __init__(self, name, category, desc, perm_view, perm_write, ctype, default):
         super().__init__(name, desc, perm_view, perm_write, ctype, default)
         self.cat = category
+
     def set(self, botdata, server, value):
         """
         Sets setting in botdata
@@ -74,7 +77,8 @@ class serverConfigSetting(_configSetting):
         """
         Returns value of setting from botdata
         """
-        return botdata.servers.get(server.id, self.name)
+        setting = botdata.servers.get(server.id, self.name)
+        return setting if (setting is not None) else self.default
 
     async def write(self, data, obj, userstr, message=None, client=None, server=None, botdata=None, conf=None):
         server = obj
@@ -93,7 +97,8 @@ class botConfigSetting(_configSetting):
         """
         Returns value of setting from botconf, cat is again a placeholder
         """
-        return botconf.get(self.name)
+        setting = botconf.get(self.name)
+        return setting if (setting is not None) else self.default
 
     async def write(self, data, obj, userstr, message=None, client=None, server=None, botdata=None, conf=None):
         conf = data
