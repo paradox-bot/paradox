@@ -299,4 +299,4 @@ def load_into(bot):
     @bot.util
     async def emb_add_fields(ctx, embed, emb_fields):
         for field in emb_fields:
-            embed.add_field(name=field[0], value=field[1], inline=bool(field[2]))
+            embed.add_field(name=str(field[0]), value=str(field[1]), inline=bool(field[2]))

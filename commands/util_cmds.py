@@ -44,13 +44,12 @@ async def cmd_secho(ctx):
 @cmds.execute("user_lookup", in_server=True)
 async def cmd_userinfo(ctx):
     """
-    Usage: {prefix}userinfo (mention)
+    Usage: {prefix}userinfo [user]
 
-    Sends information on the mentioned user, or yourself if no one is provided.
+    Sends information on the provided user, or yourself.
     """
-    if ctx.arg_str == "":
-        user = ctx.author
-    else:
+    user = ctx.author
+    if ctx.arg_str != "":
         user = ctx.objs["found_user"]
         if not user:
             await ctx.reply("I couldn't find any matching users in this server sorry!")
@@ -61,29 +60,32 @@ async def cmd_userinfo(ctx):
                   "dnd": "Do Not Disturb",
                   "online": "Online",
                   "idle": "Idle/Away"}
-
-    embed = discord.Embed(type="rich", color=(user.colour if user.colour.value else discord.Colour.light_grey()))
-    embed.set_author(name="{user.name} ({user.id})".format(user=user), icon_url=user.avatar_url, url=user.avatar_url)
+    colour = (user.colour if user.colour.value else discord.Colour.light_grey())
+    embed = discord.Embed(type="rich", color=colour)
+    embed.set_author(name="{user.name} ({user.id})".format(user=user),
+                     icon_url=user.avatar_url,
+                     url=user.avatar_url)
     embed.set_thumbnail(url=user.avatar_url)
-    embed.add_field(name="Full name", value=("{} ".format(bot_emoji) if user.bot else "")+str(user), inline=False)
 
+    name = "{}{}".format(bot_emoji if user.bot else "", user)
     game = "Playing {}".format(user.game if user.game else "nothing")
-    embed.add_field(name="Status", value="{}, {}".format(statusdict[str(user.status)], game), inline=False)
-
-    embed.add_field(name="Nickname", value=str(user.display_name), inline=False)
-
+    status = "{}, {}".format(statusdict[str(user.status)], game)
     shared = len(list(filter(lambda m: m.id == user.id, ctx.bot.get_all_members())))
-    embed.add_field(name="Shared servers", value=str(shared), inline=False)
-
     joined_ago = ctx.strfdelta(datetime.utcnow()-user.joined_at)
     joined = user.joined_at.strftime("%-I:%M %p, %d/%m/%Y")
     created_ago = ctx.strfdelta(datetime.utcnow()-user.created_at)
     created = user.created_at.strftime("%-I:%M %p, %d/%m/%Y")
-    embed.add_field(name="Joined at", value="{} ({} ago)".format(joined, joined_ago), inline=False)
-    embed.add_field(name="Created at", value="{} ({} ago)".format(created, created_ago), inline=False)
-
     roles = [r.name for r in user.roles if r.name != "@everyone"]
-    embed.add_field(name="Roles", value=('`' + '`, `'.join(roles) + '`'), inline=False)
+    roles = ('`' + '`, `'.join(roles) + '`') if roles else "None"
+
+    emb_fields = [("Full name", name, 0),
+                  ("Status", status, 0),
+                  ("Nickname", user.display_name, 0),
+                  ("Shared servers", shared, 0),
+                  ("Joined at", "{} ({} ago)".format(joined, joined_ago), 0),
+                  ("Created at", "{} ({} ago)".format(created, created_ago), 0),
+                  ("Roles", roles, 0)]
+    await ctx.emb_add_fields(embed, emb_fields)
     await ctx.reply(embed=embed)
 
 
