@@ -208,7 +208,7 @@ async def cmd_piggybank(ctx):
           short_help="Shows or sets a user setting")
 async def cmd_set(ctx):
     """
-    "Usage: {prefix}set [settingname [value]]
+    Usage: {prefix}set [settingname [value]]
 
     Sets <settingname> to <value>, shows the value of <settingname>, or lists your available settings.
     Temporary implementation, more is coming soon!
