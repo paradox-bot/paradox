@@ -283,13 +283,12 @@ async def cmd_time(ctx):
 @cmds.execute("user_lookup", in_server=True)
 async def cmd_profile(ctx):
     """
-    Usage: {prefix}profile [mention]
+    Usage: {prefix}profile [user]
 
-    Displays the mentioned user's profile, or your own.
+    Displays the provided user's profile, or your own.
     """
-    if ctx.arg_str == "":
-        user = ctx.author
-    else:
+    user = ctx.author
+    if ctx.arg_str != "":
         user = ctx.objs["found_user"]
         if not user:
             await ctx.reply("I couldn't find any matching users in this server sorry!")
@@ -308,6 +307,7 @@ async def cmd_profile(ctx):
     created_ago = ctx.strfdelta(datetime.utcnow()-user.created_at)
     created = user.created_at.strftime("%-I:%M %p, %d/%m/%Y")
     rep = await ctx.data.users.get(user.id, "rep")
+
     embed = discord.Embed(type="rich", color=user.colour) \
         .set_author(name="{user} ({user.id})".format(user=user),
                     icon_url=user.avatar_url)
