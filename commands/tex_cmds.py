@@ -11,11 +11,13 @@ cmds = paraCH()
           short_help="Renders LaTeX code")
 async def cmd_tex(ctx):
     """
-    Usage: {prefix}tex <code>
-
-    Renders and displays LaTeX code.
-    Use the reactions to show your code/ edit your code/ delete the message respectively.
+    Usage:
+        {prefix}tex <code>
+    Description:
+        Renders and displays LaTeX code.
+        Use the reactions to delete the message and show your code, respectively.
     """
+    # TODO: Make this an embed
     error = await texcomp(ctx)
     err_msg = ""
     if error != "":

@@ -14,9 +14,10 @@ cmds = paraCH()
 @cmds.require("exec_perm")
 async def cmd_async(ctx):
     """
-    Usage: {prefix}async <code>
-
-    Runs <code> as an asynchronous coroutine and prints the output or error.
+    Usage:
+        {prefix}async <code>
+    Description:
+        Runs <code> as an asynchronous coroutine and prints the output or error.
     """
     if ctx.arg_str == "":
         await ctx.reply("You must give me something to run!")
@@ -36,8 +37,9 @@ async def cmd_async(ctx):
 @cmds.require("exec_perm")
 async def cmd_exec(ctx):
     """
-    Usage: {prefix}exec <code>
-
+    Usage:
+        {prefix}exec <code>
+    Description:
     Runs <code> in current environment using exec() and prints the output or error.
     """
     if ctx.arg_str == "":
@@ -58,9 +60,10 @@ async def cmd_exec(ctx):
 @cmds.require("exec_perm")
 async def cmd_eval(ctx):
     """
-    Usage: {prefix}eval <code>
-
-    Runs <code> in current environment using eval() and prints the output or error.
+    Usage:
+        {prefix}eval <code>
+    Description:
+        Runs <code> in current environment using eval() and prints the output or error.
     """
     if ctx.arg_str == "":
         await ctx.reply("You must give me something to run!")
@@ -80,9 +83,10 @@ async def cmd_eval(ctx):
 @cmds.require("exec_perm")
 async def cmd_seval(ctx):
     """
-    Usage: {prefix}seval <code>
-
-    Runs <code> silently in current environment using eval().
+    Usage:
+        {prefix}seval <code>
+    Description:
+        Runs <code> silently in current environment using eval().
     """
     if ctx.arg_str == "":
         await ctx.reply("You must give me something to run!")
@@ -102,9 +106,10 @@ async def cmd_seval(ctx):
 @cmds.require("exec_perm")
 async def cmd_shell(ctx):
     """
-    Usage: {prefix}shell <command>
-
-    Runs <command> in the operating environment and returns the output in a codeblock.
+    Usage:
+        {prefix}shell <command>
+    Description:
+        Runs <command> in the operating environment and returns the output in a codeblock.
     """
     if ctx.arg_str == "":
         await ctx.reply("You must give me something to run!")

@@ -9,9 +9,10 @@ cmds = paraCH()
           short_help="Provides some detailed help on a command.")
 async def cmd_help(ctx):
     """
-    Usage: {prefix}help [command name]
-
-    Shows detailed help on the requested command or sends you a listing of the commands.
+    Usage:
+        {prefix}help [command name]
+    Description:
+        Shows detailed help on the requested command or sends you a listing of the commands.
     """
     help_keys = {"prefix": ctx.used_prefix}
     msg = ""
@@ -48,9 +49,10 @@ async def cmd_help(ctx):
           short_help="Lists all my commands!")
 async def cmd_list(ctx):
     """
-    Usage: {prefix}list
-
-    Replies with an embed containing all my visible commands.
+    Usage:
+        {prefix}list
+    Description:
+        Replies with an embed containing all my visible commands.
     """
     sorted_cats = ctx.bot.objects["sorted cats"]
     cats = {}

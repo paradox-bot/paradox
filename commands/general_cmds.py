@@ -14,11 +14,12 @@ cmds = paraCH()
           short_help="Provides information about the bot.")
 async def cmd_about(ctx):
     """
-    Usage: {prefix}about
-
-    Sends a message containing information about the bot.
+    Usage:
+        {prefix}about
+    Description:
+        Sends a message containing information about the bot.
     """
-    devs = ["298706728856453121", "299175087389802496", "225773687037493258", "300992784020668416"]  #TODO: Don't hard code these here!!
+    devs = ["298706728856453121", "299175087389802496", "225773687037493258", "300992784020668416"]  # TODO: Don't hard code these here!!
     devnames = ', '.join([str(discord.utils.get(ctx.bot.get_all_members(), id=str(devs))) for devs in devs])
     pform = platform.platform()
     py_vers = sys.version
@@ -52,11 +53,12 @@ async def cmd_about(ctx):
           short_help="Send feedback to my creators")
 async def cmd_feedback(ctx):
     """
-    Usage {prefix}feedback [msg]
-
-    Sends a message back to the developers of the bot.
-    This can be used for suggestions, bug reporting, or general feedback.
-    Note that abuse or overuse of this command will lead to blacklisting.
+    Usage:
+        {prefix}feedback [msg]
+    Description:
+        Sends a message back to the developers of the bot.
+        This can be used for suggestions, bug reporting, or general feedback.
+        Note that abuse or overuse of this command will lead to blacklisting.
     """
     response = ctx.arg_str
     if response == "":
@@ -87,12 +89,13 @@ async def cmd_feedback(ctx):
 @cmds.execute("flags", flags=["e=="])
 async def cmd_cr(ctx):
     """
-    Usage: {prefix}cheatreport <user> <cheat> [-e <evidence>]
-
-    Reports a user for cheating on a social system.
-    Please provide the user you wish to report, the way they cheated, and your evidence.
-    If reporting the user in DM or another server, please use their user id.
-    Note that abuse or overuse of this command will lead to your account being blacklisted.
+    Usage:
+        {prefix}cheatreport <user> <cheat> [-e <evidence>]
+    Description:
+        Reports a user for cheating on a social system.
+        Please provide the user you wish to report, the way they cheated, and your evidence.
+        If reporting the user in DM or another server, please use their user id.
+        Note that abuse or overuse of this command will lead to your account being blacklisted.
     """
     if len(ctx.params) < 2:
         await ctx.reply("Insufficient arguments, see help for usage")
@@ -133,10 +136,11 @@ async def cmd_cr(ctx):
           short_help="Checks the bot's latency")
 async def cmd_ping(ctx):
     """
-    Usage: {prefix}ping
-
-    Checks the response delay of the bot.
-    Usually used to test whether the bot is responsive or not.
+    Usage:
+        {prefix}ping
+    Description:
+        Checks the response delay of the bot.
+        Usually used to test whether the bot is responsive or not.
     """
     msg = await ctx.reply("Beep")
     msg_tstamp = msg.timestamp
@@ -151,9 +155,10 @@ async def cmd_ping(ctx):
           short_help="Sends the bot's invite link")
 async def cmd_invite(ctx):
     """
-    Usage: {prefix}invite
-
-    Sends the link to invite the bot to your server.
+    Usage:
+        {prefix}invite
+    Description:
+        Sends the link to invite the bot to your server.
     """
     await ctx.reply("Here's my invite link! \n<{}>".format(ctx.bot.objects["invite_link"]))
 
@@ -163,9 +168,10 @@ async def cmd_invite(ctx):
           short_help="Sends the link to the bot guild")
 async def cmd_support(ctx):
     """
-    Usage: {prefix}support
-
-    Sends the invite link to the Paradøx support guild.
+    Usage:
+        {prefix}support
+    Description:
+        Sends the invite link to the Paradøx support guild.
     """
     await ctx.reply("Join my server here!\n\n<{}>".format(ctx.bot.objects["support guild"]))
 
@@ -175,6 +181,12 @@ async def cmd_support(ctx):
           short_help="Shows server info.")
 @cmds.require("in_server")
 async def cmd_serverinfo(ctx):
+    """
+    Usage:
+        {prefix}serverinfo
+    Description:
+        Shows information about the server you are in.
+    """
     regions = {
         "brazil": "Brazil",
         "eu-central": "Central Europe",

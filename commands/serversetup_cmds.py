@@ -10,10 +10,11 @@ cmds = paraCH()
 @cmds.require("in_server")
 async def cmd_config(ctx):
     """
-    Usage: {prefix}config | config help | config <option> [value]
-
-    Lists your current server configuration, shows option help, or sets an option.
-    For example, "config join_ch #general" could be used to set your join message channel.
+    Usage:
+        {prefix}config | config help | config <option> [value]
+    Description:
+        Lists your current server configuration, shows option help, or sets an option.
+        For example, "config join_ch #general" could be used to set your join message channel.
     """
     server_conf = ctx.server_conf.settings
     serv_conf = {}
@@ -82,9 +83,10 @@ async def cmd_config(ctx):
 @cmds.require("has_manage_server")
 async def cmd_rmrole(ctx):
     """
-    Usage: {prefix}rmrole <rolename>
-
-    Deletes a role given by partial name or mention.
+    Usage:
+        {prefix}rmrole <rolename>
+    Description:
+        Deletes a role given by partial name or mention.
     """
     if ctx.arg_str.strip() == "":
         await ctx.reply("You must give me a role to delete!")
