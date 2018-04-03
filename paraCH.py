@@ -1,5 +1,5 @@
 from contextBot.CommandHandler import CommandHandler
-from contextBot.Command import Command
+from paraCMD import paraCMD
 
 from snippets import snippets
 from checks import checks
@@ -10,7 +10,7 @@ class paraCH(CommandHandler):
     snippets = snippets
     checks = checks
     priority = 1
-    CmdCls = Command
+    CmdCls = paraCMD
 
     async def before_exec(self, ctx):
         if ctx.author.bot:
