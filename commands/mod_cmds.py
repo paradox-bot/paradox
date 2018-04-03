@@ -180,8 +180,8 @@ async def cmd_ban(ctx):
     Description:
         Bans the users listed with an optional reason.
     Flags:
-        -p:\t (purge) Purge <days> days of message history for each user.
-        -f:\t (fake) Pretends to ban.
+        -p:  (purge) Purge <days> days of message history for each user.
+        -f:  (fake) Pretends to ban.
     """
     if ctx.arg_str.strip() == "":
         await ctx.reply("You must give me a user to ban!")
@@ -222,8 +222,8 @@ async def cmd_softban(ctx):
     Description:
         Softbans (bans and unbans) the users listed with an optional reason.
     Flags:
-        -p:\t (purge) Purge <days> days of message history for each user. By default purges 1 day.
-        -f:\t (fake) Pretends to softban.
+        -p:  (purge) Purge <days> days of message history for each user. By default purges 1 day.
+        -f:  (fake) Pretends to softban.
     """
     if ctx.arg_str.strip() == "":
         await ctx.reply("You must give me a user to softban!")
@@ -264,7 +264,7 @@ async def cmd_kick(ctx):
     Description:
         Kicks the users listed with an optional reason.
     Flags:
-        -f:\t (fake) Pretends to kick.
+        -f:  (fake) Pretends to kick.
     """
     if ctx.arg_str.strip() == "":
         await ctx.reply("You must give me a user to kick!")

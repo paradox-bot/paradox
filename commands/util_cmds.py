@@ -357,7 +357,7 @@ async def cmd_emoji(ctx):
         Displays some information about the provided custom emoji, and sends an enlarged version.
         Built in emoji support is coming soon!
     Flags:
-        -e:\t (enlarge) Only shows the enlarged emoji, with no other info.
+        -e:  (enlarge) Only shows the enlarged emoji, with no other info.
     """
     # TODO: Handle the case where a builtin emoji has the same name as a custom emoji
     # Any way of testing whether an emoji from get is a builtin?

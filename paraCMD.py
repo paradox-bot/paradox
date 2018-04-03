@@ -23,4 +23,4 @@ class paraCMD(Command):
                 field += lines[i] + "\n"
         if field_name and field:
             help_fields.append((field_name, field))
-        self.help_fields = list(map(lambda f: (f[0], textwrap.dedent(f[1].strip())), help_fields))
+        self.help_fields = list(map(lambda f: (f[0], (textwrap.dedent(f[1])).strip()), help_fields))
