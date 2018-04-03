@@ -9,9 +9,10 @@ cmds = paraCH()
           short_help="Provides some detailed help on a command.")
 async def cmd_help(ctx):
     """
-    Usage: {prefix}help [command name]
-
-    Shows detailed help on the requested command or sends you a listing of the commands.
+    Usage:
+        {prefix}help [command name]
+    Description:
+        Shows detailed help on the requested command or sends you a listing of the commands.
     """
     help_keys = {"prefix": ctx.used_prefix}
     msg = ""
@@ -37,10 +38,19 @@ async def cmd_help(ctx):
     else:
         for cmd in ctx.params:
             if cmd in commands:
-                msg += "```{}```\n".format((commands[cmd].long_help).format(**help_keys))
+                embed = discord.Embed(type="rich", color=discord.Colour.teal(), title="Help for `{}`".format(cmd))
+                emb_fields = []
+                fields = commands[cmd].help_fields
+                if len(fields) == 0:
+                    msg += "Sorry, no help has been written for the command {} yet!".format(cmd)
+                    continue
+                emb_fields = [(field[0], "```{}```".format(field[1].format(**help_keys)), 0) for field in fields]
+                await ctx.emb_add_fields(embed, emb_fields)
+                await ctx.reply(embed=embed)
             else:
                 msg += "I couldn't find a command named `{}`. Please make sure you have spelled the command correctly. \n".format(cmd)
-        await ctx.reply(msg, split=True, code=False)
+        if msg:
+            await ctx.reply(msg, split=True, code=False)
 
 
 @cmds.cmd("list",
@@ -48,9 +58,10 @@ async def cmd_help(ctx):
           short_help="Lists all my commands!")
 async def cmd_list(ctx):
     """
-    Usage: {prefix}list
-
-    Replies with an embed containing all my visible commands.
+    Usage:
+        {prefix}list
+    Description:
+        Replies with an embed containing all my visible commands.
     """
     sorted_cats = ctx.bot.objects["sorted cats"]
     cats = {}

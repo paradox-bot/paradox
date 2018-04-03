@@ -175,11 +175,13 @@ async def request_reason(ctx):
 @cmds.require("in_server_can_ban")
 async def cmd_ban(ctx):
     """
-    Usage: {prefix}ban <user1> [user2] [user3]... [-r <reason>] [-p <days>] [-f]
-
-    Bans the users listed with an optional reason.
-    If -p (purge) is provided, purges <days> days of message history for each user.
-    If -f (fake) is provided, only pretends to ban.
+    Usage:
+        {prefix}ban <user1> [user2] [user3]... [-r <reason>] [-p <days>] [-f]
+    Description:
+        Bans the users listed with an optional reason.
+    Flags:
+        -p:  (purge) Purge <days> days of message history for each user.
+        -f:  (fake) Pretends to ban.
     """
     if ctx.arg_str.strip() == "":
         await ctx.reply("You must give me a user to ban!")
@@ -215,11 +217,13 @@ async def cmd_ban(ctx):
 @cmds.require("in_server_can_softban")
 async def cmd_softban(ctx):
     """
-    Usage: {prefix}softban <user1> [user2] [user3]... [-r <reason>] [-p <days>] [-f]
-
-    Softbans (bans and unbans) the users listed with an optional reason.
-    If -p (purge) is provided, purges <days> days of message history for each user. Otherwise purges 1 day.
-    If -f (fake) is provided, only pretends to softban.
+    Usage:
+        {prefix}softban <user1> [user2] [user3]... [-r <reason>] [-p <days>] [-f]
+    Description:
+        Softbans (bans and unbans) the users listed with an optional reason.
+    Flags:
+        -p:  (purge) Purge <days> days of message history for each user. By default purges 1 day.
+        -f:  (fake) Pretends to softban.
     """
     if ctx.arg_str.strip() == "":
         await ctx.reply("You must give me a user to softban!")
@@ -255,10 +259,12 @@ async def cmd_softban(ctx):
 @cmds.require("in_server_can_kick")
 async def cmd_kick(ctx):
     """
-    Usage: {prefix}kick <user1> [user2] [user3]... [-r <reason>] [-f]
-
-    Kicks the users listed with an optional reason.
-    If -f (fake) is provided,  only pretends to kick.
+    Usage:
+        {prefix}kick <user1> [user2] [user3]... [-r <reason>] [-f]
+    Description:
+        Kicks the users listed with an optional reason.
+    Flags:
+        -f:  (fake) Pretends to kick.
     """
     if ctx.arg_str.strip() == "":
         await ctx.reply("You must give me a user to kick!")

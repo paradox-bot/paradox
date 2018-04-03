@@ -14,9 +14,10 @@ cmds = paraCH()
           short_help="Sends what you tell me to!")
 async def cmd_echo(ctx):
     """
-    Usage: {prefix}echo <text>
-
-    Replies to the message with <text>.
+    Usage:
+        {prefix}echo <text>
+    Description:
+        Replies to the message with <text>.
     """
     await ctx.reply(ctx.arg_str if ctx.arg_str else "I can't send an empty message!")
 
@@ -26,9 +27,10 @@ async def cmd_echo(ctx):
           short_help="Like echo but deletes.")
 async def cmd_secho(ctx):
     """
-    Usage: {prefix}secho <text>
-
-    Replies to the message with <text> and deletes your message.
+    Usage:
+        {prefix}secho <text>
+    Description:
+        Replies to the message with <text> and deletes your message.
     """
     try:
         await ctx.bot.delete_message(ctx.msg)
@@ -44,9 +46,10 @@ async def cmd_secho(ctx):
 @cmds.execute("user_lookup", in_server=True)
 async def cmd_userinfo(ctx):
     """
-    Usage: {prefix}userinfo [user]
-
-    Sends information on the provided user, or yourself.
+    Usage:
+        {prefix}userinfo [user]
+    Description:
+        Sends information on the provided user, or yourself.
     """
     user = ctx.author
     if ctx.arg_str != "":
@@ -94,9 +97,10 @@ async def cmd_userinfo(ctx):
           short_help="Searches for users with a given discrim")
 async def prim_cmd_discrim(ctx):
     """
-    Usage: {prefix}discrim [discriminator]
-
-    Searches all guilds the bot is in for users matching the given discriminator.
+    Usage:
+        {prefix}discrim [discriminator]
+    Description:
+        Searches all guilds the bot is in for users matching the given discriminator.
     """
     p = ctx.bot.get_all_members()
     args = ctx.arg_str
@@ -122,12 +126,13 @@ async def prim_cmd_discrim(ctx):
           short_help="Keep track of money added towards a goal.")
 async def cmd_piggybank(ctx):
     """
-    Usage: {prefix}piggybank [+|- <amount>] | [list [clear]] | [goal <amount>|none]
-
-    [+|- <amount>]: Adds or removes an amount to your piggybank.
-    [list [clear]]: Sends you a DM with your previous transactions or clears your history.
-    [goal <amount>|none]: Sets your goal!
-    Or with no arguments, lists your current amount and progress to the goal.
+    Usage:
+        {prefix}piggybank [+|- <amount>] | [list [clear]] | [goal <amount>|none]
+    Description:
+        [+|- <amount>]: Adds or removes an amount to your piggybank.
+        [list [clear]]: Sends you a DM with your previous transactions or clears your history.
+        [goal <amount>|none]: Sets your goal!
+        Or with no arguments, lists your current amount and progress to the goal.
     """
     bank_amount = await ctx.data.users.get(ctx.authid, "piggybank_amount")
     transactions = await ctx.data.users.get(ctx.authid, "piggybank_history")
@@ -208,10 +213,11 @@ async def cmd_piggybank(ctx):
           short_help="Shows or sets a user setting")
 async def cmd_set(ctx):
     """
-    Usage: {prefix}set [settingname [value]]
-
-    Sets <settingname> to <value>, shows the value of <settingname>, or lists your available settings.
-    Temporary implementation, more is coming soon!
+    Usage:
+        {prefix}set [settingname [value]]
+    Description:
+        Sets <settingname> to <value>, shows the value of <settingname>, or lists your available settings.
+        Temporary implementation, more is coming soon!
     """
     if ctx.arg_str == '':
         await ctx.reply("```timezone: Country/City, some short-hands are accepted, use ETC/+10 etc to set to GMT-10.```")
@@ -244,10 +250,11 @@ async def cmd_set(ctx):
 @cmds.execute("user_lookup", in_server=True)
 async def cmd_time(ctx):
     """
-    Usage: {prefix}time [mention | id | partial name]
-
-    Gives the time for the mentioned user or yourself.
-    Requires the user to have set the usersetting "timezone".
+    Usage:
+        {prefix}time [mention | id | partial name]
+    Description:
+        Gives the time for the mentioned user or yourself.
+        Requires the user to have set the usersetting "timezone".
     """
     if ctx.arg_str == "":
         user = ctx.author
@@ -283,9 +290,10 @@ async def cmd_time(ctx):
 @cmds.execute("user_lookup", in_server=True)
 async def cmd_profile(ctx):
     """
-    Usage: {prefix}profile [user]
-
-    Displays the provided user's profile, or your own.
+    Usage:
+        {prefix}profile [user]
+    Description:
+        Displays the provided user's profile, or your own.
     """
     user = ctx.author
     if ctx.arg_str != "":
@@ -343,11 +351,13 @@ async def cmd_profile(ctx):
 @cmds.execute("flags", flags=["e"])
 async def cmd_emoji(ctx):
     """
-    Usage: {prefix}emoji <emoji> [-e]
-
-    Displays some information about the provided custom emoji, and sends an enlarged version.
-    Built in emoji support is coming soon!
-    With the -e flag, only shows the enlarged emoji, with no info.
+    Usage:
+        {prefix}emoji <emoji> [-e]
+    Description:
+        Displays some information about the provided custom emoji, and sends an enlarged version.
+        Built in emoji support is coming soon!
+    Flags:
+        -e:  (enlarge) Only shows the enlarged emoji, with no other info.
     """
     # TODO: Handle the case where a builtin emoji has the same name as a custom emoji
     # Any way of testing whether an emoji from get is a builtin?
