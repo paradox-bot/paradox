@@ -7,6 +7,28 @@ from datetime import datetime, timedelta
 cmds = paraCH()
 
 
+@cmds.cmd("bin2ascii",
+          category="Fun stuff",
+          short_help="Converts binary to ascii")
+async def cmd_bin2ascii(ctx):
+    """
+    Usage:
+        {prefix}bin2ascii <binary string>
+    Description:
+        Converts the provided binary string into ascii, then sends the output.
+    Examples:
+        {prefix}bin2ascii 01001000 01101001 00100001
+    """
+    # Would be cool if example could use username
+    bitstr = ctx.arg_str.replace(' ', '')
+    if (not bitstr.isdigit()) or (len(bitstr) % 8 != 0):
+        await ctx.reply("Not a valid binary string!")
+        return
+    bytelist = map(''.join, zip(*[iter(bitstr)] * 8))
+    asciilist = [chr(sum([int(b) << 7 - n for (n, b) in enumerate(byte)])) for byte in bytelist]
+    await ctx.reply("Output: `{}`".format(''.join(asciilist)))
+
+
 @cmds.cmd("lenny",
           category="Fun stuff",
           short_help="( ͡° ͜ʖ ͡°)")
