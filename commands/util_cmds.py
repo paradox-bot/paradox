@@ -14,9 +14,10 @@ cmds = paraCH()
           short_help="Sends what you tell me to!")
 async def cmd_echo(ctx):
     """
-    Usage: {prefix}echo <text>
-
-    Replies to the message with <text>.
+    Usage:
+        {prefix}echo <text>
+    Description:
+        Replies to the message with <text>.
     """
     await ctx.reply(ctx.arg_str if ctx.arg_str else "I can't send an empty message!")
 
@@ -26,9 +27,10 @@ async def cmd_echo(ctx):
           short_help="Like echo but deletes.")
 async def cmd_secho(ctx):
     """
-    Usage: {prefix}secho <text>
-
-    Replies to the message with <text> and deletes your message.
+    Usage:
+        {prefix}secho <text>
+    Description:
+        Replies to the message with <text> and deletes your message.
     """
     try:
         await ctx.bot.delete_message(ctx.msg)
@@ -44,13 +46,13 @@ async def cmd_secho(ctx):
 @cmds.execute("user_lookup", in_server=True)
 async def cmd_userinfo(ctx):
     """
-    Usage: {prefix}userinfo (mention)
-
-    Sends information on the mentioned user, or yourself if no one is provided.
+    Usage:
+        {prefix}userinfo [user]
+    Description:
+        Sends information on the provided user, or yourself.
     """
-    if ctx.arg_str == "":
-        user = ctx.author
-    else:
+    user = ctx.author
+    if ctx.arg_str != "":
         user = ctx.objs["found_user"]
         if not user:
             await ctx.reply("I couldn't find any matching users in this server sorry!")
@@ -61,29 +63,32 @@ async def cmd_userinfo(ctx):
                   "dnd": "Do Not Disturb",
                   "online": "Online",
                   "idle": "Idle/Away"}
-
-    embed = discord.Embed(type="rich", color=(user.colour if user.colour.value else discord.Colour.light_grey()))
-    embed.set_author(name="{user.name} ({user.id})".format(user=user), icon_url=user.avatar_url, url=user.avatar_url)
+    colour = (user.colour if user.colour.value else discord.Colour.light_grey())
+    embed = discord.Embed(type="rich", color=colour)
+    embed.set_author(name="{user.name} ({user.id})".format(user=user),
+                     icon_url=user.avatar_url,
+                     url=user.avatar_url)
     embed.set_thumbnail(url=user.avatar_url)
-    embed.add_field(name="Full name", value=("{} ".format(bot_emoji) if user.bot else "")+str(user), inline=False)
 
+    name = "{}{}".format(bot_emoji if user.bot else "", user)
     game = "Playing {}".format(user.game if user.game else "nothing")
-    embed.add_field(name="Status", value="{}, {}".format(statusdict[str(user.status)], game), inline=False)
-
-    embed.add_field(name="Nickname", value=str(user.display_name), inline=False)
-
+    status = "{}, {}".format(statusdict[str(user.status)], game)
     shared = len(list(filter(lambda m: m.id == user.id, ctx.bot.get_all_members())))
-    embed.add_field(name="Shared servers", value=str(shared), inline=False)
-
     joined_ago = ctx.strfdelta(datetime.utcnow()-user.joined_at)
     joined = user.joined_at.strftime("%-I:%M %p, %d/%m/%Y")
     created_ago = ctx.strfdelta(datetime.utcnow()-user.created_at)
     created = user.created_at.strftime("%-I:%M %p, %d/%m/%Y")
-    embed.add_field(name="Joined at", value="{} ({} ago)".format(joined, joined_ago), inline=False)
-    embed.add_field(name="Created at", value="{} ({} ago)".format(created, created_ago), inline=False)
-
     roles = [r.name for r in user.roles if r.name != "@everyone"]
-    embed.add_field(name="Roles", value=('`' + '`, `'.join(roles) + '`'), inline=False)
+    roles = ('`' + '`, `'.join(roles) + '`') if roles else "None"
+
+    emb_fields = [("Full name", name, 0),
+                  ("Status", status, 0),
+                  ("Nickname", user.display_name, 0),
+                  ("Shared servers", shared, 0),
+                  ("Joined at", "{} ({} ago)".format(joined, joined_ago), 0),
+                  ("Created at", "{} ({} ago)".format(created, created_ago), 0),
+                  ("Roles", roles, 0)]
+    await ctx.emb_add_fields(embed, emb_fields)
     await ctx.reply(embed=embed)
 
 
@@ -92,19 +97,28 @@ async def cmd_userinfo(ctx):
           short_help="Searches for users with a given discrim")
 async def prim_cmd_discrim(ctx):
     """
-    Usage: {prefix}discrim [discriminator]
-
-    Searches all guilds the bot is in for users matching the given discriminator.
+    Usage:
+        {prefix}discrim [discriminator]
+    Description:
+        Searches all guilds the bot is in for users matching the given discriminator.
     """
     p = ctx.bot.get_all_members()
-    found_members = set(filter(lambda m: m.discriminator.endswith(ctx.args), p))
+    args = ctx.arg_str
+    if (len(args) > 4) or not args.isdigit():
+        await ctx.reply("You must give me at most four digits to find!")
+        return
+    discrim = "0"*(4-len(args)) + args
+    found_members = set(filter(lambda m: m.discriminator == discrim, p))
     if len(found_members) == 0:
         await ctx.reply("No users with this discrim found!")
         return
     user_info = [(str(m), "({})".format(m.id)) for m in found_members]
     max_len = len(max(list(zip(*user_info))[0], key=len))
     user_strs = ["{0[0]:^{max_len}} {0[1]:^25}".format(user, max_len=max_len) for user in user_info]
-    await ctx.reply("```asciidoc\n= Users found =\n{}\n```".format('\n'.join(user_strs)))
+    await ctx.reply("`{2}` user{1} found:```asciidoc\n= Users found =\n{0}\n```".format('\n'.join(user_strs),
+                                                                                        "s" if len(user_strs) > 1 else "",
+                                                                                        len(user_strs)))
+    # TODO: Make this splittable across codeblocks
 
 
 @cmds.cmd("piggybank",
@@ -112,12 +126,13 @@ async def prim_cmd_discrim(ctx):
           short_help="Keep track of money added towards a goal.")
 async def cmd_piggybank(ctx):
     """
-    Usage: {prefix}piggybank [+|- <amount>] | [list [clear]] | [goal <amount>|none]
-
-    [+|- <amount>]: Adds or removes an amount to your piggybank.
-    [list [clear]]: Sends you a DM with your previous transactions or clears your history.
-    [goal <amount>|none]: Sets your goal!
-    Or with no arguments, lists your current amount and progress to the goal.
+    Usage:
+        {prefix}piggybank [+|- <amount>] | [list [clear]] | [goal <amount>|none]
+    Description:
+        [+|- <amount>]: Adds or removes an amount to your piggybank.
+        [list [clear]]: Sends you a DM with your previous transactions or clears your history.
+        [goal <amount>|none]: Sets your goal!
+        Or with no arguments, lists your current amount and progress to the goal.
     """
     bank_amount = await ctx.data.users.get(ctx.authid, "piggybank_amount")
     transactions = await ctx.data.users.get(ctx.authid, "piggybank_history")
@@ -198,10 +213,11 @@ async def cmd_piggybank(ctx):
           short_help="Shows or sets a user setting")
 async def cmd_set(ctx):
     """
-    "Usage: {prefix}set [settingname [value]]
-
-    Sets <settingname> to <value>, shows the value of <settingname>, or lists your available settings.
-    Temporary implementation, more is coming soon!
+    Usage:
+        {prefix}set [settingname [value]]
+    Description:
+        Sets <settingname> to <value>, shows the value of <settingname>, or lists your available settings.
+        Temporary implementation, more is coming soon!
     """
     if ctx.arg_str == '':
         await ctx.reply("```timezone: Country/City, some short-hands are accepted, use ETC/+10 etc to set to GMT-10.```")
@@ -234,10 +250,11 @@ async def cmd_set(ctx):
 @cmds.execute("user_lookup", in_server=True)
 async def cmd_time(ctx):
     """
-    Usage: {prefix}time [mention | id | partial name]
-
-    Gives the time for the mentioned user or yourself.
-    Requires the user to have set the usersetting "timezone".
+    Usage:
+        {prefix}time [mention | id | partial name]
+    Description:
+        Gives the time for the mentioned user or yourself.
+        Requires the user to have set the usersetting "timezone".
     """
     if ctx.arg_str == "":
         user = ctx.author
@@ -273,13 +290,13 @@ async def cmd_time(ctx):
 @cmds.execute("user_lookup", in_server=True)
 async def cmd_profile(ctx):
     """
-    Usage: {prefix}profile [mention]
-
-    Displays the mentioned user's profile, or your own.
+    Usage:
+        {prefix}profile [user]
+    Description:
+        Displays the provided user's profile, or your own.
     """
-    if ctx.arg_str == "":
-        user = ctx.author
-    else:
+    user = ctx.author
+    if ctx.arg_str != "":
         user = ctx.objs["found_user"]
         if not user:
             await ctx.reply("I couldn't find any matching users in this server sorry!")
@@ -298,6 +315,7 @@ async def cmd_profile(ctx):
     created_ago = ctx.strfdelta(datetime.utcnow()-user.created_at)
     created = user.created_at.strftime("%-I:%M %p, %d/%m/%Y")
     rep = await ctx.data.users.get(user.id, "rep")
+
     embed = discord.Embed(type="rich", color=user.colour) \
         .set_author(name="{user} ({user.id})".format(user=user),
                     icon_url=user.avatar_url)
@@ -327,3 +345,62 @@ async def cmd_profile(ctx):
     await ctx.reply(embed=embed)
 
 
+@cmds.cmd(name="emoji",
+          category="Utility",
+          short_help="Displays info and enlarges a custom emoji")
+@cmds.execute("flags", flags=["e"])
+async def cmd_emoji(ctx):
+    """
+    Usage:
+        {prefix}emoji <emoji> [-e]
+    Description:
+        Displays some information about the provided custom emoji, and sends an enlarged version.
+        Built in emoji support is coming soon!
+    Flags:
+        -e:  (enlarge) Only shows the enlarged emoji, with no other info.
+    """
+    # TODO: Handle the case where a builtin emoji has the same name as a custom emoji
+    # Any way of testing whether an emoji from get is a builtin?
+    # Emojis with the same name are shown
+    id_str = 0
+    em_str = 0
+    emoji = None
+    embed = discord.Embed(title=None if ctx.flags["e"] else "Emoji info!", color=discord.Colour.light_grey())
+    if ctx.arg_str.endswith(">") and ctx.arg_str.startswith("<"):
+        id_str = ctx.arg_str[ctx.arg_str.rfind(":") + 1:-1]
+        if id_str.isdigit():
+            emoji = discord.utils.get(ctx.bot.get_all_emojis(), id=id_str)
+            if emoji is None:
+                link = "https://cdn.discordapp.com/emojis/{}.{}".format(id_str, "gif" if ctx.arg_str[1] == "a" else "png")
+                embed.set_image(url=link)
+                if not ctx.flags["e"]:
+                    emb_fields = [("Name", ctx.arg_str[ctx.arg_str.find(":") + 1:ctx.arg_str.rfind(":")], 0),
+                                  ("ID", id_str, 0),
+                                  ("Link", link, 0)]
+                    await ctx.emb_add_fields(embed, emb_fields)
+                try:
+                    await ctx.reply(None if ctx.flags["e"] else "I couldn't find the emoji in my servers, but here is what I have!", embed=embed)
+                except Exception:
+                    await ctx.reply("I couldn't understand or find the emoji in your message")
+                return
+    else:
+        em_str = ctx.arg_str.strip(":")
+        emoji = discord.utils.get(ctx.bot.get_all_emojis(), name=em_str)
+        if not emoji:
+            await ctx.reply("I couldn't understand or find the emoji in your message. Please note I cannot handle built in emojis at this time.")
+            return
+    embed.set_image(url=emoji.url)
+    if not ctx.flags["e"]:
+        created_ago = ctx.strfdelta(datetime.utcnow()-emoji.created_at)
+        created = emoji.created_at.strftime("%-I:%M %p, %d/%m/%Y")
+        same_emojis = filter(lambda e: (e.name == emoji.name) and (e != emoji), ctx.bot.get_all_emojis())
+        emoj_same_str = " ".join(map(str, same_emojis))
+        emb_fields = [("Name", emoji.name, 0),
+                      ("ID", emoji.id, 0),
+                      ("Link", emoji.url, 0),
+                      ("Originating server", emoji.server.name if emoji.server else "Built in", 0),
+                      ("Created at", "{}({} ago)".format(created, created_ago), 0)]
+        if emoj_same_str:
+            emb_fields.append(("Emojis I can see with the same name", emoj_same_str, 0))
+        await ctx.emb_add_fields(embed, emb_fields)
+    await ctx.reply(embed=embed)

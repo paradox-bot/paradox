@@ -17,12 +17,13 @@ async def cmd_shutdown(ctx):
 @cmds.require("master_perm")
 async def cmd_setgame(ctx):
     """
-    Usage: {prefix}setgame <status>
-
-    Sets my playing status to <status>, The following expansions are made:
-        $users$: Number of users I can see.
-        $servers$: Number of servers I am in.
-        $channels$: Number of channels I am in.
+    Usage:
+        {prefix}setgame <status>
+    Description:
+        Sets my playing status to <status>, The following expansions are made:
+            $users$: Number of users I can see.
+            $servers$: Number of servers I am in.
+            $channels$: Number of channels I am in.
     """
     status = await ctx.ctx_format(ctx.arg_str)
     await ctx.bot.change_presence(game=discord.Game(name=status))
@@ -35,9 +36,10 @@ async def cmd_setgame(ctx):
 @cmds.require("manager_perm")
 async def cmd_restart(ctx):
     """
-    Usage: {prefix}restart
-
-    Redeploys the bot from github.
+    Usage:
+        {prefix}restart
+    Description:
+        Redeploys the bot from github.
     """
     await ctx.reply("Restarting! Hold your horses...")
     msg = await ctx.run_sh('./Nanny/scripts/redeploy.sh')
@@ -89,9 +91,10 @@ async def cmd_blacklist(ctx):
 @cmds.require("master_perm")
 async def cmd_logs(ctx):
     """
-    Usage: {prefix}logs [number]
-
-    Sends the logfile or the last <number> lines of the log.
+    Usage:
+        {prefix}logs [number]
+    Description:
+        Sends the logfile or the last <number> lines of the log.
     """
     if ctx.arg_str == '':
         try:

@@ -1,6 +1,7 @@
 from paraCH import paraCH
 import discord
 import aiohttp
+import asyncio
 from datetime import datetime, timedelta
 
 cmds = paraCH()
@@ -11,12 +12,16 @@ cmds = paraCH()
           short_help="( ͡° ͜ʖ ͡°)")
 async def cmd_lenny(ctx):
     """
-    Usage: {prefix}lenny
-
-    Sends lenny ( ͡° ͜ʖ ͡°).
+    Usage:
+        {prefix}lenny
+    Description:
+        Sends lenny ( ͡° ͜ʖ ͡°).
     """
-    await ctx.bot.delete_message(ctx.message)
-    await ctx.reply('( ͡° ͜ʖ ͡°)')
+    try:
+        await ctx.bot.delete_message(ctx.msg)
+    except discord.Forbidden:
+        pass
+    await ctx.reply("( ͡° ͜ʖ ͡°)")
 
 
 @cmds.cmd("dog",
@@ -24,9 +29,10 @@ async def cmd_lenny(ctx):
           short_help="Sends a random dog image")
 async def cmd_dog(ctx):
     """
-    Usage: {prefix}dog
-
-    Replies with a random dog image!
+    Usage:
+        {prefix}dog
+    Description:
+        Replies with a random dog image!
     """
     async with aiohttp.get('http://random.dog/woof') as r:
         if r.status == 200:
@@ -42,18 +48,29 @@ async def cmd_dog(ctx):
 @cmds.cmd("cat",
           category="Fun Stuff",
           short_help="Sends a random cat image")
-async def cmd_cat(ctx):
+async def cmd_cat(ctx, recursion=0):
     """
-    Usage: {prefix}cat
-
-    Replies with a random cat image!
+    Usage:
+        {prefix}cat
+    Description:
+        Replies with a random cat image!
     """
     async with aiohttp.get('http://aws.random.cat/meow') as r:
         if r.status == 200:
             js = await r.json()
             embed = discord.Embed(title="Meow!", color=discord.Colour.light_grey())
             embed.set_image(url=js['file'])
-            await ctx.reply(embed=embed)
+            try:
+                await ctx.reply(embed=embed)
+                return
+            except Exception:
+                pass
+        else:
+            if recursion < 10:
+                asyncio.sleep(1)
+                await cmd_cat(ctx, recursion=recursion+1)
+                return
+        await ctx.reply("Sorry! The cats are too poweful right now. Please try again later!")
 
 
 @cmds.cmd("rep",
@@ -61,9 +78,13 @@ async def cmd_cat(ctx):
           short_help="Give reputation to a user")
 async def cmd_rep(ctx):
     """
-    Usage: {prefix}rep [mention] | rep stats
+    Usage:
+        {prefix}rep [mention]
+        {prefix}rep stats
+    Description:
+        Gives a reputation point to the mentioned user or shows your current reputation cooldown timer.
 
-    Gives a reputation point to the mentioned user or shows your current reputation cooldown timer.
+        With stats, shows how many times you have repped and your last rep time.
     """
     cooldown = 24*60*60
     now = datetime.utcnow()
