@@ -1,5 +1,6 @@
 import discord
 
+
 class Context:
     def __init__(self, **kwargs):
         self.cmd_err = (0, "")
@@ -67,7 +68,7 @@ class Context:
         prefix = self.bot.prefix
         return [prefix]
 
-    async def msg_split(self, msg, code=False, MAX_LEN = 1800):
+    async def msg_split(self, msg, code=False, MAX_LEN=1800):
         if code:
             msg = msg.strip("```")
         if len(msg) < MAX_LEN:
@@ -145,7 +146,6 @@ class MessageContext(Context):
             self.id = self.msg.id
             self.authid = self.author.id
 
-
     async def reply(self, message=None, embed=None, file_name=None, dm=False, **kwargs):
         """
         A wrapper for send used to reply to a message.
@@ -156,8 +156,10 @@ class MessageContext(Context):
             self.bot_err = (2, "Require channel for non dm reply")
             return None
 
-
         destination = self.author if dm else self.ch
+
+        if message and ("@everyone" in message):
+            message = "Couldn't reply since the message contained `@everyone`"
         try:
             return await self.send(destination, message=message, embed=embed, file_name=file_name, **kwargs)
         except discord.Forbidden as e:
@@ -184,7 +186,6 @@ class MessageContext(Context):
             self.cmd_err = (1, "")
             raise e
             return
-
 
     async def del_src(self):
         """
