@@ -62,7 +62,7 @@ async def cmd_config(ctx):
         await ctx.reply(msg)
     else:
         if ctx.params[0] not in serv_conf:
-            await ctx.reply("Unrecognised option! See `{0.used_prefix}config help` for all options.").format(ctx)
+            await ctx.reply("Unrecognised option! See `{0.used_prefix}config help` for all options.".format(ctx))
             return
         if len(ctx.params) == 1:
             op = ctx.params[0]
