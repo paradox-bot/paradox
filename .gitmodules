@@ -1,0 +1,3 @@
+[submodule "contextBot"]
+	path = contextBot
+	url = gitlab:Puerosola/pybot-ctx-CH.git
