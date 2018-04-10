@@ -4,6 +4,8 @@ from datetime import datetime
 from pytz import timezone
 import iso8601
 import traceback
+import string
+import aiohttp
 
 
 cmds = paraCH()
@@ -405,3 +407,40 @@ async def cmd_emoji(ctx):
             emb_fields.append(("Emojis I can see with the same name", emoj_same_str, 0))
         await ctx.emb_add_fields(embed, emb_fields)
     await ctx.reply(embed=embed)
+
+
+@cmds.cmd(name="colour",
+          category="Utility",
+          short_help="Displays information about a colours",
+          aliases=["color"])
+async def cmd_colour(ctx):
+    """
+    Usage:
+        {prefix}colour <hexvalue>
+    Description:
+        Displays some detailed information about the colour, including a picture.
+    Examples:
+        {prefix}colour #0047AB
+        {prefix}colour 0047AB
+    """
+    # TODO: Support for names, rgb etc as well
+    hexstr = ctx.arg_str.strip("#")
+    if not (len(hexstr) == 6 or all(c in string.hexdigits for c in hexstr)):
+        await ctx.reply("Please give me a valid hex colour (e.g. #0047AB)")
+        return
+    fetchstr = "http://thecolorapi.com/id?hex={}&format=json".format(hexstr)
+    async with aiohttp.get(fetchstr) as r:
+        if r.status == 200:
+            js = await r.json()
+            embed = discord.Embed(title="Colour info for `#{}`".format(hexstr), color=discord.Colour(int(hexstr, 16)))
+            embed.set_thumbnail(url="http://placehold.it/150x150.png/{}/000000?text={}".format(hexstr, js["name"]["value"]))
+            embed.add_field(name="Closest named colour", value="`{}` (Hex `{}`)".format(js["name"]["value"], js["name"]["closest_named_hex"]))
+            embed.add_field(name="Values", value="```\n{}\n{}\n{}\n{}\n{}\n```".format(js["rgb"]["value"],
+                                                                                       js["hsl"]["value"],
+                                                                                       js["hsv"]["value"],
+                                                                                       js["cmyk"]["value"],
+                                                                                       js["XYZ"]["value"]))
+            await ctx.reply(embed=embed)
+        else:
+            await ctx.reply("Sorry, something went wrong while fetching your colour! Please try again later")
+            return
