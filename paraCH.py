@@ -12,8 +12,24 @@ class paraCH(CommandHandler):
     priority = 1
     CmdCls = paraCMD
 
+    def __init__(self):
+        super().__init__()
+        self.raw_cmds = {}  # The raw command listing, with no aliases
+
     async def before_exec(self, ctx):
         if ctx.author.bot:
             ctx.cmd_err = (1, "")
         if int(ctx.authid) in ctx.bot.bot_conf.getintlist("blacklisted_users"):
             ctx.cmd_err = (1, "")
+
+    def build_cmd(self, name, func, aliases=[], **kwargs):
+        cmd = super().build_cmd(name, func, aliases=aliases, **kwargs)
+        self.raw_cmds[name] = cmd
+        for alias in aliases:
+            self.cmds[alias] = cmd
+        return cmd
+
+    def append(self, CH):
+        super().append(CH)
+        self.raw_cmds.update(CH.raw_cmds)
+

@@ -16,7 +16,8 @@ async def cmd_help(ctx):
     """
     help_keys = {"prefix": ctx.used_prefix}
     msg = ""
-    commands = await ctx.get_cmds()  # Should probably be cached from ctx init
+    all_commands = await ctx.get_cmds()  # Should probably be cached from ctx init
+    commands = await ctx.get_raw_cmds()
     sorted_cats = ctx.bot.objects["sorted cats"]
     if ctx.arg_str == "":
         cat_msgs = {}
@@ -37,10 +38,12 @@ async def cmd_help(ctx):
         return
     else:
         for cmd in ctx.params:
-            if cmd in commands:
+            if cmd in all_commands:
+                command = all_commands[cmd]
+                cmd = command.name
                 embed = discord.Embed(type="rich", color=discord.Colour.teal(), title="Help for `{}`".format(cmd))
                 emb_fields = []
-                fields = commands[cmd].help_fields
+                fields = command.help_fields
                 if len(fields) == 0:
                     msg += "Sorry, no help has been written for the command {} yet!".format(cmd)
                     continue
@@ -65,7 +68,7 @@ async def cmd_list(ctx):
     """
     sorted_cats = ctx.bot.objects["sorted cats"]
     cats = {}
-    commands = await ctx.get_cmds()
+    commands = await ctx.get_raw_cmds()
     for cmd in sorted(commands):
         command = commands[cmd]
         cat = command.category if command.category else "Misc"

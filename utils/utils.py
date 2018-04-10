@@ -136,3 +136,11 @@ def load_into(bot):
     async def emb_add_fields(ctx, embed, emb_fields):
         for field in emb_fields:
             embed.add_field(name=str(field[0]), value=str(field[1]), inline=bool(field[2]))
+
+    @bot.util
+    async def get_raw_cmds(ctx):
+        handlers = ctx.bot.handlers
+        cmds = {}
+        for CH in handlers:
+            cmds = dict(cmds, **(CH.raw_cmds))
+        return cmds

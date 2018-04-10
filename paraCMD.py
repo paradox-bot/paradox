@@ -4,9 +4,10 @@ import textwrap
 
 
 class paraCMD(Command):
-    def __init__(self, name, func, CH, **kwargs):
+    def __init__(self, name, func, CH, aliases=[], **kwargs):
         super().__init__(name, func, CH, **kwargs)
         self.parse_help()
+        self.aliases = aliases
 
     def parse_help(self):
         lines = self.long_help.split("\n")

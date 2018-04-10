@@ -4,7 +4,7 @@ from paraCH import paraCH
 cmds = paraCH()
 
 
-@cmds.cmd("test")
+@cmds.cmd("test", aliases=["testy", "tst"])
 @cmds.execute("flags", flags=["please", "c=="])
 async def cmd_test(ctx):
     """
