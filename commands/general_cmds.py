@@ -85,7 +85,8 @@ async def cmd_feedback(ctx):
 
 @cmds.cmd("cheatreport",
           category="General",
-          short_help="Reports a user for cheating with rep/level/xp.")
+          short_help="Reports a user for cheating with rep/level/xp.",
+          aliases=["cr"])
 @cmds.execute("flags", flags=["e=="])
 async def cmd_cr(ctx):
     """

@@ -41,7 +41,8 @@ async def cmd_help(ctx):
             if cmd in all_commands:
                 command = all_commands[cmd]
                 cmd = command.name
-                embed = discord.Embed(type="rich", color=discord.Colour.teal(), title="Help for `{}`".format(cmd))
+                alias_str = "(alias{} `{}`)".format("es" if len(command.aliases) > 1 else "", "`, `".join(command.aliases)) if command.aliases else ""
+                embed = discord.Embed(type="rich", color=discord.Colour.teal(), title="Help for `{}` {}".format(cmd, alias_str))
                 emb_fields = []
                 fields = command.help_fields
                 if len(fields) == 0:

@@ -347,7 +347,8 @@ async def cmd_profile(ctx):
 
 @cmds.cmd(name="emoji",
           category="Utility",
-          short_help="Displays info and enlarges a custom emoji")
+          short_help="Displays info and enlarges a custom emoji",
+          aliases=["e"])
 @cmds.execute("flags", flags=["e"])
 async def cmd_emoji(ctx):
     """
