@@ -372,12 +372,12 @@ async def cmd_emoji(ctx):
         if id_str.isdigit():
             emoji = discord.utils.get(ctx.bot.get_all_emojis(), id=id_str)
             if emoji is None:
-                link = "[Click me](https://cdn.discordapp.com/emojis/{}.{})".format(id_str, "gif" if ctx.arg_str[1] == "a" else "png")
+                link = "https://cdn.discordapp.com/emojis/{}.{}".format(id_str, "gif" if ctx.arg_str[1] == "a" else "png")
                 embed.set_image(url=link)
                 if not ctx.flags["e"]:
                     emb_fields = [("Name", ctx.arg_str[ctx.arg_str.find(":") + 1:ctx.arg_str.rfind(":")], 0),
                                   ("ID", id_str, 0),
-                                  ("Link", link, 0)]
+                                  ("Link", "[Click me](" + link + ")", 0)]
                     await ctx.emb_add_fields(embed, emb_fields)
                 try:
                     await ctx.reply(None if ctx.flags["e"] else "I couldn't find the emoji in my servers, but here is what I have!", embed=embed)
