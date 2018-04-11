@@ -433,7 +433,7 @@ async def cmd_colour(ctx):
         if r.status == 200:
             js = await r.json()
             embed = discord.Embed(title="Colour info for `#{}`".format(hexstr), color=discord.Colour(int(hexstr, 16)))
-            embed.set_thumbnail(url="http://placehold.it/150x150.png/{}/000000?text={}".format(hexstr, js["name"]["value"]))
+            embed.set_thumbnail(url="http://placehold.it/150x150.png/{}/000000?text={}".format(hexstr, hexstr))
             embed.add_field(name="Closest named colour", value="`{}` (Hex `{}`)".format(js["name"]["value"], js["name"]["closest_named_hex"]))
             embed.add_field(name="Values", value="```\n{}\n{}\n{}\n{}\n{}\n```".format(js["rgb"]["value"],
                                                                                        js["hsl"]["value"],
