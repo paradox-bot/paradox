@@ -5,7 +5,7 @@ cmds = paraCH()
 
 
 @cmds.cmd("config",
-          category="Server setup",
+          category="Server Admin",
           short_help="Server configuration")
 @cmds.require("in_server")
 async def cmd_config(ctx):
@@ -78,7 +78,7 @@ async def cmd_config(ctx):
 
 
 @cmds.cmd("rmrole",
-          category="Server setup",
+          category="Server Admin",
           short_help="Deletes a role")
 @cmds.require("has_manage_server")
 async def cmd_rmrole(ctx):

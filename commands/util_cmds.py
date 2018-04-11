@@ -411,7 +411,7 @@ async def cmd_emoji(ctx):
 
 @cmds.cmd(name="colour",
           category="Utility",
-          short_help="Displays information about a colours",
+          short_help="Displays information about a colour",
           aliases=["color"])
 async def cmd_colour(ctx):
     """
@@ -444,3 +444,67 @@ async def cmd_colour(ctx):
         else:
             await ctx.reply("Sorry, something went wrong while fetching your colour! Please try again later")
             return
+
+
+@cmds.cmd(name="roleinfo",
+          category="Utility",
+          short_help="Displays information about a role",
+          aliases=["role"])
+@cmds.require("in_server")
+async def cmd_role(ctx):
+    """
+    Usage:
+        {prefix}roleinfo <rolename>
+    Description:
+        Provides information about the given role.
+    """
+    if ctx.arg_str.strip() == "":
+        await ctx.reply("You must give me a role!")
+        return
+    # TODO: Letting find_role handle all input and output for finding.
+    role = await ctx.find_role(ctx.arg_str, create=False, interactive=True)
+    if role is None:
+        return
+    title = "Roleinfo for `{role.name}` (id: `{role.id}`)".format(role=role)
+    colour = str(role.colour) if role.colour.value else str(discord.Colour.light_grey())
+#    thumbnail = "http://placehold.it/150x150.png/{}/000000?text={}".format(colour.strip("#"), colour)
+    num_users = len([user for user in ctx.server.members if (role in user.roles)])
+    created_ago = ctx.strfdelta(datetime.utcnow()-role.created_at)
+    created = role.created_at.strftime("%-I:%M %p, %d/%m/%Y")
+    created_at = "{} ({} ago)".format(created, created_ago)
+    hoisted = "Yes" if role.hoist else "No"
+    mentionable = "Yes" if role.mentionable else "No"
+
+    pos = role.position
+    server_roles = sorted(ctx.server.roles, key=lambda role: role.position)
+    position = "```\n"
+    for i in range(-3,4):
+        line_pos = pos + i
+        if line_pos < 0:
+            continue
+        if line_pos >= len(server_roles):
+            break
+        position += "{0:<4}{1}{2:<20}\n".format(str(line_pos)+".", " " * 4 + (">" if i == 0 else " "), str(server_roles[line_pos]))
+    position += "```"
+    if role > ctx.author.top_role:
+        diff_str = "(Higher than your highest role)"
+    elif role < ctx.author.top_role:
+        diff_str = "(Lower than your highest role)"
+    elif role == ctx.author.top_role:
+        diff_str = "(This is your highest role!)"
+    position += diff_str
+
+    embed = discord.Embed(title=title, colour=role.colour)
+#    embed.set_thumbnail(url=thumbnail)
+    emb_fields = [("Colour", colour, 0),
+                  ("Created at", created_at, 0),
+                  ("Hoisted", hoisted, 0),
+                  ("Mentionable", mentionable, 0),
+                  ("Number of members", num_users, 0),
+                  ("Position in the heirachy", position, 0)]
+    await ctx.emb_add_fields(embed, emb_fields)
+    await ctx.reply(embed=embed)
+
+
+
+
