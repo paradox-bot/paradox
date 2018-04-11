@@ -478,12 +478,12 @@ async def cmd_role(ctx):
     pos = role.position
     server_roles = sorted(ctx.server.roles, key=lambda role: role.position)
     position = "```\n"
-    for i in range(-3,4):
+    for i in reversed(range(-3,4)):
         line_pos = pos + i
         if line_pos < 0:
-            continue
-        if line_pos >= len(server_roles):
             break
+        if line_pos >= len(server_roles):
+            continue
         position += "{0:<4}{1}{2:<20}\n".format(str(line_pos)+".", " " * 4 + (">" if i == 0 else " "), str(server_roles[line_pos]))
     position += "```"
     if role > ctx.author.top_role:
@@ -494,9 +494,9 @@ async def cmd_role(ctx):
         diff_str = "(This is your highest role!)"
     position += diff_str
 
-    embed = discord.Embed(title=title, colour=role.colour)
+    embed = discord.Embed(title=title, colour=role.colour if role.colour.value else discord.Colour.light_grey())
 #    embed.set_thumbnail(url=thumbnail)
-    emb_fields = [("Colour", colour, 0),
+    emb_fields = [("Colour", role.colour, 0),
                   ("Created at", created_at, 0),
                   ("Hoisted", hoisted, 0),
                   ("Mentionable", mentionable, 0),
