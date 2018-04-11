@@ -24,6 +24,57 @@ async def cmd_echo(ctx):
     await ctx.reply(ctx.arg_str if ctx.arg_str else "I can't send an empty message!")
 
 
+@cmds.cmd("quote",
+          category="Utility",
+          short_help="Quotes a message by id")
+@cmds.execute("flags", flags=["a"])
+@cmds.require("in_server")
+async def cmd_quote(ctx):
+    """
+    Usage:
+        {prefix}quote <messageid> [-a]
+    Description:
+        Replies with the specified message in an embed.
+        Note that the message must be from the same server.
+    Flags:
+        -a:  (anonymous) Removes author information from the quote.
+    """
+    msgid = ctx.arg_str
+    if msgid == "" or not msgid.isdigit():
+        await ctx.reply("Please provide a valid message id")
+        return
+    message = None
+    try:
+        message = await ctx.bot.get_message(ctx.ch, msgid)
+    except Exception:
+        pass
+    for channel in ctx.server.channels:
+        if message:
+            break
+        if channel.type != discord.ChannelType.text:
+            continue
+        if channel == ctx.ch:
+            continue
+        try:
+            message = await ctx.bot.get_message(channel, msgid)
+        except Exception:
+            pass
+    if not message:
+        await ctx.reply("Couldn't find the message!")
+        return
+    embed = discord.Embed(colour=discord.Colour.light_grey())
+    if not ctx.flags["a"]:
+        embed.set_author(name="{user.name}".format(user=message.author),
+                        icon_url=message.author.avatar_url)
+    embed.set_footer(text=message.timestamp.strftime("Sent at %-I:%M %p, %d/%m/%Y in #{}".format(message.channel.name)))
+    if message.content:
+        embed.add_field(name="Message", value=message.content)
+    if message.attachments:
+        embed.set_image(url=message.attachments[0]["proxy_url"])
+    await ctx.reply(embed=embed)
+
+
+
 @cmds.cmd("secho",
           category="Utility",
           short_help="Like echo but deletes.")

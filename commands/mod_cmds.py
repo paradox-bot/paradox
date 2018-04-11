@@ -366,10 +366,10 @@ async def cmd_giverole(ctx):
                 else:
                     await ctx.bot.remove_roles(user, role[1])
                     user_lines[i] += "{}`-{}`".format("" if started else ", ", role[1].name)
-            except Exception:
+            except discord.Forbidden:
                 if not error_lines:
                     error_lines = "\nErrors:\n"
-                error_lines += ("\tFailed to {} `{}`.\n".format("add role `{}` to".format(role[1].name) if role[0] > 0 else "remove role `{}` from".format(role[1].name), user))
+                error_lines += ("\tI don't have permissions to {} `{}`!\n".format("add role `{}` to".format(role[1].name) if role[0] > 0 else "remove role `{}` from".format(role[1].name), user))
                 await asyncio.sleep(1)
             await ctx.bot.edit_message(out_msg, "{}{}{}".format(intro, "\n".join(user_lines), error_lines))
 
