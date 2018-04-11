@@ -1,6 +1,7 @@
 from paraCH import paraCH
 import discord
 from datetime import datetime
+import asyncio
 
 cmds = paraCH()
 
@@ -281,6 +282,96 @@ async def cmd_kick(ctx):
     strings["results"] = {0: "🔨 Kicked `{user.name}`!",
                           1: "🚨 Failed to kick `{user.name}`! (Insufficient Permissions)"}
     await multi_mod_action(ctx, ctx.params, action_func, strings, reason)
+
+
+@cmds.cmd("giverole",
+          category="Moderation",
+          short_help="Give or take role(s) from member(s)",
+          aliases=["gr"])
+@cmds.require("in_server")
+@cmds.require("has_manage_server")
+async def cmd_giverole(ctx):
+    """
+    Usage:
+        {prefix}giverole <user1> [user2] [user3]... <+|->role1 [<+|->role2]...
+    Description:
+        Modifies the specified user(s) roles.
+        All listed roles must be prefixed with + or -, the roles with + will be added and the roles with - will be removed.
+    Example:
+        {prefix}gr Para +Bots -Member
+    """
+    users = []
+    roles = []
+    n = len(ctx.params)
+    i = 0
+    while i < n:
+        param = ctx.params[i]
+        if param.strip() == "":
+            i += 1
+            continue
+        if param.startswith("+") or param.startswith("-"):
+            if len(param) == 1:
+                if i < n - 1:
+                    obj = ctx.params[i+1]
+                    i += 1
+                else:
+                    break
+            else:
+                obj = param[1:]
+            role = await ctx.find_role(obj, create=True, interactive=True)
+            if role is None:
+                return
+            roles.append((1 if param.startswith("+") else -1, role))
+        else:
+            users.append(param)
+        i += 1
+    if len(users) == 0:
+        await ctx.reply("No users were given, nothing to do!")
+        return
+    if len(roles) == 0:
+        await ctx.reply("No valid roles were given, nothing to do!")
+        return
+    error_lines = ""
+    intro = "Modifying roles...\n"
+    real_users = []
+    user_lines = []
+    n = len(users)
+    out_msg = await ctx.reply(intro)
+    for role in roles:
+        for i in range(n):
+            started = False
+            if i >= len(real_users):
+                started = True
+                user_lines.append("\tIdentifying `{}`".format(users[i]))
+                await ctx.bot.edit_message(out_msg, "{}{}{}".format(intro, "\n".join(user_lines), error_lines))
+                user = await ctx.find_user(users[i], in_server=True, interactive=True)
+                real_users.append(user)
+                if user is None:
+                    if ctx.cmd_err[0] != -1:
+                        user_lines[i] = "\t⚠ Couldn't find user `{}`, skipping".format(users[i])
+                    else:
+                        user_lines[i] = "\t🗑 User selection aborted for `{}`, skipping".format(users[i])
+                        ctx.cmd_err = (0, "")
+                    await ctx.bot.edit_message(out_msg, "{}{}{}".format(intro, "\n".join(user_lines), error_lines))
+                    continue
+            if real_users[i] is None:
+                continue
+            user = real_users[i]
+            if started:
+                user_lines[i] = "\tModified user `{}` with: ".format(user)
+            try:
+                if role[0] > 0:
+                    await ctx.bot.add_roles(user, role[1])
+                    user_lines[i] += "{}`+{}`".format("" if started else ", ", role[1].name)
+                else:
+                    await ctx.bot.remove_roles(user, role[1])
+                    user_lines[i] += "{}`-{}`".format("" if started else ", ", role[1].name)
+            except Exception:
+                if not error_lines:
+                    error_lines = "\nErrors:\n"
+                error_lines += ("\tFailed to {} `{}`.\n".format("add role `{}` to".format(role[1].name) if role[0] > 0 else "remove role `{}` from".format(role[1].name), user))
+                await asyncio.sleep(1)
+            await ctx.bot.edit_message(out_msg, "{}{}{}".format(intro, "\n".join(user_lines), error_lines))
 
 
 '''
