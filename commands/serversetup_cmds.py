@@ -119,7 +119,7 @@ async def cmd_rmrole(ctx):
           short_help="Create or edit a server role.",
           aliases=["erole", "roleedit", "roledit", "editr"])
 @cmds.require("has_manage_server")
-@cmds.execute("flags", flags=["colour=", "color=", "name==", "perm==", "hoist=", "mention=", "position=="])
+@cmds.execute("flags", flags=["colour=", "color=", "name==", "perm==", "hoist=", "mention=", "pos=="])
 async def cmd_editrole(ctx):
     """
     Usage:
@@ -128,14 +128,15 @@ async def cmd_editrole(ctx):
         Modifies the specified role, either interactively (WIP), or using the provided flags (see below).
         This may also be used to create a role.
     Flags:
-        --colour/--color <hex value>:  Change the colour of the role
+        --colour/--color <hex value>:  Change the colour
         --name <name>:  Change the name
         --perm <permission>: Add or remove a permission (WIP)
-        --hoist <on/off>: Whether the role is hoisted
-        --mention <on/off>: Whether the role is mentionable
-        --position < number | up | down | above <role> | below <role> >: Move the role in the heirachy (WIP)
+        --hoist <on/off>: Hoist or unhoist the role
+        --mention <on/off>: Make the role mentionable, or not
+        --pos < number | up | down | above <role> | below <role> >: Move the role in the heirachy (WIP)
     Examples:
-        {prefix}erole Member --colour #0047AB --name Noob --hoist on --mention on
+        {prefix}erole Member --colour #0047AB --name Noob
+        {prefix}erole Regular --pos above Member
     """
     role = await ctx.find_role(ctx.arg_str, create=True, interactive=True)
     if role is None:
@@ -145,7 +146,7 @@ async def cmd_editrole(ctx):
     if role >= ctx.me.top_role:
         await ctx.reply("The role specified is above or equal to my top role, aborting.")
         return
-    if not (ctx.flags["colour"] or ctx.flags["color"] or ctx.flags["name"] or ctx.flags["perm"] or ctx.flags["hoist"] or ctx.flags["mention"] or ctx.flags["position"]):
+    if not (ctx.flags["colour"] or ctx.flags["color"] or ctx.flags["name"] or ctx.flags["perm"] or ctx.flags["hoist"] or ctx.flags["mention"] or ctx.flags["pos"]):
         await ctx.reply("Interactive role editing is a work in progress, please check back later!")
         return
     if ctx.flags["colour"] or ctx.flags["color"]:
@@ -166,7 +167,7 @@ async def cmd_editrole(ctx):
         elif ctx.flags["hoist"].lower() in ["disable", "no", "off"]:
             hoist = False
         else:
-            await ctx.reply("I don't understand your hoist argument! Please use on/off.")
+            await ctx.reply("I don't understand your argument to --hoist! See the help for usage.")
             return
         edits["hoist"] = hoist
     if ctx.flags["mention"]:
@@ -175,12 +176,12 @@ async def cmd_editrole(ctx):
         elif ctx.flags["mention"].lower() in ["disable", "no", "off"]:
             mention = False
         else:
-            await ctx.reply("I don't understand your mention argument! Please use on/off.")
+            await ctx.reply("I don't understand your argument to --mention! See the help for usage.")
             return
         edits["mentionable"] = mention
     position = None
-    if ctx.flags["position"]:
-        pos_flag = ctx.flags["position"]
+    if ctx.flags["pos"]:
+        pos_flag = ctx.flags["pos"]
         if pos_flag.isdigit():
             position = int(pos_flag)
         elif pos_flag.lower() == "up":
@@ -193,6 +194,8 @@ async def cmd_editrole(ctx):
         elif pos_flag.startswith("below"):
             target_role = await ctx.find_role((' '.join(pos_flag.split(' ')[1:])).strip(), create=False, interactive=True)
             position = target_role.position
+        else:
+            await ctx.reply("I didn't understand your argument to --pos. See the help for usage.")
 #    msg = ""
     if position is not None:
         if position > ctx.me.top_role.position:
