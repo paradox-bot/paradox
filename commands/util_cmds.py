@@ -425,15 +425,16 @@ async def cmd_colour(ctx):
     """
     # TODO: Support for names, rgb etc as well
     hexstr = ctx.arg_str.strip("#")
-    if not (len(hexstr) == 6 or all(c in string.hexdigits for c in hexstr)):
+    if not (len(hexstr) == 6 and all(c in string.hexdigits for c in hexstr)):
         await ctx.reply("Please give me a valid hex colour (e.g. #0047AB)")
         return
     fetchstr = "http://thecolorapi.com/id?hex={}&format=json".format(hexstr)
     async with aiohttp.get(fetchstr) as r:
         if r.status == 200:
             js = await r.json()
+            inverted = col_invert(hexstr)
             embed = discord.Embed(title="Colour info for `#{}`".format(hexstr), color=discord.Colour(int(hexstr, 16)))
-            embed.set_thumbnail(url="http://placehold.it/150x150.png/{}/000000?text={}".format(hexstr, hexstr))
+            embed.set_thumbnail(url="http://placehold.it/150x150.png/{}/{}?text={}".format(hexstr, inverted, "%23"+hexstr))
             embed.add_field(name="Closest named colour", value="`{}` (Hex `{}`)".format(js["name"]["value"], js["name"]["closest_named_hex"]))
             embed.add_field(name="Values", value="```\n{}\n{}\n{}\n{}\n{}\n```".format(js["rgb"]["value"],
                                                                                        js["hsl"]["value"],
@@ -445,6 +446,9 @@ async def cmd_colour(ctx):
             await ctx.reply("Sorry, something went wrong while fetching your colour! Please try again later")
             return
 
+def col_invert(color_to_convert):
+    table = str.maketrans('0123456789abcdef', 'fedcba9876543210')
+    return color_to_convert.lower().translate(table).upper()
 
 @cmds.cmd(name="roleinfo",
           category="Utility",
