@@ -1,5 +1,6 @@
 import discord
 
+
 def load_into(bot):
     @bot.util
     async def find_user(ctx, user_str, in_server=False, interactive=False, limit=20):
@@ -47,7 +48,6 @@ def load_into(bot):
     async def create_role(ctx, name):
         pass
 
-
     @bot.util
     async def find_role(ctx, userstr, create=False, interactive=False):
         if not ctx.server:
@@ -61,7 +61,7 @@ def load_into(bot):
             if len(roles) == 0:
                 role = None
             else:
-                selected = await ctx.selector("Multiple roles found! Please select one.",
+                selected = await ctx.selector("Multiple roles found matching `{}`! Please select one.".format(userstr),
                                               [role.name for role in roles])
                 if selected is None:
                     return None
@@ -86,4 +86,3 @@ def load_into(bot):
                 await ctx.bot.delete_message(msg)
                 return role
             return None
-

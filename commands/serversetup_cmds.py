@@ -1,5 +1,6 @@
 from paraCH import paraCH
 import discord
+import string
 
 cmds = paraCH()
 
@@ -111,3 +112,108 @@ async def cmd_rmrole(ctx):
         await ctx.reply("Sorry, I am not able to delete that role!")
         return
     await ctx.reply("Successfully deleted the role!")
+
+
+@cmds.cmd("editrole",
+          category="Server Admin",
+          short_help="Create or edit a server role.",
+          aliases=["erole", "roleedit", "roledit", "editr"])
+@cmds.require("has_manage_server")
+@cmds.execute("flags", flags=["colour=", "color=", "name==", "perm==", "hoist=", "mention=", "position=="])
+async def cmd_editrole(ctx):
+    """
+    Usage:
+        {prefix}editrole <rolename> [flags]
+    Description:
+        Modifies the specified role, either interactively (WIP), or using the provided flags (see below).
+        This may also be used to create a role.
+    Flags:
+        --colour/--color <hex value>:  Change the colour of the role
+        --name <name>:  Change the name
+        --perm <permission>: Add or remove a permission (WIP)
+        --hoist <on/off>: Whether the role is hoisted
+        --mention <on/off>: Whether the role is mentionable
+        --position < number | up | down | above <role> | below <role> >: Move the role in the heirachy (WIP)
+    Examples:
+        {prefix}erole Member --colour #0047AB --name Noob --hoist on --mention on
+    """
+    role = await ctx.find_role(ctx.arg_str, create=True, interactive=True)
+    if role is None:
+        return
+    edits = {}
+    ctx.me = ctx.server.me  # Not actually required, just due to a bug in contextBot TODO
+    if role >= ctx.me.top_role:
+        await ctx.reply("The role specified is above or equal to my top role, aborting.")
+        return
+    if not (ctx.flags["colour"] or ctx.flags["color"] or ctx.flags["name"] or ctx.flags["perm"] or ctx.flags["hoist"] or ctx.flags["mention"] or ctx.flags["position"]):
+        await ctx.reply("Interactive role editing is a work in progress, please check back later!")
+        return
+    if ctx.flags["colour"] or ctx.flags["color"]:
+        colour = ctx.flags["colour"] if ctx.flags["colour"] else ctx.flags["color"]
+        hexstr = colour.strip("#")
+        if not (len(hexstr) == 6 or all(c in string.hexdigits for c in hexstr)):
+            await ctx.reply("Please provide a valid hex colour (e.g. #0047AB)")
+            return
+        edits["colour"] = discord.Colour(int(hexstr, 16))
+    if ctx.flags["name"]:
+        edits["name"] = ctx.flags["name"]
+    if ctx.flags["perm"]:
+        await ctx.reply("Sorry, perm modification is a work in progress. Please check back later!")
+        return
+    if ctx.flags["hoist"]:
+        if ctx.flags["hoist"].lower() in ["enable", "yes", "on"]:
+            hoist = True
+        elif ctx.flags["hoist"].lower() in ["disable", "no", "off"]:
+            hoist = False
+        else:
+            await ctx.reply("I don't understand your hoist argument! Please use on/off.")
+            return
+        edits["hoist"] = hoist
+    if ctx.flags["mention"]:
+        if ctx.flags["mention"].lower() in ["enable", "yes", "on"]:
+            mention = True
+        elif ctx.flags["mention"].lower() in ["disable", "no", "off"]:
+            mention = False
+        else:
+            await ctx.reply("I don't understand your mention argument! Please use on/off.")
+            return
+        edits["mentionable"] = mention
+    position = None
+    if ctx.flags["position"]:
+        pos_flag = ctx.flags["position"]
+        if pos_flag.isdigit():
+            position = int(pos_flag)
+        elif pos_flag.lower() == "up":
+            position = role.position + 1
+        elif pos_flag.lower() == "down":
+            position = role.position - 1
+        elif pos_flag.startswith("above"):
+            target_role = await ctx.find_role((' '.join(pos_flag.split(' ')[1:])).strip(), create=False, interactive=True)
+            position = target_role.position + 1
+        elif pos_flag.startswith("below"):
+            target_role = await ctx.find_role((' '.join(pos_flag.split(' ')[1:])).strip(), create=False, interactive=True)
+            position = target_role.position
+#    msg = ""
+    if position is not None:
+        if position > ctx.me.top_role.position:
+            await ctx.reply("The target position is above me! Aborting")
+            return
+        if position == 0:
+            await ctx.reply("Can't move a role to position 0, aborting.")
+            return
+        try:
+            await ctx.bot.move_role(ctx.server, role, position)
+#            msg += "Moved role to position {}!".format(
+        except discord.Forbidden as e:
+            await ctx.reply("I do not have enough perms to move the role!")
+            return
+        except discord.HTTPException as e:
+            await ctx.reply("Something went wrong while moving the role! Possibly I am of too low a rank.")
+            return
+    if edits:
+        try:
+            await ctx.bot.edit_role(ctx.server, role, **edits)
+        except discord.Forbidden as e:
+            await ctx.reply("I don't have enough permissions to make the specified edits.")
+            return
+    await ctx.reply("The role was modified successfully!")
