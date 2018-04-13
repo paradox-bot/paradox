@@ -7,12 +7,14 @@ class BOOL(paraSetting):
     """
     A sort of boolean type, more like a wrapper for a boolean.
     """
-    accept = "Yes/No, True/False, Enabled/Disabled"
+    accept = "Yes/No, On/Off, True/False, Enabled/Disabled"
     inputexps = {"^yes$": True,
                  "^true$": True,
+                 "^on$": True,
                  "^enabled?$": True,
                  "^no$": False,
                  "^false$": False,
+                 "^off$": True,
                  "^disabled?$": False}
     outputs = {True: "",
                False: ""}
