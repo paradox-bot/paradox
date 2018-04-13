@@ -41,7 +41,7 @@ def load_into(bot):
             for serv in servers:
                 if serv == server:
                     continue
-                if member in server.members:
+                if member in serv.members:
                     known += 1
                     break
                 unknown += 1
