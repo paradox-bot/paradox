@@ -38,12 +38,15 @@ def load_into(bot):
             if member.bot:
                 bots += 1
                 continue
+            k = False
             for serv in servers:
                 if serv == server:
                     continue
                 if member in serv.members:
                     known += 1
+                    k = True
                     break
+            if not k:
                 unknown += 1
 
         mem1 = "people I know" if known != 1 else "person I know"
