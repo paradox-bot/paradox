@@ -25,6 +25,7 @@ async def cmd_setgame(ctx):
             $servers$: Number of servers I am in.
             $channels$: Number of channels I am in.
     """
+    ctx.bot.objects["GAME"] = ctx.arg_str
     status = await ctx.ctx_format(ctx.arg_str)
     await ctx.bot.change_presence(game=discord.Game(name=status))
     await ctx.reply("Game changed to: \'{}\'".format(status))

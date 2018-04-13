@@ -188,23 +188,7 @@ async def cmd_serverinfo(ctx):
     Description:
         Shows information about the server you are in.
     """
-    regions = {
-        "brazil": "Brazil",
-        "eu-central": "Central Europe",
-        "hongkong": "Hong Kong",
-        "japan": "Japan",
-        "russia": "Russia",
-        "singapore": "Singapore",
-        "sydney": "Sydney",
-        "us-central": "Central United States",
-        "us-east": "Eastern United States",
-        "us-south": "Southern United States",
-        "us-west": "Western United States",
-        "eu-west": "Western Europe",
-        "vip-amsterdam": "Amsterdam (VIP)",
-        "vip-us-east": "Eastern United States (VIP)"
-    }
-
+    regions = ctx.bot.objects["regions"]
     ver = {
         "none": "None",
         "low": "1 - Must have a verified email",

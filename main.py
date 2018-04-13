@@ -24,8 +24,10 @@ PREFIX = conf.get("PREFIX")
 
 CHEAT_CH = "429507856908419074"
 FEEDBACK_CH = "429514404418289684"
+BOT_LOG_CH = "426655650706096129"
 
 LOG_CHANNEL = "428159039831146506"
+
 
 LOGFILE = "logs/paralog.log"
 LOGFILE_LAST = "logs/paralog.last.log"
@@ -90,6 +92,23 @@ bot.objects["sorted_conf_cats"] = ["Guild settings",
                                    "Join message",
                                    "Leave message",
                                    "Moderation"]
+bot.objects["regions"] = {
+        "brazil": "Brazil",
+        "eu-central": "Central Europe",
+        "hongkong": "Hong Kong",
+        "japan": "Japan",
+        "russia": "Russia",
+        "singapore": "Singapore",
+        "sydney": "Sydney",
+        "us-central": "Central United States",
+        "us-east": "Eastern United States",
+        "us-south": "Southern United States",
+        "us-west": "Western United States",
+        "eu-west": "Western Europe",
+        "vip-amsterdam": "Amsterdam (VIP)",
+        "vip-us-east": "Eastern United States (VIP)"
+    }
+
 
 # ----Discord event handling----
 
@@ -99,6 +118,7 @@ async def on_ready():
     GAME = conf.getStr("GAME")
     if GAME == "":
         GAME = "in $servers$ servers!"
+    bot.objects["GAME"] = GAME
     GAME = await Context(bot=bot).ctx_format(GAME)
     await bot.change_presence(status=discord.Status.online, game=discord.Game(name=GAME))
     bot.sync_log("Logged in as")
@@ -124,6 +144,7 @@ async def on_ready():
 
     bot.objects["cheat_report_channel"] = discord.utils.get(bot.get_all_channels(), id=CHEAT_CH)
     bot.objects["feedback_channel"] = discord.utils.get(bot.get_all_channels(), id=FEEDBACK_CH)
+    bot.objects["server_change_log_channel"] = discord.utils.get(bot.get_all_channels(), id=BOT_LOG_CH)
 
 # ----Event loops----
 # ----End event loops----
