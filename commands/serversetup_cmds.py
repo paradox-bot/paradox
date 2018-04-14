@@ -80,7 +80,8 @@ async def cmd_config(ctx):
 
 @cmds.cmd("rmrole",
           category="Server Admin",
-          short_help="Deletes a role")
+          short_help="Deletes a role",
+          aliases=["removerole", "remrole", "deleterole", "delrole"])
 @cmds.require("has_manage_server")
 async def cmd_rmrole(ctx):
     """
