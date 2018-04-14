@@ -140,7 +140,7 @@ async def role_finder(ctx, user_str, msg):
     role = await ctx.find_role(user_str, interactive=False if hack else True, create=True)
     if role is None:
         if ctx.cmd_err[0] != -1:
-            msg = msg + "\t⚠ Couldn't find role `{}`, skipping\n".format(user_str)
+            msg = msg + "\t🚨 Couldn't find role `{}`, skipping\n".format(user_str)
         else:
             msg = msg + "\t🗑 Role selection aborted for `{}`, skipping\n".format(user_str)
             ctx.cmd_err = (0, "")
@@ -153,7 +153,7 @@ async def member_finder(ctx, user_str, msg, hack=False, collection=None, is_memb
                 print(user_str)
                 member_info = await ctx.bot.get_user_info(user_str.strip())
             except discord.NotFound:
-                msg += "\t⚠ User with id `{}` does not exist, skipping\n".format(user_str)
+                msg += "\t🚨 User with id `{}` does not exist, skipping\n".format(user_str)
                 return (None, msg)
             member = discord.Object(id=user_str)
             member.server = ctx.server
@@ -162,7 +162,7 @@ async def member_finder(ctx, user_str, msg, hack=False, collection=None, is_memb
     user = await ctx.find_user(user_str, in_server=True, interactive=True, collection=collection, is_member=is_member)
     if user is None:
         if ctx.cmd_err[0] != -1:
-            msg = msg + "\t⚠ Couldn't find user `{}`, skipping\n".format(user_str)
+            msg = msg + "\t🚨 Couldn't find user `{}`, skipping\n".format(user_str)
         else:
             msg = msg + "\t🗑 User selection aborted for `{}`, skipping\n".format(user_str)
             ctx.cmd_err = (0, "")
@@ -281,17 +281,17 @@ async def cmd_hackban(ctx):
     if not purge_days:
         purge_days = "1"
     if not purge_days.isdigit():
-        await ctx.reply("⚠ Number of days to purge must be a number!")
+        await ctx.reply("🚨 Number of days to purge must be a number.")
         return
     if int(purge_days) > 7:
-        await ctx.reply("⚠ Number of days to purge must be less than 7")
+        await ctx.reply("🚨 Number of days to purge must be less than 7.")
         return
     strings = {"action_name": "hackban",
                "action_multi_name": "multi-hackban",
                "start": "Hackbanning... \n",
                "fail_unknown": "🚨 Encountered an unexpected fatal error hackbanning `{user.name}` (id: `{user.id}`)! Aborting hackban sequence..."}
-    strings["results"] = {0: "🔨 Successfully hackbanned `{user.name}` (id: `{user.id}`)" + (" and purged `{}` days of messages".format(purge_days) if int(purge_days) > 0 else "!"),
-                          1: "🚨 Failed to hackban `{user.name}` (id: `{user.id}`)! (Insufficient Permissions)"}
+    strings["results"] = {0: "✅ Successfully hackbanned `{user.name}` (id: `{user.id}`)" + (" and purged `{}` days of messages.".format(purge_days) if int(purge_days) > 0 else "!"),
+                          1: "🚨 Failed to hackban `{user.name}` (id: `{user.id}`), insufficient permissions."}
     await multi_mod_action(ctx, ctx.params, action_func, strings, reason, finder=user_finder, days=int(purge_days), ban_reason="{}: {}".format(ctx.author, reason))
 
 @cmds.cmd("unban",
@@ -309,7 +309,7 @@ async def cmd_unban(ctx):
         Partial names are supported, and looked up from the ban list.
     """
     if ctx.arg_str.strip() == "":
-        await ctx.reply("You must give me a user to hackban!")
+        await ctx.reply("You must provide a user to unban.")
         return
     reason = ctx.flags["r"]
     action_func = unban
@@ -320,8 +320,8 @@ async def cmd_unban(ctx):
                "action_multi_name": "multi-unban",
                "start": "Unbanning... \n",
                "fail_unknown": "🚨 Encountered an unexpected fatal error unbanning `{user.name}` (id: `{user.id}`)! Aborting unban sequence..."}
-    strings["results"] = {0: "🔨 Successfully unbanned `{user.name}` (id: `{user.id}`)!",
-                          1: "🚨 Failed to unban `{user.name}` (id: `{user.id}`)! (Insufficient Permissions)"}
+    strings["results"] = {0: "✅ Successfully unbanned `{user.name}` (id: `{user.id}`).",
+                          1: "🚨 Failed to unban `{user.name}` (id: `{user.id}`), insufficient permissions."}
     await multi_mod_action(ctx, ctx.params, action_func, strings, reason, finder=ban_finder, ban_reason="{}: {}".format(ctx.author, reason))
 
 @cmds.cmd("ban",
@@ -342,7 +342,7 @@ async def cmd_ban(ctx):
         -f:  (fake) Pretends to ban.
     """
     if ctx.arg_str.strip() == "":
-        await ctx.reply("You must give me a user to ban!")
+        await ctx.reply("You must provide a user to ban.")
         return
     reason = ctx.flags["r"]
     purge_days = ctx.flags["p"]
@@ -353,17 +353,17 @@ async def cmd_ban(ctx):
     if not purge_days:
         purge_days = "0"
     if not purge_days.isdigit():
-        await ctx.reply("⚠ Number of days to purge must be a number!")
+        await ctx.reply("🚨 Number of days to purge must be a number.")
         return
     if int(purge_days) > 7:
-        await ctx.reply("⚠ Number of days to purge must be less than 7")
+        await ctx.reply("🚨 Number of days to purge must be less than 7.")
         return
     strings = {"action_name": "ban",
                "action_multi_name": "multi-ban",
                "start": "Banning... \n",
                "fail_unknown": "🚨 Encountered an unexpected fatal error banning `{user.name}`! Aborting ban sequence..."}
-    strings["results"] = {0: "🔨 Successfully banned `{user.name}`" + (" and purged `{}` days of messages".format(purge_days) if int(purge_days) > 0 else "!"),
-                          1: "🚨 Failed to ban `{user.name}`! (Insufficient Permissions)"}
+    strings["results"] = {0: "✅ Successfully banned `{user.name}`" + (" and purged `{}` days of messages.".format(purge_days) if int(purge_days) > 0 else "!"),
+                          1: "🚨 Failed to ban `{user.name}`, insufficient permissions."}
     await multi_mod_action(ctx, ctx.params, action_func, strings, reason, days=int(purge_days), ban_reason="{}: {}".format(ctx.author, reason))
 
 
@@ -385,7 +385,7 @@ async def cmd_softban(ctx):
         -f:  (fake) Pretends to softban.
     """
     if ctx.arg_str.strip() == "":
-        await ctx.reply("You must give me a user to softban!")
+        await ctx.reply("You must provide a user to softban.)
         return
     reason = ctx.flags["r"]
     purge_days = ctx.flags["p"]
@@ -396,17 +396,17 @@ async def cmd_softban(ctx):
     if not purge_days:
         purge_days = "1"
     if not purge_days.isdigit():
-        await ctx.reply("⚠ Number of days to purge must be a number!")
+        await ctx.reply("🚨 Number of days to purge must be a number.")
         return
     if int(purge_days) > 7:
-        await ctx.reply("⚠ Number of days to purge must be less than 7")
+        await ctx.reply("🚨 Number of days to purge must be less than 7.")
         return
     strings = {"action_name": "softban",
                "action_multi_name": "multi-softban",
                "start": "Softbanning... \n",
-               "fail_unknown": "🚨 Encountered an unexpected fatal error softbanning `{user.name}`!Aborting ban sequence..."}
-    strings["results"] = {0: "🔨 Softbanned `{user.name}`" + " and purged `{}` days of messages!".format(purge_days),
-                          1: "🚨 Failed to softban `{user.name}`! (Insufficient Permissions)"}
+               "fail_unknown": "🚨 Encountered an unexpected fatal error softbanning `{user.name}`! Aborting softban sequence..."}
+    strings["results"] = {0: "✅ Softbanned `{user.name}`" + " and purged `{}` days of messages.".format(purge_days),
+                          1: "🚨 Failed to softban `{user.name}`, insufficient permissions."}
     await multi_mod_action(ctx, ctx.params, action_func, strings, reason, days=int(purge_days), ban_reason="{}: {}".format(ctx.author, reason))
 
 
@@ -427,7 +427,7 @@ async def cmd_kick(ctx):
         -f:  (fake) Pretends to kick.
     """
     if ctx.arg_str.strip() == "":
-        await ctx.reply("You must give me a user to kick!")
+        await ctx.reply("You must provide a user to kick.")
         return
     reason = ctx.flags["r"]
     action_func = test_action if ctx.flags["f"] else kick
@@ -438,8 +438,8 @@ async def cmd_kick(ctx):
                "action_multi_name": "multi-kick",
                "start": "Kicking... \n",
                "fail_unknown": "🚨 Encountered an unexpected fatal error kicking `{user.name}`! Aborting kick sequence..."}
-    strings["results"] = {0: "🔨 Kicked `{user.name}`!",
-                          1: "🚨 Failed to kick `{user.name}`! (Insufficient Permissions)"}
+    strings["results"] = {0: "✅ Kicked `{user.name}`.",
+                          1: "🚨 Failed to kick `{user.name}`, insufficient permissions."}
     await multi_mod_action(ctx, ctx.params, action_func, strings, reason)
 
 
@@ -461,11 +461,11 @@ async def cmd_giverole(ctx):
         {prefix}gr Para Bots root
     """
     if len(ctx.params) < 2:
-        await ctx.reply("Please provide a user and at least one role to add!")
+        await ctx.reply("Please provide a user and at least one role to add.")
         return
     user = ctx.objs["found_user"]
     if not user:
-        await ctx.reply("I couldn't find any matching users in this server sorry!")
+        await ctx.reply("No users matching that criteria were found.")
         return
     await multi_action(ctx, ctx.params[1:], giverole, role_finder, role_result, "Adding Roles to `{}`...\n".format(user.name), user=user)
 
@@ -513,10 +513,10 @@ async def cmd_rolemod(ctx):
             users.append(param)
         i += 1
     if len(users) == 0:
-        await ctx.reply("No users were given, nothing to do!")
+        await ctx.reply("No users matching that criteria were found.")
         return
     if len(roles) == 0:
-        await ctx.reply("No valid roles were given, nothing to do!")
+        await ctx.reply("No roles matching that criteria were found.")
         return
     error_lines = ""
     intro = "Modifying roles...\n"
@@ -535,7 +535,7 @@ async def cmd_rolemod(ctx):
                 real_users.append(user)
                 if user is None:
                     if ctx.cmd_err[0] != -1:
-                        user_lines[i] = "\t⚠ Couldn't find user `{}`, skipping".format(users[i])
+                        user_lines[i] = "\t🚨 Couldn't find user `{}`, skipping".format(users[i])
                     else:
                         user_lines[i] = "\t🗑 User selection aborted for `{}`, skipping".format(users[i])
                         ctx.cmd_err = (0, "")
