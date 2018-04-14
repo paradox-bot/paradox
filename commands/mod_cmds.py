@@ -385,7 +385,7 @@ async def cmd_softban(ctx):
         -f:  (fake) Pretends to softban.
     """
     if ctx.arg_str.strip() == "":
-        await ctx.reply("You must provide a user to softban.)
+        await ctx.reply("You must provide a user to softban.")
         return
     reason = ctx.flags["r"]
     purge_days = ctx.flags["p"]
