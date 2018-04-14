@@ -10,20 +10,20 @@ class ModEvent:
     """
     TODO: Ticket numbers and stuff.
     """
-    actions = {"ban": "User Banned!",
-               "multi-ban": "Multiple-User Ban!",
-               "hackban": "User Hackbanned!",
-               "multi-hackban": "Multiple-User Hackban!",
-               "kick": "User Kicked!",
-               "multi-kick": "Users Kicked!",
+    actions = {"ban": "User Banned",
+               "multi-ban": "Multiple-User Ban",
+               "hackban": "User Hackbanned",
+               "multi-hackban": "Multiple-User Hackban",
+               "kick": "User Kicked",
+               "multi-kick": "Users Kicked",
                "unban": "User Unbanned",
                "multi-unban": "Users Unbanned",
-               "mute": "User Muted!",
-               "multi-mute": "Users Muted!",
-               "unmute": "User unmuted!",
-               "multi-unmute": "Users unmuted!",
-               "softban": "User Softbanned!",
-               "multi-softban": "Users Softbanned!"}
+               "mute": "User Muted",
+               "multi-mute": "Users Muted",
+               "unmute": "User Unmuted",
+               "multi-unmute": "Users Unmuted",
+               "softban": "User Softbanned",
+               "multi-softban": "Users Softbanned"}
 
     def __init__(self, ctx, action, mod, users, reason="None", timeout=0):
         self.ctx = ctx
