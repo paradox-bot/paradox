@@ -12,8 +12,8 @@ class ModEvent:
     """
     actions = {"ban": "User Banned!",
                "multi-ban": "Multiple-User Ban!",
-               "hackban": "User HackBanned!",
-               "multi-hackban": "Multiple-User HackBan!",
+               "hackban": "User Hackbanned!",
+               "multi-hackban": "Multiple-User Hackban!",
                "kick": "User Kicked!",
                "multi-kick": "Users Kicked!",
                "unban": "User Unbanned",
