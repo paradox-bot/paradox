@@ -178,9 +178,9 @@ async def ban_finder(ctx, user_str, msg):
 
 async def role_result(ctx, result, msg, role, **kwargs):
     if result == 0:
-        msg += "\tAdded role `{}`".format(role)
+        msg += "\tAdded role `{}`.".format(role)
     elif result == 1:
-        msg += "\tInsufficient permissions to add role `{}`".format(role)
+        msg += "\tInsufficient permissions to add role `{}`.".format(role)
     else:
         msg += "\tUnknown error while adding role `{}`, aborting sequence.".format(role)
         return (1, msg)
@@ -230,9 +230,9 @@ async def multi_mod_action(ctx, user_strs, action, strings, reason, finder=membe
     mod_event = ModEvent(ctx, action, ctx.author, users, reason)
     result = await mod_event.modlog_post()
     if result == 1:
-        await ctx.reply("I tried to post to the modlog, but lack the permissions!")  # TODO: Offer to repost after modlog works.
+        await ctx.reply("I tried to post to the modlog, but lack the permissions.")  # TODO: Offer to repost after modlog works.
     elif result == 2:
-        await ctx.reply("I can't see the set modlog channel!")
+        await ctx.reply("I can't access the set modlog channel.")
     elif result == 3:
         await ctx.reply("An unexpected error occurred while trying to post to the modlog.")
 
@@ -242,7 +242,7 @@ async def request_reason(ctx):
     if reason.lower() == "no":
         reason = "None"
     elif reason.lower() == "c":
-        await ctx.reply("📋 Aborting!")
+        await ctx.reply("📋 Aborting...")
         return None
     elif reason is None:
         await ctx.reply("📋 Request timed out, aborting.")
