@@ -91,6 +91,29 @@ async def check_in_server_can_ban(ctx):
         return (1, "You don't have permission to ban users in this server!")
     return (0, "")
 
+@check("in_server_can_unban")
+async def check_in_server_can_ban(ctx):
+    """
+    TODO: Need to do proper custom checks here
+    """
+    (code, msg) = await checks["has_manage_server"](ctx)
+    if code == 0:
+        return (code, msg)
+    else:
+        return (1, "You don't have permission to unban users in this server!")
+    return (0, "")
+
+@check("in_server_can_hackban")
+async def check_in_server_can_ban(ctx):
+    """
+    TODO: Need to do proper custom checks here
+    """
+    (code, msg) = await checks["has_manage_server"](ctx)
+    if code == 0:
+        return (code, msg)
+    else:
+        return (1, "You don't have permission to hackban users in this server!")
+    return (0, "")
 
 @check("in_server_can_kick")
 async def check_in_server_can_kick(ctx):

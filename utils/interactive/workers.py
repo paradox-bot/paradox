@@ -3,17 +3,21 @@ import discord
 
 def load_into(bot):
     @bot.util
-    async def find_user(ctx, user_str, in_server=False, interactive=False, limit=20):
+    async def find_user(ctx, user_str, in_server=False, interactive=False, limit=20, collection=None, is_member=True):
         if user_str == "":
             return None
         maybe_user_id = user_str.strip('<@!> ')
+        if is_member:
+            def is_user(member):
+                return ((member.id == maybe_user_id) or
+                        (user_str.lower() in member.display_name.lower()) or
+                        (user_str.lower() in member.name.lower()))
+        else:
+            def is_user(member):
+                return ((member.id == maybe_user_id) or
+                        (user_str.lower() in member.name.lower()))
 
-        def is_user(member):
-            return ((member.id == maybe_user_id) or
-                    (user_str.lower() in member.display_name.lower()) or
-                    (user_str.lower() in member.name.lower()))
-
-        collection = ctx.server.members if in_server else ctx.bot.get_all_members
+        collection = collection if collection else (ctx.server.members if in_server else ctx.bot.get_all_members())
         if interactive:
             users = list(filter(is_user, collection))
             if len(users) == 0:
@@ -22,7 +26,10 @@ def load_into(bot):
                 await ctx.reply("Over {} users found matching `{}`! Please refine your search".format(limit, user_str))
                 ctx.cmd_err = (-1, "")
                 return None
-            names = ["{} {}".format(user.display_name, ("({})".format(user.name)) if user.nick else "") for user in users]
+            if is_member:
+                names = ["{} {}".format(user.display_name, ("({})".format(user.name)) if user.nick else "") for user in users]
+            else:
+                names = [user.name for user in users]
             selected = await ctx.selector("Multiple users found matching `{}`! Please select one.".format(user_str), names)
             if selected is None:
                 return None
@@ -86,6 +93,7 @@ def load_into(bot):
                 role = await ctx.offer_create_role(userstr)
                 if not role:
                     ctx.cmd_err = (1, "Aborting...")
+                    await ctx.bot.delete_message(msg)
                     return None
                 await ctx.bot.delete_message(msg)
                 return role
