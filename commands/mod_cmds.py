@@ -252,7 +252,8 @@ async def request_reason(ctx):
 
 @cmds.cmd("hackban",
           category="Moderation",
-          short_help="Hackbans users")
+          short_help="Hackbans users",
+          aliases=["hb"])
 @cmds.execute("flags", flags=["r==", "p=", "f"])
 @cmds.require("in_server")
 @cmds.require("in_server_can_hackban")
@@ -325,7 +326,8 @@ async def cmd_unban(ctx):
 
 @cmds.cmd("ban",
           category="Moderation",
-          short_help="Bans users")
+          short_help="Bans users",
+          aliases=["b", "banne", "bean"])
 @cmds.execute("flags", flags=["r==", "p=", "f"])
 @cmds.require("in_server")
 @cmds.require("in_server_can_ban")
@@ -367,7 +369,8 @@ async def cmd_ban(ctx):
 
 @cmds.cmd("softban",
           category="Moderation",
-          short_help="Softbans users")
+          short_help="Softbans users",
+          aliases=["sb"])
 @cmds.execute("flags", flags=["r==", "p=", "f"])
 @cmds.require("in_server")
 @cmds.require("in_server_can_softban")
@@ -409,7 +412,8 @@ async def cmd_softban(ctx):
 
 @cmds.cmd("kick",
           category="Moderation",
-          short_help="Kicks users")
+          short_help="Kicks users",
+          aliases=["k"])
 @cmds.execute("flags", flags=["r==", "f"])
 @cmds.require("in_server")
 @cmds.require("in_server_can_kick")

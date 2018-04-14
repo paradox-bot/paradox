@@ -95,7 +95,7 @@ async def cmd_secho(ctx):
 @cmds.cmd("userinfo",
           category="Utility",
           short_help="Shows the user's information",
-          aliases=["uinfo"])
+          aliases=["uinfo", "ui"])
 @cmds.require("in_server")
 @cmds.execute("user_lookup", in_server=True)
 async def cmd_userinfo(ctx):
@@ -506,7 +506,7 @@ def col_invert(color_to_convert):
 @cmds.cmd(name="roleinfo",
           category="Utility",
           short_help="Displays information about a role",
-          aliases=["role", "rinfo"])
+          aliases=["role", "rinfo", "ri"])
 @cmds.require("in_server")
 async def cmd_role(ctx):
     """

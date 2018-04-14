@@ -6,7 +6,8 @@ cmds = paraCH()
 
 @cmds.cmd("help",
           category="General",
-          short_help="Provides some detailed help on a command.")
+          short_help="Provides some detailed help on a command.",
+          aliases=["h"])
 async def cmd_help(ctx):
     """
     Usage:
