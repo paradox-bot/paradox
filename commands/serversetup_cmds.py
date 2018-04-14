@@ -91,7 +91,7 @@ async def cmd_rmrole(ctx):
         Deletes a role given by partial name or mention.
     """
     if ctx.arg_str.strip() == "":
-        await ctx.reply("You must give me a role to delete!")
+        await ctx.reply("You must provide a role to delete.")
         return
     # TODO: Letting find_role handle all input and output for finding.
     role = await ctx.find_role(ctx.arg_str, create=False, interactive=True)
@@ -102,17 +102,17 @@ async def cmd_rmrole(ctx):
         await ctx.reply("Question timed out, aborting")
         return
     if result == 0:
-        await ctx.reply("Aborting!")
+        await ctx.reply("Aborting...")
         return
     try:
         await ctx.bot.delete_role(ctx.server, role)
     except discord.Forbidden:
-        await ctx.reply("Sorry, it seems I don't have permissions to delete that role!")
+        await ctx.reply("I am unable to delete that role, insufficient permissions.")
         return
     except Exception:
-        await ctx.reply("Sorry, I am not able to delete that role!")
+        await ctx.reply("I am unable to delete that role, integration managed.")
         return
-    await ctx.reply("Successfully deleted the role!")
+    await ctx.reply("Successfully deleted the role.")
 
 
 @cmds.cmd("editrole",
@@ -154,7 +154,7 @@ async def cmd_editrole(ctx):
         colour = ctx.flags["colour"] if ctx.flags["colour"] else ctx.flags["color"]
         hexstr = colour.strip("#")
         if not (len(hexstr) == 6 or all(c in string.hexdigits for c in hexstr)):
-            await ctx.reply("Please provide a valid hex colour (e.g. #0047AB)")
+            await ctx.reply("Please provide a valid hex colour (e.g. #0047AB).")
             return
         edits["colour"] = discord.Colour(int(hexstr, 16))
     if ctx.flags["name"]:
@@ -200,7 +200,7 @@ async def cmd_editrole(ctx):
 #    msg = ""
     if position is not None:
         if position > ctx.me.top_role.position:
-            await ctx.reply("The target position is above me! Aborting")
+            await ctx.reply("The target position is above me, aborting.")
             return
         if position == 0:
             await ctx.reply("Can't move a role to position 0, aborting.")
@@ -209,7 +209,7 @@ async def cmd_editrole(ctx):
             await ctx.bot.move_role(ctx.server, role, position)
 #            msg += "Moved role to position {}!".format(
         except discord.Forbidden as e:
-            await ctx.reply("I do not have enough perms to move the role!")
+            await ctx.reply("I am unable to move the role, insufficient permissions.")
             return
         except discord.HTTPException as e:
             await ctx.reply("Something went wrong while moving the role! Possibly I am of too low a rank.")
@@ -220,4 +220,4 @@ async def cmd_editrole(ctx):
         except discord.Forbidden as e:
             await ctx.reply("I don't have enough permissions to make the specified edits.")
             return
-    await ctx.reply("The role was modified successfully!")
+    await ctx.reply("The role was modified successfully.")
