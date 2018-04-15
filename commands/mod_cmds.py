@@ -155,7 +155,7 @@ async def purge(ctx, user, hours):
     pass
 
 async def role_finder(ctx, user_str, msg):
-    role = await ctx.find_role(user_str, interactive=False if hack else True, create=True)
+    role = await ctx.find_role(user_str, interactive=True, create=True)
     if role is None:
         if ctx.cmd_err[0] != -1:
             msg = msg + "\t🚨 Couldn't find role `{}`, skipping\n".format(user_str)
