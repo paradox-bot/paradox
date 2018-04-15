@@ -8,7 +8,8 @@ cmds = paraCH()
 
 @cmds.cmd("tex",
           category="Misc",
-          short_help="Renders LaTeX code")
+          short_help="Renders LaTeX code",
+          aliases=["LaTeX"])
 async def cmd_tex(ctx):
     """
     Usage:

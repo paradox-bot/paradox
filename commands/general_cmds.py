@@ -134,7 +134,8 @@ async def cmd_cr(ctx):
 
 @cmds.cmd("ping",
           category="General",
-          short_help="Checks the bot's latency")
+          short_help="Checks the bot's latency",
+          aliases=["pong"])
 async def cmd_ping(ctx):
     """
     Usage:
@@ -153,7 +154,8 @@ async def cmd_ping(ctx):
 
 @cmds.cmd("invite",
           category="General",
-          short_help="Sends the bot's invite link")
+          short_help="Sends the bot's invite link",
+          aliases=["inv"])
 async def cmd_invite(ctx):
     """
     Usage:
@@ -179,7 +181,8 @@ async def cmd_support(ctx):
 
 @cmds.cmd("serverinfo",
           category="General",
-          short_help="Shows server info.")
+          short_help="Shows server info.",
+          aliases=["sinfo", "si"])
 @cmds.require("in_server")
 async def cmd_serverinfo(ctx):
     """

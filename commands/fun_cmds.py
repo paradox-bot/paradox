@@ -9,7 +9,8 @@ cmds = paraCH()
 
 @cmds.cmd("bin2ascii",
           category="Fun stuff",
-          short_help="Converts binary to ascii")
+          short_help="Converts binary to ascii",
+          aliases=["bin2a", "binarytoascii"])
 async def cmd_bin2ascii(ctx):
     """
     Usage:
@@ -48,7 +49,8 @@ async def cmd_lenny(ctx):
 
 @cmds.cmd("dog",
           category="Fun Stuff",
-          short_help="Sends a random dog image")
+          short_help="Sends a random dog image",
+          aliases=["doge", "pupper", "doggo"])
 async def cmd_dog(ctx):
     """
     Usage:

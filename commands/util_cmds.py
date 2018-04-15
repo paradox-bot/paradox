@@ -94,7 +94,8 @@ async def cmd_secho(ctx):
 
 @cmds.cmd("userinfo",
           category="Utility",
-          short_help="Shows the user's information")
+          short_help="Shows the user's information",
+          aliases=["uinfo", "ui"])
 @cmds.require("in_server")
 @cmds.execute("user_lookup", in_server=True)
 async def cmd_userinfo(ctx):
@@ -176,7 +177,8 @@ async def prim_cmd_discrim(ctx):
 
 @cmds.cmd("piggybank",
           category="Utility",
-          short_help="Keep track of money added towards a goal.")
+          short_help="Keep track of money added towards a goal.",
+          aliases=["bank"])
 async def cmd_piggybank(ctx):
     """
     Usage:
@@ -504,7 +506,7 @@ def col_invert(color_to_convert):
 @cmds.cmd(name="roleinfo",
           category="Utility",
           short_help="Displays information about a role",
-          aliases=["role"])
+          aliases=["role", "rinfo", "ri"])
 @cmds.require("in_server")
 async def cmd_role(ctx):
     """
@@ -559,7 +561,3 @@ async def cmd_role(ctx):
                   ("Position in the heirachy", position, 0)]
     await ctx.emb_add_fields(embed, emb_fields)
     await ctx.reply(embed=embed)
-
-
-
-
