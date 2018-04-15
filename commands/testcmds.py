@@ -1,5 +1,6 @@
 # from contextBot.CommandHandler import CommandHandler
 from paraCH import paraCH
+from botconf import Conf`
 
 cmds = paraCH()
 

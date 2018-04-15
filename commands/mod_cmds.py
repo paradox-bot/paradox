@@ -86,6 +86,7 @@ async def ban(ctx, user, **kwargs):
 
 async def mute(ctx, user, **kwargs):
     try:
+        ctx.reply("Work in progress, come back later")
     except discord.Forbidden:
         return 1
     except Exception:
@@ -94,6 +95,7 @@ async def mute(ctx, user, **kwargs):
 
 async def unmute(ctx, user, **kwargs):
     try:
+        ctx.reply("Work in progress, come back later")
     except discord.Forbidden:
         return 1
     except Exception:

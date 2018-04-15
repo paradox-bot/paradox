@@ -45,7 +45,7 @@ class Server_Setting_Autorole_Bot(Server_Setting, settingTypes.ROLE):
 
     @classmethod
     async def dyn_default(cls, ctx):
-        return await ctx.server_conf.settings["autorole"].get(ctx)
+        return await ctx.server_conf.guild_autorole.get(ctx)
 
 # Moderation settings
 
