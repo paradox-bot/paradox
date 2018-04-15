@@ -139,3 +139,27 @@ async def check_in_server_can_softban(ctx):
     else:
         return (1, "You don't have permission to softban users in this server!")
     return (0, "")
+
+@check("in_server_can_mute")
+async def check_in_server_can_softban(ctx):
+    """
+    TODO: Need to do proper custom checks here
+    """
+    (code, msg) = await checks["has_manage_server"](ctx)
+    if code == 0:
+        return (code, msg)
+    else:
+        return (1, "You don't have permission to mute users in this server!")
+    return (0, "")
+
+@check("in_server_can_unmute")
+async def check_in_server_can_softban(ctx):
+    """
+    TODO: Need to do proper custom checks here
+    """
+    (code, msg) = await checks["has_manage_server"](ctx)
+    if code == 0:
+        return (code, msg)
+    else:
+        return (1, "You don't have permission to unmute users in this server!")
+    return (0, "")
