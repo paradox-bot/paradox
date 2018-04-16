@@ -7,7 +7,7 @@ def load_into(bot):
     async def on_member_join(member):
         ctx = Context(bot=bot, member=member)
 
-        autorole = await ctx.server_conf.guild_autorole.get(ctx)
+        autorole = (await ctx.server_conf.guild_autorole_bot.get(ctx)) if ctx.member.bot else (await ctx.server_conf.guild_autorole.get(ctx))
         autorole = discord.utils.get(ctx.server.roles, id=autorole)
         if autorole:
             try:

@@ -36,6 +36,17 @@ class Server_Setting_Autorole(Server_Setting, settingTypes.ROLE):
     category = "Guild settings"
     default = "0"
 
+@server_conf.setting
+class Server_Setting_Autorole_Bot(Server_Setting, settingTypes.ROLE):
+    name = "guild_autorole_bot"
+    vis_name = "autorole_bot"
+    desc = "Role automatically given to new bots. By default same as autorole."
+    category = "Guild settings"
+
+    @classmethod
+    async def dyn_default(cls, ctx):
+        return await ctx.server_conf.guild_autorole.get(ctx)
+
 # Moderation settings
 
 
@@ -47,6 +58,14 @@ class Server_Setting_modlog_ch(Server_Setting, settingTypes.CHANNEL):
     default = None
     category = "Moderation"
 
+
+@server_conf.setting
+class Server_Setting_mute_role(Server_Setting, settingTypes.ROLE):
+    name = "mute_role"
+    vis_name = "mute_role"
+    desc = "Role given to mute users (automatically set, but can be overridden)"
+    default = None
+    category = "Moderation"
 
 # Join and leave message settings
 

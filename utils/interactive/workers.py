@@ -96,5 +96,6 @@ def load_into(bot):
                     await ctx.bot.delete_message(msg)
                     return None
                 await ctx.bot.delete_message(msg)
+                role = discord.utils.get(ctx.server.roles, id=role.id)
                 return role
             return None

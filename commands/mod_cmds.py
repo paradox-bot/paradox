@@ -84,6 +84,24 @@ async def ban(ctx, user, **kwargs):
         return 2
     return 0
 
+async def mute(ctx, user, **kwargs):
+    try:
+        ctx.reply("Work in progress, come back later")
+    except discord.Forbidden:
+        return 1
+    except Exception:
+        return 2
+    return 0
+
+async def unmute(ctx, user, **kwargs):
+    try:
+        ctx.reply("Work in progress, come back later")
+    except discord.Forbidden:
+        return 1
+    except Exception:
+        return 2
+    return 0
+
 async def softban(ctx, user, **kwargs):
     """
     Todo: on rewrite, make this post reason
@@ -137,7 +155,7 @@ async def purge(ctx, user, hours):
     pass
 
 async def role_finder(ctx, user_str, msg):
-    role = await ctx.find_role(user_str, interactive=False if hack else True, create=True)
+    role = await ctx.find_role(user_str, interactive=True, create=True)
     if role is None:
         if ctx.cmd_err[0] != -1:
             msg = msg + "\t🚨 Couldn't find role `{}`, skipping\n".format(user_str)
@@ -409,6 +427,68 @@ async def cmd_softban(ctx):
                           1: "🚨 Failed to softban `{user.name}`, insufficient permissions."}
     await multi_mod_action(ctx, ctx.params, action_func, strings, reason, days=int(purge_days), ban_reason="{}: {}".format(ctx.author, reason))
 
+@cmds.cmd("mute",
+          category="Moderation",
+          short_help="Mutes users (WIP)")
+@cmds.execute("flags", flags=["r==", "f", "t=="])
+@cmds.require("in_server")
+@cmds.require("in_server_can_mute")
+async def cmd_kick(ctx):
+    """
+    Usage:
+        {prefix}mute <user1> [user2] [user3]... [-r <reason>] [-f] [-t time]
+    Description:
+        Mutes the users listed with an optional reason. (WIP)
+    Flags:
+        -f:  (fake) Pretends to mute.
+        -t: (time) Optional time to mute for (WIP)
+    """
+    if ctx.arg_str.strip() == "":
+        await ctx.reply("You must give me a user to mute!")
+        return
+    reason = ctx.flags["r"]
+    action_func = test_action if ctx.flags["f"] else mute
+    reason = reason if reason else (await request_reason(ctx))
+    if not reason:
+        return
+    strings = {"action_name": "mute",
+               "action_multi_name": "multi-mute",
+               "start": "Muting... \n",
+               "fail_unknown": "🚨 Encountered an unexpected fatal error muting `{user.name}`! Aborting sequence..."}
+    strings["results"] = {0: "Muted `{user.name}`!",
+                          1: "🚨 Failed to mute `{user.name}`! (Insufficient Permissions)"}
+    await multi_mod_action(ctx, ctx.params, action_func, strings, reason)
+
+@cmds.cmd("unmute",
+          category="Moderation",
+          short_help="Unmutes users (WIP)")
+@cmds.execute("flags", flags=["r==", "f"])
+@cmds.require("in_server")
+@cmds.require("in_server_can_unmute")
+async def cmd_kick(ctx):
+    """
+    Usage:
+        {prefix}unmute <user1> [user2] [user3]... [-r <reason>] [-f]
+    Description:
+        Unmutes the users listed with an optional reason. (WIP)
+    Flags:
+        -f:  (fake) Pretends to unmute.
+    """
+    if ctx.arg_str.strip() == "":
+        await ctx.reply("You must give me at least one user to unmute")
+        return
+    reason = ctx.flags["r"]
+    action_func = test_action if ctx.flags["f"] else unmute
+    reason = reason if reason else (await request_reason(ctx))
+    if not reason:
+        return
+    strings = {"action_name": "unmute",
+               "action_multi_name": "multi-unmute",
+               "start": "Unmuting... \n",
+               "fail_unknown": "🚨 Encountered an unexpected fatal error unmuting `{user.name}`! Aborting sequence..."}
+    strings["results"] = {0: "Unmuted `{user.name}`!",
+                          1: "🚨 Failed to unmute `{user.name}`! (Insufficient Permissions)"}
+    await multi_mod_action(ctx, ctx.params, action_func, strings, reason)
 
 @cmds.cmd("kick",
           category="Moderation",
