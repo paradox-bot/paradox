@@ -166,6 +166,7 @@ def load_into(bot):
         def check(reaction, user):
             return (reaction.emoji in [emo_next, emo_prev]) and (not (user == ctx.me))
         try:
+            await ctx.bot.add_reaction(out_msg, emo_prev)
             await ctx.bot.add_reaction(out_msg, emo_next)
         except discord.Forbidden:
             await ctx.reply("Cannot page results because I do not have permissions to add emojis!")
@@ -178,18 +179,13 @@ def load_into(bot):
                 await ctx.bot.remove_reaction(out_msg, res.reaction.emoji, res.user)
             except discord.Forbidden:
                 pass
-            await ctx.bot.remove_reaction(out_msg, emo_prev, ctx.me)
-            await ctx.bot.remove_reaction(out_msg, emo_next, ctx.me)
             if res is None:
                 break
             page += 1 if res.reaction.emoji == emo_next else -1
-            if page == 0:
-                await ctx.bot.add_reaction(out_msg, emo_next)
-            elif page == len(pages) - 1:
-                await ctx.bot.add_reaction(out_msg, emo_prev)
-            else:
-                await ctx.bot.add_reaction(out_msg, emo_prev)
-                await ctx.bot.add_reaction(out_msg, emo_next)
+            if page == -1:
+                page = len(pages) - 1
+            if page == len(pages):
+                page = 0
             args[arg] = pages[page]
             await ctx.bot.edit_message(out_msg, **args)
         try:
