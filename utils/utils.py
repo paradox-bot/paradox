@@ -189,6 +189,8 @@ def load_into(bot):
             args[arg] = pages[page]
             await ctx.bot.edit_message(out_msg, **args)
         try:
+            await ctx.bot.remove_reaction(out_msg, emo_prev, ctx.me)
+            await ctx.bot.remove_reaction(out_msg, emo_next, ctx.me)
             await ctx.bot.clear_reactions(out_msg)
         except discord.Forbidden:
             pass
