@@ -175,12 +175,12 @@ def load_into(bot):
             res = await ctx.bot.wait_for_reaction(message=out_msg,
                                                   timeout=300,
                                                   check=check)
+            if res is None:
+                break
             try:
                 await ctx.bot.remove_reaction(out_msg, res.reaction.emoji, res.user)
             except discord.Forbidden:
                 pass
-            if res is None:
-                break
             page += 1 if res.reaction.emoji == emo_next else -1
             if page == -1:
                 page = len(pages) - 1
