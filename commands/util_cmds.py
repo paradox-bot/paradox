@@ -370,6 +370,7 @@ async def cmd_profile(ctx):
     created_ago = ctx.strfdelta(datetime.utcnow()-user.created_at)
     created = user.created_at.strftime("%-I:%M %p, %d/%m/%Y")
     rep = await ctx.data.users.get(user.id, "rep")
+    given_rep = await ctx.data.users.get(ctx.authid, "given_rep")
 
     embed = discord.Embed(type="rich", color=user.colour) \
         .set_author(name="{user} ({user.id})".format(user=user),
@@ -382,7 +383,7 @@ async def cmd_profile(ctx):
         .add_field(name="XP",
                    value="(Coming Soon!)", inline=True) \
         .add_field(name="Reputation",
-                   value=rep, inline=True) \
+                   value="{} Received | {} Given".format(rep, given_rep), inline=True) \
         .add_field(name="Premium",
                    value="No", inline=True)
     tz = await ctx.data.users.get(user.id, "tz")
