@@ -141,6 +141,8 @@ async def on_ready():
     bot.objects["emoji_idle"] = discord.utils.get(bot.get_all_emojis(), name='ParaIdle')
     bot.objects["emoji_dnd"] = discord.utils.get(bot.get_all_emojis(), name='ParaDND')
     bot.objects["emoji_offline"] = discord.utils.get(bot.get_all_emojis(), name='ParaInvis')
+    bot.objects["emoji_next"] = discord.utils.get(bot.get_all_emojis(), name='ParaOn')
+    bot.objects["emoji_prev"] = discord.utils.get(bot.get_all_emojis(), name='ParaIdle')
 
     bot.objects["cheat_report_channel"] = discord.utils.get(bot.get_all_channels(), id=CHEAT_CH)
     bot.objects["feedback_channel"] = discord.utils.get(bot.get_all_channels(), id=FEEDBACK_CH)

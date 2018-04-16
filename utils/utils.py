@@ -144,3 +144,60 @@ def load_into(bot):
         for CH in handlers:
             cmds = dict(cmds, **(CH.raw_cmds))
         return cmds
+
+    @bot.util
+    async def pager(ctx, pages, embed=False):
+        """
+        Replies with the first page and provides reactions to page back and forth.
+        Reaction timeout is five minutes.
+        On timeout, returns the message (for easy deletion).
+        pages is either a list of messages or a list of embeds, depending on the embed flag.
+        """
+        arg = "embed" if embed else "message"
+        args = {}
+        args[arg] = pages[0]
+        out_msg = await ctx.reply(**args)
+        args = {}
+        arg = "embed" if embed else "new_content"
+        emo_next = ctx.bot.objects["emoji_next"]
+        emo_prev = ctx.bot.objects["emoji_prev"]
+        page = 0
+
+        def check(reaction, user):
+            return (reaction.emoji in [emo_next, emo_prev]) and (not (user == ctx.me))
+        try:
+            await ctx.bot.add_reaction(out_msg, emo_next)
+        except discord.Forbidden:
+            await ctx.reply("Cannot page results because I do not have permissions to add emojis!")
+            return
+        while True:
+            res = await ctx.bot.wait_for_reaction(message=out_msg,
+                                                  timeout=300,
+                                                  check=check)
+            try:
+                await ctx.bot.remove_reaction(out_msg, res.reaction.emoji, res.user)
+            except discord.Forbidden:
+                pass
+            await ctx.bot.remove_reaction(out_msg, emo_prev, ctx.me)
+            await ctx.bot.remove_reaction(out_msg, emo_next, ctx.me)
+            if res is None:
+                break
+            page += 1 if res.reaction.emoji == emo_next else -1
+            if page == 0:
+                await ctx.bot.add_reaction(out_msg, emo_next)
+            elif page == len(pages) - 1:
+                await ctx.bot.add_reaction(out_msg, emo_prev)
+            else:
+                await ctx.bot.add_reaction(out_msg, emo_prev)
+                await ctx.bot.add_reaction(out_msg, emo_next)
+            args[arg] = pages[page]
+            await ctx.bot.edit_message(out_msg, **args)
+        try:
+            await ctx.bot.clear_reactions(out_msg)
+        except discord.Forbidden:
+            pass
+        return out_msg
+
+
+
+
