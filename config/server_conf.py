@@ -99,7 +99,6 @@ class Server_Setting_Join_Ch(Server_Setting, settingTypes.CHANNEL):
     default = None
     category = "Join message"
 
-
 @server_conf.setting
 class Server_Setting_Leave(Server_Setting, settingTypes.BOOL):
     name = "leave_msgs_enabled"

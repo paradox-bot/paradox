@@ -88,10 +88,9 @@ bot.objects["sorted cats"] = ["General",
                               "Bot Admin",
                               "Tex",
                               "Misc"]
-bot.objects["sorted_conf_cats"] = ["Guild settings",
-                                   "Join message",
-                                   "Leave message",
-                                   "Moderation"]
+bot.objects["sorted_conf_pages"] = [("General", ["Guild settings"]),
+                              ("Manual Moderation", ["Moderation"]),
+                              ("Join/Leave Messages", ["Join message", "Leave message"])]
 bot.objects["regions"] = {
         "brazil": "Brazil",
         "eu-central": "Central Europe",
