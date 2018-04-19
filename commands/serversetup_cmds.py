@@ -5,6 +5,43 @@ import string
 cmds = paraCH()
 
 
+async def _config_pages(ctx, serv_conf, value=True):
+    """
+    Builds the server configuration pages.
+    """
+    cats = {}
+    pages = []
+    sorted_pages = ctx.bot.objects["sorted_conf_pages"]
+
+    for option in sorted(serv_conf):
+        cat = serv_conf[option].category
+        if cat not in cats:
+            cats[cat] = []
+        cats[cat].append(option)
+    for page in sorted_pages:
+        page_name = page[0]
+        page_cats = page[1]
+        page_embed = discord.Embed(title="{} options:".format(page_name), color=discord.Colour.teal())
+        for cat in page_cats:
+            cat_msg = ""
+            if not cat in cats:
+                continue
+            for option in cats[cat]:
+                if value:
+                    option_line = await serv_conf[option].hr_get(ctx)
+                else:
+                    option_line = serv_conf[option].desc
+                cat_msg += "`​{}{}`:\t {}\n".format(" " * (12 - len(option)),
+                                                    option, option_line)
+            cat_msg += "\n"
+            page_embed.add_field(name=cat, value=cat_msg, inline=False)
+        page_embed.set_footer(text="Use {}config <option> [value] to see or set an option.".format(ctx.used_prefix))
+        pages.append(page_embed)
+    return pages
+
+
+
+
 @cmds.cmd("config",
           category="Server Admin",
           short_help="Server configuration")
@@ -22,32 +59,8 @@ async def cmd_config(ctx):
     for setting in server_conf:
         serv_conf[server_conf[setting].vis_name] = server_conf[setting]
     if (ctx.params[0] in ["", "help"]) and len(ctx.params) == 1:
-        """
-        Print all config categories, their options, and descriptions or values in a pretty way.
-        """
-        sorted_cats = ctx.bot.objects["sorted_conf_cats"]
-        cats = {}
-        for option in sorted(serv_conf):
-            cat = serv_conf[option].category
-            if cat not in cats:
-                cats[cat] = []
-            if (cat not in sorted_cats) and (cat != "Hidden"):
-                sorted_cats.append(cat)
-            cats[cat].append(option)
-        embed = discord.Embed(title="Configuration options:", color=discord.Colour.teal())
-        for cat in sorted_cats:
-            cat_msg = ""
-            for option in cats[cat]:
-                if ctx.params[0] == "":
-                    option_line = await serv_conf[option].hr_get(ctx)
-                else:
-                    option_line = serv_conf[option].desc
-                cat_msg += "`​{}{}`:\t {}\n".format(" " * (12 - len(option)),
-                                                    option, option_line)
-            cat_msg += "\n"
-            embed.add_field(name=cat, value=cat_msg, inline=False)
-        embed.set_footer(text="Use config <option> [value] to see or set an option.")
-        await ctx.reply(embed=embed)
+        pages = await _config_pages(ctx, serv_conf, value=True if ctx.params[0] == "" else False)
+        await ctx.pager(pages, embed=True)
         return
     elif (ctx.params[0] == "help") and len(ctx.params) > 1:
         """
