@@ -158,12 +158,12 @@ async def cmd_ping(ctx):
 @cmds.execute("user_lookup", in_server=True)
 async def cmd_avatar(ctx):
     user = ctx.author
-    avatar = user.avatar_url if user.avatar_url else user.default_avatar_url
     if ctx.arg_str != "":
         user = ctx.objs["found_user"]
         if not user:
             await ctx.reply("I couldn't find any matching users in this server sorry!")
             return
+    avatar = user.avatar_url if user.avatar_url else user.default_avatar_url
     embed = discord.Embed(colour=discord.Colour.green())
     embed.set_author(name="{}'s Avatar".format(user))
     embed.set_image(url=avatar)
