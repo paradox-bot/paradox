@@ -155,6 +155,7 @@ async def cmd_ping(ctx):
           category="General",
           short_help="Obtains the mentioned user's avatar, or your own.",
           aliases=["av"])
+@cmds.execute("user_lookup", in_server=True)
 async def cmd_avatar(ctx):
     user = ctx.author
     if ctx.arg_str != "":
