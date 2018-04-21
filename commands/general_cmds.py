@@ -162,7 +162,7 @@ async def cmd_avatar(ctx):
         if not user:
             await ctx.reply("I couldn't find any matching users in this server sorry!")
             return
-    embed = discord.Embed(colour=discord.Colour.light_green())
+    embed = discord.Embed(colour=discord.Colour.green())
     embed.set_author(name="{}'s Avatar".format(user))
     embed.set_image(url=user.avatar_url)
 
