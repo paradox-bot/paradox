@@ -151,6 +151,23 @@ async def cmd_ping(ctx):
     latency = ((emsg_tstamp - msg_tstamp).microseconds) // 1000
     await ctx.bot.edit_message(msg, "Ping: {}ms".format(str(latency)))
 
+@cmds.cmd("avatar",
+          category="General",
+          short_help="Obtains the mentioned user's avatar, or your own.",
+          aliases=["av"])
+async def cmd_avatar(ctx):
+    user = ctx.author
+    if ctx.arg_str != "":
+        user = ctx.objs["found_user"]
+        if not user:
+            await ctx.reply("I couldn't find any matching users in this server sorry!")
+            return
+    embed = discord.Embed(colour=discord.Colour.light_green())
+    embed.set_author(name="{}'s Avatar".format(user))
+    embed.set_image(url=user.avatar_url)
+
+    await ctx.reply(embed=embed)
+
 
 @cmds.cmd("invite",
           category="General",
