@@ -69,6 +69,15 @@ async def cmd_dog(ctx):
             await ctx.reply(embed=embed)
 
 
+@cmds.cmd("sorry",
+          category="Fun Stuff",
+          short_help="Sorry, love.")
+async def cmd_sorry(ctx):
+
+   embed = discord.Embed(color=discord.Colour.purple())
+   embed.set_image(url="https://cdn.discordapp.com/attachments/309625872665542658/406040395462737921/image.png")
+   await ctx.reply(embed=embed)
+
 @cmds.cmd("cat",
           category="Fun Stuff",
           short_help="Sends a random cat image")
