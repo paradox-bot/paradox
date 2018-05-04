@@ -319,7 +319,7 @@ async def cmd_hackban(ctx):
         Hackbans the users listed with an optional reason.
         Hackbanning allows you to ban without the user being in the server.
         This is not an interactive command, you provide a userid for the users you wish to ban.
-    Flags:3:
+    Flags:3
         -m::  **multi**, allows mutiple user bans.
         -r::  **reason**, reason for the ban
         -p::  **purge**, purge <days> days of message history. (Default 1)
@@ -356,9 +356,9 @@ async def cmd_unban(ctx):
     Description:
         Unbans the listed users with optional reason.
         Partial names are supported.
-    Flags:
-        -m:  (multi) Allows mutiple user unbans.
-        -r:  (reason) Reason for unbanning
+    Flags:3
+        -m::  **multi** allows mutiple user unbans.
+        -r::  **reason** Reason for unbanning
     """
     if ctx.arg_str.strip() == "":
         await ctx.reply("You must provide a user to unban.")
@@ -392,11 +392,11 @@ async def cmd_ban(ctx):
     Description:
         Bans the users listed with an optional reason.
         Partial names are supported.
-    Flags:
-        -m:  (multi) Allows mutiple user bans.
-        -r:  (reason) Reason for the ban
-        -p:  (purge) Purge <days> days of message history. (Default 1)
-        -f:  (fake) Pretends to ban.
+    Flags:3
+        -m::  **multi** Allows mutiple user bans.
+        -r::  **reason** Reason for the ban
+        -p::  **purge** Purge <days> days of message history. **Default 1**
+        -f::  **fake** Pretends to ban.
     """
     if ctx.arg_str.strip() == "":
         await ctx.reply("You must provide a user to ban.")
@@ -430,11 +430,11 @@ async def cmd_softban(ctx):
     Description:
         Softbans (bans and unbans) the users listed with an optional reason.
         Partial names are supported.
-    Flags:
-        -m:  (multi) Allows mutiple user bans.
-        -r:  (reason) Reason for the ban
-        -p:  (purge) Purge <days> days of message history. (Default 1)
-        -f:  (fake) Pretends to softban.
+    Flags:3
+        -m::  **multi** Allows mutiple user bans.
+        -r::  **reason** Reason for the ban
+        -p::  **purge** Purge <days> days of message history. **Default 1**
+        -f::  **fake** Pretends to softban.
     """
     if ctx.arg_str.strip() == "":
         await ctx.reply("You must provide a user to softban.")
@@ -466,11 +466,11 @@ async def cmd_mute(ctx):
         {prefix}mute -m <user1> [user2] [user3]... [-r <reason>] [-f] [-t time]
     Description:
         Mutes the users listed with an optional reason. (WIP)
-    Flags:
-        -m:  (multi) Allows multiple user mutes.
-        -r:  (reason) Reason for the mute.
-        -f:  (fake) Pretends to mute.
-        -t:  (time) Optional time to mute for (WIP)
+    Flags:3
+        -m::  **multi** Allows multiple user mutes.
+        -r::  **reason** Reason for the mute.
+        -f::  **fake** Pretends to mute.
+        -t::  **time** Optional time to mute for **WIP**
     """
     if ctx.arg_str.strip() == "":
         await ctx.reply("You must give me a user to mute!")
@@ -502,10 +502,10 @@ async def cmd_unmute(ctx):
         {prefix}unmute <user1> [user2] [user3]... [-r <reason>] [-f]
     Description:
         Unmutes the users listed with an optional reason. (WIP)
-    Flags:
-        -m:  (multi) Allows multiple user unmutes.
-        -r:  (reason) Reason for the unmute.
-        -f:  (fake) Pretends to unmute.
+    Flags:3
+        -m::  **multi** Allows multiple user unmutes.
+        -r::  **reason** Reason for the unmute.
+        -f::  **fake** Pretends to unmute.
     """
     if ctx.arg_str.strip() == "":
         await ctx.reply("You must give me at least one user to unmute")
@@ -537,10 +537,10 @@ async def cmd_kick(ctx):
         {prefix}kick <user1> [user2] [user3]... [-r <reason>] [-f]
     Description:
         Kicks the users listed with an optional reason.
-    Flags:
-        -m:  (multi) Allows multiple user kicks.
-        -r:  (reason) Reason for the kick.
-        -f:  (fake) Pretends to kick.
+    Flags:3
+        -m::  **multi** Allows multiple user kicks.
+        -r::  **reason** Reason for the kick.
+        -f::  **fake** Pretends to kick.
     """
     if ctx.arg_str.strip() == "":
         await ctx.reply("You must provide a user to kick.")
