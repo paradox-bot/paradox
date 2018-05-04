@@ -196,6 +196,11 @@ def load_into(bot):
             pass
         return out_msg
 
+    @bot.util
+    async def from_now(ctx, time_diff):
+        now = datetime.datetime.utcnow().timestamp()
+        return now + time_diff
 
-
-
+    @bot.util
+    async def to_tstamp(ctx, days=0, hours=0, minutes=0, seconds=0):
+        return seconds + (minutes + (hours + days * 24) * 60) * 60

@@ -1,6 +1,8 @@
 import discord
 import shutil
 import os
+import bisect
+import asyncio
 from datetime import datetime
 
 from botdata import BotData
@@ -88,9 +90,11 @@ bot.objects["sorted cats"] = ["General",
                               "Bot Admin",
                               "Tex",
                               "Misc"]
+
 bot.objects["sorted_conf_pages"] = [("General", ["Guild settings"]),
                               ("Manual Moderation", ["Moderation"]),
                               ("Join/Leave Messages", ["Join message", "Leave message"])]
+
 bot.objects["regions"] = {
         "brazil": "Brazil",
         "eu-central": "Central Europe",
@@ -107,7 +111,6 @@ bot.objects["regions"] = {
         "vip-amsterdam": "Amsterdam (VIP)",
         "vip-us-east": "Eastern United States (VIP)"
     }
-
 
 # ----Discord event handling----
 
