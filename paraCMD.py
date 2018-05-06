@@ -16,13 +16,13 @@ class paraCMD(Command):
         field_name = ""
         table_field = False
         for i in range(0, len(lines)):
-            if re.match(r"^.*:$", lines[i]):
+            if re.match(r"^.*:[0-9]?$", lines[i]):
                 if field_name and field:
                     help_fields.append((field_name, field + ("" if table_field else "\n```")))
                     table_field = False
                 if re.match(r"^.*:[0-9]$", lines[i]):
-                    field_name = lines[i][:-3]
-                    field_len = int(lines[i][-2])
+                    field_name = lines[i][:-2]
+                    field_len = int(lines[i][-1])
                     table_field = True
                     field = ""
                 else:
