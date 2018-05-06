@@ -112,6 +112,13 @@ async def mute(ctx, user, **kwargs):
         return 1
     except Exception:
         return 2
+    dur = kwargs.get("duration", None)
+    if dur and dur.seconds:
+        mod_event = ModEvent(ctx, "unmute", ctx.author, [user], "Scheduled Unmute after " + ctx.strfdelta(dur))
+        async def unmute_scheduled(bot):
+            await ctx.bot.remove_roles(user, role)
+            await mod_event.modlog_post()
+        await ctx.bot.schedule(await ctx.from_now(dur.seconds), unmute_scheduled)
     return 0
 
 
@@ -498,7 +505,9 @@ async def cmd_mute(ctx):
         -m::  **multi** Allows multiple user mutes.
         -r::  **reason** Reason for the mute.
         -f::  **fake** Pretends to mute.
-        -t::  **time** Optional time to mute for **WIP**
+        -t::  **time** Optional time to mute for.
+    Examples:
+        {prefix}mute {msg.author.name} For jokes -t 1d, 2h, 10m
     """
     if ctx.arg_str.strip() == "":
         await ctx.reply("You must give me a user to mute!")
@@ -506,16 +515,24 @@ async def cmd_mute(ctx):
     reason, users = await mod_parse(ctx, purge=False)
     if not reason:
         return
+    dur = None
+    if ctx.flags["t"]:
+        dur = ctx.parse_dur(ctx.flags["t"])
+        if not dur.seconds:
+            await ctx.reply("Didn't understand the duration given. See the help for usage.")
+            return
+
+
 
     action_func = test_action if ctx.flags["f"] else mute
     strings = {"action_name": "mute",
                "action_multi_name": "multi-mute",
-               "start": "Muting... \n",
+               "start": "Muting... \n" if not dur else "Temp-Muting for `{}`... \n".format(ctx.strfdelta(dur)),
                "fail_unknown": "🚨 Encountered an unexpected fatal error muting `{user.name}`! Aborting sequence..."}
     strings["results"] = {0: "Muted `{user.name}`!",
                           1: "🚨 Failed to mute `{user.name}`! (Insufficient Permissions)",
                           -1: "Failed to find or create a mute role. Please set a mute role in config or ensure I have permissions to create it."}
-    await multi_mod_action(ctx, users, action_func, strings, reason)
+    await multi_mod_action(ctx, users, action_func, strings, reason, duration=dur)
 
 
 @cmds.cmd("unmute",
@@ -551,7 +568,7 @@ async def cmd_unmute(ctx):
     strings["results"] = {0: "Unmuted `{user.name}`!",
                           1: "🚨 Failed to unmute `{user.name}`! (Insufficient Permissions)",
                           -1: "Failed to find a mute role."}
-    await multi_mod_action(ctx, ctx.params, action_func, strings, reason)
+    await multi_mod_action(ctx, users, action_func, strings, reason)
 
 
 @cmds.cmd("kick",
