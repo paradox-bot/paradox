@@ -84,10 +84,30 @@ async def ban(ctx, user, **kwargs):
         return 2
     return 0
 
+async def make_muted(ctx):
+    role_name = "Muted"
+    colour = discord.Colour.red()
+    perms = discord.Permissions.none()
+    perms.send_messages = False
+    role = None
+    try:
+        role = await ctx.bot.create_role(ctx.server, name=role_name, colour=colour, permissions=perms)
+        await ctx.server_conf.mute_role.set(ctx, role.id)
+    except discord.Forbidden:
+        pass
+    return role
+
 
 async def mute(ctx, user, **kwargs):
+    role = await ctx.server_conf.mute_role.get(ctx)
+    if role:
+        role = discord.utils.get(ctx.server.roles, id=role)
+    if not role:
+        role = await make_muted(ctx)
+    if not role:
+        return -1
     try:
-        ctx.reply("Work in progress, come back later")
+        await ctx.bot.add_roles(user, role)
     except discord.Forbidden:
         return 1
     except Exception:
@@ -96,8 +116,13 @@ async def mute(ctx, user, **kwargs):
 
 
 async def unmute(ctx, user, **kwargs):
+    role = await ctx.server_conf.mute_role.get(ctx)
+    if role:
+        role = discord.utils.get(ctx.server.roles, id=role)
+    if not role:
+        return -1
     try:
-        ctx.reply("Work in progress, come back later")
+        await ctx.bot.remove_roles(user, role)
     except discord.Forbidden:
         return 1
     except Exception:
@@ -219,7 +244,10 @@ async def mod_result(ctx, result, msg, user, **kwargs):
     strings = kwargs["strings"]
     if result in strings["results"]:
         msg += "\t{}".format(strings["results"][result].format(user=user))
-        return (0, msg)
+        if result >= 0:
+            return (0, msg)
+        elif result < 0:
+            return (1, msg)
     else:
         msg += "\t{}".format(strings["fail_unknown"].format(user=user))
         return (1, msg)
@@ -485,7 +513,8 @@ async def cmd_mute(ctx):
                "start": "Muting... \n",
                "fail_unknown": "🚨 Encountered an unexpected fatal error muting `{user.name}`! Aborting sequence..."}
     strings["results"] = {0: "Muted `{user.name}`!",
-                          1: "🚨 Failed to mute `{user.name}`! (Insufficient Permissions)"}
+                          1: "🚨 Failed to mute `{user.name}`! (Insufficient Permissions)",
+                          -1: "Failed to find or create a mute role. Please set a mute role in config or ensure I have permissions to create it."}
     await multi_mod_action(ctx, users, action_func, strings, reason)
 
 
@@ -520,7 +549,8 @@ async def cmd_unmute(ctx):
                "start": "Unmuting... \n",
                "fail_unknown": "🚨 Encountered an unexpected fatal error unmuting `{user.name}`! Aborting sequence..."}
     strings["results"] = {0: "Unmuted `{user.name}`!",
-                          1: "🚨 Failed to unmute `{user.name}`! (Insufficient Permissions)"}
+                          1: "🚨 Failed to unmute `{user.name}`! (Insufficient Permissions)",
+                          -1: "Failed to find a mute role."}
     await multi_mod_action(ctx, ctx.params, action_func, strings, reason)
 
 
