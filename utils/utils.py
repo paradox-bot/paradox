@@ -2,6 +2,7 @@ import asyncio
 import subprocess
 import datetime
 import discord
+import re
 
 
 def load_into(bot):
@@ -46,7 +47,7 @@ def load_into(bot):
         return out.decode('utf-8')
 
     @bot.util
-    def convdatestring(ctx, datestring):
+    def convdatestring(datestring):
         datestring = datestring.strip(' ,')
         datearray = []
         funcs = {'d': lambda x: x * 24 * 60 * 60,
@@ -204,3 +205,18 @@ def load_into(bot):
     @bot.util
     async def to_tstamp(ctx, days=0, hours=0, minutes=0, seconds=0):
         return seconds + (minutes + (hours + days * 24) * 60) * 60
+
+    @bot.util
+    def parse_dur(ctx, time_str):
+        funcs = {'d': lambda x: x * 24 * 60 * 60,
+                 'h': lambda x: x * 60 * 60,
+                 'm': lambda x: x * 60,
+                 's': lambda x: x}
+        time_str = time_str.strip(" ,")
+        found = re.findall(r'(\d+)\s?(\w+?)', time_str)
+        seconds = 0
+        for bit in found:
+            if bit[1] in funcs:
+                seconds += funcs[bit[1]](int(bit[0]))
+        return datetime.timedelta(seconds=seconds)
+
