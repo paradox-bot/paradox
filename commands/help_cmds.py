@@ -15,7 +15,8 @@ async def cmd_help(ctx):
     Description:
         Shows detailed help on the requested command or sends you a listing of the commands.
     """
-    help_keys = {"prefix": ctx.used_prefix}
+    help_keys = {"prefix": ctx.used_prefix,
+                 "msg": ctx.msg}
     msg = ""
     all_commands = await ctx.get_cmds()  # Should probably be cached from ctx init
     commands = await ctx.get_raw_cmds()
