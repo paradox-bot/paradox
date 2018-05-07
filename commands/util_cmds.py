@@ -62,13 +62,11 @@ async def cmd_quote(ctx):
     if not message:
         await ctx.reply("Couldn't find the message!")
         return
-    embed = discord.Embed(colour=discord.Colour.light_grey())
+    embed = discord.Embed(colour=discord.Colour.light_grey(), description=message.content)
     if not ctx.flags["a"]:
         embed.set_author(name="{user.name}".format(user=message.author),
                         icon_url=message.author.avatar_url)
     embed.set_footer(text=message.timestamp.strftime("Sent at %-I:%M %p, %d/%m/%Y in #{}".format(message.channel.name)))
-    if message.content:
-        embed.add_field(name="Message", value=message.content)
     if message.attachments:
         embed.set_image(url=message.attachments[0]["proxy_url"])
     await ctx.reply(embed=embed)
