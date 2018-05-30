@@ -15,7 +15,8 @@ async def cmd_help(ctx):
     Description:
         Shows detailed help on the requested command or sends you a listing of the commands.
     """
-    help_keys = {"prefix": ctx.used_prefix}
+    help_keys = {"prefix": ctx.used_prefix,
+                 "msg": ctx.msg}
     msg = ""
     all_commands = await ctx.get_cmds()  # Should probably be cached from ctx init
     commands = await ctx.get_raw_cmds()
@@ -50,7 +51,7 @@ async def cmd_help(ctx):
                 if len(fields) == 0:
                     msg += "Sorry, no help has been written for the command {} yet!".format(cmd)
                     continue
-                emb_fields = [(field[0], "```{}```".format(field[1].format(**help_keys)), 0) for field in fields]
+                emb_fields = [(field[0], field[1].format(**help_keys), 0) for field in fields]
                 await ctx.emb_add_fields(embed, emb_fields)
                 await ctx.reply(embed=embed)
             else:

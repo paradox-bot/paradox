@@ -28,6 +28,8 @@ BOT_LOG_CH = "426655650706096129"
 
 LOG_CHANNEL = "428159039831146506"
 
+EMOJI_SERVER = "398694383089745920"
+
 
 LOGFILE = "logs/paralog.log"
 LOGFILE_LAST = "logs/paralog.last.log"
@@ -88,9 +90,11 @@ bot.objects["sorted cats"] = ["General",
                               "Bot Admin",
                               "Tex",
                               "Misc"]
+
 bot.objects["sorted_conf_pages"] = [("General", ["Guild settings"]),
-                              ("Manual Moderation", ["Moderation"]),
-                              ("Join/Leave Messages", ["Join message", "Leave message"])]
+                                    ("Manual Moderation", ["Moderation"]),
+                                    ("Join/Leave Messages", ["Join message", "Leave message"])]
+
 bot.objects["regions"] = {
         "brazil": "Brazil",
         "eu-central": "Central Europe",
@@ -108,8 +112,24 @@ bot.objects["regions"] = {
         "vip-us-east": "Eastern United States (VIP)"
     }
 
+emojis = {"emoji_tex_del": "delete",
+          "emoji_tex_show": "showtex",
+          "emoji_bot": "parabot",
+          "emoji_botowner": "botowner",
+          "emoji_botmanager": "botmanager",
+          "emoji_online": "ParaOn",
+          "emoji_idle": "ParaIdle",
+          "emoji_dnd": "ParaDND",
+          "emoji_offline": "ParaInvis",
+          "emoji_next": "Next",
+          "emoji_prev": "Previous"}
 
 # ----Discord event handling----
+
+
+def get_emoji(name):
+    emojis = bot.get_server(id=EMOJI_SERVER).emojis
+    return discord.utils.get(emojis, name=name)
 
 
 @bot.event
@@ -131,17 +151,8 @@ async def on_ready():
         for log in log_splits:
             await bot.send_message(discord.utils.get(bot.get_all_channels(), id=LOG_CHANNEL), log)
 
-    bot.objects["emoji_tex_del"] = discord.utils.get(bot.get_all_emojis(), name='delete')
-    bot.objects["emoji_tex_show"] = discord.utils.get(bot.get_all_emojis(), name='showtex')
-    bot.objects["emoji_bot"] = discord.utils.get(bot.get_all_emojis(), name='parabot')
-    bot.objects["emoji_botowner"] = discord.utils.get(bot.get_all_emojis(), name='botowner')
-    bot.objects["emoji_botmanager"] = discord.utils.get(bot.get_all_emojis(), name='botmanager')
-    bot.objects["emoji_online"] = discord.utils.get(bot.get_all_emojis(), name='ParaOn')
-    bot.objects["emoji_idle"] = discord.utils.get(bot.get_all_emojis(), name='ParaIdle')
-    bot.objects["emoji_dnd"] = discord.utils.get(bot.get_all_emojis(), name='ParaDND')
-    bot.objects["emoji_offline"] = discord.utils.get(bot.get_all_emojis(), name='ParaInvis')
-    bot.objects["emoji_next"] = discord.utils.get(bot.get_all_emojis(), name='ParaOn')
-    bot.objects["emoji_prev"] = discord.utils.get(bot.get_all_emojis(), name='ParaIdle')
+    for emoji in emojis:
+        bot.objects[emoji] = get_emoji(emojis[emoji])
 
     bot.objects["cheat_report_channel"] = discord.utils.get(bot.get_all_channels(), id=CHEAT_CH)
     bot.objects["feedback_channel"] = discord.utils.get(bot.get_all_channels(), id=FEEDBACK_CH)
