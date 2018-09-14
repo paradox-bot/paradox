@@ -9,23 +9,26 @@ def load_into(bot):
         maybe_user_id = user_str.strip('<@!> ')
         if is_member:
             def is_user(member):
-                return ((member.id == maybe_user_id) or
-                        (user_str.lower() in member.display_name.lower()) or
-                        (user_str.lower() in member.name.lower()))
+                return (user_str.lower() in member.display_name.lower()) or
+                       (user_str.lower() in member.name.lower()))
         else:
             def is_user(member):
-                return ((member.id == maybe_user_id) or
-                        (user_str.lower() in member.name.lower()))
+                return (user_str.lower() in member.name.lower()))
 
         collection = collection if collection else (ctx.server.members if in_server else ctx.bot.get_all_members())
         if interactive:
-            users = list(filter(is_user, collection))
+            users = []
+            if maybe_user_id.isdigit():
+                users = list(filter(lambda mem: mem.id == maybe_user_id, collection))
+            users = users if users else list(filter(is_user, collection))
             if len(users) == 0:
                 return None
             if len(users) > limit:
                 await ctx.reply("Over {} users found matching `{}`! Please refine your search".format(limit, user_str))
                 ctx.cmd_err = (-1, "")
                 return None
+            if len(users) == 1:
+                return users[0]
             if is_member:
                 names = ["{} {}".format(user.display_name, ("({})".format(user.name)) if user.nick else "") for user in users]
             else:
