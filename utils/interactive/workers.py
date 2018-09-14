@@ -31,9 +31,9 @@ def load_into(bot):
             if len(users) == 1:
                 return users[0]
             if is_member:
-                names = ["{} {}".format(user.display_name, ("({})".format(user.name)) if user.nick else "") for user in users]
+                names = ["{} {} {}".format(user.display_name, ("({})".format(user.name)) if user.nick else "", ("({})".format(user.id)) if not in_server else "") for user in users]
             else:
-                names = [user.name for user in users]
+                names = ["{} ({})".format(user.name, user.id) for user in users]
             selected = await ctx.selector("Multiple users found matching `{}`! Please select one.".format(user_str), names)
             if selected is None:
                 return None
