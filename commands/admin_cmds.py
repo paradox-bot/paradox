@@ -42,7 +42,7 @@ async def cmd_dm(ctx):
         Dms a user with the specified message.
         Performs an bot wide interactive lookup on user_info.
     """
-    if len(ctx.params < 2):
+    if len(ctx.params) < 2:
         await ctx.reply("Please see Usage.")
         return
     await ctx.run("dm", user_info = ctx.params[0], message = " ".join(ctx.params[1:]))
