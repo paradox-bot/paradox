@@ -30,6 +30,23 @@ async def cmd_setgame(ctx):
     await ctx.bot.change_presence(game=discord.Game(name=status))
     await ctx.reply("Game changed to: \'{}\'".format(status))
 
+@cmds.cmd("dm",
+          category="Bot admin",
+          short_help="dms a user")
+@cmds.require("master_perm")
+async def cmd_dm(ctx):
+    """
+    Usage:
+        {prefix}dm user_info message
+    Description:
+        Dms a user with the specified message.
+        Performs an bot wide interactive lookup on user_info.
+    """
+    if len(ctx.params < 2):
+        await ctx.reply("Please see Usage.")
+        return
+    await ctx.run("dm", user_info = ctx.params[0], message = " ".join(ctx.params[1:]))
+    await ctx.reply("Done.")
 
 @cmds.cmd("restart",
           category="Bot admin",
