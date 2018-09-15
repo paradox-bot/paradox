@@ -47,7 +47,7 @@ async def cmd_calc(ctx):
         return
     to_calc = ctx.arg_str.replace("`", "")
     nsp = NumericStringParser()
-    response = nsp(to_calc)
+    response = nsp.eval(to_calc)
     if response:
         await ctx.reply("Answer: `{}`".format(response))
     else:
