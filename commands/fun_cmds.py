@@ -3,6 +3,7 @@ import discord
 import aiohttp
 import asyncio
 from datetime import datetime, timedelta
+from NumericStringParser import NumericStringParser
 
 cmds = paraCH()
 
@@ -29,6 +30,29 @@ async def cmd_bin2ascii(ctx):
     asciilist = [chr(sum([int(b) << 7 - n for (n, b) in enumerate(byte)])) for byte in bytelist]
     await ctx.reply("Output: `{}`".format(''.join(asciilist)))
 
+@cmds.cmd("calc",
+          category="Fun stuff",
+          short_help="Calculator!")
+async def cmd_calc(ctx):
+    """
+    Usage:
+        {prefix}calc <what you want to calculate>
+    Description:
+        Calculates the given expression and returns the answer
+    Examples:
+        {prefix}calc 1+1
+    """
+    if not ctx.params[0]:
+        await ctx.reply("Please give me something to calculate!")
+        return
+    to_calc = ctx.arg_str.replace("`", "")
+    nsp = NumericStringParser()
+    response = nsp(to_calc)
+    if response:
+        await ctx.reply("Answer: `{}`".format(response))
+    else:
+        await ctx.reply("Something went wrong calculating your expression! Please check your input and try again.")
+    
 
 @cmds.cmd("lenny",
           category="Fun stuff",
