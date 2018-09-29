@@ -4,6 +4,8 @@ import aiohttp
 import asyncio
 from datetime import datetime, timedelta
 from NumericStringParser import NumericStringParser
+import urllib
+import random
 
 cmds = paraCH()
 
@@ -52,7 +54,44 @@ async def cmd_calc(ctx):
         await ctx.reply("Answer: `{}`".format(response))
     else:
         await ctx.reply("Something went wrong calculating your expression! Please check your input and try again.")
-    
+
+@cmds.cmd("image",
+          category="Fun Stuff",
+          short_help="Searches images for the specified text",
+          aliases=["imagesearch", "images"])
+async def cmd_image(ctx):
+    """
+    Usage:
+        {prefix}image <image text>
+    Description:
+        Replies with a random image matching the search description.
+    """
+    API_KEY = "10259038-12ef42751915ae10017141c86"
+    if not ctx.arg_str:
+        await ctx.reply("Please enter something to search for")
+        return
+    search_for = urllib.parse.quote_plus(ctx.arg_str)
+    async with aiohttp.get('https://pixabay.com/api/?key={}&q={}&image_type=photo'.format(API_KEY, search_for)) as r:
+        if r.status == 200:
+            js = await r.json()
+            hits = js['hits'] if 'hits' in js else None
+            if not hits:
+                await ctx.reply("Didn't get any results for this query!")
+                return
+            hit = random.choice(hits)
+            print(hit)
+            url = hit["webformatURL"]
+            embed = discord.Embed(title="Ok!", color=discord.Colour.light_grey())
+            embed.set_image(url=url)
+            try:
+                await ctx.reply(embed=embed)
+                return
+            except Exception:
+                await ctx.reply("Something went wrong sending your search, sorry!")
+                pass
+        else:
+            await ctx.reply("Something went wrong with your search, sorry!")
+        await ctx.reply("Sorry! The cats are too poweful right now. Please try again later!")
 
 @cmds.cmd("lenny",
           category="Fun stuff",
