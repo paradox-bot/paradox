@@ -27,6 +27,16 @@ async def snip_user_lookup(ctx, in_server=False):
     ctx.objs["found_user"] = await ctx.find_user(ctx.params[0], in_server, interactive=True)
     return ctx.objs["found_user"]
 
+@snip("dm")
+async def snip_dm(ctx, user_info=None, message=None):
+    """
+    Does a lookup on the provided user string and dms them the given message
+    """
+    user = await ctx.find_user(user_info, in_server=False, interactive=True)
+    if not user:
+        await ctx.reply("Couldn't find the user")
+        return
+    await ctx.send(user, message)
 
 @snip("rep cooldown")
 async def snip_rep_cooldown(ctx, userid=None):

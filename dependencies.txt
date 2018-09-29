@@ -2,3 +2,4 @@ discord
 psutil
 iso8601
 pytz
+pyparsing

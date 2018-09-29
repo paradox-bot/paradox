@@ -2,6 +2,7 @@ import sys
 from io import StringIO
 import traceback
 import asyncio
+import discord
 
 from paraCH import paraCH
 
