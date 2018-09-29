@@ -78,20 +78,17 @@ async def cmd_image(ctx):
             if not hits:
                 await ctx.reply("Didn't get any results for this query!")
                 return
-            hit = random.choice(hits)
-            print(hit)
-            url = hit["webformatURL"]
-            embed = discord.Embed(title="Ok!", color=discord.Colour.light_grey())
-            embed.set_image(url=url)
-            try:
-                await ctx.reply(embed=embed)
-                return
-            except Exception:
-                await ctx.reply("Something went wrong sending your search, sorry!")
-                pass
+            hit_pages = []
+            for hit in [random.choice(hits) for i in range(20)]:
+                embed = discord.Embed(title="Ok!", color=discord.Colour.light_grey())
+                embed.set_image(url=hit["webformatURL"]) if "webformatURL" in hit else continue
+                embed.set_footer("Images thanks to the free https://pixabay.com API!")
+                hit_pages.append(embed)
+            await ctx.pager(hit_pages, embed=True)
         else:
             await ctx.reply("Something went wrong with your search, sorry!")
-        await ctx.reply("Sorry! The cats are too poweful right now. Please try again later!")
+            return
+        await ctx.reply("Sorry! The images are too poweful right now. Please try again later!")
 
 @cmds.cmd("lenny",
           category="Fun stuff",
