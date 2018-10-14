@@ -557,6 +557,6 @@ async def cmd_role(ctx):
                   ("Hoisted", hoisted, 0),
                   ("Mentionable", mentionable, 0),
                   ("Number of members", num_users, 0),
-                  ("Position in the heirachy", position, 0)]
+                  ("Position in the hierachy", position, 0)]
     await ctx.emb_add_fields(embed, emb_fields)
     await ctx.reply(embed=embed)
