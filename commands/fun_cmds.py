@@ -85,7 +85,7 @@ async def cmd_image(ctx):
                     embed.set_image(url=hit["webformatURL"])
                 else:
                     continue
-                embed.set_footer("Images thanks to the free https://pixabay.com API!")
+                embed.set_footer(text="Images thanks to the free https://pixabay.com API!")
                 hit_pages.append(embed)
             await ctx.pager(hit_pages, embed=True)
         else:
