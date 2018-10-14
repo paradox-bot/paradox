@@ -91,7 +91,6 @@ async def cmd_image(ctx):
         else:
             await ctx.reply("Something went wrong with your search, sorry!")
             return
-        await ctx.reply("Sorry! The images are too poweful right now. Please try again later!")
 
 @cmds.cmd("lenny",
           category="Fun stuff",
@@ -166,7 +165,7 @@ async def cmd_cat(ctx, recursion=0):
                 asyncio.sleep(1)
                 await cmd_cat(ctx, recursion=recursion+1)
                 return
-        await ctx.reply("Sorry! The cats are too poweful right now. Please try again later!")
+        await ctx.reply("Sorry! The cats are too powerful right now. Please try again later!")
 
 
 @cmds.cmd("rep",
