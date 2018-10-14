@@ -81,7 +81,10 @@ async def cmd_image(ctx):
             hit_pages = []
             for hit in [random.choice(hits) for i in range(20)]:
                 embed = discord.Embed(title="Ok!", color=discord.Colour.light_grey())
-                embed.set_image(url=hit["webformatURL"]) if "webformatURL" in hit else continue
+                if "webformatURL" in hit
+                    embed.set_image(url=hit["webformatURL"])
+                else
+                    continue
                 embed.set_footer("Images thanks to the free https://pixabay.com API!")
                 hit_pages.append(embed)
             await ctx.pager(hit_pages, embed=True)
