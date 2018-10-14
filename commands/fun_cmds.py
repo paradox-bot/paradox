@@ -80,7 +80,7 @@ async def cmd_image(ctx):
                 return
             hit_pages = []
             for hit in [random.choice(hits) for i in range(20)]:
-                embed = discord.Embed(title="Ok!", color=discord.Colour.light_grey())
+                embed = discord.Embed(title="Here you go!", color=discord.Colour.light_grey())
                 if "webformatURL" in hit:
                     embed.set_image(url=hit["webformatURL"])
                 else:
