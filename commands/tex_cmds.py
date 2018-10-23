@@ -112,13 +112,15 @@ async def cmd_preamble(ctx):
         await ctx.data.users.set(ctx.authid, "latex_preamble", default_preamble)
         await ctx.data.users.set(ctx.authid, "limbo_preamble", "")
         message = "Your LaTeX preamble has been reset to the default!\n"
+    embed = discord.Embed(title="LaTeX config", color = discord.Colour.light_grey(), description = message)
     if ctx.arg_str.strip() == "":
         preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
         preamble = preamble if preamble else default_preamble
-        await ctx.reply("{}```tex\n{}\n```".format(message, preamble))
-        new_preamble = await ctx.data.users.get(ctx.flags["approve"], "limbo_preamble")
+        embed.add_field(name="Current preamble", value="```tex\n{}\n```".format(preamble))
+        new_preamble = await ctx.data.users.get(ctx.authid, "limbo_preamble")
         if new_preamble:
-            await ctx.reply("Awaiting approval:\n```tex\n{}\n```".format(new_preamble))
+            embed.add_field(name="Awaiting approval", value="```tex\n{}\n```".format(new_preamble), inline=False)
+        await ctx.reply(embed=embed)
         return
     new_preamble = ctx.arg_str
     await ctx.data.users.set(ctx.authid, "limbo_preamble", new_preamble)
