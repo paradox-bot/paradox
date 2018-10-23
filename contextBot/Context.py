@@ -106,6 +106,7 @@ class Context:
         if file_name:
             return await self.bot.send_file(destination, file_name, content=message)
         if message:
+            message = message.replace("@everyone", "[REDACTED]")
             if split and (not embed):
                 splits = await self.msg_split(str(message), code)
                 out = []
