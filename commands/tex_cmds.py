@@ -35,13 +35,15 @@ async def cmd_tex(ctx):
         err_msg = "Compile error! Output:\n```\n{}\n```".format(error)
     else:
         await ctx.del_src()
-    source_msg = "```tex\n{}\n```{}".format(ctx.arg_str, err_msg)
-
-    out_msg = await ctx.reply(file_name='tex/{}.png'.format(ctx.authid), message= "{}:\n{}".format(ctx.author.name, source_msg if error else ""))
 
     del_emoji = ctx.bot.objects["emoji_tex_del"]
     show_emoji = ctx.bot.objects["emoji_tex_errors" if error else "emoji_tex_show"]
-    show = 1 if error else 0
+
+    source_msg = "```tex\n{}\n```{}".format(ctx.arg_str, err_msg)
+
+    out_msg = await ctx.reply(file_name='tex/{}.png'.format(ctx.authid), message= "{}:\n{}".format(ctx.author.name, ("Compile Error! Click the {} reaction for details.".format(show_emoji)) if error else ""))
+
+    show = 0
 
     def check(reaction, user):
         return ((reaction.emoji == del_emoji) or (reaction.emoji == show_emoji)) and (not (user == ctx.me))
