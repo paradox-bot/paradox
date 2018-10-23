@@ -102,7 +102,7 @@ async def cmd_preamble(ctx):
             new_preamble = new_preamble if new_preamble.strip() else default_preamble
             await ctx.data.users.set(user_id, "latex_preamble", new_preamble)
             await ctx.reply("The preamble change has been approved")
-        await ctx.data.users.set(, "limbo_preamble", "")
+        await ctx.data.users.set(user_id, "limbo_preamble", "")
         if ctx.flags["deny"]:
             await ctx.reply("The preamble change has been denied")
         return
