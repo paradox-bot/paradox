@@ -115,6 +115,7 @@ bot.objects["regions"] = {
 
 emojis = {"emoji_tex_del": "delete",
           "emoji_tex_show": "showtex",
+          "emoji_tex_errors": "errors",
           "emoji_bot": "parabot",
           "emoji_botowner": "botowner",
           "emoji_botmanager": "botmanager",

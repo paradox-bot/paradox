@@ -32,14 +32,16 @@ async def cmd_tex(ctx):
     error = await texcomp(ctx)
     err_msg = ""
     if error != "":
-        err_msg = "\nCompile error! Output:\n```\n{}\n```".format(error)
+        err_msg = "Compile error! Output:\n```\n{}\n```".format(error)
+    else:
+        await ctx.del_src()
+    source_msg = "```tex\n{}\n```{}".format(ctx.arg_str, err_msg)
 
-    await ctx.del_src()
-    out_msg = await ctx.reply(file_name='tex/{}.png'.format(ctx.authid), message=ctx.author.name + ":" + err_msg)
+    out_msg = await ctx.reply(file_name='tex/{}.png'.format(ctx.authid), message= "{}:\n{}".format(ctx.author.name, source_msg if error else ""))
 
     del_emoji = ctx.bot.objects["emoji_tex_del"]
-    show_emoji = ctx.bot.objects["emoji_tex_show"]
-    show = 0
+    show_emoji = ctx.bot.objects["emoji_tex_errors" if error else "emoji_tex_show"]
+    show = 1 if error else 0
 
     def check(reaction, user):
         return ((reaction.emoji == del_emoji) or (reaction.emoji == show_emoji)) and (not (user == ctx.me))
@@ -64,7 +66,7 @@ async def cmd_tex(ctx):
                 pass
             show = 1 - show
             await ctx.bot.edit_message(out_msg, ctx.author.name + ":\n" +
-                                       ("```tex\n{}\n```".format(ctx.arg_str) if show else ""))
+                                       (source_msg if show else ""))
     try:
         await ctx.bot.remove_reaction(out_msg, del_emoji, ctx.me)
         await ctx.bot.remove_reaction(out_msg, show_emoji, ctx.me)
