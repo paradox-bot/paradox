@@ -79,7 +79,7 @@ async def cmd_tex(ctx):
           category="Maths",
           short_help="View and set your LaTeX preamble",
           aliases=["texconfig"])
-@cmds.execute("flags", flags=["reset", "approve=="])
+@cmds.execute("flags", flags=["reset", "approve==", "deny=="])
 async def cmd_preamble(ctx):
     """
     Usage:
