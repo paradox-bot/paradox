@@ -24,6 +24,7 @@ PREFIX = conf.get("PREFIX")
 
 CHEAT_CH = "429507856908419074"
 FEEDBACK_CH = "429514404418289684"
+PREAMBLE_CH = "504225174799908864"
 BOT_LOG_CH = "426655650706096129"
 
 LOG_CHANNEL = "428159039831146506"
@@ -156,6 +157,7 @@ async def on_ready():
 
     bot.objects["cheat_report_channel"] = discord.utils.get(bot.get_all_channels(), id=CHEAT_CH)
     bot.objects["feedback_channel"] = discord.utils.get(bot.get_all_channels(), id=FEEDBACK_CH)
+    bot.objects["preamble_channel"] = discord.utils.get(bot.get_all_channels(), id=PREAMBLE_CH)
     bot.objects["server_change_log_channel"] = discord.utils.get(bot.get_all_channels(), id=BOT_LOG_CH)
 
 # ----Event loops----

@@ -1,13 +1,23 @@
 import shutil
 import discord
+from datetime import datetime
+import re
 
 from paraCH import paraCH
 
 cmds = paraCH()
 
 
+header = "\\documentclass[preview, 12pt]{standalone}\
+          \n\\nonstopmode"
+
+default_preamble = "\\usepackage{amsmath}\
+                    \n\\usepackage{fancycom}\
+                    \n\\usepackage{color}\
+                    \n\\usepackage{tikz-cd}"
+
 @cmds.cmd("tex",
-          category="Misc",
+          category="Maths",
           short_help="Renders LaTeX code",
           aliases=["LaTeX"])
 async def cmd_tex(ctx):
@@ -61,12 +71,76 @@ async def cmd_tex(ctx):
         await ctx.bot.clear_reactions(out_msg)
     except discord.Forbidden:
         pass
+    except discord.NotFound:
+        pass
+
+
+@cmds.cmd("preamble",
+          category="Maths",
+          short_help="View and set your LaTeX preamble",
+          aliases=["texconfig"])
+@cmds.execute("flags", flags=["reset", "approve=="])
+async def cmd_preamble(ctx):
+    """
+    Usage:
+        {prefix}preamble [code] [--reset]
+    Description:
+        Displays the preamble currently used for compiling your latex code.
+        If [code] is provided, sets this to be preamble instead.
+        Note that preambles must currently be approved by a bot manager, to prevent abuse.
+    Flags:2
+        reset::  Resets your preamble to the default.
+    """
+    message = ""
+    user_id = ctx.flags["approve"] or ctx.flags["deny"]
+    if user_id:
+        (code, msg) = await cmds.checks["manager_perm"](ctx)
+        if code != 0:
+            return
+        if ctx.flags["approve"]:
+            new_preamble = await ctx.data.users.get(user_id, "limbo_preamble")
+            new_preamble = new_preamble if new_preamble.strip() else default_preamble
+            await ctx.data.users.set(user_id, "latex_preamble", new_preamble)
+            await ctx.reply("The preamble change has been approved")
+        await ctx.data.users.set(, "limbo_preamble", "")
+        if ctx.flags["deny"]:
+            await ctx.reply("The preamble change has been denied")
+        return
+
+
+    if ctx.flags["reset"]:
+        await ctx.data.users.set(ctx.authid, "latex_preamble", default_preamble)
+        await ctx.data.users.set(ctx.authid, "limbo_preamble", "")
+        message = "Your LaTeX preamble has been reset to the default!\n"
+    if ctx.arg_str.strip() == "":
+        preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
+        preamble = preamble if preamble else default_preamble
+        await ctx.reply("{}```tex\n{}\n```".format(message, preamble))
+        new_preamble = await ctx.data.users.get(ctx.flags["approve"], "limbo_preamble")
+        if new_preamble:
+            await ctx.reply("Awaiting approval:\n```tex\n{}\n```".format(new_preamble))
+        return
+    new_preamble = ctx.arg_str
+    await ctx.data.users.set(ctx.authid, "limbo_preamble", new_preamble)
+    embed = discord.Embed(title="LaTeX Preamble Request", color=discord.Colour.blue()) \
+        .set_author(name="{} ({})".format(ctx.author, ctx.authid),
+                    icon_url=ctx.author.avatar_url) \
+        .add_field(name="Requested preamble", value="```tex\n{}\n```".format(new_preamble), inline=False) \
+        .add_field(name="To Approve", value="`preamble --approve {}`".format(ctx.authid), inline=False) \
+        .set_footer(text=datetime.utcnow().strftime("Sent from {} at %-I:%M %p, %d/%m/%Y".format(ctx.server.name if ctx.server else "private message")))
+    await ctx.bot.send_message(ctx.bot.objects["preamble_channel"], embed=embed)
+    await ctx.reply("Your new preamble has been sent to the bot managers for review!")
+
 
 
 async def texcomp(ctx):
     fn = "tex/{}.tex".format(ctx.authid)
     shutil.copy('tex/preamble.tex', fn)
-    with open(fn, 'a') as work:
+    preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
+    preamble = preamble if preamble else default_preamble
+    with open(fn, 'w') as work:
+        work.write(header + preamble)
+        work.write('\n' + '\\begin{document}' + '\n')
         work.write(ctx.arg_str)
         work.write('\n' + '\\end{document}' + '\n')
         work.close()
