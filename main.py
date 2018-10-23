@@ -89,7 +89,7 @@ bot.objects["sorted cats"] = ["General",
                               "Moderation",
                               "Server Admin",
                               "Bot Admin",
-                              "Tex",
+                              "Maths",
                               "Misc"]
 
 bot.objects["sorted_conf_pages"] = [("General", ["Guild settings"]),
