@@ -77,19 +77,21 @@ async def cmd_tex(ctx):
 
 @cmds.cmd("preamble",
           category="Maths",
-          short_help="View and set your LaTeX preamble",
+          short_help="Change how your LaTeX compiles",
           aliases=["texconfig"])
-@cmds.execute("flags", flags=["reset", "approve==", "deny=="])
+@cmds.execute("flags", flags=["color==", "colour==", "reset", "approve==", "deny=="])
 async def cmd_preamble(ctx):
     """
     Usage:
-        {prefix}preamble [code] [--reset]
+        {prefix}preamble [code] [--reset] [--colour|color [default|transparent]]
     Description:
         Displays the preamble currently used for compiling your latex code.
         If [code] is provided, sets this to be preamble instead.
         Note that preambles must currently be approved by a bot manager, to prevent abuse.
+        Can also change the colourscheme of the output.
     Flags:2
         reset::  Resets your preamble to the default.
+        colour:: One of default or transparent. Change how the output looks.
     """
     message = ""
     user_id = ctx.flags["approve"] or ctx.flags["deny"]
@@ -108,6 +110,13 @@ async def cmd_preamble(ctx):
         return
 
 
+    colour = ctx.flags["colour"] or ctx.flags["color"]
+    if colour:
+        if colour not in ["default", "transparent"]:
+            await ctx.reply("Unrecognised colourscheme. It must be one of `default` or `transparent`.")
+            return
+        await ctx.data.users.set(ctx.authid, "latex_colour", colour)
+
     if ctx.flags["reset"]:
         await ctx.data.users.set(ctx.authid, "latex_preamble", default_preamble)
         await ctx.data.users.set(ctx.authid, "limbo_preamble", "")
@@ -120,6 +129,9 @@ async def cmd_preamble(ctx):
         new_preamble = await ctx.data.users.get(ctx.authid, "limbo_preamble")
         if new_preamble:
             embed.add_field(name="Awaiting approval", value="```tex\n{}\n```".format(new_preamble), inline=False)
+        colour = await ctx.data.users.get(ctx.authid, "latex_colour")
+        colour = colour if colour else "default"
+        embed.add_field(name="Output colourscheme", value=colour, inline=False)
         await ctx.reply(embed=embed)
         return
     new_preamble = ctx.arg_str
@@ -146,4 +158,6 @@ async def texcomp(ctx):
         work.write(ctx.arg_str)
         work.write('\n' + '\\end{document}' + '\n')
         work.close()
-    return await ctx.run_sh("tex/texcompile.sh "+ctx.authid)
+    colour = await ctx.data.users.get(ctx.authid, "latex_colour")
+    colour = colour if colour else "default"
+    return await ctx.run_sh("tex/texcompile.sh {} {}".format(ctx.authid, colour))
