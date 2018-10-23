@@ -358,17 +358,21 @@ async def cmd_profile(ctx):
     badge_dict = {"master_perm": "botowner",
                   "manager_perm": "botmanager"}
     badges = ""
+    tempid = ctx.authid
+    ctx.authid = user.id
+    #TODO: VERY BAD, quick hack so badges work.
     for badge in badge_dict:
         (code, msg) = await cmds.checks[badge](ctx)
         if code == 0:
             badge_emoj = ctx.bot.objects["emoji_"+badge_dict[badge]]
             if badge_emoj is not None:
                 badges += str(badge_emoj) + " "
+    ctx.authid = tempid
 
     created_ago = ctx.strfdelta(datetime.utcnow()-user.created_at)
     created = user.created_at.strftime("%-I:%M %p, %d/%m/%Y")
     rep = await ctx.data.users.get(user.id, "rep")
-    given_rep = await ctx.data.users.get(ctx.authid, "given_rep")
+    given_rep = await ctx.data.users.get(user.id, "given_rep")
 
     embed = discord.Embed(type="rich", color=user.colour) \
         .set_author(name="{user} ({user.id})".format(user=user),
