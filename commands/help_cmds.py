@@ -34,6 +34,9 @@ async def cmd_help(ctx):
             if cat.lower() not in cat_msgs:
                 continue
             cat_msgs[cat.lower()] += "```"
+            if len(msg) + len(cat_msgs[cat.lower()]) > 1990:
+                await ctx.reply(msg, dm=True)
+                msg = ""
             msg += cat_msgs[cat.lower()]
         await ctx.reply(msg, dm=True)
         await ctx.reply("I have messaged you a detailed listing of my commands! \
