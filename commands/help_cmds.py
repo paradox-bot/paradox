@@ -40,7 +40,7 @@ async def cmd_help(ctx):
             msg += cat_msgs[cat.lower()]
         await ctx.reply(msg, dm=True)
         await ctx.reply("I have messaged you a detailed listing of my commands! \
-                        \nUse `{0.used_prefix}<cmd>` to get detailed help on a command, or `{0.used_prefix}list` to obtain a briefer listing.".format(ctx))
+                        \nUse `{0.used_prefix}help <cmd>` to get detailed help on a command, or `{0.used_prefix}list` to obtain a briefer listing.".format(ctx))
         return
     else:
         for cmd in ctx.params:
