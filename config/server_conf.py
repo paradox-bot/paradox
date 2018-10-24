@@ -13,6 +13,10 @@ class Server_Setting(paraSetting):
 
     @classmethod
     async def write(cls, ctx, value):
+        (code, msg) = await ctx.CH.checks["in_server_has_mod"](ctx)
+        if code != 0:
+            ctx.cmd_err = (code, msg)
+            return
         return await ctx.data.servers.set(ctx.server.id, cls.name, value)
 
 
