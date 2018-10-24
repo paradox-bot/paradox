@@ -19,8 +19,10 @@ async def cmd_about(ctx):
     Description:
         Sends a message containing information about the bot.
     """
-    devs = ["298706728856453121", "299175087389802496", "225773687037493258", "300992784020668416"]  # TODO: Don't hard code these here!!
-    devnames = ', '.join([str(discord.utils.get(ctx.bot.get_all_members(), id=str(devs))) for devs in devs])
+    current_devs = ["299175087389802496", "408905098312548362", "300992784020668416"]
+    old_devs = ["298706728856453121",  "225773687037493258",]  # TODO: Don't hard code these here!!
+    current_devnames = ', '.join([str(discord.utils.get(ctx.bot.get_all_members(), id=str(devs))) for devs in current_devs])
+    old_devnames = ', '.join([str(discord.utils.get(ctx.bot.get_all_members(), id=str(devs))) for devs in old_devs])
     pform = platform.platform()
     py_vers = sys.version
     mem = psutil.virtual_memory()
@@ -30,10 +32,12 @@ async def cmd_about(ctx):
         \nI am under active development and constantly evolving with new commands and features."
     links = "[Support Server]({sprt}), [Invite Me]({invite})".format(sprt=ctx.bot.objects["support guild"],
                                                                      invite=ctx.bot.objects["invite_link"])
+    api_vers = "{} ({})".format(discord.__version__, discord.version_info[3])
 
     emb_fields = [("Info", info, 1),
-                  ("Developed by", devnames, 0),
+                  ("Developed by", "Current: {}.\nPast: {}.".format(current_devnames, old_devnames), 0),
                   ("Python version", py_vers, 0),
+                  ("Discord API version", api_vers, 0),
                   ("Platform", pform, 0),
                   ("Memory", mem_str, 0),
                   ("CPU usage", cpu_usage_str, 0),
