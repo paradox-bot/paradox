@@ -79,7 +79,7 @@ Bot.log = log
 
 bot.load("commands", "config", "events", "utils", ignore=["RCS", "__pycache__"])
 
-bot.objects["invite_link"] = "https://invite.paradoxical.pw"
+bot.objects["invite_link"] = "http://invite.paradoxical.pw"
 bot.objects["support guild"] = "https://discord.gg/ECbUu8u"
 bot.objects["sorted cats"] = ["General",
                               "Fun Stuff",
