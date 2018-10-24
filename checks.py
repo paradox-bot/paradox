@@ -79,12 +79,29 @@ async def perm_manage_server(ctx):
 
 # Mod action checks
 
+@check("in_server_has_mod")
+async def check_in_server_has_mod(ctx):
+    if (ctx.user is None) or (ctx.server is None):
+        return (2, "An internal error occurred.")
+    mod_role = await ctx.server_conf.mod_role.get(ctx)
+    if mod_role:
+        mod_role = discord.utils.get(ctx.server.roles, id=mod_role)
+    if not mod_role:
+        (code, msg) = await checks["has_manage_server"](ctx)
+        return (code, msg)
+    if mod_role in ctx.member.roles:
+        return (0, "")
+    else:
+        return (1, "You don't have the moderator role in this server!")
+
+
+
 @check("in_server_can_ban")
 async def check_in_server_can_ban(ctx):
     """
     TODO: Need to do proper custom checks here
     """
-    (code, msg) = await checks["has_manage_server"](ctx)
+    (code, msg) = await checks["in_server_has_mod"](ctx)
     if code == 0:
         return (code, msg)
     else:
@@ -96,7 +113,7 @@ async def check_in_server_can_ban(ctx):
     """
     TODO: Need to do proper custom checks here
     """
-    (code, msg) = await checks["has_manage_server"](ctx)
+    (code, msg) = await checks["in_server_has_mod"](ctx)
     if code == 0:
         return (code, msg)
     else:
@@ -108,7 +125,7 @@ async def check_in_server_can_ban(ctx):
     """
     TODO: Need to do proper custom checks here
     """
-    (code, msg) = await checks["has_manage_server"](ctx)
+    (code, msg) = await checks["in_server_has_mod"](ctx)
     if code == 0:
         return (code, msg)
     else:
@@ -120,7 +137,7 @@ async def check_in_server_can_kick(ctx):
     """
     TODO: Need to do proper custom checks here
     """
-    (code, msg) = await checks["has_manage_server"](ctx)
+    (code, msg) = await checks["in_server_has_mod"](ctx)
     if code == 0:
         return (code, msg)
     else:
@@ -133,7 +150,7 @@ async def check_in_server_can_softban(ctx):
     """
     TODO: Need to do proper custom checks here
     """
-    (code, msg) = await checks["has_manage_server"](ctx)
+    (code, msg) = await checks["in_server_has_mod"](ctx)
     if code == 0:
         return (code, msg)
     else:
@@ -145,7 +162,7 @@ async def check_in_server_can_softban(ctx):
     """
     TODO: Need to do proper custom checks here
     """
-    (code, msg) = await checks["has_manage_server"](ctx)
+    (code, msg) = await checks["in_server_has_mod"](ctx)
     if code == 0:
         return (code, msg)
     else:
@@ -157,7 +174,7 @@ async def check_in_server_can_softban(ctx):
     """
     TODO: Need to do proper custom checks here
     """
-    (code, msg) = await checks["has_manage_server"](ctx)
+    (code, msg) = await checks["in_server_has_mod"](ctx)
     if code == 0:
         return (code, msg)
     else:

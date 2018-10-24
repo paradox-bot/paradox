@@ -58,6 +58,13 @@ class Server_Setting_modlog_ch(Server_Setting, settingTypes.CHANNEL):
     default = None
     category = "Moderation"
 
+@server_conf.setting
+class Server_Setting_modrole(Server_Setting, settingTypes.ROLE):
+    name = "mod_role"
+    vis_name = "modrole"
+    desc = "Role required to use moderation commands"
+    default = None
+    category = "Moderation"
 
 @server_conf.setting
 class Server_Setting_mute_role(Server_Setting, settingTypes.ROLE):
