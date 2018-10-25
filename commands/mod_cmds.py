@@ -575,7 +575,7 @@ async def cmd_unmute(ctx):
           category="Moderation",
           short_help="Kicks users",
           aliases=["k"])
-@cmds.execute("flags", flags=["r==", "f"])
+@cmds.execute("flags", flags=["r==", "f", "m"])
 @cmds.require("in_server")
 @cmds.require("in_server_can_kick")
 async def cmd_kick(ctx):
