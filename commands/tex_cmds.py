@@ -2,6 +2,7 @@ import shutil
 import discord
 from datetime import datetime
 import re
+import asyncio
 
 from paraCH import paraCH
 
@@ -28,66 +29,96 @@ async def cmd_tex(ctx):
         Renders and displays LaTeX code.
         Use the reactions to delete the message and show your code, respectively.
     """
-    # TODO: Make this an embed
+    ctx.objs["latex_source_deleted"] = False
+    ctx.objs["latex_out_deleted"] = False
+    ctx.objs["latex_source"] = ctx.arg_str
+
+    out_msg = await make_latex(ctx)
+
+    asyncio.ensure_future(reaction_edit_handler(ctx, out_msg), loop = ctx.bot.loop)
+    if not ctx.objs["latex_source_deleted"]:
+        asyncio.ensure_future(source_edit_handler(ctx, out_msg), loop = ctx.bot.loop)
+
+
+async def make_latex(ctx):
     error = await texcomp(ctx)
     err_msg = ""
     if error != "":
         err_msg = "Compile error! Output:\n```\n{}\n```".format(error)
-    else:
+    elif not (await ctx.data.users.get(ctx.authid, "latex_keep_message")):
+        ctx.objs["latex_source_deleted"] = True
         await ctx.del_src()
+    ctx.objs["latex_source_msg"] = "```tex\n{}\n```{}".format(ctx.objs["latex_source"], err_msg)
+    ctx.objs["latex_del_emoji"] = ctx.bot.objects["emoji_tex_del"]
+    ctx.objs["latex_show_emoji"] = ctx.bot.objects["emoji_tex_errors" if error else "emoji_tex_show"]
+    out_msg = await ctx.reply(file_name='tex/{}.png'.format(ctx.authid), message= "{}:\n{}".format(ctx.author.name, ("Compile Error! Click the {} reaction for details.".format(ctx.objs["latex_show_emoji"])) if error else ""))
+    ctx.objs["latex_show"] = 0
+    return out_msg
 
-    del_emoji = ctx.bot.objects["emoji_tex_del"]
-    show_emoji = ctx.bot.objects["emoji_tex_errors" if error else "emoji_tex_show"]
 
-    source_msg = "```tex\n{}\n```{}".format(ctx.arg_str, err_msg)
+async def source_edit_handler(ctx, out_msg):
+    while True:
+        res = await ctx.bot.wait_for_message_edit(message=ctx.msg, timeout=300)
+        if res is None:
+            break
+        if (not res.after) or (not res.after.content):
+            break
+        if res.before.content == res.after.content:
+            continue
+        ctx.objs["latex_source"] = res.after.content[(len(res.after.content.split()[0])):].strip()
+        try:
+            await ctx.bot.delete_message(out_msg)
+        except discord.NotFound:
+            pass
+        out_msg = await make_latex(ctx)
+        asyncio.ensure_future(reaction_edit_handler(ctx, out_msg), loop = ctx.bot.loop)
 
-    out_msg = await ctx.reply(file_name='tex/{}.png'.format(ctx.authid), message= "{}:\n{}".format(ctx.author.name, ("Compile Error! Click the {} reaction for details.".format(show_emoji)) if error else ""))
-
-    show = 0
-
-    def check(reaction, user):
-        return ((reaction.emoji == del_emoji) or (reaction.emoji == show_emoji)) and (not (user == ctx.me))
+async def reaction_edit_handler(ctx, out_msg):
     try:
-        await ctx.bot.add_reaction(out_msg, del_emoji)
-        await ctx.bot.add_reaction(out_msg, show_emoji)
+        await ctx.bot.add_reaction(out_msg, ctx.objs["latex_del_emoji"])
+        await ctx.bot.add_reaction(out_msg, ctx.objs["latex_show_emoji"])
     except discord.Forbidden:
         return
+    def check(reaction, user):
+        return ((reaction.emoji == ctx.objs["latex_del_emoji"]) or (reaction.emoji == ctx.objs["latex_show_emoji"])) and (not (user == ctx.me))
     while True:
         res = await ctx.bot.wait_for_reaction(message=out_msg,
                                               timeout=300,
                                               check=check)
         if res is None:
             break
-        if res.reaction.emoji == del_emoji and res.user == ctx.author:
+        if res.reaction.emoji == ctx.objs["latex_del_emoji"] and res.user == ctx.author:
             await ctx.bot.delete_message(out_msg)
+            ctx.objs["latex_out_deleted"] = True
             return
-        if res.reaction.emoji == show_emoji and (res.user != ctx.me):
+        if res.reaction.emoji == ctx.objs["latex_show_emoji"] and (res.user != ctx.me):
             try:
-                await ctx.bot.remove_reaction(out_msg, show_emoji, res.user)
+                await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_show_emoji"], res.user)
             except discord.Forbidden:
                 pass
-            show = 1 - show
+            ctx.objs["latex_show"] = 1 - ctx.objs["latex_show"]
             await ctx.bot.edit_message(out_msg, ctx.author.name + ":\n" +
-                                       (source_msg if show else ""))
+                                       (ctx.objs["latex_source_msg"] if ctx.objs["latex_show"] else ""))
     try:
-        await ctx.bot.remove_reaction(out_msg, del_emoji, ctx.me)
-        await ctx.bot.remove_reaction(out_msg, show_emoji, ctx.me)
-        await ctx.bot.clear_reactions(out_msg)
+        await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_del_emoji"], ctx.me)
+        await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_show_emoji"], ctx.me)
+        #await ctx.bot.clear_reactions(out_msg)
     except discord.Forbidden:
         pass
     except discord.NotFound:
         pass
+    pass
 
 
 @cmds.cmd("preamble",
           category="Maths",
           short_help="Change how your LaTeX compiles",
           aliases=["texconfig"])
-@cmds.execute("flags", flags=["color==", "colour==", "reset", "approve==", "deny=="])
+@cmds.execute("flags", flags=["color==", "colour==", "keepmsg==", "reset", "approve==", "deny=="])
 async def cmd_preamble(ctx):
     """
     Usage:
-        {prefix}preamble [code] [--reset] [--colour|color [default|transparent]]
+        {prefix}preamble [code] [--reset] [--colour|color [default|transparent]] [--keepmsg [yes|no]]
     Description:
         Displays the preamble currently used for compiling your latex code.
         If [code] is provided, sets this to be preamble instead.
@@ -96,6 +127,7 @@ async def cmd_preamble(ctx):
     Flags:2
         reset::  Resets your preamble to the default.
         colour:: One of default or transparent. Change how the output looks.
+        keepmsg:: Either yes or no. Whether to delete your source message after rendering.
     """
     message = ""
     user_id = ctx.flags["approve"] or ctx.flags["deny"]
@@ -121,6 +153,13 @@ async def cmd_preamble(ctx):
             return
         await ctx.data.users.set(ctx.authid, "latex_colour", colour)
 
+    keep = ctx.flags["keepmsg"]
+    if keep:
+        if keep not in ["yes", "no"]:
+            await ctx.reply("Unrecognised keep message setting. It must be `yes` or `no`.")
+            return
+        await ctx.data.users.set(ctx.authid, "latex_keep_message", True if keep == "yes" else False)
+
     if ctx.flags["reset"]:
         await ctx.data.users.set(ctx.authid, "latex_preamble", default_preamble)
         await ctx.data.users.set(ctx.authid, "limbo_preamble", "")
@@ -135,7 +174,10 @@ async def cmd_preamble(ctx):
             embed.add_field(name="Awaiting approval", value="```tex\n{}\n```".format(new_preamble), inline=False)
         colour = await ctx.data.users.get(ctx.authid, "latex_colour")
         colour = colour if colour else "default"
-        embed.add_field(name="Output colourscheme", value=colour, inline=False)
+        embed.add_field(name="Output colourscheme (colour)", value=colour, inline=False)
+        keep = await ctx.data.users.get(ctx.authid, "latex_keep_message")
+        keep = "Yes" if keep else "No"
+        embed.add_field(name="Whether to keep source message after rendering (keepmsg)", value=keep, inline=False)
         await ctx.reply(embed=embed)
         return
     new_preamble = ctx.arg_str
@@ -159,7 +201,7 @@ async def texcomp(ctx):
     with open(fn, 'w') as work:
         work.write(header + preamble)
         work.write('\n' + '\\begin{document}' + '\n')
-        work.write(ctx.arg_str)
+        work.write(ctx.objs["latex_source"])
         work.write('\n' + '\\end{document}' + '\n')
         work.close()
     colour = await ctx.data.users.get(ctx.authid, "latex_colour")
