@@ -6,7 +6,7 @@ then
 else
     echo "";
 fi
-convert -background white -flatten -border 80 -density 300 -quality 300 -trim +repage -border 40 $1.pdf $1.png;
+convert -background white -flatten -border 80 -density 500 -quality 300 -trim +repage -border 40 $1.pdf $1.png;
 if [ "$2" = "transparent" ];
 then
   convert $1.png -negate $1.png;
