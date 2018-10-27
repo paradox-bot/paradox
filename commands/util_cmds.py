@@ -358,15 +358,15 @@ async def cmd_timezone(ctx):
     Description:
         Searches for <partial> amongst the available timezones and shows you the current time in each!
     """
-    tzlist = pytz.all_timezones
+    timestr = '%-I:%M %p'
+    tzlist = [(tz, iso8601.parse_date(datetime.now().isoformat()).astimezone(timezone(tz)).strftime(timestr)) for tz in pytz.all_timezones]
     if ctx.arg_str:
-        tzlist = [tz for tz in tzlist if ctx.arg_str in tz]
+        tzlist = [tzpair for tzpair in tzlist if (ctx.arg_str.lower() in tzpair[0].lower()) or (ctx.arg_str.lower() in tzpair[1].lower())]
     if not tzlist:
         await ctx.reply("No timezones were found matching these criteria!")
         return
 
-    timestr = '%-I:%M %p'
-    tz_blocks = [[(tz, iso8601.parse_date(datetime.now().isoformat()).astimezone(timezone(tz)).strftime(timestr)) for tz in tzlist[i:i+20]] for i in range(0, len(tzlist),20)]
+    tz_blocks = [tzlist[i:i+20] for i in range(0, len(tzlist),20)]
     max_block_lens = [len(max(list(zip(*tz_block))[0], key=len)) for tz_block in tz_blocks]
     block_strs = [["{0[0]:^{max_len}} {0[1]:^10}".format(tzpair, max_len=max_block_lens[i]) for tzpair in tzblock] for i, tzblock in enumerate(tz_blocks)]
     tz_pages = ["```\n{}\n```".format("\n".join(block)) for block in block_strs]
