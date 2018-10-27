@@ -64,7 +64,7 @@ async def cmd_pounce(ctx):
     embed = discord.Embed(colour=discord.Colour.light_grey(), title="Message pounce fired!", description=message.content)
     embed.set_author(name="{user.name}".format(user=message.author),
                     icon_url=message.author.avatar_url)
-    embed.set_footer(text=message.timestamp.strftime("Sent at %-I:%M %p, %d/%m/%Y in #{}".format(message.channel.name)))
+    embed.set_footer(text=message.timestamp.strftime("Sent at %-I:%M %p, %d/%m/%Y in #{} from {}".format(message.channel.name, message.server.name)))
     if message.attachments:
         embed.set_image(url=message.attachments[0]["proxy_url"])
     await ctx.reply(embed=embed, dm=True)
