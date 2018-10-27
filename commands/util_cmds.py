@@ -2,6 +2,7 @@ from paraCH import paraCH
 import discord
 from datetime import datetime
 from pytz import timezone
+import pytz
 import iso8601
 import traceback
 import string
@@ -333,17 +334,43 @@ async def cmd_set(ctx):
             if tz:
                 msg = "Your current timezone is `{}`".format(tz)
             else:
-                msg = "You haven't set your timezone! Use `{prefix}set timezone <timezone>` to set it!".format(ctx.used_prefix)
+                msg = "You haven't set your timezone! Use `{0}set timezone <timezone>` to set it! Available timezones may be searched using the `{0}timezone` command".format(ctx.used_prefix)
             await ctx.reply(msg)
             return
         tz = ' '.join(ctx.params[1:])
         try:
             timezone(tz)
         except Exception:
-            await ctx.reply("Unfortunately, I don't understand this timezone. More options will be available soon.")
+            await ctx.reply("Unfortunately, I don't understand this timezone. Use the `timezone` command to search timezones. More options will be available soon.")
             return
         await ctx.data.users.set(ctx.authid, "tz", tz)
         await ctx.reply("Your timezone has been set to `{}`".format(tz))
+
+
+@cmds.cmd("timezone",
+          category="Utility",
+          short_help="Searches the timezone list",
+          aliases=["tz"])
+async def cmd_timezone(ctx):
+    """
+    Usage:
+        {prefix}timezone <partial>
+    Description:
+        Searches for <partial> amongst the available timezones and shows you the current time in each!
+    """
+    tzlist = pytz.all_timezones
+    if ctx.arg_str:
+        tzlist = [tz for tz in tzlist if ctx.arg_str in tz]
+    if not tzlist:
+        await ctx.reply("No timezones were found matching these criteria!")
+        return
+
+    timestr = '%-I:%M %p'
+    tz_blocks = [[(tz, iso8601.parse_date(datetime.now().isoformat()).astimezone(timezone(tz)).strftime(timestr)) for tz in tzlist[i:i+20]] for i in range(0, len(tzlist),20)]
+    max_block_lens = [len(max(list(zip(*tz_block))[0], key=len)) for tz_block in tz_blocks]
+    block_strs = [["{0[0]:^{max_len}} {0[1]:^10}".format(tzpair, max_len=max_block_lens[i]) for tzpair in tzblock] for i, tzblock in enumerate(tz_blocks)]
+    tz_pages = ["```\n{}\n```".format("\n".join(block)) for block in block_strs]
+    await ctx.pager(tz_pages)
 
 # User info commands
 
@@ -371,9 +398,9 @@ async def cmd_time(ctx):
     tz = await ctx.data.users.get(user, "tz")
     if not tz:
         if user == ctx.authid:
-            await ctx.reply("You haven't set your timezone! Set it using \"{}set timezone <timezone>\"!".format(ctx.used_prefix))
+            await ctx.reply("You haven't set your timezone! Set it using `{0}set timezone <timezone>`!\nAvailable timezones may be searched using `{0}timezone`".format(ctx.used_prefix))
         else:
-            await ctx.reply("This user hasn't set their timezone. Ask them to set it using \"{}set timezone <timezone>\"!".format(ctx.used_prefix))
+            await ctx.reply("This user hasn't set their timezone. Ask them to set it using `{0}set timezone <timezone>`!\nAvailable timezones may be searched using `{0}timezone`!".format(ctx.used_prefix))
         return
     try:
         TZ = timezone(tz)
