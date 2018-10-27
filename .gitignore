@@ -7,8 +7,18 @@
 # Nanny
 Nanny
 
+# ContextBot contents
+contextBot/*
+
 # Tex files
 **.aux
+**.out
+tex/*.dvi
+tex/*.tex
+tex/*.pdf
+tex/*.png
+tex/*.log
+
 **.synctex*
 
 # Byte-compiled / optimized / DLL files
