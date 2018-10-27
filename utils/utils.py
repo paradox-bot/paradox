@@ -158,6 +158,8 @@ def load_into(bot):
         args = {}
         args[arg] = pages[0]
         out_msg = await ctx.reply(**args)
+        if len(pages) == 1:
+            return out_msg
         args = {}
         arg = "embed" if embed else "new_content"
         emo_next = ctx.bot.objects["emoji_next"]
