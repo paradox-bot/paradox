@@ -20,18 +20,24 @@ default_preamble = "\\usepackage{amsmath}\
 @cmds.cmd("tex",
           category="Maths",
           short_help="Renders LaTeX code",
-          aliases=["LaTeX"])
+          aliases=["LaTeX", "$", "$$", "align"])
 async def cmd_tex(ctx):
     """
     Usage:
         {prefix}tex <code>
+        {prefix}$ <equation>
+        {prefix}$$ <displayeqn>
+        {prefix}align <align block>
     Description:
         Renders and displays LaTeX code.
+        Using $ instead of tex compiles $<code>$.
+        Using $$ instead of tex compiles $$<code>$$.
+        Using align instead of tex compiles \\begin{{align*}}<code>\\end{{align*}}.
         Use the reactions to delete the message and show your code, respectively.
     """
     ctx.objs["latex_source_deleted"] = False
     ctx.objs["latex_out_deleted"] = False
-    ctx.objs["latex_source"] = ctx.arg_str
+    ctx.objs["latex_source"] = parse_tex(ctx)
 
     out_msg = await make_latex(ctx)
 
@@ -39,6 +45,15 @@ async def cmd_tex(ctx):
     if not ctx.objs["latex_source_deleted"]:
         asyncio.ensure_future(source_edit_handler(ctx, out_msg), loop = ctx.bot.loop)
 
+def parse_tex(ctx):
+    if ctx.used_cmd_name == "$":
+        return "${}$".format(ctx.arg_str)
+    elif ctx.used_cmd_name == "$$":
+        return "$${}$$".format(ctx.arg_str)
+    elif ctx.used_cmd_name == "align":
+        return "\\begin{{align*}}\n{}\n\\end{{align*}}".format(ctx.arg_str)
+    else:
+        return ctx.arg_str
 
 async def make_latex(ctx):
     error = await texcomp(ctx)
