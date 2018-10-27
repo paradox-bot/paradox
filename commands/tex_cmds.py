@@ -80,7 +80,7 @@ async def source_edit_handler(ctx, out_msg):
             break
         if res.before.content == res.after.content:
             continue
-        ctx.objs["latex_source"] = res.after.content[(len(res.after.content.split()[0])):].strip()
+        ctx.objs["latex_source"] = parse_tex(res.after.content[(len(res.after.content.split()[0])):].strip())
         try:
             await ctx.bot.delete_message(out_msg)
         except discord.NotFound:
