@@ -23,6 +23,57 @@ async def cmd_echo(ctx):
     """
     await ctx.reply(ctx.arg_str if ctx.arg_str else "I can't send an empty message!")
 
+@cmds.cmd("pounce",
+          category="Utility",
+          short_help="Sends you a dm when someone says something")
+@cmds.execute("flags", flags=["from=="])
+@cmds.require("in_server")
+async def cmd_pounce(ctx):
+    """
+    Usage:
+        {prefix}pounce [text] --from <user>
+    Description:
+        Sends you a DM when a message containing [text] (if given) is sent in the channel.
+        Note that all criterias specified must be satisfied.
+        Also note that pounces are reset if the bot restarts (for now).
+    Flags:2
+        --from:: Message must be sent from this user.
+    """
+    user = None
+    if ctx.flags["from"]:
+        user = await ctx.find_user(ctx.flags["from"], in_server=True, interactive=True)
+        if user is None:
+            await ctx.reply("User lookup failed, aborting")
+            return
+        user = user.id
+    def predicate(message):
+        found = True
+        found = found and message.channel == ctx.ch
+        if ctx.arg_str:
+            found = found and ctx.arg_str in message.content
+        if user:
+            found = found and message.author.id == user
+        return found
+    try:
+        await ctx.bot.add_reaction(ctx.msg, "✅")
+    except discord.Forbidden:
+        await ctx.reply("Pounce set!")
+    message = await ctx.bot.wait_for_message(check=predicate)
+    if message is None:
+        return
+    embed = discord.Embed(colour=discord.Colour.light_grey(), title="Message pounce fired!", description=message.content)
+    embed.set_author(name="{user.name}".format(user=message.author),
+                    icon_url=message.author.avatar_url)
+    embed.set_footer(text=message.timestamp.strftime("Sent at %-I:%M %p, %d/%m/%Y in #{}".format(message.channel.name)))
+    if message.attachments:
+        embed.set_image(url=message.attachments[0]["proxy_url"])
+    await ctx.reply(embed=embed, dm=True)
+
+
+
+
+
+
 
 @cmds.cmd("quote",
           category="Utility",
