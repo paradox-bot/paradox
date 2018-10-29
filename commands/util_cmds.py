@@ -492,16 +492,32 @@ async def cmd_emoji(ctx):
         {prefix}emoji <emoji> [-e]
     Description:
         Displays some information about the provided custom emoji, and sends an enlarged version.
+        If the emoji isn't found, instead searches for the emoji amongst all emojis I can see.
         Built in emoji support is coming soon!
     Flags:
         -e:  (enlarge) Only shows the enlarged emoji, with no other info.
+    Examples:
+        {prefix}e catThink
     """
     # TODO: Handle the case where a builtin emoji has the same name as a custom emoji
     # Any way of testing whether an emoji from get is a builtin?
     # Emojis with the same name are shown
+    if not ctx.arg_str:
+        if ctx.server:
+            emojis = filter(lambda e: e.server == ctx.server, ctx.bot.get_all_emojis())
+            if emojis:
+                await ctx.reply("Custom emojis in this server:\n{}".format(" ".join(map(str, emojis))))
+                return
+            else:
+                await ctx.reply("No custom emojis in this server! You can search for emojis using this command!")
+                return
+        else:
+            await ctx.reply("Search for emojis using {}`emoji <search>`".format(ctx.used_prefix))
+            return
     id_str = 0
     em_str = 0
     emoji = None
+    emojis = []
     embed = discord.Embed(title=None if ctx.flags["e"] else "Emoji info!", color=discord.Colour.light_grey())
     if ctx.arg_str.endswith(">") and ctx.arg_str.startswith("<"):
         id_str = ctx.arg_str[ctx.arg_str.rfind(":") + 1:-1]
@@ -523,22 +539,24 @@ async def cmd_emoji(ctx):
     else:
         em_str = ctx.arg_str.strip(":")
         emoji = discord.utils.get(ctx.bot.get_all_emojis(), name=em_str)
+        emojis = list(filter(lambda e: (em_str.lower() in e.name.lower()), ctx.bot.get_all_emojis()))
+        emoji = emoji if emoji else (emojis[0] if emojis else None)
         if not emoji:
-            await ctx.reply("I couldn't understand or find the emoji in your message. Please note I cannot handle built in emojis at this time.")
+            await ctx.reply("I cannot see any matching emojis.\nPlease note I cannot handle built in emojis at this time.")
             return
     embed.set_image(url=emoji.url)
     if not ctx.flags["e"]:
         created_ago = ctx.strfdelta(datetime.utcnow()-emoji.created_at)
         created = emoji.created_at.strftime("%-I:%M %p, %d/%m/%Y")
-        same_emojis = filter(lambda e: (e.name == emoji.name) and (e != emoji), ctx.bot.get_all_emojis())
-        emoj_same_str = " ".join(map(str, same_emojis))
+        emojis = emojis[:10] if emojis else filter(lambda e: (e.name == emoji.name) and (e != emoji), ctx.bot.get_all_emojis())
+        emoj_similar_str = " ".join(map(str, emojis))
         emb_fields = [("Name", emoji.name, 0),
                       ("ID", emoji.id, 0),
                       ("Link", emoji.url, 0),
                       ("Originating server", emoji.server.name if emoji.server else "Built in", 0),
                       ("Created at", "{}({} ago)".format(created, created_ago), 0)]
-        if emoj_same_str:
-            emb_fields.append(("Emojis I can see with the same name", emoj_same_str, 0))
+        if emoj_similar_str:
+            emb_fields.append(("Some other matching emojis", emoj_similar_str, 0))
         await ctx.emb_add_fields(embed, emb_fields)
     await ctx.reply(embed=embed)
 
