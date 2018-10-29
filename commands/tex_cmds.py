@@ -37,7 +37,7 @@ async def cmd_tex(ctx):
     """
     ctx.objs["latex_source_deleted"] = False
     ctx.objs["latex_out_deleted"] = False
-    ctx.objs["latex_source"] = parse_tex(ctx)
+    ctx.objs["latex_source"] = parse_tex(ctx, ctx.arg_str)
 
     out_msg = await make_latex(ctx)
 
@@ -45,15 +45,15 @@ async def cmd_tex(ctx):
     if not ctx.objs["latex_source_deleted"]:
         asyncio.ensure_future(source_edit_handler(ctx, out_msg), loop = ctx.bot.loop)
 
-def parse_tex(ctx):
+def parse_tex(ctx, source):
     if ctx.used_cmd_name == "$":
-        return "${}$".format(ctx.arg_str)
+        return "${}$".format(source)
     elif ctx.used_cmd_name == "$$":
-        return "$${}$$".format(ctx.arg_str)
+        return "$${}$$".format(source)
     elif ctx.used_cmd_name == "align":
-        return "\\begin{{align*}}\n{}\n\\end{{align*}}".format(ctx.arg_str)
+        return "\\begin{{align*}}\n{}\n\\end{{align*}}".format(source)
     else:
-        return ctx.arg_str
+        return source
 
 async def make_latex(ctx):
     error = await texcomp(ctx)
@@ -80,7 +80,7 @@ async def source_edit_handler(ctx, out_msg):
             break
         if res.before.content == res.after.content:
             continue
-        ctx.objs["latex_source"] = parse_tex(res.after.content[(len(res.after.content.split()[0])):].strip())
+        ctx.objs["latex_source"] = parse_tex(ctx, res.after.content[(len(res.after.content.split()[0])):].strip())
         try:
             await ctx.bot.delete_message(out_msg)
         except discord.NotFound:

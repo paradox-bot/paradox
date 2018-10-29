@@ -480,22 +480,24 @@ async def cmd_profile(ctx):
                     value="{} ({} ago)".format(created, created_ago), inline=False)
     await ctx.reply(embed=embed)
 
-
 @cmds.cmd(name="emoji",
           category="Utility",
           short_help="Displays info and enlarges a custom emoji",
-          aliases=["e"])
-@cmds.execute("flags", flags=["e"])
+          aliases=["e", "ee"])
+@cmds.execute("flags", flags=["e", "a"])
 async def cmd_emoji(ctx):
     """
     Usage:
         {prefix}emoji <emoji> [-e]
+        {prefix}ee <emoji>
     Description:
         Displays some information about the provided custom emoji, and sends an enlarged version.
         If the emoji isn't found, instead searches for the emoji amongst all emojis I can see.
+        If used as ee or given with -e flag, only shows the enlarged image.
         Built in emoji support is coming soon!
     Flags:
         -e:  (enlarge) Only shows the enlarged emoji, with no other info.
+        -a:  (animated) Forces to show the emoji as animated (if possible).
     Examples:
         {prefix}e catThink
     """
@@ -518,13 +520,15 @@ async def cmd_emoji(ctx):
     em_str = 0
     emoji = None
     emojis = []
+    if ctx.used_cmd_name == "ee":
+        ctx.flags["e"] = True
     embed = discord.Embed(title=None if ctx.flags["e"] else "Emoji info!", color=discord.Colour.light_grey())
     if ctx.arg_str.endswith(">") and ctx.arg_str.startswith("<"):
         id_str = ctx.arg_str[ctx.arg_str.rfind(":") + 1:-1]
         if id_str.isdigit():
             emoji = discord.utils.get(ctx.bot.get_all_emojis(), id=id_str)
             if emoji is None:
-                link = "https://cdn.discordapp.com/emojis/{}.{}".format(id_str, "gif" if ctx.arg_str[1] == "a" else "png")
+                link = "https://cdn.discordapp.com/emojis/{}.{}".format(id_str, "gif" if ctx.arg_str[1] == "a" or ctx.flags["a"] else "png")
                 embed.set_image(url=link)
                 if not ctx.flags["e"]:
                     emb_fields = [("Name", ctx.arg_str[ctx.arg_str.find(":") + 1:ctx.arg_str.rfind(":")], 0),
@@ -544,7 +548,8 @@ async def cmd_emoji(ctx):
         if not emoji:
             await ctx.reply("I cannot see any matching emojis.\nPlease note I cannot handle built in emojis at this time.")
             return
-    embed.set_image(url=emoji.url)
+    url = "https://cdn.discordapp.com/emojis/{}.{}".format(emoji.id, "gif" if ctx.flags["a"] else "png")
+    embed.set_image(url=url)
     if not ctx.flags["e"]:
         created_ago = ctx.strfdelta(datetime.utcnow()-emoji.created_at)
         created = emoji.created_at.strftime("%-I:%M %p, %d/%m/%Y")
@@ -558,7 +563,13 @@ async def cmd_emoji(ctx):
         if emoj_similar_str:
             emb_fields.append(("Some other matching emojis", emoj_similar_str, 0))
         await ctx.emb_add_fields(embed, emb_fields)
-    await ctx.reply(embed=embed)
+    try:
+        await ctx.reply(embed=embed)
+    except discord.HTTPException as e:
+        if ctx.flags["a"]:
+            await ctx.reply("Failed to send animated emoji. Maybe this emoji isn't animated?")
+        else:
+            await ctx.reply("Failed to send the emoji!")
 
 
 @cmds.cmd(name="colour",
