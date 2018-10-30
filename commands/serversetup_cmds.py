@@ -127,6 +127,16 @@ async def cmd_rmrole(ctx):
         return
     await ctx.reply("Successfully deleted the role.")
 
+@cmds.cmd("bancmd",
+          category="Server Admin",
+          short_help="Blacklist commands in the server.",
+          aliases=["bcmd", "nocmd"])
+@cmds.require("has_manage_server")
+async def cmd_bancmd(ctx):
+    """
+    Usage:
+        {prefix}bancmd cmd1, cmd2, cmd3,...
+    """
 
 @cmds.cmd("editrole",
           category="Server Admin",
