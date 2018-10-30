@@ -55,6 +55,9 @@ async def _texlistener(ctx):
 
         ctx.msg = msg
         ctx.ch = msg.channel
+        first = msg.content.split()[0]
+        if not first.startswith("$") and not first.startswith("```tex") and any(prefix in first for prefix in ["latex", "tex", "align", "$", "$$"]):
+            continue
         ctx.objs["latex_listening"] = True
         ctx.objs["latex_source_deleted"] = False
         ctx.objs["latex_out_deleted"] = False
