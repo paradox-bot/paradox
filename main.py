@@ -1,13 +1,16 @@
 import discord
 import shutil
 import os
+import asyncio
 from datetime import datetime
 
 from botdata import BotData
 from botconf import Conf
 
-from contextBot.Context import Context
+from contextBot.Context import Context, MessageContext
 from contextBot.Bot import Bot
+
+from commands.tex_cmds import texlistener
 
 # Global constants/ environment variables
 
@@ -160,6 +163,20 @@ async def on_ready():
     bot.objects["feedback_channel"] = discord.utils.get(bot.get_all_channels(), id=FEEDBACK_CH)
     bot.objects["preamble_channel"] = discord.utils.get(bot.get_all_channels(), id=PREAMBLE_CH)
     bot.objects["server_change_log_channel"] = discord.utils.get(bot.get_all_channels(), id=BOT_LOG_CH)
+
+    ##TODO This is really really ugly and inefficient. Please fix this up.
+    tex_listeners = await bot.data.users.find("tex_listening", True, read=True)
+    for listener in tex_listeners:
+        try:
+            user = await ctx.bot.get_user_info(listener)
+        except discord.NotFound:
+            bot.sync_log("Tex listener {} not found.".format(listener))
+        except discord.HTTPException:
+            bot.sync_log("Tex listener {} failed to convert to user.".format(listener))
+        else:
+            listenctx = MessageContext(bot=bot, author=user)
+        asyncio.ensure_future(texlistener(listenctx), loop=ctx.bot.loop)
+    bot.sync_log("Loaded {} tex listeners".format(len(tex_listeners)))
 
 # ----Event loops----
 # ----End event loops----

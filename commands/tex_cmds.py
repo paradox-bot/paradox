@@ -3,15 +3,19 @@ import discord
 from datetime import datetime
 import re
 import asyncio
+import copy
 
 from paraCH import paraCH
 
 cmds = paraCH()
 
+#TODO: Factor out into a util file everything except commands.
 
 header = "\\documentclass[preview, 12pt]{standalone}\
           \n\\nonstopmode\
-          \n\\everymath{\\displaystyle}"
+          \n\\everymath{\\displaystyle}\
+          \n\\usepackage[mathletters]{ucs}\
+          \n\\usepackage[utf8x]{inputenc}"
 
 default_preamble = "\\usepackage{amsmath}\
                     \n\\usepackage{fancycom}\
@@ -25,49 +29,51 @@ default_preamble = "\\usepackage{amsmath}\
 async def cmd_texlisten(ctx):
     """
     Usage:
-        {prefix}texlisten start|stop
+        {prefix}texlisten
     Description:
-        Starts or stops listening to messages you post looking for tex.
+        Toggles istening to messages you post looking for tex.
         When tex is found, compiles it and replies to you.
-        Note that for now, this has to be re set on every restart of the bot.
+        Note that for now, this has to be turned off and on for every restart of the bot.
     """
-    if ctx.arg_str == "stop":
+    listening = await ctx.data.users.get(ctx.authid, "tex_listening")
+    if listening and not ctx.arg_str:
         await ctx.data.users.set(ctx.authid, "tex_listening", False)
         await ctx.reply("I have stopped listening to your tex.")
         return
-    elif ctx.arg_str not in ["", "start"]:
-        await ctx.reply("Valid options are `start` and `stop`")
-        return
     await ctx.data.users.set(ctx.authid, "tex_listening", True)
     ctx.objs["latex_listening"] = True
-    asyncio.ensure_future(_texlistener(ctx), loop=ctx.bot.loop)
+    asyncio.ensure_future(texlistener(ctx), loop=ctx.bot.loop)
     await ctx.reply("I am now listening to your tex.")
 
 def _is_tex(msg):
+    print("Checking tex for "+msg.content)
     return (("$" in msg.content) and 1 - (msg.content.count("$") % 2)) or ("\\begin{" in msg.content)
 
 
-async def _texlistener(ctx):
+async def texlistener(ctx):
     while True:
+        print("here, waiting for user "+ctx.author.name)
         msg = await ctx.bot.wait_for_message(author=ctx.author, check=_is_tex)
-        if not await ctx.data.users.get(ctx.authid, "tex_listening"):
+        print("Now here")
+        if not await ctx.data.users.get(ctx.author.id, "tex_listening"):
             break
         await ctx.bot.log("Got a listening latex message\n{}\nfrom `{}` in `{}`".format(msg.content, msg.author.name, msg.server.name if msg.server else "DM"))
 
-        ctx.msg = msg
-        ctx.ch = msg.channel
+        newctx = type(ctx)(bot=ctx.bot, message=msg)
+        newctx.msg = msg
+        newctx.ch = msg.channel
         first = msg.content.split()[0]
-        if not first.startswith("$") and not first.startswith("```tex") and any(prefix in first for prefix in ["latex", "tex", "align", "$", "$$"]):
+        if not any(first.startswith(okprefix) for okprefix in ["$", "```tex", "`$", "\\begin"]) and any(prefix in first for prefix in ["latex", "tex", "align", "$", "$$"]):
             continue
-        ctx.objs["latex_listening"] = True
-        ctx.objs["latex_source_deleted"] = False
-        ctx.objs["latex_out_deleted"] = False
-        ctx.objs["latex_source"] = parse_tex(ctx, msg.content)
-        out_msg = await make_latex(ctx)
+        newctx.objs["latex_listening"] = True
+        newctx.objs["latex_source_deleted"] = False
+        newctx.objs["latex_out_deleted"] = False
+        newctx.objs["latex_source"] = parse_tex(newctx, msg.content)
+        out_msg = await make_latex(newctx)
 
-        asyncio.ensure_future(reaction_edit_handler(ctx, out_msg), loop = ctx.bot.loop)
-        if not ctx.objs["latex_source_deleted"]:
-            asyncio.ensure_future(source_edit_handler(ctx, out_msg), loop = ctx.bot.loop)
+        asyncio.ensure_future(reaction_edit_handler(newctx, out_msg), loop = ctx.bot.loop)
+        if not newctx.objs["latex_source_deleted"]:
+            asyncio.ensure_future(source_edit_handler(newctx, out_msg), loop = ctx.bot.loop)
 
 
 
@@ -104,6 +110,8 @@ def parse_tex(ctx, source):
     if source.strip().startswith("```tex"):
         source = source[6:]
     source = source.strip("`").strip()
+    if ctx.objs["latex_listening"]:
+        return source
     if ctx.used_cmd_name == "$":
         return "${}$".format(source)
     elif ctx.used_cmd_name == "$$":
