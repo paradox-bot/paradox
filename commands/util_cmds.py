@@ -135,14 +135,11 @@ async def cmd_secho(ctx):
     Description:
         Replies to the message with <text> and deletes your message.
     """
-    """
     try:
         await ctx.bot.delete_message(ctx.msg)
     except Exception:
         pass
-    await ctx.reply(ctx.arg_str if ctx.arg_str else "I can't send an empty message!")
-    """
-    pass
+    await ctx.reply("{}".format(ctx.arg_str) if ctx.arg_str else "I can't send an empty message!")
 
 @cmds.cmd("userinfo",
           category="Utility",
