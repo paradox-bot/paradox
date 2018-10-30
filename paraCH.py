@@ -25,6 +25,10 @@ class paraCH(CommandHandler):
             await ctx.bot.send_typing(ctx.ch)
         except Exception:
             pass
+        if ctx.server:
+            ban_cmds = await ctx.data.servers.get(ctx.server.id, "banned_cmds")
+            if ban_cmds and ctx.cmd.name in ban_cmds:
+                ctx.cmd_err = (1, "")
 
     def build_cmd(self, name, func, aliases=[], **kwargs):
         cmd = super().build_cmd(name, func, aliases=aliases, **kwargs)
