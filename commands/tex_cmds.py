@@ -10,12 +10,62 @@ cmds = paraCH()
 
 
 header = "\\documentclass[preview, 12pt]{standalone}\
-          \n\\nonstopmode"
+          \n\\nonstopmode\
+          \n\\everymath{\\displaystyle}"
 
 default_preamble = "\\usepackage{amsmath}\
                     \n\\usepackage{fancycom}\
                     \n\\usepackage{color}\
                     \n\\usepackage{tikz-cd}"
+
+@cmds.cmd("texlisten",
+          category="Maths",
+          short_help="Listens for latex to reply to",
+          aliases=["tl"])
+async def cmd_texlisten(ctx):
+    """
+    Usage:
+        {prefix}texlisten start|stop
+    Description:
+        Starts or stops listening to messages you post looking for tex.
+        When tex is found, compiles it and replies to you.
+    """
+    if ctx.arg_str == "stop":
+        await ctx.data.users.set(ctx.authid, "tex_listening", False)
+        await ctx.reply("I have stopped listening to your tex.")
+        return
+    elif ctx.arg_str not in ["", "start"]:
+        await ctx.reply("Valid options are `start` and `stop`")
+        return
+    await ctx.data.users.set(ctx.authid, "tex_listening", True)
+    ctx.objs["latex_listening"] = True
+    asyncio.ensure_future(_texlistener(ctx), loop=ctx.bot.loop)
+    await ctx.reply("I am now listening to your tex.")
+
+def _is_tex(msg):
+    return (("$" in msg.content) and 1 - (msg.content.count("$") % 2)) or ("\\begin{" in msg.content)
+
+
+async def _texlistener(ctx):
+    while True:
+        msg = await ctx.bot.wait_for_message(author=ctx.author, check=_is_tex)
+        if not await ctx.data.users.get(ctx.authid, "tex_listening"):
+            break
+        await ctx.bot.log("Got a listening latex message\n{}\nfrom `{}` in `{}`".format(msg.content, msg.author.name, msg.server.name if msg.server else "DM"))
+
+        ctx.msg = msg
+        ctx.ch = msg.channel
+        ctx.objs["latex_listening"] = True
+        ctx.objs["latex_source_deleted"] = False
+        ctx.objs["latex_out_deleted"] = False
+        ctx.objs["latex_source"] = parse_tex(ctx, msg.content)
+        out_msg = await make_latex(ctx)
+
+        asyncio.ensure_future(reaction_edit_handler(ctx, out_msg), loop = ctx.bot.loop)
+        if not ctx.objs["latex_source_deleted"]:
+            asyncio.ensure_future(source_edit_handler(ctx, out_msg), loop = ctx.bot.loop)
+
+
 
 @cmds.cmd("tex",
           category="Maths",
@@ -35,6 +85,7 @@ async def cmd_tex(ctx):
         Using align instead of tex compiles \\begin{{align*}}<code>\\end{{align*}}.
         Use the reactions to delete the message and show your code, respectively.
     """
+    ctx.objs["latex_listening"] = False
     ctx.objs["latex_source_deleted"] = False
     ctx.objs["latex_out_deleted"] = False
     ctx.objs["latex_source"] = parse_tex(ctx, ctx.arg_str)
@@ -46,6 +97,9 @@ async def cmd_tex(ctx):
         asyncio.ensure_future(source_edit_handler(ctx, out_msg), loop = ctx.bot.loop)
 
 def parse_tex(ctx, source):
+    if source.strip().startswith("```tex"):
+        source = source[6:]
+    source = source.strip("`").strip()
     if ctx.used_cmd_name == "$":
         return "${}$".format(source)
     elif ctx.used_cmd_name == "$$":
@@ -80,7 +134,8 @@ async def source_edit_handler(ctx, out_msg):
             break
         if res.before.content == res.after.content:
             continue
-        ctx.objs["latex_source"] = parse_tex(ctx, res.after.content[(len(res.after.content.split()[0])):].strip())
+        source = res.after.content if ctx.objs["latex_listening"] else res.after.content[(len(res.after.content.split()[0])):].strip()
+        ctx.objs["latex_source"] = parse_tex(ctx, source)
         try:
             await ctx.bot.delete_message(out_msg)
         except discord.NotFound:
