@@ -29,6 +29,7 @@ async def cmd_texlisten(ctx):
     Description:
         Starts or stops listening to messages you post looking for tex.
         When tex is found, compiles it and replies to you.
+        Note that for now, this has to be re set on every restart of the bot.
     """
     if ctx.arg_str == "stop":
         await ctx.data.users.set(ctx.authid, "tex_listening", False)
