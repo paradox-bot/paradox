@@ -79,6 +79,24 @@ async def perm_manage_server(ctx):
     return (0, "")
 
 
+@check("has_ban_members")
+async def perm_ban_members(ctx):
+    if (ctx.user is None) or (ctx.server is None):
+        return (2, "An internal error occurred.")
+    if not (ctx.user.server_permissions.ban_members or
+            ctx.user.server_permissions.administrator):
+        return (1, "You lack the `Ban Members` permission on this server!")
+    return (0, "")
+
+@check("has_kick_members")
+async def perm_kick_members(ctx):
+    if (ctx.user is None) or (ctx.server is None):
+        return (2, "An internal error occurred.")
+    if not (ctx.user.server_permissions.kick_members or
+            ctx.user.server_permissions.administrator):
+        return (1, "You lack the `Kick Members` permission on this server!")
+    return (0, "")
+
 # Mod action checks
 
 @check("in_server_has_mod")
@@ -106,20 +124,11 @@ async def check_in_server_can_ban(ctx):
     (code, msg) = await checks["in_server_has_mod"](ctx)
     if code == 0:
         return (code, msg)
-    else:
-        return (1, "You don't have permission to ban users in this server!")
-    return (0, "")
-
-@check("in_server_can_unban")
-async def check_in_server_can_ban(ctx):
-    """
-    TODO: Need to do proper custom checks here
-    """
-    (code, msg) = await checks["in_server_has_mod"](ctx)
+    (code, msg) = await checks["has_ban_members"](ctx)
     if code == 0:
         return (code, msg)
     else:
-        return (1, "You don't have permission to unban users in this server!")
+        return (1, "You don't have permission to ban users in this server!")
     return (0, "")
 
 @check("in_server_can_hackban")
@@ -128,6 +137,9 @@ async def check_in_server_can_ban(ctx):
     TODO: Need to do proper custom checks here
     """
     (code, msg) = await checks["in_server_has_mod"](ctx)
+    if code == 0:
+        return (code, msg)
+    (code, msg) = await checks["has_ban_members"](ctx)
     if code == 0:
         return (code, msg)
     else:
@@ -142,6 +154,9 @@ async def check_in_server_can_kick(ctx):
     (code, msg) = await checks["in_server_has_mod"](ctx)
     if code == 0:
         return (code, msg)
+    (code, msg) = await checks["has_kick_members"](ctx)
+    if code == 0:
+        return (code, msg)
     else:
         return (1, "You don't have permission to kick users in this server!")
     return (0, "")
@@ -153,6 +168,9 @@ async def check_in_server_can_softban(ctx):
     TODO: Need to do proper custom checks here
     """
     (code, msg) = await checks["in_server_has_mod"](ctx)
+    if code == 0:
+        return (code, msg)
+    (code, msg) = await checks["has_ban_members"](ctx)
     if code == 0:
         return (code, msg)
     else:
