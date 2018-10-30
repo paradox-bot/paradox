@@ -36,24 +36,24 @@ async def cmd_texlisten(ctx):
     """
     listening = await ctx.data.users.get(ctx.authid, "tex_listening")
     if listening and not ctx.arg_str:
+        if ctx.authid in ctx.bot.objects["tex_listen_tasks"]:
+            ctx.bot.objects["tex_listen_tasks"][ctx.authid].cancel()
         await ctx.data.users.set(ctx.authid, "tex_listening", False)
         await ctx.reply("I have stopped listening to your tex.")
         return
     await ctx.data.users.set(ctx.authid, "tex_listening", True)
     ctx.objs["latex_listening"] = True
-    asyncio.ensure_future(texlistener(ctx), loop=ctx.bot.loop)
+    listen_task = asyncio.ensure_future(texlistener(ctx), loop=ctx.bot.loop)
+    ctx.bot.objects["tex_listen_tasks"][ctx.authid] = listen_task
     await ctx.reply("I am now listening to your tex.")
 
 def _is_tex(msg):
-    print("Checking tex for "+msg.content)
     return (("$" in msg.content) and 1 - (msg.content.count("$") % 2)) or ("\\begin{" in msg.content)
 
 
 async def texlistener(ctx):
     while True:
-        print("here, waiting for user "+ctx.author.name)
         msg = await ctx.bot.wait_for_message(author=ctx.author, check=_is_tex)
-        print("Now here")
         if not await ctx.data.users.get(ctx.author.id, "tex_listening"):
             break
         await ctx.bot.log("Got a listening latex message\n{}\nfrom `{}` in `{}`".format(msg.content, msg.author.name, msg.server.name if msg.server else "DM"))

@@ -165,6 +165,7 @@ async def on_ready():
     bot.objects["server_change_log_channel"] = discord.utils.get(bot.get_all_channels(), id=BOT_LOG_CH)
 
     ##TODO This is really really ugly and inefficient. Please fix this up.
+    listen_tasks = {}
     tex_listeners = await bot.data.users.find("tex_listening", True, read=True)
     for listener in tex_listeners:
         try:
@@ -175,7 +176,10 @@ async def on_ready():
             bot.sync_log("Tex listener {} failed to convert to user.".format(listener))
         else:
             listenctx = MessageContext(bot=bot, author=user)
-        asyncio.ensure_future(texlistener(listenctx), loop=ctx.bot.loop)
+            listentask = asyncio.ensure_future(texlistener(listenctx), loop=ctx.bot.loop)
+            listen_tasks[str(listener)] = listentask
+    bot.objects["tex_listen_tasks"] = listen_tasks
+
     bot.sync_log("Loaded {} tex listeners".format(len(tex_listeners)))
 
 # ----Event loops----
