@@ -141,6 +141,28 @@ async def cmd_secho(ctx):
         pass
     await ctx.reply("{}".format(ctx.arg_str) if ctx.arg_str else "I can't send an empty message!")
 
+@cmds.cmd("invitebot",
+          category="Utility",
+          short_help="Generates a bot invite link for a bot",
+          aliases=["ibot"])
+@cmds.execute("user_lookup", in_server=True)
+async def cmd_invitebot(ctx):
+    """
+    Usage:
+        {prefix}invitebot <bot>
+    Description:
+        Replies with an invite link for the bot.
+    """
+    user = ctx.objs["found_user"]
+    if not user:
+        await ctx.reply("I couldn't find any matching bots in this server")
+        return
+    if not user.bot:
+        await ctx.reply("Maybe you could try asking them nicely?")
+        return
+    await ctx.reply("https://discordapp.com/api/oauth2/authorize?client_id={}&permissions=0&scope=bot".format(user.id))
+
+
 @cmds.cmd("userinfo",
           category="Utility",
           short_help="Shows the user's information",
