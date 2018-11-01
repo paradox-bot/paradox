@@ -10,7 +10,7 @@ from botconf import Conf
 from contextBot.Context import Context, MessageContext
 from contextBot.Bot import Bot
 
-from commands.tex_cmds import texlistener
+from commands.tex_cmds import texlistener, texlistener_server
 
 # Global constants/ environment variables
 
@@ -151,10 +151,6 @@ async def on_ready():
     bot.sync_log("Logged into {} servers".format(len(bot.servers)))
 
     ctx = Context(bot=bot)
-    with open(LOGFILE, "r") as f:
-        log_splits = await ctx.msg_split(f.read(), True)
-        for log in log_splits:
-            await bot.send_message(discord.utils.get(bot.get_all_channels(), id=LOG_CHANNEL), log)
 
     for emoji in emojis:
         bot.objects[emoji] = get_emoji(emojis[emoji])
@@ -179,8 +175,24 @@ async def on_ready():
             listentask = asyncio.ensure_future(texlistener(listenctx), loop=ctx.bot.loop)
             listen_tasks[str(listener)] = listentask
     bot.objects["tex_listen_tasks"] = listen_tasks
-
     bot.sync_log("Loaded {} tex listeners".format(len(tex_listeners)))
+
+    server_listen_tasks = {}
+    server_tex_listeners = await bot.data.servers.find("latex_listen_enabled", True, read=True)
+    for listener in server_tex_listeners:
+        server = ctx.bot.get_server(str(listener))
+        if not server:
+            continue
+        listenctx = MessageContext(bot=bot, server=server)
+        listentask = asyncio.ensure_future(texlistener_server(listenctx), loop=ctx.bot.loop)
+        server_listen_tasks[str(listener)] = listentask
+    bot.objects["server_tex_listen_tasks"] = server_listen_tasks
+    bot.sync_log("Loaded {} server tex listeners".format(len(server_tex_listeners)))
+
+    with open(LOGFILE, "r") as f:
+        log_splits = await ctx.msg_split(f.read(), True)
+        for log in log_splits:
+            await bot.send_message(discord.utils.get(bot.get_all_channels(), id=LOG_CHANNEL), log)
 
 # ----Event loops----
 # ----End event loops----

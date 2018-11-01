@@ -14,7 +14,7 @@ class BOOL(paraSetting):
                  "^enabled?$": True,
                  "^no$": False,
                  "^false$": False,
-                 "^off$": True,
+                 "^off$": False,
                  "^disabled?$": False}
     outputs = {True: "",
                False: ""}
