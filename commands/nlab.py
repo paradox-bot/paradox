@@ -81,7 +81,7 @@ async def cmd_nlab(ctx):
 
     soup = await soup_site(url)
     direct_soup = await soup_site(direct_page)
-    direct_found = False if "Page not found" in direct_soup.find("title").contents[0] else True
+    direct_found = False if not direct_soup.find("title") or "Page not found" in direct_soup.find("title").contents[0] else True
     direct_str = "\nDirect page found at: [{}]({})".format(ctx.arg_str, direct_page) if direct_found else ""
 
     if not "Search results" in soup.find("title").contents[0]:
