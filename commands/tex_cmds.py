@@ -216,7 +216,7 @@ async def reaction_edit_handler(ctx, out_msg):
 async def cmd_preamble(ctx):
     """
     Usage:
-        {prefix}preamble [code] [--reset] [--colour|color [default|transparent|black]] [--keepmsg [yes|no]]
+        {prefix}preamble [code] [--reset] [--colour|color [default|transparent|black|gray]] [--keepmsg [yes|no]]
     Description:
         Displays the preamble currently used for compiling your latex code.
         If [code] is provided, sets this to be preamble instead.
@@ -246,8 +246,8 @@ async def cmd_preamble(ctx):
 
     colour = ctx.flags["colour"] or ctx.flags["color"]
     if colour:
-        if colour not in ["default", "transparent", "black"]:
-            await ctx.reply("Unrecognised colourscheme. It must be one of `default` or `transparent`.")
+        if colour not in ["default", "transparent", "black", "gray"]:
+            await ctx.reply("Unrecognised colourscheme. It must be one of `default`, `transparent`, `black` or `gray`.")
             return
         await ctx.data.users.set(ctx.authid, "latex_colour", colour)
 

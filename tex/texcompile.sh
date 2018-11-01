@@ -17,6 +17,11 @@ then
   convert $1.png -negate $1.png;
   convert $1.png -fuzz 40% -fill black -opaque black $1.png;
 fi
+if [ "$2" = "gray" ];
+then
+  convert $1.png -negate $1.png;
+  convert $1.png -fuzz 40% -fill black -opaque rgb(128,128,128) $1.png;
+fi
 #cd tex
 #latex -no-shell-escape -halt-on-error $1.tex >> $1.texout.log 2>&1
 #dvipng -bg White -T tight -D 620 -o $1.png $1
