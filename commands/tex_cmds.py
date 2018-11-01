@@ -125,7 +125,9 @@ async def make_latex(ctx):
     err_msg = ""
     if error != "":
         err_msg = "Compile error! Output:\n```\n{}\n```".format(error)
-    elif not (await ctx.data.users.get(ctx.authid, "latex_keep_message")):
+    keep = await ctx.data.users.get(ctx.authid, "latex_keep_message")
+    keep = keep or (keep is None)
+    elif not keep:
         ctx.objs["latex_source_deleted"] = True
         await ctx.del_src()
     ctx.objs["latex_source_msg"] = "```tex\n{}\n```{}".format(ctx.objs["latex_source"], err_msg)
@@ -257,7 +259,7 @@ async def cmd_preamble(ctx):
         colour = colour if colour else "default"
         embed.add_field(name="Output colourscheme (colour)", value=colour, inline=False)
         keep = await ctx.data.users.get(ctx.authid, "latex_keep_message")
-        keep = "Yes" if keep else "No"
+        keep = "Yes" if keep or (keep is None) else "No"
         embed.add_field(name="Whether to keep source message after rendering (keepmsg)", value=keep, inline=False)
         await ctx.reply(embed=embed)
         return
