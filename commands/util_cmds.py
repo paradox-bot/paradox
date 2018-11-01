@@ -145,7 +145,7 @@ async def cmd_secho(ctx):
           category="Utility",
           short_help="Generates a bot invite link for a bot",
           aliases=["ibot"])
-@cmds.execute("user_lookup", in_server=True)
+@cmds.execute("user_lookup", in_server=False)
 async def cmd_invitebot(ctx):
     """
     Usage:
@@ -154,13 +154,17 @@ async def cmd_invitebot(ctx):
         Replies with an invite link for the bot.
     """
     user = ctx.objs["found_user"]
-    if not user:
+    if ctx.arg_str.isdigit():
+        userid = ctx.arg_str
+    elif not user:
         await ctx.reply("I couldn't find any matching bots in this server")
         return
-    if not user.bot:
+    elif not user.bot:
         await ctx.reply("Maybe you could try asking them nicely?")
         return
-    await ctx.reply("https://discordapp.com/api/oauth2/authorize?client_id={}&permissions=0&scope=bot".format(user.id))
+    if user:
+        userid = user.id
+    await ctx.reply("https://discordapp.com/api/oauth2/authorize?client_id={}&permissions=0&scope=bot".format(userid))
 
 
 @cmds.cmd("userinfo",
