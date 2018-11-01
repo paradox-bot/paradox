@@ -2,9 +2,12 @@ from contextBot.Conf import Conf
 from paraSetting import paraSetting
 import settingTypes
 
+import asyncio
+from commands.tex_cmds import texlistener_server as tls
+
 server_conf = Conf("s_conf")
 
-
+#TODO can do the write check with what's
 class Server_Setting(paraSetting):
     @classmethod
     async def read(cls, ctx):
@@ -138,6 +141,31 @@ class Server_Setting_Leave_Ch(Server_Setting, settingTypes.CHANNEL):
     desc = "Channel to post in when a user leaves"
     default = None
     category = "Leave message"
+
+@server_conf.setting
+class Server_Setting_Latex_Listen(Server_Setting, settingTypes.BOOL):
+    name = "latex_listen_enabled"
+    vis_name = "latex"
+    desc = "Enables/Disables listening for LaTeX messages"
+    default = False
+    category = "Guild settings"
+
+    outputs = {True: "Enabled",
+               False: "Disabled"}
+
+    @classmethod
+    async def write(cls, ctx, value):
+        result = await super().write(ctx, value)
+        listens = ctx.bot.objects["server_tex_listen_tasks"]
+        if ctx.server.id in listens:
+            listens[ctx.server.id].cancel()
+        if value:
+            listentask = asyncio.ensure_future(tls(ctx), loop=ctx.bot.loop)
+            listens[ctx.server.id] = listentask
+        return result
+
+
+
 
 
 def load_into(bot):

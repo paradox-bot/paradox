@@ -11,7 +11,7 @@ TODO: Permission to view a setting
 """
 
 
-class _configSetting:
+class _configSetting():
     def __init__(self, name, desc, perm_view, perm_write, ctype, default):
         self.name = name
         self.desc = desc

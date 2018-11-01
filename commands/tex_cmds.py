@@ -57,23 +57,38 @@ async def texlistener(ctx):
         if not await ctx.data.users.get(ctx.author.id, "tex_listening"):
             break
         await ctx.bot.log("Got a listening latex message\n{}\nfrom `{}` in `{}`".format(msg.content, msg.author.name, msg.server.name if msg.server else "DM"))
+        await _texlisten_compile(ctx, msg)
 
-        newctx = type(ctx)(bot=ctx.bot, message=msg)
-        newctx.msg = msg
-        newctx.ch = msg.channel
-        first = msg.content.split()[0]
-        if not any(first.startswith(okprefix) for okprefix in ["$", "```tex", "`$", "\\begin"]) and any(prefix in first for prefix in ["latex", "tex", "align", "$", "$$"]):
-            continue
-        newctx.objs["latex_listening"] = True
-        newctx.objs["latex_source_deleted"] = False
-        newctx.objs["latex_out_deleted"] = False
-        newctx.objs["latex_source"] = parse_tex(newctx, msg.content)
-        out_msg = await make_latex(newctx)
+async def _texlisten_compile(ctx, msg):
+    newctx = type(ctx)(bot=ctx.bot, message=msg)
+    newctx.msg = msg
+    newctx.ch = msg.channel
+    first = msg.content.split()[0]
+    if not any(first.startswith(okprefix) for okprefix in ["$", "```tex", "`$", "\\begin"]) and any(prefix in first for prefix in ["latex", "tex", "align", "$", "$$"]):
+        return
+    newctx.objs["latex_listening"] = True
+    newctx.objs["latex_source_deleted"] = False
+    newctx.objs["latex_out_deleted"] = False
+    newctx.objs["latex_source"] = parse_tex(newctx, msg.content)
+    out_msg = await make_latex(newctx)
 
-        asyncio.ensure_future(reaction_edit_handler(newctx, out_msg), loop = ctx.bot.loop)
-        if not newctx.objs["latex_source_deleted"]:
-            asyncio.ensure_future(source_edit_handler(newctx, out_msg), loop = ctx.bot.loop)
+    asyncio.ensure_future(reaction_edit_handler(newctx, out_msg), loop = ctx.bot.loop)
+    if not newctx.objs["latex_source_deleted"]:
+        asyncio.ensure_future(source_edit_handler(newctx, out_msg), loop = ctx.bot.loop)
 
+async def server_pass_off(ctx, msg):
+    print("Passed off to server")
+    if await ctx.data.users.get(msg.author.id, "tex_listening"):
+        return
+    await ctx.bot.log("Got a server based listening latex message\n{}\nfrom `{}` in `{}`".format(msg.content, msg.author.name, msg.server.name if msg.server else "DM"))
+    await _texlisten_compile(ctx, msg)
+
+async def texlistener_server(ctx):
+    while True:
+        print("Going around the server listener")
+        msg = await ctx.bot.wait_for_message(check=lambda msg: ((msg.server.id == ctx.server.id) and _is_tex(msg) and not msg.author.bot))
+        print("Seen message")
+        asyncio.ensure_future(server_pass_off(ctx, msg))
 
 
 @cmds.cmd("tex",
@@ -89,7 +104,7 @@ async def cmd_tex(ctx):
         {prefix}align <align block>
     Description:
         Renders and displays LaTeX code.
-        Using $ instead of tex compiles $<code>$.
+        Using $ instead of tex compiles \\begin{{gather*}}<code>\\end{{gather*}}.
         Using $$ instead of tex compiles $$<code>$$.
         Using align instead of tex compiles \\begin{{align*}}<code>\\end{{align*}}.
         Use the reactions to delete the message and show your code, respectively.
@@ -112,7 +127,7 @@ def parse_tex(ctx, source):
     if ctx.objs["latex_listening"]:
         return source
     if ctx.used_cmd_name == "$":
-        return "${}$".format(source)
+        return "\\begin{{gather*}}\n{}\n\\end{{gather*}}".format(source)
     elif ctx.used_cmd_name == "$$":
         return "$${}$$".format(source)
     elif ctx.used_cmd_name == "align":
