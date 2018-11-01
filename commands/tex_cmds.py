@@ -123,10 +123,10 @@ def parse_tex(ctx, source):
 async def make_latex(ctx):
     error = await texcomp(ctx)
     err_msg = ""
-    if error != "":
-        err_msg = "Compile error! Output:\n```\n{}\n```".format(error)
     keep = await ctx.data.users.get(ctx.authid, "latex_keep_message")
     keep = keep or (keep is None)
+    if error != "":
+        err_msg = "Compile error! Output:\n```\n{}\n```".format(error)
     elif not keep:
         ctx.objs["latex_source_deleted"] = True
         await ctx.del_src()
