@@ -10,8 +10,6 @@ from botconf import Conf
 from contextBot.Context import Context, MessageContext
 from contextBot.Bot import Bot
 
-from commands.tex_cmds import texlistener, texlistener_server
-
 # Global constants/ environment variables
 
 CONF_FILE = "paradox.conf"
@@ -145,12 +143,14 @@ async def on_ready():
     bot.objects["GAME"] = GAME
     GAME = await Context(bot=bot).ctx_format(GAME)
     await bot.change_presence(status=discord.Status.online, game=discord.Game(name=GAME))
-    bot.sync_log("Logged in as")
-    bot.sync_log(bot.user.name)
-    bot.sync_log(bot.user.id)
-    bot.sync_log("Logged into {} servers".format(len(bot.servers)))
-
-    ctx = Context(bot=bot)
+    log_msg = "Logged in as\n{bot.user.name}\n{bot.user.id}\
+        \nLogged into {n} servers.\
+        \nLoaded {CH} command handlers.\
+        \nListening for {cmds} command keywords.\
+        \nReady to process commands.".format(bot=bot,
+                                             n=len(bot.servers),
+                                             CH=len(bot.handlers),
+                                             cmds=len(bot.cmd_cache))
 
     for emoji in emojis:
         bot.objects[emoji] = get_emoji(emojis[emoji])
@@ -160,40 +160,16 @@ async def on_ready():
     bot.objects["preamble_channel"] = discord.utils.get(bot.get_all_channels(), id=PREAMBLE_CH)
     bot.objects["server_change_log_channel"] = discord.utils.get(bot.get_all_channels(), id=BOT_LOG_CH)
 
-    ##TODO This is really really ugly and inefficient. Please fix this up.
-    listen_tasks = {}
-    tex_listeners = await bot.data.users.find("tex_listening", True, read=True)
-    for listener in tex_listeners:
-        try:
-            user = await ctx.bot.get_user_info(listener)
-        except discord.NotFound:
-            bot.sync_log("Tex listener {} not found.".format(listener))
-        except discord.HTTPException:
-            bot.sync_log("Tex listener {} failed to convert to user.".format(listener))
-        else:
-            listenctx = MessageContext(bot=bot, author=user)
-            listentask = asyncio.ensure_future(texlistener(listenctx), loop=ctx.bot.loop)
-            listen_tasks[str(listener)] = listentask
-    bot.objects["tex_listen_tasks"] = listen_tasks
-    bot.sync_log("Loaded {} tex listeners".format(len(tex_listeners)))
+    await bot.log(log_msg)
 
-    server_listen_tasks = {}
-    server_tex_listeners = await bot.data.servers.find("latex_listen_enabled", True, read=True)
-    for listener in server_tex_listeners:
-        server = ctx.bot.get_server(str(listener))
-        if not server:
-            continue
-        listenctx = MessageContext(bot=bot, server=server)
-        listentask = asyncio.ensure_future(texlistener_server(listenctx), loop=ctx.bot.loop)
-        server_listen_tasks[str(listener)] = listentask
-    bot.objects["server_tex_listen_tasks"] = server_listen_tasks
-    bot.sync_log("Loaded {} server tex listeners".format(len(server_tex_listeners)))
-
+    """
+    ctx = Context(bot=bot)
+    # This log isn't really needed. If it doesn't start up, it won't log anyway.
     with open(LOGFILE, "r") as f:
         log_splits = await ctx.msg_split(f.read(), True)
         for log in log_splits:
             await bot.send_message(discord.utils.get(bot.get_all_channels(), id=LOG_CHANNEL), log)
-
+    """
 # ----Event loops----
 # ----End event loops----
 

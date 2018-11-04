@@ -2,9 +2,6 @@ from contextBot.Conf import Conf
 from paraSetting import paraSetting
 import settingTypes
 
-import asyncio
-from commands.tex_cmds import texlistener_server as tls
-
 server_conf = Conf("s_conf")
 
 #TODO can do the write check with what's
@@ -156,12 +153,11 @@ class Server_Setting_Latex_Listen(Server_Setting, settingTypes.BOOL):
     @classmethod
     async def write(cls, ctx, value):
         result = await super().write(ctx, value)
-        listens = ctx.bot.objects["server_tex_listen_tasks"]
-        if ctx.server.id in listens:
-            listens[ctx.server.id].cancel()
+        listens = ctx.bot.objects["server_tex_listeners"]
         if value:
-            listentask = asyncio.ensure_future(tls(ctx), loop=ctx.bot.loop)
-            listens[ctx.server.id] = listentask
+            listens.append(ctx.server.id)
+        else:
+            listens.remove(ctx.server.id)
         return result
 
 
