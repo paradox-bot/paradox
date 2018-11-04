@@ -35,60 +35,20 @@ async def cmd_texlisten(ctx):
         When tex is found, compiles it and replies to you.
     """
     listening = await ctx.data.users.get(ctx.authid, "tex_listening")
-    if listening and not ctx.arg_str:
-        if ctx.authid in ctx.bot.objects["tex_listen_tasks"]:
-            ctx.bot.objects["tex_listen_tasks"][ctx.authid].cancel()
+    if listening:
+        if ctx.authid in ctx.bot.objects["user_tex_listeners"]:
+            ctx.bot.objects["user_tex_listeners"].remove(ctx.authid)
         await ctx.data.users.set(ctx.authid, "tex_listening", False)
         await ctx.reply("I have stopped listening to your tex.")
         return
-    await ctx.data.users.set(ctx.authid, "tex_listening", True)
-    ctx.objs["latex_listening"] = True
-    listen_task = asyncio.ensure_future(texlistener(ctx), loop=ctx.bot.loop)
-    ctx.bot.objects["tex_listen_tasks"][ctx.authid] = listen_task
-    await ctx.reply("I am now listening to your tex.")
+    else:
+        await ctx.data.users.set(ctx.authid, "tex_listening", True)
+        ctx.bot.objects["user_tex_listeners"].append(ctx.authid)
+        await ctx.reply("I am now listening to your tex.")
 
 def _is_tex(msg):
     return (("$" in msg.content) and 1 - (msg.content.count("$") % 2)) or ("\\begin{" in msg.content)
 
-
-async def texlistener(ctx):
-    while True:
-        msg = await ctx.bot.wait_for_message(author=ctx.author, check=_is_tex)
-        if not await ctx.data.users.get(ctx.author.id, "tex_listening"):
-            break
-        await ctx.bot.log("Got a listening latex message\n{}\nfrom `{}` in `{}`".format(msg.content, msg.author.name, msg.server.name if msg.server else "DM"))
-        await _texlisten_compile(ctx, msg)
-
-async def _texlisten_compile(ctx, msg):
-    newctx = type(ctx)(bot=ctx.bot, message=msg)
-    newctx.msg = msg
-    newctx.ch = msg.channel
-    first = msg.content.split()[0]
-    if not any(first.startswith(okprefix) for okprefix in ["$", "```tex", "`$", "\\begin"]) and any(prefix in first for prefix in ["latex", "tex", "align", "$", "$$"]):
-        return
-    newctx.objs["latex_listening"] = True
-    newctx.objs["latex_source_deleted"] = False
-    newctx.objs["latex_out_deleted"] = False
-    newctx.objs["latex_source"] = parse_tex(newctx, msg.content)
-    out_msg = await make_latex(newctx)
-
-    asyncio.ensure_future(reaction_edit_handler(newctx, out_msg), loop = ctx.bot.loop)
-    if not newctx.objs["latex_source_deleted"]:
-        asyncio.ensure_future(source_edit_handler(newctx, out_msg), loop = ctx.bot.loop)
-
-async def server_pass_off(ctx, msg):
-    print("Passed off to server")
-    if await ctx.data.users.get(msg.author.id, "tex_listening"):
-        return
-    await ctx.bot.log("Got a server based listening latex message\n{}\nfrom `{}` in `{}`".format(msg.content, msg.author.name, msg.server.name if msg.server else "DM"))
-    await _texlisten_compile(ctx, msg)
-
-async def texlistener_server(ctx):
-    while True:
-        print("Going around the server listener")
-        msg = await ctx.bot.wait_for_message(check=lambda msg: ((msg.server.id == ctx.server.id) and _is_tex(msg) and not msg.author.bot))
-        print("Seen message")
-        asyncio.ensure_future(server_pass_off(ctx, msg))
 
 
 @cmds.cmd("tex",
@@ -112,6 +72,7 @@ async def cmd_tex(ctx):
     ctx.objs["latex_listening"] = False
     ctx.objs["latex_source_deleted"] = False
     ctx.objs["latex_out_deleted"] = False
+    ctx.objs["latex_handled"] = True
     ctx.objs["latex_source"] = parse_tex(ctx, ctx.arg_str)
 
     out_msg = await make_latex(ctx)
@@ -305,3 +266,34 @@ async def texcomp(ctx):
     colour = await ctx.data.users.get(ctx.authid, "latex_colour")
     colour = colour if colour else "default"
     return await ctx.run_sh("tex/texcompile.sh {} {}".format(ctx.authid, colour))
+
+async def register_tex_listeners(bot):
+    bot.objects["user_tex_listeners"] = [str(userid) for userid in await bot.data.users.find("tex_listening", True, read=True)]
+    bot.objects["server_tex_listeners"] = [str(serverid) for serverid in await bot.data.servers.find("latex_listen_enabled", True, read=True)]
+    await bot.log("Loaded {} user tex listeners and {} server tex listeners.".format(len(bot.objects["user_tex_listeners"]), len(bot.objects["server_tex_listeners"])))
+
+async def tex_listener(ctx):
+    if ctx.author.bot:
+        return
+    if "latex_handled" in ctx.objs and ctx.objs["latex_handled"]:
+        return
+    if not (ctx.authid in ctx.bot.objects["user_tex_listeners"] or (ctx.server and ctx.server.id in ctx.bot.objects["server_tex_listeners"])):
+        return
+    if not _is_tex(ctx.msg):
+        return
+    await ctx.bot.log("Recieved the following listening tex message from \"{ctx.author.name}\" in server \"{ctx.server.name}\":\n{ctx.cntnt}".format(ctx=ctx))
+    ctx.objs["latex_handled"] = True
+    ctx.objs["latex_listening"] = True
+    ctx.objs["latex_source_deleted"] = False
+    ctx.objs["latex_out_deleted"] = False
+    ctx.objs["latex_source"] = parse_tex(ctx, ctx.msg.content)
+    out_msg = await make_latex(ctx)
+
+    asyncio.ensure_future(reaction_edit_handler(ctx, out_msg), loop = ctx.bot.loop)
+    if not ctx.objs["latex_source_deleted"]:
+        asyncio.ensure_future(source_edit_handler(ctx, out_msg), loop = ctx.bot.loop)
+
+
+def load_into(bot):
+    bot.add_after_event("ready", register_tex_listeners)
+    bot.after_ctx_message(tex_listener)
