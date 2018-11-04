@@ -550,17 +550,19 @@ async def cmd_profile(ctx):
 @cmds.cmd(name="emoji",
           category="Utility",
           short_help="Displays info and enlarges a custom emoji",
-          aliases=["e", "ee"])
+          aliases=["e", "ee", "ree"])
 @cmds.execute("flags", flags=["e", "a"])
 async def cmd_emoji(ctx):
     """
     Usage:
         {prefix}emoji <emoji> [-e]
         {prefix}ee <emoji>
+        {prefix}ree <emoji>
     Description:
         Displays some information about the provided custom emoji, and sends an enlarged version.
         If the emoji isn't found, instead searches for the emoji amongst all emojis I can see.
         If used as ee or given with -e flag, only shows the enlarged image.
+        If used as ree, reacts with the emoji.
         Built in emoji support is coming soon!
     Flags:
         -e:  (enlarge) Only shows the enlarged emoji, with no other info.
@@ -571,6 +573,8 @@ async def cmd_emoji(ctx):
     # TODO: Handle the case where a builtin emoji has the same name as a custom emoji
     # Any way of testing whether an emoji from get is a builtin?
     # Emojis with the same name are shown
+    if not ctx.arg_str and ctx.used_cmd_name == "ree":
+        ctx.arg_str = "reeeeeeeeeee"
     if not ctx.arg_str:
         if ctx.server:
             emojis = filter(lambda e: e.server == ctx.server, ctx.bot.get_all_emojis())
@@ -587,7 +591,7 @@ async def cmd_emoji(ctx):
     em_str = 0
     emoji = None
     emojis = []
-    if ctx.used_cmd_name == "ee":
+    if ctx.used_cmd_name in ["ee", "ree"]:
         ctx.flags["e"] = True
     embed = discord.Embed(title=None if ctx.flags["e"] else "Emoji info!", color=discord.Colour.light_grey())
     if ctx.arg_str.endswith(">") and ctx.arg_str.startswith("<"):
@@ -631,7 +635,14 @@ async def cmd_emoji(ctx):
             emb_fields.append(("Some other matching emojis", emoj_similar_str, 0))
         await ctx.emb_add_fields(embed, emb_fields)
     try:
-        await ctx.reply(embed=embed)
+        if ctx.used_cmd_name == "ree":
+            logs = ctx.bot.logs_from(ctx.ch, limit=2)
+            async for message in logs:
+                message=message
+
+            await ctx.bot.add_reaction(message, emoji)
+        else:
+            await ctx.reply(embed=embed)
     except discord.HTTPException as e:
         if ctx.flags["a"]:
             await ctx.reply("Failed to send animated emoji. Maybe this emoji isn't animated?")
