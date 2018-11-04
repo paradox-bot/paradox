@@ -550,7 +550,7 @@ async def cmd_profile(ctx):
 @cmds.cmd(name="emoji",
           category="Utility",
           short_help="Displays info and enlarges a custom emoji",
-          aliases=["e", "ee", "ree"])
+          aliases=["e", "ee", "ree", "sree"])
 @cmds.execute("flags", flags=["e", "a"])
 async def cmd_emoji(ctx):
     """
@@ -573,7 +573,7 @@ async def cmd_emoji(ctx):
     # TODO: Handle the case where a builtin emoji has the same name as a custom emoji
     # Any way of testing whether an emoji from get is a builtin?
     # Emojis with the same name are shown
-    if not ctx.arg_str and ctx.used_cmd_name == "ree":
+    if not ctx.arg_str and ctx.used_cmd_name in ["ree", "sree"]:
         ctx.arg_str = "reeeeeeeeeee"
     if not ctx.arg_str:
         if ctx.server:
@@ -591,7 +591,7 @@ async def cmd_emoji(ctx):
     em_str = 0
     emoji = None
     emojis = []
-    if ctx.used_cmd_name in ["ee", "ree"]:
+    if ctx.used_cmd_name in ["ee", "ree", "sree"]:
         ctx.flags["e"] = True
     embed = discord.Embed(title=None if ctx.flags["e"] else "Emoji info!", color=discord.Colour.light_grey())
     if ctx.arg_str.endswith(">") and ctx.arg_str.startswith("<"):
@@ -635,12 +635,16 @@ async def cmd_emoji(ctx):
             emb_fields.append(("Some other matching emojis", emoj_similar_str, 0))
         await ctx.emb_add_fields(embed, emb_fields)
     try:
-        if ctx.used_cmd_name == "ree":
+        if ctx.used_cmd_name in ["ree", "sree"]:
             logs = ctx.bot.logs_from(ctx.ch, limit=2)
             async for message in logs:
                 message=message
-
             await ctx.bot.add_reaction(message, emoji)
+            if ctx.used_cmd_name == "sree":
+                try:
+                    await ctx.bot.delete_message(ctx.msg)
+                except discord.Forbidden:
+                    pass
         else:
             await ctx.reply(embed=embed)
     except discord.HTTPException as e:
