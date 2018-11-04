@@ -7,9 +7,51 @@ import iso8601
 import traceback
 import string
 import aiohttp
+from PIL import Image
+from io import BytesIO
 
 
 cmds = paraCH()
+
+@cmds.cmd("rotate",
+          category="Utility",
+          short_help="Rotates the last sent image.")
+async def cmd_rotate(ctx):
+    """
+    Usage:
+        {prefix}rotate [amount]
+    Description:
+        Rotates the attached image or the last sent image (within the last 10 messages) by <amount>.
+        If <amount> is not specified, rotates forward by 90.
+    """
+    amount = int(ctx.arg_str) if ctx.arg_str and (ctx.arg_str.isdigit() or (len(ctx.arg_str) > 1 and ctx.arg_str[0] == '-' and ctx.arg_str[1:].isdigit())) else 90
+    try:
+        message_list = ctx.bot.logs_from(ctx.ch, limit=10)
+    except discord.Forbidden:
+        await ctx.reply("I need permisions to get message logs to use this command")
+        return
+    file_dict = None
+    async for message in message_list:
+        if message.attachments and "height" in message.attachments[0]:
+            file_dict = message.attachments[0]
+            break
+    if not file_dict:
+        await ctx.reply("Couldn't find an attached image in the last 10 messages")
+        return
+    image_url = file_dict["url"]
+
+    async with aiohttp.get(image_url) as r:
+        response = await r.read()
+    im = Image.open(BytesIO(response))
+    rotated = im.rotate(amount, expand=1)
+    with BytesIO() as output:
+        rotated.save(output, format="PNG")
+        output.seek(0)
+        await ctx.bot.send_file(ctx.ch, fp=output, filename="{}.png".format(file_dict["id"]))
+
+
+
+
 
 
 @cmds.cmd("echo",
