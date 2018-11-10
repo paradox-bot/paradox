@@ -25,7 +25,7 @@ There are a few other rendering commands, for instance `{prefix}align` and `{pre
 In the custom preamble you may define your own commands, load your favourite packages, and do anything you can normally do in a standard latex preamble.
 If you are a LaTeX geek and have a long preamble, you can also upload a file with this command.
 
-With the ***inline rendering*** feature I can automatically listen to messages and compile detected LaTeX!
+With the ***automatic rendering*** feature I can automatically listen to messages and compile detected LaTeX!
 ```ini
 [ Automatic Rendering: ]
 
