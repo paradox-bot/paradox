@@ -60,7 +60,7 @@ async def get_prefixes(ctx):
         Currently just bot and server prefixes
         """
         prefix = 0
-        prefix_conf = ctx.server_conf.guild_prefix
+        prefix_conf = ctx.server_conf.texit_guild_prefix
         if ctx.server:
             prefix = await prefix_conf.get(ctx)
         prefix = prefix if prefix else ctx.bot.prefix

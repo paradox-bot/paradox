@@ -22,7 +22,7 @@ class Server_Setting(paraSetting):
 
 @server_conf.setting
 class Server_Setting_Prefix(Server_Setting, settingTypes.STR):
-    name = "guild_prefix"
+    name = "texit_guild_prefix"
     vis_name = "prefix"
     desc = "Custom server prefix"
     category = "Guild settings"
