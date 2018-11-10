@@ -156,6 +156,9 @@ async def cmd_bancmd(ctx):
             bans.remove(cmd)
             unbans.append(cmd)
         else:
+            if cmd == "bancmd":
+                await ctx.reply("You can't ban bancmd!")
+                continue
             bans.append(cmd)
             newbans.append(cmd)
     newbanstr = "Banned commands: `{}`\n".format("`, `".join(newbans))
