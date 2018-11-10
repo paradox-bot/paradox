@@ -20,36 +20,28 @@ async def cmd_about(ctx):
         Sends a message containing information about the bot.
     """
     current_devs = ["299175087389802496", "408905098312548362", "300992784020668416"]
-    old_devs = ["298706728856453121",  "225773687037493258",]  # TODO: Don't hard code these here!!
-    current_devnames = ', '.join([str(discord.utils.get(ctx.bot.get_all_members(), id=str(devs))) for devs in current_devs])
-    old_devnames = ', '.join([str(discord.utils.get(ctx.bot.get_all_members(), id=str(devs))) for devs in old_devs])
+    devnames = ', '.join([str(discord.utils.get(ctx.bot.get_all_members(), id=str(devs))) for devs in current_devs])
     pform = platform.platform()
     py_vers = sys.version
     mem = psutil.virtual_memory()
-    mem_str = "{0:.2f}GB used out of {1:.2f}GB ({mem.percent}\%)".format(mem.used/(1024 ** 3), mem.total/(1024 ** 3), mem=mem)
-    cpu_usage_str = "{}\%".format(psutil.cpu_percent())
-    info = "I am a multi-purpose guild automation bot from Team Paradøx, coded in Discord.py!\
-        \nI am under active development and constantly evolving with new commands and features."
+    mem_str = "{0:.2f}GB used out of {1:.2f}GB ({mem.percent}%)".format(mem.used / (1024 ** 3), mem.total / (1024 ** 3), mem=mem)
+    cpu_usage_str = "{}%".format(psutil.cpu_percent())
+    info = "I am a high quality LaTeX rendering bot, coded in Discord.py!\
+        \nSee `{}help` for information about how to use me.".format(ctx.used_prefix)
     links = "[Support Server]({sprt}), [Invite Me]({invite})".format(sprt=ctx.bot.objects["support guild"],
                                                                      invite=ctx.bot.objects["invite_link"])
     api_vers = "{} ({})".format(discord.__version__, discord.version_info[3])
 
-    emb_fields = [("Info", info, 1),
-                  ("Developed by", "Current: {}.\nPast: {}.".format(current_devnames, old_devnames), 0),
+    emb_fields = [("Developed by", "{}.".format(devnames), 0),
                   ("Python version", py_vers, 0),
                   ("Discord API version", api_vers, 0),
                   ("Platform", pform, 0),
                   ("Memory", mem_str, 0),
                   ("CPU usage", cpu_usage_str, 0),
                   ("Links", links, 0)]
-    embed = discord.Embed(title="About Me", color=discord.Colour.red())
+    embed = discord.Embed(title="About Me", color=discord.Colour.red(), description=info)
     await ctx.emb_add_fields(embed, emb_fields)
     await ctx.reply(embed=embed)
-    # Uptime as well, of system and bot
-    # Commands used? Or that goes in stats
-# TODO: Interactive bug reporting
-
-# TODO: cooldown on feedback
 
 
 @cmds.cmd("feedback",
@@ -105,6 +97,7 @@ async def cmd_ping(ctx):
     emsg_tstamp = emsg.edited_timestamp
     latency = ((emsg_tstamp - msg_tstamp).microseconds) // 1000
     await ctx.bot.edit_message(msg, "Ping: {}ms".format(str(latency)))
+
 
 @cmds.cmd("invite",
           category="General",
