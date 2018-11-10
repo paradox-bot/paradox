@@ -141,7 +141,7 @@ class Server_Setting_Leave_Ch(Server_Setting, settingTypes.CHANNEL):
 
 @server_conf.setting
 class Server_Setting_Latex_Listen(Server_Setting, settingTypes.BOOL):
-    name = "latex_listen_enabled"
+    name = "texit_latex_listen_enabled"
     vis_name = "latex"
     desc = "Enables/Disables listening for LaTeX messages"
     default = False

@@ -314,7 +314,7 @@ async def texcomp(ctx):
 
 async def register_tex_listeners(bot):
     bot.objects["user_tex_listeners"] = [str(userid) for userid in await bot.data.users.find("tex_listening", True, read=True)]
-    bot.objects["server_tex_listeners"] = [str(serverid) for serverid in await bot.data.servers.find("latex_listen_enabled", True, read=True)]
+    bot.objects["server_tex_listeners"] = [str(serverid) for serverid in await bot.data.servers.find("texit_latex_listen_enabled", True, read=True)]
     await bot.log("Loaded {} user tex listeners and {} server tex listeners.".format(len(bot.objects["user_tex_listeners"]), len(bot.objects["server_tex_listeners"])))
 
 
