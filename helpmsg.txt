@@ -34,4 +34,4 @@ With the ***inline rendering*** feature I can automatically listen to messages a
 ```
 
 To see a complete list of all my commands, use `{prefix}list`. 
-If you have any questions please join my support server at {support}! There, you can also see my older sister Paradøx who has a much wider range of abilities.
+If you have any questions please join my support server at {support} :relaxed: There, you can also see my older sister Paradøx who has a much wider range of abilities.
