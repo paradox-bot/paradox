@@ -19,28 +19,14 @@ async def cmd_help(ctx):
                  "msg": ctx.msg}
     msg = ""
     all_commands = await ctx.get_cmds()  # Should probably be cached from ctx init
-    commands = await ctx.get_raw_cmds()
-    sorted_cats = ctx.bot.objects["sorted cats"]
     if ctx.arg_str == "":
-        cat_msgs = {}
-        for cmd in sorted(commands):
-            command = commands[cmd]
-            cat = command.category if command.category else "Misc"
-            lower_cat = cat.lower()
-            if lower_cat not in cat_msgs or not cat_msgs[lower_cat]:
-                cat_msgs[lower_cat] = "```ini\n [ {}: ]\n".format(cat)
-            cat_msgs[lower_cat] += "; {}{}:\t{}\n".format(" " * (12 - len(cmd)), cmd, command.short_help)
-        for cat in sorted_cats:
-            if cat.lower() not in cat_msgs:
-                continue
-            cat_msgs[cat.lower()] += "```"
-            if len(msg) + len(cat_msgs[cat.lower()]) > 1990:
-                await ctx.reply(msg, dm=True)
-                msg = ""
-            msg += cat_msgs[cat.lower()]
-        await ctx.reply(msg, dm=True)
-        await ctx.reply("I have messaged you a detailed listing of my commands! \
-                        \nUse `{0.used_prefix}help <cmd>` to get detailed help on a command, or `{0.used_prefix}list` to obtain a briefer listing.".format(ctx))
+        with open("helpmsg.txt", "r") as helpmsg:
+            msg = helpmsg.read()
+            await ctx.reply(msg.format(prefix=ctx.used_prefix, support=ctx.bot.objects["support guild"]), dm=True)
+            try:
+                await ctx.bot.add_reaction(ctx.msg, "✅")
+            except discord.Forbidden:
+                await ctx.reply("Help sent!")
         return
     else:
         for cmd in ctx.params:
@@ -71,22 +57,30 @@ async def cmd_list(ctx):
     Usage:
         {prefix}list
     Description:
-        Replies with an embed containing all my visible commands.
+        DMs you with a complete listing of my commands.
     """
-    sorted_cats = ctx.bot.objects["sorted cats"]
-    cats = {}
+    msg = "Here are my commands!\n"
     commands = await ctx.get_raw_cmds()
+    sorted_cats = ctx.bot.objects["sorted cats"]
+    cat_msgs = {}
     for cmd in sorted(commands):
         command = commands[cmd]
         cat = command.category if command.category else "Misc"
         lower_cat = cat.lower()
-        if lower_cat not in cats:
-            cats[lower_cat] = []
-        cats[lower_cat].append(cmd)
-    embed = discord.Embed(title="Paradøx's commands!", color=discord.Colour.green())
+        if lower_cat not in cat_msgs or not cat_msgs[lower_cat]:
+            cat_msgs[lower_cat] = "```ini\n [ {}: ]\n".format(cat)
+        cat_msgs[lower_cat] += "; {}{}:\t{}\n".format(" " * (12 - len(cmd)), cmd, command.short_help)
     for cat in sorted_cats:
-        if cat.lower() not in cats:
+        if cat.lower() not in cat_msgs:
             continue
-        embed.add_field(name=cat, value="`{}`".format('`, `'.join(cats[cat.lower()])), inline=False)
-    embed.set_footer(text="Use {0}help or {0}help <command> for detailed help or get support with {0}support.".format(ctx.used_prefix))
-    await ctx.reply(embed=embed)
+        cat_msgs[cat.lower()] += "```"
+        if len(msg) + len(cat_msgs[cat.lower()]) > 1990:
+            await ctx.reply(msg, dm=True)
+            msg = ""
+        msg += cat_msgs[cat.lower()]
+    await ctx.reply(msg, dm=True)
+    try:
+        await ctx.bot.add_reaction(ctx.msg, "✅")
+    except discord.Forbidden:
+        await ctx.reply("Command list set!")
+    return
