@@ -90,7 +90,7 @@ Bot.log = log
 
 bot.load("commands", "config", "events", "utils", ignore=["RCS", "__pycache__"])
 
-bot.objects["invite_link"] = "http://invite.paradoxical.pw"
+bot.objects["invite_link"] = "https://discordapp.com/api/oauth2/authorize?client_id=510789298321096704&permissions=370752&scope=bot"
 bot.objects["support guild"] = "https://discord.gg/ECbUu8u"
 bot.objects["sorted cats"] = ["General",
                               "Fun Stuff",
