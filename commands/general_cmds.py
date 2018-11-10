@@ -110,7 +110,11 @@ async def cmd_invite(ctx):
     Description:
         Sends the link to invite the bot to your server.
     """
-    await ctx.reply("Visit <{}> to invite me!".format(ctx.bot.objects["invite_link"]))
+    await ctx.reply("Visit <{}> to invite me!".format(ctx.bot.objects["invite_link"]), dm=True)
+    try:
+        await ctx.bot.add_reaction(ctx.msg, "✅")
+    except discord.Forbidden:
+        await ctx.reply("Help sent!")
 
 
 @cmds.cmd("support",
@@ -123,4 +127,8 @@ async def cmd_support(ctx):
     Description:
         Sends the invite link to the Paradøx support guild.
     """
-    await ctx.reply("Join my server here!\n\n<{}>".format(ctx.bot.objects["support guild"]))
+    await ctx.reply("Join my server here!\n\n<{}>".format(ctx.bot.objects["support guild"]), dm=True)
+    try:
+        await ctx.bot.add_reaction(ctx.msg, "✅")
+    except discord.Forbidden:
+        await ctx.reply("Help sent!")
