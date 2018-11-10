@@ -99,7 +99,6 @@ bot.objects["sorted cats"] = ["General",
                               "User info",
                               "Moderation",
                               "Server Admin",
-                              "Bot Admin",
                               "Maths",
                               "Misc"]
 

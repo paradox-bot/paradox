@@ -18,9 +18,9 @@ There are a few other rendering commands, for instance `{prefix}align` and `{pre
 ```ini
 [ Customisation: ]
 
-; {prefix}tex --config colour white | black | transparent:     Change your latex colourscheme.
-;                            {prefix}tex --config keepmsg:     Toggle whether I delete your source message after rendering.
-;                                 {prefix}preamble [code]:     Change your preamble or show your current one.
+; {prefix}tex --colour white | black | transparent:     Change your latex colourscheme.
+;                            {prefix}tex --keepmsg:     Toggle whether I delete your source message after rendering.
+;                          {prefix}preamble [code]:     Change your preamble or show your current config.
 ```
 In the custom preamble you may define your own commands, load your favourite packages, and do anything you can normally do in a standard latex preamble.
 If you are a LaTeX geek and have a long preamble, you can also upload a file with this command.
