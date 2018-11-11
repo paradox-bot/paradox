@@ -1,5 +1,6 @@
 import discord
 
+
 def load_into(bot):
     @bot.util
     async def listen_for(ctx, chars=[], timeout=30, lower=True):
@@ -24,7 +25,7 @@ def load_into(bot):
 
     @bot.util
     async def ask(ctx, msg, timeout=30):
-        offer_msg = await ctx.reply(msg+" `y(es)`/`n(o)`")
+        offer_msg = await ctx.reply(msg + " `y(es)`/`n(o)`")
         result_msg = await ctx.listen_for(["y", "yes", "n", "no"], timeout=timeout)
         if result_msg is None:
             return None
@@ -50,7 +51,7 @@ def load_into(bot):
         """
 
     @bot.util
-    async def selector(ctx, message, select_from, timeout=30):
+    async def selector(ctx, message, select_from, timeout=120, max_len=20):
         """
         Interactive method to ask the user to select an entry from a list.
         Returns the index of the list which was selected,
@@ -64,13 +65,10 @@ def load_into(bot):
         if len(select_from) == 1:
             return 0
         lines = ["{:>3}:\t{}".format(i + 1, line) for (i, line) in enumerate(select_from)]
-        msg = message
-        msg += "```\n"
-        msg += "\n".join(lines)
-        msg += "```\n"
-        msg += "Type the number of your selection or `c` to cancel."
-        out_msg = await ctx.reply(msg)
-        result_msg = await ctx.listen_for([str(i+1) for i in range(0, len(select_from))] + ["c"], timeout=timeout)
+        blocks = [lines[i:i + max_len - 1] for i in range(0, len(lines), max_len)]
+        pages = ["{}```\n{}\n```\nType the number of your selection or `c` to cancel.".format(message, "\n".join(block)) for block in blocks]
+        out_msg = await ctx.pager(pages)
+        result_msg = await ctx.listen_for([str(i + 1) for i in range(0, len(select_from))] + ["c"], timeout=timeout)
         await ctx.bot.delete_message(out_msg)
         if not result_msg:
             await ctx.reply("Question timed out, aborting...")
@@ -86,6 +84,3 @@ def load_into(bot):
             ctx.cmd_err = (-1, "")  # User cancelled or didn't respond
             return None
         return int(result_msg.content) - 1
-
-
-
