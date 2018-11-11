@@ -4,7 +4,9 @@ import settingTypes
 
 server_conf = Conf("s_conf")
 
-#TODO can do the write check with what's
+# TODO can do the write check with what's
+
+
 class Server_Setting(paraSetting):
     @classmethod
     async def read(cls, ctx):
@@ -33,12 +35,66 @@ class Server_Setting_Prefix(Server_Setting, settingTypes.STR):
 
 
 @server_conf.setting
+class Server_Setting_Starboard(Server_Setting, settingTypes.BOOL):
+    name = "starboard_enabled"
+    vis_name = "starboard"
+    desc = "Enable/Disable Starboard"
+    category = "Starboard"
+    default = False
+
+    outputs = {True: "Enabled",
+               False: "Disabled"}
+
+    @classmethod
+    async def write(cls, ctx, value):
+        result = await super().write(ctx, value)
+        if ctx.cmd_err[0]:
+            return result
+        starboards = ctx.bot.objects["server_starboard_emojis"]
+        if value:
+            starboards[ctx.server.id] = await ctx.server_conf.starboard_emoji.get(ctx)
+            ctx.bot.objects["server_starboards"][ctx.server.id] = {}
+        else:
+            starboards.pop(ctx.server.id, None)
+        return result
+
+
+@server_conf.setting
+class Server_Setting_StarChan(Server_Setting, settingTypes.CHANNEL):
+    name = "starboard_channel"
+    vis_name = "star_channel"
+    desc = "Starboard channel"
+    category = "Starboard"
+    default = None
+
+
+@server_conf.setting
+class Server_Setting_StarEmoji(Server_Setting, settingTypes.EMOJI):
+    name = "starboard_emoji"
+    vis_name = "star_emoji"
+    desc = "Starboard emoji"
+    category = "Starboard"
+    default = "⭐"
+
+    @classmethod
+    async def write(cls, ctx, value):
+        result = await super().write(ctx, value)
+        if ctx.cmd_err[0]:
+            return result
+        starboards = ctx.bot.objects["server_starboard_emojis"]
+        if ctx.server.id in starboards:
+            starboards[ctx.server.id] = value if value else cls.default
+        return result
+
+
+@server_conf.setting
 class Server_Setting_Autorole(Server_Setting, settingTypes.ROLE):
     name = "guild_autorole"
     vis_name = "autorole"
     desc = "Role automatically given to new members"
     category = "Guild settings"
     default = "0"
+
 
 @server_conf.setting
 class Server_Setting_Autorole_Bot(Server_Setting, settingTypes.ROLE):
@@ -62,6 +118,7 @@ class Server_Setting_modlog_ch(Server_Setting, settingTypes.CHANNEL):
     default = None
     category = "Moderation"
 
+
 @server_conf.setting
 class Server_Setting_modrole(Server_Setting, settingTypes.ROLE):
     name = "mod_role"
@@ -69,6 +126,7 @@ class Server_Setting_modrole(Server_Setting, settingTypes.ROLE):
     desc = "Role required to use moderation commands"
     default = None
     category = "Moderation"
+
 
 @server_conf.setting
 class Server_Setting_mute_role(Server_Setting, settingTypes.ROLE):
@@ -110,6 +168,7 @@ class Server_Setting_Join_Ch(Server_Setting, settingTypes.CHANNEL):
     default = None
     category = "Join message"
 
+
 @server_conf.setting
 class Server_Setting_Leave(Server_Setting, settingTypes.BOOL):
     name = "leave_msgs_enabled"
@@ -139,6 +198,7 @@ class Server_Setting_Leave_Ch(Server_Setting, settingTypes.CHANNEL):
     default = None
     category = "Leave message"
 
+
 @server_conf.setting
 class Server_Setting_Latex_Listen(Server_Setting, settingTypes.BOOL):
     name = "latex_listen_enabled"
@@ -153,15 +213,14 @@ class Server_Setting_Latex_Listen(Server_Setting, settingTypes.BOOL):
     @classmethod
     async def write(cls, ctx, value):
         result = await super().write(ctx, value)
+        if ctx.cmd_err[0]:
+            return result
         listens = ctx.bot.objects["server_tex_listeners"]
         if value:
             listens.append(ctx.server.id)
         else:
             listens.remove(ctx.server.id)
         return result
-
-
-
 
 
 def load_into(bot):
