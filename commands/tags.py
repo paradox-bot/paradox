@@ -132,6 +132,12 @@ async def create_tag(ctx):
             content = None
         elif content is None:
             await ctx.reply("Request timed out, aborting")
+        if content is None:
+            try:
+                await ctx.bot.delete_message(embed_msg)
+            except discord.NotFound:
+                pass
+            return None
         create_embed.set_field_at(1, name="Tag Content", value=content)
         await ctx.bot.edit_message(embed_msg, embed=create_embed)
 
