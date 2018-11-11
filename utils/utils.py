@@ -3,6 +3,7 @@ import subprocess
 import datetime
 import discord
 import re
+import asyncio
 
 
 def load_into(bot):
@@ -102,6 +103,8 @@ def load_into(bot):
                 index = params.index("-" + clean_flag)
             elif (("--" + clean_flag) in params):
                 index = params.index("--" + clean_flag)
+            elif (("—" + clean_flag) in params):
+                index = params.index("—" + clean_flag)
 
             if index is None:
                 final_flags[clean_flag] = False
@@ -164,7 +167,6 @@ def load_into(bot):
         arg = "embed" if embed else "new_content"
         emo_next = ctx.bot.objects["emoji_next"]
         emo_prev = ctx.bot.objects["emoji_prev"]
-        page = 0
 
         def check(reaction, user):
             return (reaction.emoji in [emo_next, emo_prev]) and (not (user == ctx.me))
@@ -174,29 +176,32 @@ def load_into(bot):
         except discord.Forbidden:
             await ctx.reply("Cannot page results because I do not have permissions to add emojis!")
             return
-        while True:
-            res = await ctx.bot.wait_for_reaction(message=out_msg,
-                                                  timeout=300,
-                                                  check=check)
-            if res is None:
-                break
+        async def paging():
+            page = 0
+            while True:
+                res = await ctx.bot.wait_for_reaction(message=out_msg,
+                                                      timeout=300,
+                                                      check=check)
+                if res is None:
+                    break
+                try:
+                    await ctx.bot.remove_reaction(out_msg, res.reaction.emoji, res.user)
+                except discord.Forbidden:
+                    pass
+                page += 1 if res.reaction.emoji == emo_next else -1
+                if page == -1:
+                    page = len(pages) - 1
+                if page == len(pages):
+                    page = 0
+                args[arg] = pages[page]
+                await ctx.bot.edit_message(out_msg, **args)
             try:
-                await ctx.bot.remove_reaction(out_msg, res.reaction.emoji, res.user)
+                await ctx.bot.remove_reaction(out_msg, emo_prev, ctx.me)
+                await ctx.bot.remove_reaction(out_msg, emo_next, ctx.me)
+                await ctx.bot.clear_reactions(out_msg)
             except discord.Forbidden:
                 pass
-            page += 1 if res.reaction.emoji == emo_next else -1
-            if page == -1:
-                page = len(pages) - 1
-            if page == len(pages):
-                page = 0
-            args[arg] = pages[page]
-            await ctx.bot.edit_message(out_msg, **args)
-        try:
-            await ctx.bot.remove_reaction(out_msg, emo_prev, ctx.me)
-            await ctx.bot.remove_reaction(out_msg, emo_next, ctx.me)
-            await ctx.bot.clear_reactions(out_msg)
-        except discord.Forbidden:
-            pass
+        asyncio.ensure_future(paging())
         return out_msg
 
     @bot.util

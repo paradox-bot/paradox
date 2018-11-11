@@ -1,50 +1,59 @@
 import discord
 import shutil
 import os
-import asyncio
 from datetime import datetime
 
 from botdata import BotData
 from botconf import Conf
 
-from contextBot.Context import Context, MessageContext
+from contextBot.Context import Context
 from contextBot.Bot import Bot
 
-# Global constants/ environment variables
+
+# Configuration file for environment variables.
 
 CONF_FILE = "paradox.conf"
-BOT_DATA_FILE = "botdata.db"
-
-
-# Initialise
 
 conf = Conf(CONF_FILE)
-botdata = BotData(BOT_DATA_FILE)
+
+# ------------------------------
+# Read the environment variables
 
 PREFIX = conf.get("PREFIX")
 
-CHEAT_CH = "429507856908419074"
-FEEDBACK_CH = "429514404418289684"
-PREAMBLE_CH = "504225174799908864"
-BOT_LOG_CH = "426655650706096129"
+# Discord channel ids for logging endpoints and internal communication
+CHEAT_CH = conf.get("CHEAT_CH")
+FEEDBACK_CH = conf.get("FEEDBACK_CH")
+PREAMBLE_CH = conf.get("PREAMBLE_CH")
+BOT_LOG_CH = conf.get("BOT_LOG_CH")
+LOG_CHANNEL = conf.get("LOG_CHANNEL")
 
-LOG_CHANNEL = "428159039831146506"
-
-EMOJI_SERVER = "398694383089745920"
-
-
-LOGFILE = "logs/paralog.log"
-LOGFILE_LAST = "logs/paralog.last.log"
+# Server where the referenced emojis live
+EMOJI_SERVER = conf.get("EMOJI_SERVER")
 
 
-# Log file
+# ------------------------------
+# Initialise data
+BOT_DATA_FILE = conf.get("BOT_DATA_FILE")
+botdata = BotData(BOT_DATA_FILE)
+
+# Initialise logs
+LOGNAME = conf.get("LOGFILE")
+LOGDIR = conf.get("LOGDIR")
+
+LOGFILE = "{}/{}.log".format(LOGDIR, LOGNAME)
+LOGFILE_LAST = "{}/{}.last.log".format(LOGDIR, LOGNAME)
 
 if os.path.isfile(LOGFILE):
     if os.path.isfile(LOGFILE_LAST):
-        shutil.move(LOGFILE_LAST, "logs/{}paralog.log".format(datetime.utcnow().strftime("%s")))
+        shutil.move(LOGFILE_LAST, "{}/{}{}.log".format(LOGDIR, datetime.utcnow().strftime("%s"), LOGNAME))
     shutil.move(LOGFILE, LOGFILE_LAST)
+else:
+    with open(LOGFILE, "w") as file:
+        pass
 
 
+# Get the valid prefixes in given context
 async def get_prefixes(ctx):
         """
         Returns a list of valid prefixes in this context.
@@ -57,13 +66,14 @@ async def get_prefixes(ctx):
         prefix = prefix if prefix else ctx.bot.prefix
         return [prefix]
 
+# Initialise the bot
 bot = Bot(data=botdata,
           bot_conf=conf,
           prefix=PREFIX,
           prefix_func=get_prefixes,
-          log_file="logs/paralog.log")
+          log_file=LOGFILE)
 
-bot.DEBUG = 1
+bot.DEBUG = conf.get("DEBUG")
 
 
 async def log(bot, logMessage):
@@ -89,7 +99,6 @@ bot.objects["sorted cats"] = ["General",
                               "User info",
                               "Moderation",
                               "Server Admin",
-                              "Bot Admin",
                               "Maths",
                               "Misc"]
 
@@ -98,21 +107,21 @@ bot.objects["sorted_conf_pages"] = [("General", ["Guild settings"]),
                                     ("Join/Leave Messages", ["Join message", "Leave message"])]
 
 bot.objects["regions"] = {
-        "brazil": "Brazil",
-        "eu-central": "Central Europe",
-        "hongkong": "Hong Kong",
-        "japan": "Japan",
-        "russia": "Russia",
-        "singapore": "Singapore",
-        "sydney": "Sydney",
-        "us-central": "Central United States",
-        "us-east": "Eastern United States",
-        "us-south": "Southern United States",
-        "us-west": "Western United States",
-        "eu-west": "Western Europe",
-        "vip-amsterdam": "Amsterdam (VIP)",
-        "vip-us-east": "Eastern United States (VIP)"
-    }
+    "brazil": "Brazil",
+    "eu-central": "Central Europe",
+    "hongkong": "Hong Kong",
+    "japan": "Japan",
+    "russia": "Russia",
+    "singapore": "Singapore",
+    "sydney": "Sydney",
+    "us-central": "Central United States",
+    "us-east": "Eastern United States",
+    "us-south": "Southern United States",
+    "us-west": "Western United States",
+    "eu-west": "Western Europe",
+    "vip-amsterdam": "Amsterdam (VIP)",
+    "vip-us-east": "Eastern United States (VIP)"
+}
 
 emojis = {"emoji_tex_del": "delete",
           "emoji_tex_show": "showtex",
@@ -137,6 +146,7 @@ def get_emoji(name):
 
 @bot.event
 async def on_ready():
+    print(type(CHEAT_CH))
     GAME = conf.getStr("GAME")
     if GAME == "":
         GAME = "in $servers$ servers!"
