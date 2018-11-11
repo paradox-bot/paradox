@@ -9,8 +9,7 @@ def load_into(bot):
         maybe_user_id = user_str.strip('<@!> ')
         if is_member:
             def is_user(member):
-                return ((user_str.lower() in member.display_name.lower()) or
-                       (user_str.lower() in member.name.lower()))
+                return ((user_str.lower() in member.display_name.lower()) or (user_str.lower() in member.name.lower()))
         else:
             def is_user(member):
                 return (user_str.lower() in member.name.lower())
