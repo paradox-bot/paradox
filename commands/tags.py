@@ -44,7 +44,21 @@ async def cmd_tag(ctx):
         return
     if ctx.arg_str not in current_tags:
         await ctx.reply("This tag does not exist.")
-        return
+        (code, msg) = await ctx.CH.checks["in_server_has_mod"](ctx)
+        if code != 0:
+            return
+        else:
+            resp = await ctx.ask("Would you like to create this tag?")
+            if resp:
+                tag_info = await create_tag(ctx)
+                if tag_info is None:
+                    return
+
+                current_tags = await ctx.bot.data.servers.get(ctx.server.id, "tags")
+                current_tags = current_tags if current_tags else {}
+                current_tags[tag_info["name"]] = tag_info
+                await ctx.bot.data.servers.set(ctx.server.id, "tags", current_tags)
+            return
     tag = current_tags[ctx.arg_str]
 
     if ctx.flags["delete"]:
