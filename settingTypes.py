@@ -89,18 +89,55 @@ class ROLE(paraSetting):
         return role.id if role else None
 
 
+class EMOJI(paraSetting):
+    """
+    EMOJI type.
+    """
+    accept = "Emoji, either built in or custom. Use None to reset"
+
+    @classmethod
+    async def humanise(self, ctx, raw):
+        """
+        Expect raw to be emoji id or unicode.
+        Empty values are None and 0.
+        """
+        if (not raw) or raw == "0":
+            return "None"
+        if raw.isdigit():
+            emoji = discord.utils.get(ctx.bot.get_all_emojis(), id=raw)
+            return str(emoji) if emoji else raw
+        else:
+            return raw
+
+    @classmethod
+    async def understand(self, ctx, userstr):
+        """
+        User can enter an emoji id, custom emoji, or unicode built in emoji.
+        """
+        if userstr.lower() in ["0", "none"]:
+            return None
+        if userstr.endswith(">") and userstr.startswith("<"):
+            # Probably a custom emoji
+            id_str = userstr[userstr.rfind(":") + 1:-1]
+            if id_str.isdigit():
+                return id_str
+        else:
+            # It's probably a built in emoji or nonsense. Either way, store it.
+            return userstr
+
+
 class CHANNEL(paraSetting):
     """
     Channel type.
     """
-    accept = "Channel mention/id/name"
+    accept = "Channel mention/id/name. Use None to reset"
 
     @classmethod
     async def humanise(self, ctx, raw):
         """
         Expect raw to be channel id or 0, an empty.
         """
-        if not raw:
+        if not raw or raw == "0":
             return "None"
         channel = ctx.server.get_channel(raw)
         if channel:
@@ -112,6 +149,8 @@ class CHANNEL(paraSetting):
         """
         User can enter a channel mention or an id, or even a partial name.
         """
+        if userstr.lower() in ["0", "none"]:
+            return None
         if not ctx.server:
             ctx.cmd_err = (1, "This is not valid outside of a server!")
             return None
