@@ -205,7 +205,7 @@ async def cmd_invitebot(ctx):
 
 
 @cmds.cmd("userinfo",
-          category="Utility",
+          category="User Info",
           short_help="Shows the user's information",
           aliases=["uinfo", "ui"])
 @cmds.require("in_server")
@@ -458,7 +458,7 @@ async def timezone_lookup(ctx):
 
 
 @cmds.cmd("time",
-          category="Utility",
+          category="User Info",
           short_help="Shows the current time for a user")
 @cmds.execute("user_lookup", in_server=True)
 @cmds.execute("flags", flags=["set=="])
