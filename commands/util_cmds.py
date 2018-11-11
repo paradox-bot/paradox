@@ -9,9 +9,11 @@ import string
 import aiohttp
 from PIL import Image
 from io import BytesIO
+import itertools
 
 
 cmds = paraCH()
+
 
 @cmds.cmd("rotate",
           category="Utility",
@@ -50,10 +52,6 @@ async def cmd_rotate(ctx):
         await ctx.bot.send_file(ctx.ch, fp=output, filename="{}.png".format(file_dict["id"]))
 
 
-
-
-
-
 @cmds.cmd("echo",
           category="Utility",
           short_help="Sends what you tell me to!")
@@ -65,6 +63,7 @@ async def cmd_echo(ctx):
         Replies to the message with <text>.
     """
     await ctx.reply(ctx.arg_str if ctx.arg_str else "I can't send an empty message!")
+
 
 @cmds.cmd("pounce",
           category="Utility",
@@ -89,6 +88,7 @@ async def cmd_pounce(ctx):
             await ctx.reply("User lookup failed, aborting")
             return
         user = user.id
+
     def predicate(message):
         found = True
         found = found and message.channel == ctx.ch
@@ -106,16 +106,11 @@ async def cmd_pounce(ctx):
         return
     embed = discord.Embed(colour=discord.Colour.light_grey(), title="Message pounce fired!", description=message.content)
     embed.set_author(name="{user.name}".format(user=message.author),
-                    icon_url=message.author.avatar_url)
+                     icon_url=message.author.avatar_url)
     embed.set_footer(text=message.timestamp.strftime("Sent at %-I:%M %p, %d/%m/%Y in #{} from {}".format(message.channel.name, message.server.name)))
     if message.attachments:
         embed.set_image(url=message.attachments[0]["proxy_url"])
     await ctx.reply(embed=embed, dm=True)
-
-
-
-
-
 
 
 @cmds.cmd("quote",
@@ -159,12 +154,11 @@ async def cmd_quote(ctx):
     embed = discord.Embed(colour=discord.Colour.light_grey(), description=message.content)
     if not ctx.flags["a"]:
         embed.set_author(name="{user.name}".format(user=message.author),
-                        icon_url=message.author.avatar_url)
+                         icon_url=message.author.avatar_url)
     embed.set_footer(text=message.timestamp.strftime("Sent at %-I:%M %p, %d/%m/%Y in #{}".format(message.channel.name)))
     if message.attachments:
         embed.set_image(url=message.attachments[0]["proxy_url"])
     await ctx.reply(embed=embed)
-
 
 
 @cmds.cmd("secho",
@@ -182,6 +176,7 @@ async def cmd_secho(ctx):
     except Exception:
         pass
     await ctx.reply("{}".format(ctx.arg_str) if ctx.arg_str else "I can't send an empty message!")
+
 
 @cmds.cmd("invitebot",
           category="Utility",
@@ -245,9 +240,9 @@ async def cmd_userinfo(ctx):
     game = "Playing {}".format(user.game if user.game else "nothing")
     status = "{}, {}".format(statusdict[str(user.status)], game)
     shared = len(list(filter(lambda m: m.id == user.id, ctx.bot.get_all_members())))
-    joined_ago = ctx.strfdelta(datetime.utcnow()-user.joined_at)
+    joined_ago = ctx.strfdelta(datetime.utcnow() - user.joined_at)
     joined = user.joined_at.strftime("%-I:%M %p, %d/%m/%Y")
-    created_ago = ctx.strfdelta(datetime.utcnow()-user.created_at)
+    created_ago = ctx.strfdelta(datetime.utcnow() - user.created_at)
     created = user.created_at.strftime("%-I:%M %p, %d/%m/%Y")
     roles = [r.name for r in user.roles if r.name != "@everyone"]
     roles = ('`' + '`, `'.join(roles) + '`') if roles else "None"
@@ -278,7 +273,7 @@ async def prim_cmd_discrim(ctx):
     if (len(args) > 4) or not args.isdigit():
         await ctx.reply("You must give me at most four digits to find!")
         return
-    discrim = "0"*(4-len(args)) + args
+    discrim = "0" * (4 - len(args)) + args
     found_members = set(filter(lambda m: m.discriminator == discrim, p))
     if len(found_members) == 0:
         await ctx.reply("No users with this discrim found!")
@@ -315,7 +310,7 @@ async def cmd_piggybank(ctx):
     if ctx.arg_str == "":
         msg = "You have ${:.2f} in your piggybank!".format(bank_amount)
         if goal:
-            msg += "\nYou have achieved {:.1%} of your goal (${:.2f})".format(bank_amount/goal, goal)
+            msg += "\nYou have achieved {:.1%} of your goal (${:.2f})".format(bank_amount / goal, goal)
         await ctx.reply(msg)
         return
     elif (ctx.params[0] in ["+", "-"]) and len(ctx.params) == 2:
@@ -338,7 +333,7 @@ async def cmd_piggybank(ctx):
             if bank_amount >= goal:
                 msg += "\nYou have achieved your goal!"
             else:
-                msg += "\nYou have now achieved {:.1%} of your goal (${:.2f}).".format(bank_amount/goal, goal)
+                msg += "\nYou have now achieved {:.1%} of your goal (${:.2f}).".format(bank_amount / goal, goal)
         await ctx.reply(msg)
     elif (ctx.params[0] == "goal") and len(ctx.params) == 2:
         if ctx.params[1].lower() in ["none", "remove", "clear"]:
@@ -433,27 +428,62 @@ async def cmd_timezone(ctx):
         await ctx.reply("No timezones were found matching these criteria!")
         return
 
-    tz_blocks = [tzlist[i:i+20] for i in range(0, len(tzlist),20)]
+    tz_blocks = [tzlist[i:i + 20] for i in range(0, len(tzlist), 20)]
     max_block_lens = [len(max(list(zip(*tz_block))[0], key=len)) for tz_block in tz_blocks]
     block_strs = [["{0[0]:^{max_len}} {0[1]:^10}".format(tzpair, max_len=max_block_lens[i]) for tzpair in tzblock] for i, tzblock in enumerate(tz_blocks)]
     tz_pages = ["```\n{}\n```".format("\n".join(block)) for block in block_strs]
     await ctx.pager(tz_pages)
 
-# User info commands
+
+async def timezone_lookup(ctx):
+    search_str = ctx.flags["set"]
+    if search_str in pytz.all_timezones:
+        return search_str
+    timestr = '%-I:%M %p'
+    tzlist = [(tz, iso8601.parse_date(datetime.now().isoformat()).astimezone(timezone(tz)).strftime(timestr)) for tz in pytz.all_timezones]
+    if search_str:
+        tzlist = [tzpair for tzpair in tzlist if (search_str.lower() in tzpair[0].lower()) or (search_str.lower() in tzpair[1].lower())]
+    if not tzlist:
+        await ctx.reply("No timezones were found matching these criteria!")
+        return
+    if len(tzlist) == 1:
+        return tzlist[0][0]
+
+    tz_blocks = [tzlist[i:i + 20] for i in range(0, len(tzlist), 20)]
+    max_block_lens = [len(max(list(zip(*tz_block))[0], key=len)) for tz_block in tz_blocks]
+    block_strs = [["{0[0]:^{max_len}} {0[1]:^10}".format(tzpair, max_len=max_block_lens[i]) for tzpair in tzblock] for i, tzblock in enumerate(tz_blocks)]
+    blocks = list(itertools.chain(*block_strs))
+    tz_num = await ctx.selector("Multiple matching timezones found, please select one!", blocks)
+    return tzlist[tz_num][0] if tz_num else None
 
 
 @cmds.cmd("time",
-          category="User info",
+          category="Utility",
           short_help="Shows the current time for a user")
 @cmds.execute("user_lookup", in_server=True)
+@cmds.execute("flags", flags=["set=="])
 async def cmd_time(ctx):
     """
     Usage:
-        {prefix}time [mention | id | partial name]
+        {prefix}time [mention | id | partial name] [--set <timezone>]
     Description:
         Gives the time for the mentioned user or yourself.
         Requires the user to have set the usersetting "timezone".
+    Flags:2
+        set:: Sets your timezone to the one given, or displays the options if multiple are found.
+    Examples:
+        {prefix}time {msg.author.name}
+        {prefix}time --set Australia/Melbourne
+        {prefix}time --set 10:52
     """
+    if ctx.flags["set"]:
+        TZ = await timezone_lookup(ctx)
+        if not TZ:
+            return
+        await ctx.data.users.set(ctx.authid, "tz", TZ)
+        await ctx.reply("Your timezone has been set to `{}`".format(TZ))
+        return
+
     if ctx.arg_str == "":
         user = ctx.author
     else:
@@ -465,9 +495,9 @@ async def cmd_time(ctx):
     tz = await ctx.data.users.get(user, "tz")
     if not tz:
         if user == ctx.authid:
-            await ctx.reply("You haven't set your timezone! Set it using `{0}set timezone <timezone>`!\nAvailable timezones may be searched using `{0}timezone`".format(ctx.used_prefix))
+            await ctx.reply("You haven't set your timezone! Set it using `{0}time --set <timezone>`!`".format(ctx.used_prefix))
         else:
-            await ctx.reply("This user hasn't set their timezone. Ask them to set it using `{0}set timezone <timezone>`!\nAvailable timezones may be searched using `{0}timezone`!".format(ctx.used_prefix))
+            await ctx.reply("This user hasn't set their timezone. Ask them to set it using `{0}time --set <timezone>`!".format(ctx.used_prefix))
         return
     try:
         TZ = timezone(tz)
@@ -505,16 +535,16 @@ async def cmd_profile(ctx):
     badges = ""
     tempid = ctx.authid
     ctx.authid = user.id
-    #TODO: VERY BAD, quick hack so badges work.
+    # TODO: VERY BAD, quick hack so badges work.
     for badge in badge_dict:
         (code, msg) = await cmds.checks[badge](ctx)
         if code == 0:
-            badge_emoj = ctx.bot.objects["emoji_"+badge_dict[badge]]
+            badge_emoj = ctx.bot.objects["emoji_" + badge_dict[badge]]
             if badge_emoj is not None:
                 badges += str(badge_emoj) + " "
     ctx.authid = tempid
 
-    created_ago = ctx.strfdelta(datetime.utcnow()-user.created_at)
+    created_ago = ctx.strfdelta(datetime.utcnow() - user.created_at)
     created = user.created_at.strftime("%-I:%M %p, %d/%m/%Y")
     rep = await ctx.data.users.get(user.id, "rep")
     given_rep = await ctx.data.users.get(user.id, "given_rep")
@@ -546,6 +576,7 @@ async def cmd_profile(ctx):
     embed.add_field(name="Created at",
                     value="{} ({} ago)".format(created, created_ago), inline=False)
     await ctx.reply(embed=embed)
+
 
 @cmds.cmd(name="emoji",
           category="Utility",
@@ -622,7 +653,7 @@ async def cmd_emoji(ctx):
     url = "https://cdn.discordapp.com/emojis/{}.{}".format(emoji.id, "gif" if ctx.flags["a"] else "png")
     embed.set_image(url=url)
     if not ctx.flags["e"]:
-        created_ago = ctx.strfdelta(datetime.utcnow()-emoji.created_at)
+        created_ago = ctx.strfdelta(datetime.utcnow() - emoji.created_at)
         created = emoji.created_at.strftime("%-I:%M %p, %d/%m/%Y")
         emojis = emojis[:10] if emojis else filter(lambda e: (e.name == emoji.name) and (e != emoji), ctx.bot.get_all_emojis())
         emoj_similar_str = " ".join(map(str, emojis))
@@ -638,7 +669,7 @@ async def cmd_emoji(ctx):
         if ctx.used_cmd_name in ["ree", "sree"]:
             logs = ctx.bot.logs_from(ctx.ch, limit=2)
             async for message in logs:
-                message=message
+                message = message
             await ctx.bot.add_reaction(message, emoji)
             if ctx.used_cmd_name == "sree":
                 try:
@@ -647,7 +678,7 @@ async def cmd_emoji(ctx):
                     pass
         else:
             await ctx.reply(embed=embed)
-    except discord.HTTPException as e:
+    except discord.HTTPException:
         if ctx.flags["a"]:
             await ctx.reply("Failed to send animated emoji. Maybe this emoji isn't animated?")
         else:
@@ -679,7 +710,7 @@ async def cmd_colour(ctx):
             js = await r.json()
             inverted = col_invert(hexstr)
             embed = discord.Embed(title="Colour info for `#{}`".format(hexstr), color=discord.Colour(int(hexstr, 16)))
-            embed.set_thumbnail(url="http://placehold.it/150x150.png/{}/{}?text={}".format(hexstr, inverted, "%23"+hexstr))
+            embed.set_thumbnail(url="http://placehold.it/150x150.png/{}/{}?text={}".format(hexstr, inverted, "%23" + hexstr))
             embed.add_field(name="Closest named colour", value="`{}` (Hex `{}`)".format(js["name"]["value"], js["name"]["closest_named_hex"]))
             embed.add_field(name="Values", value="```\n{}\n{}\n{}\n{}\n{}\n```".format(js["rgb"]["value"],
                                                                                        js["hsl"]["value"],
@@ -691,9 +722,11 @@ async def cmd_colour(ctx):
             await ctx.reply("Sorry, something went wrong while fetching your colour! Please try again later")
             return
 
+
 def col_invert(color_to_convert):
     table = str.maketrans('0123456789abcdef', 'fedcba9876543210')
     return color_to_convert.lower().translate(table).upper()
+
 
 @cmds.cmd(name="roleinfo",
           category="Utility",
@@ -718,7 +751,7 @@ async def cmd_role(ctx):
     colour = str(role.colour) if role.colour.value else str(discord.Colour.light_grey())
 #    thumbnail = "http://placehold.it/150x150.png/{}/000000?text={}".format(colour.strip("#"), colour)
     num_users = len([user for user in ctx.server.members if (role in user.roles)])
-    created_ago = ctx.strfdelta(datetime.utcnow()-role.created_at)
+    created_ago = ctx.strfdelta(datetime.utcnow() - role.created_at)
     created = role.created_at.strftime("%-I:%M %p, %d/%m/%Y")
     created_at = "{} ({} ago)".format(created, created_ago)
     hoisted = "Yes" if role.hoist else "No"
@@ -727,13 +760,13 @@ async def cmd_role(ctx):
     pos = role.position
     server_roles = sorted(ctx.server.roles, key=lambda role: role.position)
     position = "```\n"
-    for i in reversed(range(-3,4)):
+    for i in reversed(range(-3, 4)):
         line_pos = pos + i
         if line_pos < 0:
             break
         if line_pos >= len(server_roles):
             continue
-        position += "{0:<4}{1}{2:<20}\n".format(str(line_pos)+".", " " * 4 + (">" if i == 0 else " "), str(server_roles[line_pos]))
+        position += "{0:<4}{1}{2:<20}\n".format(str(line_pos) + ".", " " * 4 + (">" if i == 0 else " "), str(server_roles[line_pos]))
     position += "```"
     if role > ctx.author.top_role:
         diff_str = "(Higher than your highest role)"
@@ -743,7 +776,7 @@ async def cmd_role(ctx):
         diff_str = "(This is your highest role!)"
     position += diff_str
 
-    embed = discord.Embed(title=title, colour=role.colour if role.colour.value else discord.Colour.light_grey())
+    embed = discord.Embed(title=title, colour=colour)
 #    embed.set_thumbnail(url=thumbnail)
     emb_fields = [("Colour", role.colour, 0),
                   ("Created at", created_at, 0),
