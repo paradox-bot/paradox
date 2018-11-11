@@ -23,7 +23,7 @@ default_preamble = "\\usepackage{amsmath}\
 
 @cmds.cmd("texlisten",
           category="Maths",
-          short_help="Listens for latex to reply to",
+          short_help="Turns on listening to your LaTeX",
           aliases=["tl"])
 async def cmd_texlisten(ctx):
     """
@@ -47,13 +47,14 @@ async def cmd_texlisten(ctx):
 
 
 def _is_tex(msg):
-    return (("$" in msg.content) and 1 - (msg.content.count("$") % 2)) or ("\\begin{" in msg.content)
+    return (("$" in msg.content) and 1 - (msg.content.count("$") % 2) and msg.content.strip("$")) or ("\\begin{" in msg.content)
 
 
 @cmds.cmd("tex",
           category="Maths",
           short_help="Renders LaTeX code",
-          aliases=["LaTeX", "$", "$$", "align"])
+          aliases=["$", "$$", "align"])
+@cmds.execute("flags", flags=["config", "keepmsg", "colour=="])
 async def cmd_tex(ctx):
     """
     Usage:
@@ -61,13 +62,58 @@ async def cmd_tex(ctx):
         {prefix}$ <equation>
         {prefix}$$ <displayeqn>
         {prefix}align <align block>
+        {prefix}tex --colour white | black | transparent
+        {prefix}tex --keepmsg
+        {prefix}tex --config
     Description:
         Renders and displays LaTeX code.
-        Using $ instead of tex compiles \\begin{{gather*}}<code>\\end{{gather*}}.
-        Using $$ instead of tex compiles $$<code>$$.
-        Using align instead of tex compiles \\begin{{align*}}<code>\\end{{align*}}.
+
+        Using $ instead of tex compiles
+        \\begin{{gather*}}<code>\\end{{gather*}}.
+
+        Using $$ instead of tex compiles
+        $$<code>$$.
+
+        Using align instead of tex compiles
+        \\begin{{align*}}<code>\\end{{align*}}.
+
         Use the reactions to delete the message and show your code, respectively.
+    Flags:2
+        --config:: Shows you your current config.
+        --colour:: Changes your colourscheme. One of default, white, black, transparent, or grey.
+        --keepmsg:: Toggles whether I delete your source message or not.
+    Examples:
+        {prefix}tex This is a fraction: $\\frac{{1}}{{2}}$
+        {prefix}$ \\int^\\infty_0 f(x)~dx
+        {prefix}$$ \\bmqty{{1 & 0 & 0\\\\ 0 & 1 & 0\\\\ 0 & 0 & 1}}
+        {prefix}align a &= b\\\\ c &= d
+        {prefix}tex --colour transparent
     """
+    if ctx.flags["config"]:
+        await show_config(ctx)
+        return
+    elif ctx.flags["keepmsg"]:
+        keepmsg = await ctx.data.users.get(ctx.authid, "latex_keep_message")
+        if keepmsg is None:
+            keepmsg = True
+        keepmsg = 1 - keepmsg
+        await ctx.data.users.set(ctx.authid, "latex_keep_message", keepmsg)
+        if keepmsg:
+            await ctx.reply("I will now keep your message after compilation.")
+        else:
+            await ctx.reply("I will not keep your message after compilation.")
+        return
+    elif ctx.flags["colour"]:
+        colour = ctx.flags["colour"]
+        if colour not in ["default", "white", "transparent", "black", "grey"]:
+            await ctx.reply("Unknown colour scheme. Known colours are `default`, `white`, `transparent`, `black` and `grey`.")
+            return
+        await ctx.data.users.set(ctx.authid, "latex_colour", colour)
+        await ctx.reply("Your colour scheme has been changed to {}".format(colour))
+        return
+    if ctx.arg_str == "":
+        await ctx.reply("Please give me something to compile! See `{0}help` or `{0}help tex` for usage!".format(ctx.used_prefix))
+        return
     ctx.objs["latex_listening"] = False
     ctx.objs["latex_source_deleted"] = False
     ctx.objs["latex_out_deleted"] = False
@@ -173,26 +219,44 @@ async def reaction_edit_handler(ctx, out_msg):
     pass
 
 
+async def show_config(ctx):
+    embed = discord.Embed(title="LaTeX config", color=discord.Colour.light_grey())
+
+    preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
+    preamble = preamble if preamble else default_preamble
+    embed.add_field(name="Current preamble", value="```tex\n{}\n```".format(preamble))
+
+    new_preamble = await ctx.data.users.get(ctx.authid, "limbo_preamble")
+    if new_preamble:
+        embed.add_field(name="Awaiting approval", value="```tex\n{}\n```".format(new_preamble), inline=False)
+
+    colour = await ctx.data.users.get(ctx.authid, "latex_colour")
+    colour = colour if colour else "default"
+    embed.add_field(name="Output colourscheme (colour)", value=colour, inline=False)
+
+    keep = await ctx.data.users.get(ctx.authid, "latex_keep_message")
+    keep = "Yes" if keep or (keep is None) else "No"
+    embed.add_field(name="Whether to keep source message after rendering (keepmsg)", value=keep, inline=False)
+
+    await ctx.reply(embed=embed)
+
+
 @cmds.cmd("preamble",
           category="Maths",
           short_help="Change how your LaTeX compiles",
           aliases=["texconfig"])
-@cmds.execute("flags", flags=["color==", "colour==", "keepmsg==", "reset", "approve==", "deny=="])
+@cmds.execute("flags", flags=["reset", "approve==", "deny=="])
 async def cmd_preamble(ctx):
     """
     Usage:
-        {prefix}preamble [code] [--reset] [--colour|color [default|transparent|black|gray]] [--keepmsg [yes|no]]
+        {prefix}preamble [code] [--reset]
     Description:
         Displays the preamble currently used for compiling your latex code.
         If [code] is provided, sets this to be preamble instead.
         Note that preambles must currently be approved by a bot manager, to prevent abuse.
-        Can also change the colourscheme of the output.
     Flags:2
         reset::  Resets your preamble to the default.
-        colour:: One of default or transparent. Change how the output looks.
-        keepmsg:: Either yes or no. Whether to delete your source message after rendering.
     """
-    message = ""
     user_id = ctx.flags["approve"] or ctx.flags["deny"]
     if user_id:
         (code, msg) = await cmds.checks["manager_perm"](ctx)
@@ -200,6 +264,9 @@ async def cmd_preamble(ctx):
             return
         if ctx.flags["approve"]:
             new_preamble = await ctx.data.users.get(user_id, "limbo_preamble")
+            if not new_preamble:
+                await ctx.reply("Nothing to approve. Perhaps this preamble was already approved?")
+                return
             new_preamble = new_preamble if new_preamble.strip() else default_preamble
             await ctx.data.users.set(user_id, "latex_preamble", new_preamble)
             await ctx.reply("The preamble change has been approved")
@@ -208,39 +275,14 @@ async def cmd_preamble(ctx):
             await ctx.reply("The preamble change has been denied")
         return
 
-    colour = ctx.flags["colour"] or ctx.flags["color"]
-    if colour:
-        if colour not in ["default", "transparent", "black", "gray"]:
-            await ctx.reply("Unrecognised colourscheme. It must be one of `default`, `transparent`, `black` or `gray`.")
-            return
-        await ctx.data.users.set(ctx.authid, "latex_colour", colour)
-
-    keep = ctx.flags["keepmsg"]
-    if keep:
-        if keep not in ["yes", "no"]:
-            await ctx.reply("Unrecognised keep message setting. It must be `yes` or `no`.")
-            return
-        await ctx.data.users.set(ctx.authid, "latex_keep_message", True if keep == "yes" else False)
+    if not ctx.arg_str:
+        await show_config(ctx)
+        return
 
     if ctx.flags["reset"]:
         await ctx.data.users.set(ctx.authid, "latex_preamble", default_preamble)
         await ctx.data.users.set(ctx.authid, "limbo_preamble", "")
-        message = "Your LaTeX preamble has been reset to the default!\n"
-    embed = discord.Embed(title="LaTeX config", color=discord.Colour.light_grey(), description=message)
-    if ctx.arg_str.strip() == "":
-        preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
-        preamble = preamble if preamble else default_preamble
-        embed.add_field(name="Current preamble", value="```tex\n{}\n```".format(preamble))
-        new_preamble = await ctx.data.users.get(ctx.authid, "limbo_preamble")
-        if new_preamble:
-            embed.add_field(name="Awaiting approval", value="```tex\n{}\n```".format(new_preamble), inline=False)
-        colour = await ctx.data.users.get(ctx.authid, "latex_colour")
-        colour = colour if colour else "default"
-        embed.add_field(name="Output colourscheme (colour)", value=colour, inline=False)
-        keep = await ctx.data.users.get(ctx.authid, "latex_keep_message")
-        keep = "Yes" if keep or (keep is None) else "No"
-        embed.add_field(name="Whether to keep source message after rendering (keepmsg)", value=keep, inline=False)
-        await ctx.reply(embed=embed)
+        await ctx.reply("Your LaTeX preamble has been reset to the default!")
         return
     new_preamble = ctx.arg_str
     await ctx.data.users.set(ctx.authid, "limbo_preamble", new_preamble)
