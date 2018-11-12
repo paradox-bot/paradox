@@ -25,7 +25,7 @@ async def cmd_tag(ctx):
         await ctx.reply("Your personal custom prefix has been set to `{}`. Mentions and any server custom prefix will still function.".format(ctx.flags["set"]))
         return
 
-    personal_prefix = await ctx.bot.data.users.get(ctx.authid, "custom_prefix")
+    personal_prefix = await ctx.bot.data.users.get(ctx.authid, "texit_custom_prefix")
     server_prefix = (await ctx.server_conf.texit_guild_prefix.get(ctx)) if ctx.server else None
     personal = "Your personal prefix is `{}`.".format(personal_prefix) if personal_prefix else "You have not set a personal prefix."
     server = "The current server prefix is `{}`.".format(server_prefix) if server_prefix else "No custom server prefix here."
