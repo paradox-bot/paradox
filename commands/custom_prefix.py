@@ -21,7 +21,7 @@ async def cmd_tag(ctx):
         --set:: Set your personal bot prefix.
     """
     if ctx.flags["set"]:
-        await ctx.bot.data.users.set(ctx.authid, "custom_prefix", ctx.flags["set"])
+        await ctx.bot.data.users.set(ctx.authid, "texit_custom_prefix", ctx.flags["set"])
         await ctx.reply("Your personal custom prefix has been set to `{}`. Mentions and any server custom prefix will still function.".format(ctx.flags["set"]))
         return
 
