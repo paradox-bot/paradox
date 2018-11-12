@@ -53,8 +53,8 @@ def _is_tex(msg):
 @cmds.cmd("tex",
           category="Maths",
           short_help="Renders LaTeX code",
-          aliases=["$", "$$", "align"])
-@cmds.execute("flags", flags=["config", "keepmsg", "colour=="])
+          aliases=["$", "$$", "align", "latex"])
+@cmds.execute("flags", flags=["config", "keepmsg", "colour==", "alwaysmath"])
 async def cmd_tex(ctx):
     """
     Usage:
@@ -65,6 +65,7 @@ async def cmd_tex(ctx):
         {prefix}tex --colour white | black | transparent
         {prefix}tex --keepmsg
         {prefix}tex --config
+        {prefix}tex --alwaysmath
     Description:
         Renders and displays LaTeX code.
 
@@ -82,6 +83,7 @@ async def cmd_tex(ctx):
         --config:: Shows you your current config.
         --colour:: Changes your colourscheme. One of default, white, black, transparent, or grey.
         --keepmsg:: Toggles whether I delete your source message or not.
+        --alwaysmath:: Toggles whether {prefix}tex always renders in math mode.
     Examples:
         {prefix}tex This is a fraction: $\\frac{{1}}{{2}}$
         {prefix}$ \\int^\\infty_0 f(x)~dx
@@ -111,6 +113,17 @@ async def cmd_tex(ctx):
         await ctx.data.users.set(ctx.authid, "latex_colour", colour)
         await ctx.reply("Your colour scheme has been changed to {}".format(colour))
         return
+    elif ctx.flags["alwaysmath"]:
+        always = await ctx.data.users.get(ctx.authid, "latex_alwaysmath")
+        if always is None:
+            always = False
+        always = 1 - always
+        await ctx.data.users.set(ctx.authid, "latex_alwaysmath", always)
+        if always:
+            await ctx.reply("`{0}tex` will now render in math mode. You can use `{0}latex` to render normally.".format(ctx.used_prefix))
+        else:
+            await ctx.reply("`{0}tex` now render latex as usual.".format(ctx.used_prefix))
+        return
     if ctx.arg_str == "":
         await ctx.reply("Please give me something to compile! See `{0}help` or `{0}help tex` for usage!".format(ctx.used_prefix))
         return
@@ -118,7 +131,7 @@ async def cmd_tex(ctx):
     ctx.objs["latex_source_deleted"] = False
     ctx.objs["latex_out_deleted"] = False
     ctx.objs["latex_handled"] = True
-    ctx.objs["latex_source"] = parse_tex(ctx, ctx.arg_str)
+    ctx.objs["latex_source"] = await parse_tex(ctx, ctx.arg_str)
 
     out_msg = await make_latex(ctx)
 
@@ -127,13 +140,16 @@ async def cmd_tex(ctx):
         asyncio.ensure_future(source_edit_handler(ctx, out_msg), loop=ctx.bot.loop)
 
 
-def parse_tex(ctx, source):
+async def parse_tex(ctx, source):
     if source.strip().startswith("```tex"):
         source = source[6:]
     source = source.strip("`").strip()
     if ctx.objs["latex_listening"]:
         return source
-    if ctx.used_cmd_name == "$":
+    always = await ctx.bot.data.users.get(ctx.authid, "latex_alwaysmath")
+    if ctx.used_cmd_name == "latex" or (ctx.used_cmd_name == "tex" and not always):
+        return source
+    if ctx.used_cmd_name == "$" or (ctx.used_cmd_name == "tex" and always):
         return "\\begin{{gather*}}\n{}\n\\end{{gather*}}".format(source)
     elif ctx.used_cmd_name == "$$":
         return "$${}$$".format(source)
@@ -173,7 +189,7 @@ async def source_edit_handler(ctx, out_msg):
         if res.before.content == res.after.content:
             continue
         source = res.after.content if ctx.objs["latex_listening"] else res.after.content[(len(res.after.content.split()[0])):].strip()
-        ctx.objs["latex_source"] = parse_tex(ctx, source)
+        ctx.objs["latex_source"] = await parse_tex(ctx, source)
         try:
             await ctx.bot.delete_message(out_msg)
         except discord.NotFound:
@@ -332,7 +348,7 @@ async def tex_listener(ctx):
     ctx.objs["latex_listening"] = True
     ctx.objs["latex_source_deleted"] = False
     ctx.objs["latex_out_deleted"] = False
-    ctx.objs["latex_source"] = parse_tex(ctx, ctx.msg.content)
+    ctx.objs["latex_source"] = await parse_tex(ctx, ctx.msg.content)
     out_msg = await make_latex(ctx)
 
     asyncio.ensure_future(reaction_edit_handler(ctx, out_msg), loop=ctx.bot.loop)
