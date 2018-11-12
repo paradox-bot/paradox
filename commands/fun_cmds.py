@@ -112,7 +112,7 @@ async def cmd_lenny(ctx):
 @cmds.cmd("dog",
           category="Fun Stuff",
           short_help="Sends a random dog image",
-          aliases=["doge", "pupper", "doggo"])
+          aliases=["doge", "pupper", "doggo", "woof"])
 async def cmd_dog(ctx):
     """
     Usage:
@@ -131,6 +131,35 @@ async def cmd_dog(ctx):
             await ctx.reply(embed=embed)
 
 
+@cmds.cmd("duck",
+          category="Fun Stuff",
+          short_help="Sends a random duck image",
+          aliases=["quack"])
+@cmds.execute("flags", flags=["g"])
+async def cmd_duck(ctx):
+    """
+    Usage:
+        {prefix}duck
+    Description:
+        Replies with a random duck image!
+    Flags:2
+        -g:: Forces a gif
+    """
+    img_type = "gif" if ctx.flags["g"] else random.choice(["gif", "jpg"])
+    async with aiohttp.get('http://random-d.uk/api/v1/quack?type={}'.format(img_type)) as r:
+        if r.status == 200:
+            js = await r.json()
+            embed = discord.Embed(title="Quack!", color=discord.Colour.light_grey())
+            embed.set_image(url=js['url'])
+            try:
+                await ctx.reply(embed=embed)
+                return
+            except Exception:
+                pass
+        else:
+            await ctx.reply("The ducks are too powerful right now! Please try again later.")
+
+
 @cmds.cmd("sorry",
           category="Fun Stuff",
           short_help="Sorry, love.")
@@ -142,7 +171,8 @@ async def cmd_sorry(ctx):
 
 @cmds.cmd("cat",
           category="Fun Stuff",
-          short_help="Sends a random cat image")
+          short_help="Sends a random cat image",
+          aliases=["meow"])
 async def cmd_cat(ctx, recursion=0):
     """
     Usage:
