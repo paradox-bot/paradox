@@ -63,8 +63,9 @@ async def get_prefixes(ctx):
         prefix_conf = ctx.server_conf.texit_guild_prefix
         if ctx.server:
             prefix = await prefix_conf.get(ctx)
+        user_prefix = await ctx.bot.data.users.get(ctx.authid, "custom_prefix")
         prefix = prefix if prefix else ctx.bot.prefix
-        return [prefix]
+        return [prefix, user_prefix] if user_prefix else [prefix]
 
 # Initialise the bot
 bot = Bot(data=botdata,
