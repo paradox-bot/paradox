@@ -62,7 +62,7 @@ async def cmd_tex(ctx):
         {prefix}$ <equation>
         {prefix}$$ <displayeqn>
         {prefix}align <align block>
-        {prefix}tex --colour white | black | transparent
+        {prefix}tex --colour white | black | transparent | grey | dark
         {prefix}tex --keepmsg
         {prefix}tex --config
         {prefix}tex --alwaysmath
@@ -89,7 +89,7 @@ async def cmd_tex(ctx):
         {prefix}$ \\int^\\infty_0 f(x)~dx
         {prefix}$$ \\bmqty{{1 & 0 & 0\\\\ 0 & 1 & 0\\\\ 0 & 0 & 1}}
         {prefix}align a &= b\\\\ c &= d
-        {prefix}tex --colour transparent
+        {prefix}tex --colour grey
     """
     if ctx.flags["config"]:
         await show_config(ctx)
@@ -107,8 +107,8 @@ async def cmd_tex(ctx):
         return
     elif ctx.flags["colour"]:
         colour = ctx.flags["colour"]
-        if colour not in ["default", "white", "transparent", "black", "grey"]:
-            await ctx.reply("Unknown colour scheme. Known colours are `default`, `white`, `transparent`, `black` and `grey`.")
+        if colour not in ["default", "white", "transparent", "black", "grey", "gray", "dark"]:
+            await ctx.reply("Unknown colour scheme. Known colours are `default`, `white`, `transparent`, `black`, `dark` and `grey`.")
             return
         await ctx.data.users.set(ctx.authid, "latex_colour", colour)
         await ctx.reply("Your colour scheme has been changed to {}".format(colour))
@@ -300,6 +300,7 @@ async def cmd_preamble(ctx):
         await ctx.data.users.set(ctx.authid, "limbo_preamble", "")
         await ctx.reply("Your LaTeX preamble has been reset to the default!")
         return
+    ctx.objs["latex_handled"] = True
     new_preamble = ctx.arg_str
     await ctx.data.users.set(ctx.authid, "limbo_preamble", new_preamble)
     embed = discord.Embed(title="LaTeX Preamble Request", color=discord.Colour.blue()) \
@@ -330,12 +331,14 @@ async def texcomp(ctx):
 
 async def register_tex_listeners(bot):
     bot.objects["user_tex_listeners"] = [str(userid) for userid in await bot.data.users.find("tex_listening", True, read=True)]
-    bot.objects["server_tex_listeners"] = [str(serverid) for serverid in await bot.data.servers.find("texit_latex_listen_enabled", True, read=True)]
+    bot.objects["server_tex_listeners"] = [str(serverid) for serverid in await bot.data.servers.find("latex_listen_enabled", True, read=True)]
     await bot.log("Loaded {} user tex listeners and {} server tex listeners.".format(len(bot.objects["user_tex_listeners"]), len(bot.objects["server_tex_listeners"])))
 
 
 async def tex_listener(ctx):
     if ctx.author.bot:
+        return
+    if "ready" not in ctx.bot.objects or not ctx.bot.objects["ready"]:
         return
     if "latex_handled" in ctx.objs and ctx.objs["latex_handled"]:
         return
