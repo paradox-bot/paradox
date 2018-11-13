@@ -284,6 +284,7 @@ async def cmd_preamble(ctx):
         await ctx.data.users.set(ctx.authid, "limbo_preamble", "")
         await ctx.reply("Your LaTeX preamble has been reset to the default!")
         return
+    ctx.objs["latex_handled"] = True
     new_preamble = ctx.arg_str
     await ctx.data.users.set(ctx.authid, "limbo_preamble", new_preamble)
     embed = discord.Embed(title="LaTeX Preamble Request", color=discord.Colour.blue()) \
