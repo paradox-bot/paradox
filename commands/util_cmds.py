@@ -748,7 +748,7 @@ async def cmd_role(ctx):
     if role is None:
         return
     title = "Roleinfo for `{role.name}` (id: `{role.id}`)".format(role=role)
-    colour = str(role.colour) if role.colour.value else str(discord.Colour.light_grey())
+    colour = role.colour if role.colour.value else discord.Colour.light_grey()
 #    thumbnail = "http://placehold.it/150x150.png/{}/000000?text={}".format(colour.strip("#"), colour)
     num_users = len([user for user in ctx.server.members if (role in user.roles)])
     created_ago = ctx.strfdelta(datetime.utcnow() - role.created_at)
@@ -778,7 +778,7 @@ async def cmd_role(ctx):
 
     embed = discord.Embed(title=title, colour=colour)
 #    embed.set_thumbnail(url=thumbnail)
-    emb_fields = [("Colour", role.colour, 0),
+    emb_fields = [("Colour", str(role.colour), 0),
                   ("Created at", created_at, 0),
                   ("Hoisted", hoisted, 0),
                   ("Mentionable", mentionable, 0),
