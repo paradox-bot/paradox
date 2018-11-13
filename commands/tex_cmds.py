@@ -322,6 +322,8 @@ async def register_tex_listeners(bot):
 async def tex_listener(ctx):
     if ctx.author.bot:
         return
+    if "ready" not in ctx.bot.objects or not ctx.bot.objects["ready"]:
+        return
     if "latex_handled" in ctx.objs and ctx.objs["latex_handled"]:
         return
     if not (ctx.authid in ctx.bot.objects["user_tex_listeners"] or (ctx.server and ctx.server.id in ctx.bot.objects["server_tex_listeners"])):
