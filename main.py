@@ -147,7 +147,7 @@ def get_emoji(name):
 
 @bot.event
 async def on_ready():
-    print(type(CHEAT_CH))
+    bot.objects["ready"] = False
     GAME = conf.getStr("GAME")
     if GAME == "":
         GAME = "in $servers$ servers!"
@@ -181,6 +181,12 @@ async def on_ready():
         for log in log_splits:
             await bot.send_message(discord.utils.get(bot.get_all_channels(), id=LOG_CHANNEL), log)
     """
+
+
+async def publish_ready(bot):
+    bot.objects["ready"] = True
+
+bot.add_after_event("ready", publish_ready)
 # ----Event loops----
 # ----End event loops----
 

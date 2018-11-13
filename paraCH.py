@@ -19,6 +19,12 @@ class paraCH(CommandHandler):
     async def before_exec(self, ctx):
         if ctx.author.bot:
             ctx.cmd_err = (1, "")
+        if "ready" not in ctx.bot.objects:
+            ctx.cmd_err = (1, "Bot is restarting, please try again in a moment.")
+            return
+        if not ctx.bot.objects["ready"]:
+            await ctx.reply("I have just restarted and am loading myself, please wait!")
+            await ctx.bot.wait_until_ready()
         if int(ctx.authid) in ctx.bot.bot_conf.getintlist("blacklisted_users") and ctx.used_cmd_name != "texlisten":
             ctx.cmd_err = (1, "")
         try:
@@ -40,4 +46,3 @@ class paraCH(CommandHandler):
     def append(self, CH):
         super().append(CH)
         self.raw_cmds.update(CH.raw_cmds)
-
