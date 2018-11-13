@@ -62,7 +62,7 @@ async def cmd_tex(ctx):
         {prefix}$ <equation>
         {prefix}$$ <displayeqn>
         {prefix}align <align block>
-        {prefix}tex --colour white | black | transparent
+        {prefix}tex --colour white | black | transparent | grey | dark
         {prefix}tex --keepmsg
         {prefix}tex --config
     Description:
@@ -87,7 +87,7 @@ async def cmd_tex(ctx):
         {prefix}$ \\int^\\infty_0 f(x)~dx
         {prefix}$$ \\bmqty{{1 & 0 & 0\\\\ 0 & 1 & 0\\\\ 0 & 0 & 1}}
         {prefix}align a &= b\\\\ c &= d
-        {prefix}tex --colour transparent
+        {prefix}tex --colour grey
     """
     if ctx.flags["config"]:
         await show_config(ctx)
@@ -105,8 +105,8 @@ async def cmd_tex(ctx):
         return
     elif ctx.flags["colour"]:
         colour = ctx.flags["colour"]
-        if colour not in ["default", "white", "transparent", "black", "grey"]:
-            await ctx.reply("Unknown colour scheme. Known colours are `default`, `white`, `transparent`, `black` and `grey`.")
+        if colour not in ["default", "white", "transparent", "black", "grey", "gray", "dark"]:
+            await ctx.reply("Unknown colour scheme. Known colours are `default`, `white`, `transparent`, `black`, `dark` and `grey`.")
             return
         await ctx.data.users.set(ctx.authid, "latex_colour", colour)
         await ctx.reply("Your colour scheme has been changed to {}".format(colour))
