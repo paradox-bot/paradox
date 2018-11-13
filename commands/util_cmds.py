@@ -766,7 +766,7 @@ async def cmd_role(ctx):
             break
         if line_pos >= len(server_roles):
             continue
-        position += "{0:<4}{1}{2:<20}\n".format(str(line_pos) + ".", " " * 4 + (">" if i == 0 else " "), str(server_roles[line_pos]))
+        position += "{0:<4}{1}{2:<20}\n".format(str(line_pos) + ".", " " * 4 + (">" if str(server_roles[line_pos]) == str(role) else " "), str(server_roles[line_pos]))
     position += "```"
     if role > ctx.author.top_role:
         diff_str = "(Higher than your highest role)"
