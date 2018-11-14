@@ -67,7 +67,7 @@ def load_into(bot):
             await ctx.reply("Looking up a role without a name! Something's wacky. Please check your input and try again")
             ctx.cmd_err = (-1, "")
             return None
-        roleid = userstr.strip('<#@!>')
+        roleid = userstr.strip('<#@&!>')
         if interactive:
             def check(role):
                 return (role.id == roleid) or (userstr.lower() in role.name.lower())
