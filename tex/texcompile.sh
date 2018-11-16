@@ -24,6 +24,11 @@ then
   convert $1.png -negate $1.png;
   convert $1.png -fuzz 40% -fill 'rgb(54,57,63)' -opaque black $1.png;
 fi
+if [ "$2" = "default" ];
+then
+  convert $1.png -negate $1.png;
+  convert $1.png -fuzz 40% -fill 'rgb(54,57,63)' -opaque black $1.png;
+fi
 if [ "$2" = "gray" ];
 then
   convert $1.png -negate $1.png;
