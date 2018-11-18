@@ -48,7 +48,7 @@ async def cmd_texlisten(ctx):
 
 
 def _is_tex(msg):
-    return (("$" in msg.content) and 1 - (msg.content.count("$") % 2) and msg.content.strip("$")) or ("\\begin{" in msg.content)
+    return (("$" in msg.clean_content) and 1 - (msg.clean_content.count("$") % 2) and msg.clean_content.strip("$")) or ("\\begin{" in msg.clean_content)
 
 
 @cmds.cmd("tex",
@@ -193,7 +193,7 @@ async def source_edit_handler(ctx, out_msg):
             break
         if res.before.content == res.after.content:
             continue
-        source = res.after.content if ctx.objs["latex_listening"] else res.after.content[(len(res.after.content.split()[0])):].strip()
+        source = res.after.clean_content if ctx.objs["latex_listening"] else res.after.clean_content[(len(res.after.clean_content.split()[0])):].strip()
         ctx.objs["latex_source"] = await parse_tex(ctx, source)
         try:
             await ctx.bot.delete_message(out_msg)
@@ -356,7 +356,7 @@ async def tex_listener(ctx):
     ctx.objs["latex_listening"] = True
     ctx.objs["latex_source_deleted"] = False
     ctx.objs["latex_out_deleted"] = False
-    ctx.objs["latex_source"] = await parse_tex(ctx, ctx.msg.content)
+    ctx.objs["latex_source"] = await parse_tex(ctx, ctx.msg.clean_content)
     out_msg = await make_latex(ctx)
 
     asyncio.ensure_future(reaction_edit_handler(ctx, out_msg), loop=ctx.bot.loop)
