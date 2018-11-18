@@ -224,7 +224,7 @@ async def reaction_edit_handler(ctx, out_msg):
                 pass
             ctx.objs["latex_show"] = 1 - ctx.objs["latex_show"]
             await ctx.bot.edit_message(out_msg,
-                                       ctx.author.name + ":\n" + (ctx.objs["latex_source_msg"] if ctx.objs["latex_show"] else ""))
+                                       "**{}**:\n{}".format(ctx.author.name.replace("*","\*"), (ctx.objs["latex_source_msg"] if ctx.objs["latex_show"] else "")))
     try:
         await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_del_emoji"], ctx.me)
         await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_show_emoji"], ctx.me)
