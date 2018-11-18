@@ -110,7 +110,7 @@ async def cmd_invite(ctx):
     Description:
         Sends the link to invite the bot to your server.
     """
-    await ctx.reply("Visit <{}> to invite me!".format(ctx.bot.objects["invite_link"]), dm=True)
+    await ctx.reply("Visit <{}> to invite me! \nAlternatively, you can invite the main bot at https://invite.paradoxical.pw.".format(ctx.bot.objects["invite_link"]), dm=True)
     try:
         await ctx.bot.add_reaction(ctx.msg, "✅")
     except discord.Forbidden:
