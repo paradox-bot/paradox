@@ -2,6 +2,7 @@ import shutil
 import discord
 from datetime import datetime
 import asyncio
+import os
 
 from paraCH import paraCH
 
@@ -172,9 +173,13 @@ async def make_latex(ctx):
     ctx.objs["latex_source_msg"] = "```tex\n{}\n```{}".format(ctx.objs["latex_source"], err_msg)
     ctx.objs["latex_del_emoji"] = ctx.bot.objects["emoji_tex_del"]
     ctx.objs["latex_show_emoji"] = ctx.bot.objects["emoji_tex_errors" if error else "emoji_tex_show"]
-    out_msg = await ctx.reply(file_name='tex/{}.png'.format(ctx.authid),
+    file_name = "tex/{}.png".format(ctx.authid)
+    exists = True if os.path.isfile(file_name) else False
+    out_msg = await ctx.reply(file_name=file_name if exists else "tex/failed.png",
                               message="**{}**:\n{}".format(ctx.author.name.replace("*","\*"),
                                                        ("Compile Error! Click the {} reaction for details. (You may edit your message)".format(ctx.objs["latex_show_emoji"])) if error else ""))
+    if exists:
+        os.remove(file_name)
     ctx.objs["latex_show"] = 0
     return out_msg
 
