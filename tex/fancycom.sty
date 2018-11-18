@@ -16,7 +16,7 @@
 
 \RequirePackage{calc}
 \RequirePackage{textcomp}
-\RequirePackage{wasysym}
+\RequirePackage[nointegrals]{wasysym}
 \RequirePackage{xparse}
 
 %\RequirePackage{mathrsfs}
@@ -28,7 +28,7 @@
     \newcommand{\mbb}[1]{\mathbb{#1}} %Emblacken your symbols!
     \newcommand{\mbf}[1]{\mathbf{#1}} %Embolden your symbols!
     \newcommand{\mfk}[1]{\mathfrak{#1}} %Enfraken your symbols!
-    \newcommand{\bsl}{\backslah} %Backslash
+    \newcommand{\bsl}{\backslash} %Backslash
     \newcommand{\cndall}{\,\,\,\forall} %forall given as condition
     \newcommand{\st}{\,\mid\,}  %Such that symbol. : is also used.
     \newcommand{\what}[1]{& \qquad &\begin{sloppy}\textit{\small\mbox{#1}\small}\end{sloppy}} %Little comment for an align block. Memento of 2007.
@@ -36,6 +36,7 @@
 %Basic symbol extensions
     \def\bA{\mathbb{A}}
     \def\bF{\mathbb{F}}
+    \def\bN{\mathbb{N}}
     \def\bR{\mathbb{R}}
     \def\bZ{\mathbb{Z}}
     \def\bQ{\mathbb{Q}}
@@ -63,11 +64,14 @@
     \def\cC{\mathcal{C}}
     \def\cD{\mathcal{D}}
     \def\cT{\mathcal{T}}
+    \def\cP{\mathcal{P}}
+    \def\cS{\mathcal{S}}
     
     \def\bfz{\mathbf{0}}
     
     \def\fkp{\mathfrak{p}}
     \def\fkq{\mathfrak{q}}
+    \def\fkm{\mathfrak{m}}
 
 
 %Symbol abbreviations
@@ -79,6 +83,8 @@
     \def\ot{\otimes}
     \def\ptl{\partial}
     \def\bdry{\partial}
+
+    \def\nin{\not\in}
     
     \newcommand{\isom}{\cong} %Isomorphism
     \newcommand{\ceq}{\coloneqq} %Defined to be equal to
@@ -92,6 +98,7 @@
 
 %Function constructors
     \newcommand{\func}[3]{#1\colon#2\to #3} %Generic function definition without mapping
+    \newcommand{\mfunc}[3]{#1\colon#2\mapsto #3} %Generic function definition with only mapping
     \newcommand{\afunc}[3]{#1\colon#2&\to #3} %Generic function with alignment on arrow
     \newcommand{\vfunc}[5]{\func{#1}{#2}{#3},\quad#4\longmapsto #5} %Generic function definition with mapping
     \newcommand{\vafunc}[5]{\afunc{#1}{#2}{#3}\\#4&\longmapsto #5} %Generic function over two lines aligned on arrow
@@ -113,11 +120,23 @@
       }
     }
 
+    \DeclareDocumentCommand\ppp{ m g }
+    {%
+      \IfNoValueTF{#2}
+      {%
+        \frac{\partial}{\partial #1}
+      }{%
+        \frac{\partial #1}{\partial #2}
+      }
+    }
+
+    \newcommand{\pp}[1]{\frac{\partial}{\partial #1}}
 
 
 %For theorems and proofs
 
     \newtheorem{Theorem}{Theorem}
+    \newtheorem{Proposition}{Theorem}
     \newtheorem{Conjecture}[Theorem]{Conjecture}
     \newtheorem{Lemma}[Theorem]{Lemma}
     \newtheorem{Corollary}[Theorem]{Corollary}
@@ -126,6 +145,7 @@
     \newtheorem{Example}{Example}
     \newtheorem{Note}{Note}
     \newtheorem{Question}{Question}
+    \newtheorem{Remark}{Remark}
 
 \theoremstyle{definition}
     \newtheorem{Result}[Theorem]{Result}
@@ -138,6 +158,7 @@
     \DeclareDocumentCommand\sresult{m}{\begin{Result}#1\end{Result}}
     \DeclareDocumentCommand\sres{m}{\begin{Result}#1\end{Result}}
     \DeclareDocumentCommand\sques{m}{\begin{Question}#1\end{Question}}
+    \DeclareDocumentCommand\srem{m}{\begin{Remark}#1\end{Remark}}
 
 
 
@@ -154,11 +175,14 @@
     \DeclareMathOperator{\GL}{GL}
     \DeclareMathOperator{\Obj}{Obj}
     \DeclareMathOperator{\Spec}{Spec}
+    \DeclareMathOperator{\Specm}{Specm}
     \DeclareMathOperator{\Min}{min}
     \DeclareMathOperator{\Ker}{Ker}
     \DeclareMathOperator{\im}{Im}
     \DeclareMathOperator{\CoIm}{CoIm}
     \DeclareMathOperator{\CoKer}{CoKer}
+    \DeclareMathOperator{\Der}{Der}
+    \DeclareMathOperator{\End}{End}
     
     
 % Brackets and braces
@@ -218,6 +242,7 @@
 \DeclareDocumentCommand\pmqty{m}{\begin{pmatrix}#1\end{pmatrix}}
 \DeclareDocumentCommand\Pmqty{m}{\left\lgroup\begin{matrix}#1\end{matrix}\right\rgroup}
 \DeclareDocumentCommand\bmqty{m}{\begin{bmatrix}#1\end{bmatrix}}
+\DeclareDocumentCommand\Bmqty{m}{\begin{Bmatrix}#1\end{Bmatrix}}
 \DeclareDocumentCommand\sbmqty{m}{\left[\begin{smallmatrix}#1\end{smallmatrix}\right]}
 \DeclareDocumentCommand\vmqty{m}{\begin{vmatrix}#1\end{vmatrix}}
 \DeclareDocumentCommand\matrixquantity{}{{\ifnum\z@=`}\fi\@matrixquantity}
