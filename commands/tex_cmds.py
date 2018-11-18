@@ -173,7 +173,7 @@ async def make_latex(ctx):
     ctx.objs["latex_del_emoji"] = ctx.bot.objects["emoji_tex_del"]
     ctx.objs["latex_show_emoji"] = ctx.bot.objects["emoji_tex_errors" if error else "emoji_tex_show"]
     out_msg = await ctx.reply(file_name='tex/{}.png'.format(ctx.authid),
-                              message="{}:\n{}".format(ctx.author.name,
+                              message="**{}**:\n{}".format(ctx.author.name.replace("*","\*"),
                                                        ("Compile Error! Click the {} reaction for details. (You may edit your message)".format(ctx.objs["latex_show_emoji"])) if error else ""))
     ctx.objs["latex_show"] = 0
     return out_msg
