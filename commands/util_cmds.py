@@ -46,7 +46,7 @@ async def cmd_rotate(ctx):
     im = Image.open(BytesIO(response))
     rotated = im.rotate(amount, expand=1)
     with BytesIO() as output:
-        rotated.save(output, format="PNG")
+        rotated.save(output, format="PNG", quality=90, otpimize=True)
         output.seek(0)
         await ctx.bot.send_file(ctx.ch, fp=output, filename="{}.png".format(file_dict["id"]))
 
