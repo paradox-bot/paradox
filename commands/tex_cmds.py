@@ -338,19 +338,21 @@ async def cmd_preamble(ctx):
         return
     ctx.objs["latex_handled"] = True
 
+    file_name = "preamble.tex"
     if ctx.msg.attachments:
         file_info = ctx.msg.attachments[0]
         async with aiohttp.get(file_info['url']) as r:
             new_preamble = await r.text()
+        file_name = file_info['filename']
     else:
         new_preamble = ctx.arg_str
+
+    await ctx.data.users.set(ctx.authid, "limbo_preamble", new_preamble)
 
     in_file = (len(new_preamble) > 1000)
     if in_file:
         temp_file = StringIO()
         temp_file.write(new_preamble)
-
-    await ctx.data.users.set(ctx.authid, "limbo_preamble", new_preamble)
 
     preamble_message = "See file below!" if in_file else "```tex\n{}\n```".format(new_preamble)
 
@@ -363,7 +365,7 @@ async def cmd_preamble(ctx):
     await ctx.bot.send_message(ctx.bot.objects["preamble_channel"], embed=embed)
     if in_file:
         temp_file.seek(0)
-        await ctx.bot.send_file(ctx.bot.objects["preamble_channel"], fp=temp_file, filename=file_info['filename'])
+        await ctx.bot.send_file(ctx.bot.objects["preamble_channel"], fp=temp_file, filename=file_name)
     await ctx.reply("Your new preamble has been sent to the bot managers for review!")
 
 
