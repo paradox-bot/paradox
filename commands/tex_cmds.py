@@ -4,6 +4,9 @@ from datetime import datetime
 import asyncio
 import os
 
+from io import StringIO
+import aiohttp
+
 from paraCH import paraCH
 
 cmds = paraCH()
@@ -241,15 +244,43 @@ async def reaction_edit_handler(ctx, out_msg):
 
 
 async def show_config(ctx):
+
     embed = discord.Embed(title="LaTeX config", color=discord.Colour.light_grey())
 
     preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
     preamble = preamble if preamble else default_preamble
-    embed.add_field(name="Current preamble", value="```tex\n{}\n```".format(preamble))
+    preamble_message = "```tex\n{}\n```".format(preamble)
+
+    if len(preamble) > 1000:
+        temp_file = StringIO()
+        temp_file.write(preamble)
+
+        preamble_message = "Sent via direct message"
+
+        temp_file.seek(0)
+        try:
+            await ctx.bot.send_file(ctx.author, fp=temp_file, filename="current_preamble.tex", content="Your current preamble")
+        except discord.Forbidden:
+            preamble_message = "Attempted to send your preamble file by direct message, but couldn't reach you."
+
+    embed.add_field(name="Current preamble", value=preamble_message)
 
     new_preamble = await ctx.data.users.get(ctx.authid, "limbo_preamble")
+    new_preamble_message = "```tex\n{}\n```".format(new_preamble)
+    if new_preamble and len(new_preamble) > 1000:
+        temp_file = StringIO()
+        temp_file.write(new_preamble)
+
+        new_preamble_message = "Sent via direct message"
+
+        temp_file.seek(0)
+        try:
+            await ctx.bot.send_file(ctx.author, fp=temp_file, filename="new_preamble.tex", content="Preamble awaiting approval.")
+        except discord.Forbidden:
+            new_preamble_message = "Attempted to send your preamble file by direct message, but couldn't reach you."
+
     if new_preamble:
-        embed.add_field(name="Awaiting approval", value="```tex\n{}\n```".format(new_preamble), inline=False)
+        embed.add_field(name="Awaiting approval", value=new_preamble_message, inline=False)
 
     colour = await ctx.data.users.get(ctx.authid, "latex_colour")
     colour = colour if colour else "default"
@@ -296,7 +327,7 @@ async def cmd_preamble(ctx):
             await ctx.reply("The preamble change has been denied")
         return
 
-    if not ctx.arg_str:
+    if not ctx.arg_str and not ctx.msg.attachments:
         await show_config(ctx)
         return
 
@@ -306,15 +337,33 @@ async def cmd_preamble(ctx):
         await ctx.reply("Your LaTeX preamble has been reset to the default!")
         return
     ctx.objs["latex_handled"] = True
-    new_preamble = ctx.arg_str
+
+    if ctx.msg.attachments:
+        file_info = ctx.msg.attachments[0]
+        async with aiohttp.get(file_info['url']) as r:
+            new_preamble = await r.text()
+    else:
+        new_preamble = ctx.arg_str
+
+    in_file = (len(new_preamble) > 1000)
+    if in_file:
+        temp_file = StringIO()
+        temp_file.write(new_preamble)
+
     await ctx.data.users.set(ctx.authid, "limbo_preamble", new_preamble)
+
+    preamble_message = "See file below!" if in_file else "```tex\n{}\n```".format(new_preamble)
+
     embed = discord.Embed(title="LaTeX Preamble Request", color=discord.Colour.blue()) \
         .set_author(name="{} ({})".format(ctx.author, ctx.authid),
                     icon_url=ctx.author.avatar_url) \
-        .add_field(name="Requested preamble", value="```tex\n{}\n```".format(new_preamble), inline=False) \
+        .add_field(name="Requested preamble", value=preamble_message, inline=False) \
         .add_field(name="To Approve", value="`preamble --approve {}`".format(ctx.authid), inline=False) \
         .set_footer(text=datetime.utcnow().strftime("Sent from {} at %-I:%M %p, %d/%m/%Y".format(ctx.server.name if ctx.server else "private message")))
     await ctx.bot.send_message(ctx.bot.objects["preamble_channel"], embed=embed)
+    if in_file:
+        temp_file.seek(0)
+        await ctx.bot.send_file(ctx.bot.objects["preamble_channel"], fp=temp_file, filename=file_info['filename'])
     await ctx.reply("Your new preamble has been sent to the bot managers for review!")
 
 
