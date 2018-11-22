@@ -292,17 +292,18 @@ async def show_config(ctx):
           category="Maths",
           short_help="Change how your LaTeX compiles",
           aliases=["texconfig"])
-@cmds.execute("flags", flags=["reset", "approve==", "deny=="])
+@cmds.execute("flags", flags=["reset", "add", "approve==", "deny=="])
 async def cmd_preamble(ctx):
     """
     Usage:
-        {prefix}preamble [code] [--reset]
+        {prefix}preamble [code] [--reset] [--add]
     Description:
         Displays the preamble currently used for compiling your latex code.
         If [code] is provided, sets this to be preamble instead.
         Note that preambles must currently be approved by a bot manager, to prevent abuse.
     Flags:2
         reset::  Resets your preamble to the default.
+        add::  Adds the provided code to your current preamble.
     """
     user_id = ctx.flags["approve"] or ctx.flags["deny"]
     if user_id:
@@ -341,6 +342,10 @@ async def cmd_preamble(ctx):
         file_name = file_info['filename']
     else:
         new_preamble = ctx.arg_str
+
+    if ctx.flags["add"] or ctx.flags["append"]:
+        old_preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
+        new_preamble = "{}\n{}".format(old_preamble, new_preamble)
 
     await ctx.data.users.set(ctx.authid, "limbo_preamble", new_preamble)
 
