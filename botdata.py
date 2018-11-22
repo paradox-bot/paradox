@@ -62,6 +62,10 @@ class _dbDataManipulator:
         if read:
             value = json.dumps(value)
         curs = self.conn.cursor()
+        try:
+            curs.execute('ALTER TABLE {} ADD {} text'.format(self.table, prop))
+        except Exception:
+            pass
         curs.execute('SELECT {} FROM {} WHERE {} = ?'.format(self.keyname, self.table, prop), (value,))
         values = curs.fetchall()
         return [value[0] for value in values]

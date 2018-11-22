@@ -135,13 +135,18 @@ async def cmd_tex(ctx):
     ctx.objs["latex_source_deleted"] = False
     ctx.objs["latex_out_deleted"] = False
     ctx.objs["latex_handled"] = True
-    ctx.objs["latex_source"] = await parse_tex(ctx, ctx.arg_str)
+    ctx.bot.objects["latex_messages"][ctx.msg.id] = ctx
 
     out_msg = await make_latex(ctx)
 
     asyncio.ensure_future(reaction_edit_handler(ctx, out_msg), loop=ctx.bot.loop)
     if not ctx.objs["latex_source_deleted"]:
-        asyncio.ensure_future(source_edit_handler(ctx, out_msg), loop=ctx.bot.loop)
+        ctx.objs["latex_edit_renew"] = False
+        while True:
+            await asyncio.sleep(600)
+            if not ctx.objs["latex_edit_renew"]:
+                break
+        ctx.bot.objects["latex_messages"].pop(ctx.msg.id, None)
 
 
 async def parse_tex(ctx, source):
@@ -164,46 +169,34 @@ async def parse_tex(ctx, source):
 
 
 async def make_latex(ctx):
+    source = ctx.msg.clean_content if ctx.objs["latex_listening"] else ctx.msg.clean_content.partition(ctx.used_cmd_name)[2].strip()
+    ctx.objs["latex_source"] = await parse_tex(ctx, source)
+
     error = await texcomp(ctx)
     err_msg = ""
+
     keep = await ctx.data.users.get(ctx.authid, "latex_keep_message")
     keep = keep or (keep is None)
+
     if error != "":
         err_msg = "Compile error! Output:\n```\n{}\n```".format(error)
     elif not keep:
         ctx.objs["latex_source_deleted"] = True
         await ctx.del_src()
+
     ctx.objs["latex_source_msg"] = "```tex\n{}\n```{}".format(ctx.objs["latex_source"], err_msg)
     ctx.objs["latex_del_emoji"] = ctx.bot.objects["emoji_tex_del"]
     ctx.objs["latex_show_emoji"] = ctx.bot.objects["emoji_tex_errors" if error else "emoji_tex_show"]
     file_name = "tex/{}.png".format(ctx.authid)
     exists = True if os.path.isfile(file_name) else False
     out_msg = await ctx.reply(file_name=file_name if exists else "tex/failed.png",
-                              message="**{}**:\n{}".format(ctx.author.name.replace("*","\*"),
-                                                       ("Compile Error! Click the {} reaction for details. (You may edit your message)".format(ctx.objs["latex_show_emoji"])) if error else ""))
+                              message="**{}**:\n{}".format(ctx.author.name.replace("*", "\\*"),
+                                                           ("Compile Error! Click the {} reaction for details. (You may edit your message)".format(ctx.objs["latex_show_emoji"])) if error else ""))
     if exists:
         os.remove(file_name)
     ctx.objs["latex_show"] = 0
+    ctx.objs["latex_out_msg"] = out_msg
     return out_msg
-
-
-async def source_edit_handler(ctx, out_msg):
-    while True:
-        res = await ctx.bot.wait_for_message_edit(message=ctx.msg, timeout=300)
-        if res is None:
-            break
-        if (not res.after) or (not res.after.content):
-            break
-        if res.before.content == res.after.content:
-            continue
-        source = res.after.clean_content if ctx.objs["latex_listening"] else res.after.clean_content[(len(res.after.clean_content.split()[0])):].strip()
-        ctx.objs["latex_source"] = await parse_tex(ctx, source)
-        try:
-            await ctx.bot.delete_message(out_msg)
-        except discord.NotFound:
-            pass
-        out_msg = await make_latex(ctx)
-        asyncio.ensure_future(reaction_edit_handler(ctx, out_msg), loop=ctx.bot.loop)
 
 
 async def reaction_edit_handler(ctx, out_msg):
@@ -232,7 +225,7 @@ async def reaction_edit_handler(ctx, out_msg):
                 pass
             ctx.objs["latex_show"] = 1 - ctx.objs["latex_show"]
             await ctx.bot.edit_message(out_msg,
-                                       "**{}**:\n{}".format(ctx.author.name.replace("*","\*"), (ctx.objs["latex_source_msg"] if ctx.objs["latex_show"] else "")))
+                                       "**{}**:\n{}".format(ctx.author.name.replace("*", "\\*"), (ctx.objs["latex_source_msg"] if ctx.objs["latex_show"] else "")))
     try:
         await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_del_emoji"], ctx.me)
         await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_show_emoji"], ctx.me)
@@ -244,7 +237,6 @@ async def reaction_edit_handler(ctx, out_msg):
 
 
 async def show_config(ctx):
-
     embed = discord.Embed(title="LaTeX config", color=discord.Colour.light_grey())
 
     preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
@@ -388,6 +380,7 @@ async def texcomp(ctx):
 async def register_tex_listeners(bot):
     bot.objects["user_tex_listeners"] = [str(userid) for userid in await bot.data.users.find("tex_listening", True, read=True)]
     bot.objects["server_tex_listeners"] = [str(serverid) for serverid in await bot.data.servers.find("texit_latex_listen_enabled", True, read=True)]
+    bot.objects["latex_messages"] = {}
     await bot.log("Loaded {} user tex listeners and {} server tex listeners.".format(len(bot.objects["user_tex_listeners"]), len(bot.objects["server_tex_listeners"])))
 
 
@@ -407,14 +400,42 @@ async def tex_listener(ctx):
     ctx.objs["latex_listening"] = True
     ctx.objs["latex_source_deleted"] = False
     ctx.objs["latex_out_deleted"] = False
-    ctx.objs["latex_source"] = await parse_tex(ctx, ctx.msg.clean_content)
+    ctx.bot.objects["latex_messages"][ctx.msg.id] = ctx
+
     out_msg = await make_latex(ctx)
+
+    ctx.objs["latex_out_msg"] = out_msg
 
     asyncio.ensure_future(reaction_edit_handler(ctx, out_msg), loop=ctx.bot.loop)
     if not ctx.objs["latex_source_deleted"]:
-        asyncio.ensure_future(source_edit_handler(ctx, out_msg), loop=ctx.bot.loop)
+        ctx.objs["latex_edit_renew"] = False
+        while True:
+            await asyncio.sleep(600)
+            if not ctx.objs["latex_edit_renew"]:
+                break
+        ctx.bot.objects["latex_messages"].pop(ctx.msg.id, None)
+
+
+async def tex_edit_listener(bot, before, after):
+    if before.id not in bot.objects["latex_messages"]:
+        return
+    if before.content == after.content:
+        return
+    ctx = bot.objects["latex_messages"][before.id]
+    ctx.objs["latex_edit_renew"] = True
+    ctx.msg = after
+
+    old_out_msg = ctx.objs["latex_out_msg"] if "latex_out_msg" in ctx.objs else None
+    if old_out_msg:
+        try:
+            await ctx.bot.delete_message(old_out_msg)
+        except discord.NotFound:
+            pass
+    out_msg = await make_latex(ctx)
+    asyncio.ensure_future(reaction_edit_handler(ctx, out_msg), loop=ctx.bot.loop)
 
 
 def load_into(bot):
     bot.add_after_event("ready", register_tex_listeners)
+    bot.add_after_event("message_edit", tex_edit_listener)
     bot.after_ctx_message(tex_listener)
