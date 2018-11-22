@@ -9,6 +9,8 @@ import aiohttp
 
 from paraCH import paraCH
 
+from contextBot.Context import MessageContext as MCtx
+
 cmds = paraCH()
 
 # TODO: Factor out into a util file everything except commands.
@@ -420,8 +422,8 @@ async def tex_listener(ctx):
 
 async def tex_edit_listener(bot, before, after):
     if before.id not in bot.objects["latex_messages"]:
-        return
-    if before.content == after.content:
+        ctx = MCtx(bot=bot, message=after)
+        await tex_listener(ctx)
         return
     ctx = bot.objects["latex_messages"][before.id]
     ctx.objs["latex_edit_renew"] = True
