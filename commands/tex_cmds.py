@@ -146,6 +146,7 @@ async def cmd_tex(ctx):
             await asyncio.sleep(600)
             if not ctx.objs["latex_edit_renew"]:
                 break
+            ctx.objs["latex_edit_renew"] = False
         ctx.bot.objects["latex_messages"].pop(ctx.msg.id, None)
 
 
@@ -413,6 +414,7 @@ async def tex_listener(ctx):
             await asyncio.sleep(600)
             if not ctx.objs["latex_edit_renew"]:
                 break
+            ctx.objs["latex_edit_renew"] = False
         ctx.bot.objects["latex_messages"].pop(ctx.msg.id, None)
 
 
