@@ -292,7 +292,7 @@ async def show_config(ctx):
           category="Maths",
           short_help="Change how your LaTeX compiles",
           aliases=["texconfig"])
-@cmds.execute("flags", flags=["reset", "add", "approve==", "deny=="])
+@cmds.execute("flags", flags=["reset", "add", "append", "approve==", "deny=="])
 async def cmd_preamble(ctx):
     """
     Usage:
