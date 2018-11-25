@@ -12,6 +12,8 @@
 \RequirePackage{amsmath}
 \RequirePackage{amssymb}
 
+\RequirePackage{cancel}
+
 \RequirePackage{mathtools}
 
 \RequirePackage{calc}
@@ -34,6 +36,13 @@
     \newcommand{\what}[1]{& \qquad &\begin{sloppy}\textit{\small\mbox{#1}\small}\end{sloppy}} %Little comment for an align block. Memento of 2007.
 
 %Basic symbol extensions
+    \def\bbN{\mathbb{N}}
+    \def\bbC{\mathbb{C}}
+    \def\bbR{\mathbb{R}}
+    \def\bbQ{\mathbb{Q}}
+    \def\bbZ{\mathbb{Z}}
+
+
     \def\bA{\mathbb{A}}
     \def\bF{\mathbb{F}}
     \def\bN{\mathbb{N}}
@@ -97,6 +106,9 @@
     \renewcommand{\to}{\longrightarrow} %A long right arrow, for functions and such
     \newcommand{\lmto}{\longmapsto} %A right arrow with a vertical tail, for mapping definitions
     \newcommand{\llim}{\lim\limits} %limit set up so that it always writes the limits underneath
+
+    \newcommand{\floor}#1{\left\lfloor#1\right\rfloor}
+    \newcommand{\ceil}#1{\left\lceil#1\right\rceil}
 
 %Function constructors
     \newcommand{\func}[3]{#1\colon#2\to #3} %Generic function definition without mapping
