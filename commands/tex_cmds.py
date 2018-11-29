@@ -53,7 +53,7 @@ async def cmd_texlisten(ctx):
 
 
 def _is_tex(msg):
-    return (("$" in msg.clean_content) and 1 - (msg.clean_content.count("$") % 2) and msg.clean_content.strip("$")) or ("\\begin{" in msg.clean_content)
+    return (("$" in msg.clean_content) and 1 - (msg.clean_content.count("$") % 2) and msg.clean_content.strip("$")) or ("\\begin{" in msg.clean_content) or ("\\[" in msg.clean_content and "\\]" in msg.clean_content)
 
 
 @cmds.cmd("tex",
