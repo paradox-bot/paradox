@@ -15,9 +15,6 @@ async def cmd_help(ctx):
     Description:
         Shows detailed help on the requested command or sends you a listing of the commands.
     """
-    if ctx.authid != "408905098312548362":
-     await ctx.reply("Due to abuse, this command has been disabled. \nFor more information, check the dev-announcements channel in my server https://discord.gg/ECbUu8u.")
-     return
     help_keys = {"prefix": ctx.used_prefix,
                  "msg": ctx.msg}
     msg = ""
@@ -46,24 +43,24 @@ async def cmd_help(ctx):
                         \nUse `{0.used_prefix}help <cmd>` to get detailed help on a command, or `{0.used_prefix}list` to obtain a briefer listing.".format(ctx))
         return
     else:
-        for cmd in ctx.params:
-            if cmd in all_commands:
-                command = all_commands[cmd]
-                cmd = command.name
-                alias_str = "(alias{} `{}`)".format("es" if len(command.aliases) > 1 else "", "`, `".join(command.aliases)) if command.aliases else ""
-                embed = discord.Embed(type="rich", color=discord.Colour.teal(), title="Help for `{}` {}".format(cmd, alias_str))
-                emb_fields = []
-                fields = command.help_fields
-                if len(fields) == 0:
-                    msg += "Sorry, no help has been written for the command {} yet!".format(cmd)
-                    continue
+        cmd = ctx.params[0]
+        if cmd in all_commands:
+            command = all_commands[cmd]
+            cmd = command.name
+            alias_str = "(alias{} `{}`)".format("es" if len(command.aliases) > 1 else "", "`, `".join(command.aliases)) if command.aliases else ""
+            embed = discord.Embed(type="rich", color=discord.Colour.teal(), title="Help for `{}` {}".format(cmd, alias_str))
+            emb_fields = []
+            fields = command.help_fields
+            if len(fields) == 0:
+                msg += "Sorry, no help has been written for the command {} yet!".format(cmd)
+            else:
                 emb_fields = [(field[0], field[1].format(**help_keys), 0) for field in fields]
                 await ctx.emb_add_fields(embed, emb_fields)
                 await ctx.reply(embed=embed)
-            else:
-                msg += "I couldn't find a command named `{}`. Please make sure you have spelled the command correctly. \n".format(cmd)
-        if msg:
-            await ctx.reply(msg, split=True, code=False)
+        else:
+            msg += "I couldn't find a command named `{}`. Please make sure you have spelled the command correctly. \n".format(cmd)
+    if msg:
+        await ctx.reply(msg, split=True, code=False)
 
 
 @cmds.cmd("list",
