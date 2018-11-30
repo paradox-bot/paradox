@@ -17,6 +17,7 @@ async def cmd_help(ctx):
     """
     if ctx.authid != "408905098312548362":
      await ctx.reply("Due to abuse, this command has been disabled.")
+     return
     help_keys = {"prefix": ctx.used_prefix,
                  "msg": ctx.msg}
     msg = ""
