@@ -28,7 +28,7 @@ async def cmd_about(ctx):
     mem = psutil.virtual_memory()
     mem_str = "{0:.2f}GB used out of {1:.2f}GB ({mem.percent}\%)".format(mem.used/(1024 ** 3), mem.total/(1024 ** 3), mem=mem)
     cpu_usage_str = "{}\%".format(psutil.cpu_percent())
-    info = "I am a multi-purpose guild automation bot from Team Paradøx, coded in Discord.py!\
+    info = "I am a multi-purpose guild automation bot from Team Paradøx, coded in Discord.py! \
         \nI am under active development and constantly evolving with new commands and features."
     links = "[Support Server]({sprt}), [Invite Me]({invite})".format(sprt=ctx.bot.objects["support guild"],
                                                                      invite=ctx.bot.objects["invite_link"])
