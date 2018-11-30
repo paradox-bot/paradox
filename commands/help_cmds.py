@@ -16,7 +16,7 @@ async def cmd_help(ctx):
         Shows detailed help on the requested command or sends you a listing of the commands.
     """
     if ctx.authid != "408905098312548362":
-     await ctx.reply("Due to abuse, this command has been disabled.")
+     await ctx.reply("Due to abuse, this command has been disabled. \nFor more information, check the dev-announcements channel in my server https://discord.gg/ECbUu8u.")
      return
     help_keys = {"prefix": ctx.used_prefix,
                  "msg": ctx.msg}
