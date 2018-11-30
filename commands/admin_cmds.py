@@ -5,7 +5,7 @@ cmds = paraCH()
 
 @cmds.cmd("shutdown",
           category="Bot admin")
-@cmds.require("Master")
+@cmds.require("master_perm")
 async def cmd_shutdown(ctx):
     await ctx.reply("Shutting down, cya another day~")
     await ctx.bot.logout()
