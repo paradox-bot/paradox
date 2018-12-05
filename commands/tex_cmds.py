@@ -387,7 +387,10 @@ async def texcomp(ctx):
 
 async def register_tex_listeners(bot):
     bot.objects["user_tex_listeners"] = [str(userid) for userid in await bot.data.users.find("tex_listening", True, read=True)]
-    bot.objects["server_tex_listeners"] = [str(serverid) for serverid in await bot.data.servers.find("texit_latex_listen_enabled", True, read=True)]
+    bot.objects["server_tex_listeners"] = {}
+    for serverid in await bot.data.servers.find("texit_latex_listen_enabled", True, read=True):
+        channels = await bot.data.servers.get(serverid, "texit_maths_channels")
+        bot.objects["server_tex_listeners"][str(serverid)] = channels if channels else []
     bot.objects["latex_messages"] = {}
     await bot.log("Loaded {} user tex listeners and {} server tex listeners.".format(len(bot.objects["user_tex_listeners"]), len(bot.objects["server_tex_listeners"])))
 
@@ -402,6 +405,8 @@ async def tex_listener(ctx):
     if not (ctx.authid in ctx.bot.objects["user_tex_listeners"] or (ctx.server and ctx.server.id in ctx.bot.objects["server_tex_listeners"])):
         return
     if not _is_tex(ctx.msg):
+        return
+    if ctx.server and ctx.bot.objects["server_tex_listeners"][ctx.server.id] and not (ctx.ch.id in ctx.bot.objects["server_tex_listeners"][ctx.server.id]):
         return
     await ctx.bot.log("Recieved the following listening tex message from \"{ctx.author.name}\" in server \"{ctx.server.name}\":\n{ctx.cntnt}".format(ctx=ctx))
     ctx.objs["latex_handled"] = True

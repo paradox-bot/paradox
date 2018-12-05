@@ -103,7 +103,7 @@ bot.objects["sorted cats"] = ["General",
                               "Maths",
                               "Misc"]
 
-bot.objects["sorted_conf_pages"] = [("General", ["Guild settings"]),
+bot.objects["sorted_conf_pages"] = [("General", ["Guild settings", "Mathematical settings"]),
                                     ("Manual Moderation", ["Moderation"]),
                                     ("Join/Leave Messages", ["Join message", "Leave message"])]
 

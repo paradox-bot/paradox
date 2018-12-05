@@ -4,7 +4,9 @@ import settingTypes
 
 server_conf = Conf("s_conf")
 
-#TODO can do the write check with what's
+# TODO can do the write check with what's
+
+
 class Server_Setting(paraSetting):
     @classmethod
     async def read(cls, ctx):
@@ -40,6 +42,7 @@ class Server_Setting_Autorole(Server_Setting, settingTypes.ROLE):
     category = "Guild settings"
     default = "0"
 
+
 @server_conf.setting
 class Server_Setting_Autorole_Bot(Server_Setting, settingTypes.ROLE):
     name = "guild_autorole_bot"
@@ -62,6 +65,7 @@ class Server_Setting_modlog_ch(Server_Setting, settingTypes.CHANNEL):
     default = None
     category = "Moderation"
 
+
 @server_conf.setting
 class Server_Setting_modrole(Server_Setting, settingTypes.ROLE):
     name = "mod_role"
@@ -69,6 +73,7 @@ class Server_Setting_modrole(Server_Setting, settingTypes.ROLE):
     desc = "Role required to use moderation commands"
     default = None
     category = "Moderation"
+
 
 @server_conf.setting
 class Server_Setting_mute_role(Server_Setting, settingTypes.ROLE):
@@ -110,6 +115,7 @@ class Server_Setting_Join_Ch(Server_Setting, settingTypes.CHANNEL):
     default = None
     category = "Join message"
 
+
 @server_conf.setting
 class Server_Setting_Leave(Server_Setting, settingTypes.BOOL):
     name = "leave_msgs_enabled"
@@ -139,13 +145,16 @@ class Server_Setting_Leave_Ch(Server_Setting, settingTypes.CHANNEL):
     default = None
     category = "Leave message"
 
+
+# Maths related settings
+
 @server_conf.setting
 class Server_Setting_Latex_Listen(Server_Setting, settingTypes.BOOL):
     name = "texit_latex_listen_enabled"
     vis_name = "latex"
     desc = "Enables/Disables listening for LaTeX messages"
     default = False
-    category = "Guild settings"
+    category = "Mathematical settings"
 
     outputs = {True: "Enabled",
                False: "Disabled"}
@@ -154,14 +163,38 @@ class Server_Setting_Latex_Listen(Server_Setting, settingTypes.BOOL):
     async def write(cls, ctx, value):
         result = await super().write(ctx, value)
         listens = ctx.bot.objects["server_tex_listeners"]
-        if value:
-            listens.append(ctx.server.id)
+        if value and not (ctx.cmd_err and ctx.cmd_err[0] != 0):
+            channels = await ctx.bot.data.servers.get(ctx.server.id, "texit_maths_channels")
+            listens[str(ctx.server.id)] = channels if channels else []
         else:
-            listens.remove(ctx.server.id)
+            listens.pop(ctx.server.id)
         return result
 
 
+@server_conf.setting
+class Server_Setting_Maths_Channels(Server_Setting, settingTypes.CHANNELLIST):
+    name = "texit_maths_channels"
+    vis_name = "latex_channels"
+    desc = "Only listen to LaTeX in these channels, if set"
+    category = "Mathematical settings"
+    default = None
 
+    @classmethod
+    async def humanise(cls, ctx, raw):
+        if not raw:
+            return "All channels"
+        return await super().humanise(ctx, raw)
+
+    @classmethod
+    async def write(cls, ctx, value):
+        result = await super().write(ctx, value)
+        listens = ctx.bot.objects["server_tex_listeners"]
+        if (ctx.cmd_err and ctx.cmd_err[0] != 0):
+            return
+        if ctx.server.id not in listens:
+            return
+        listens[ctx.server.id] = value if value else []
+        return result
 
 
 def load_into(bot):
