@@ -406,7 +406,7 @@ async def tex_listener(ctx):
         return
     if not _is_tex(ctx.msg):
         return
-    if ctx.server and ctx.bot.objects["server_tex_listeners"][ctx.server.id] and not (ctx.ch.id in ctx.bot.objects["server_tex_listeners"][ctx.server.id]):
+    if ctx.server and (ctx.server.id in ctx.bot.objects["server_tex_listeners"]) and ctx.bot.objects["server_tex_listeners"][ctx.server.id] and not (ctx.ch.id in ctx.bot.objects["server_tex_listeners"][ctx.server.id]):
         return
     await ctx.bot.log("Recieved the following listening tex message from \"{ctx.author.name}\" in server \"{ctx.server.name}\":\n{ctx.cntnt}".format(ctx=ctx))
     ctx.objs["latex_handled"] = True
