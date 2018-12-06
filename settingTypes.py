@@ -146,7 +146,9 @@ class SETTING_LIST(paraSetting):
         """
         if not raw:
             return "None"
-        humanised = [await self.setting_type.humanise(ctx, raw_item) for raw_item in raw]
+        humanised = []
+        for raw_item in raw:
+            humanised.append(await self.setting_type.humanise(ctx, raw_item))
         return ", ".join(humanised)
 
     @classmethod
