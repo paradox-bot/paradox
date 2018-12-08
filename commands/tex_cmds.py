@@ -362,6 +362,7 @@ async def cmd_preamble(ctx):
 
     if ctx.flags["add"] or ctx.flags["append"]:
         old_preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
+        old_preamble = old_preamble if old_preamble else default_preamble
         new_preamble = "{}\n{}".format(old_preamble, new_preamble)
 
     await ctx.data.users.set(ctx.authid, "limbo_preamble", new_preamble)
