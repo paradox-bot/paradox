@@ -60,7 +60,7 @@ def _is_tex(msg):
           category="Maths",
           short_help="Renders LaTeX code",
           aliases=["$", "$$", "align", "latex"])
-@cmds.execute("flags", flags=["config", "keepmsg", "colour==", "alwaysmath"])
+@cmds.execute("flags", flags=["config", "keepmsg", "colour==", "alwaysmath", "allowother"])
 async def cmd_tex(ctx):
     """
     Usage:
@@ -69,9 +69,6 @@ async def cmd_tex(ctx):
         {prefix}$$ <displayeqn>
         {prefix}align <align block>
         {prefix}tex --colour white | black | transparent | grey | dark
-        {prefix}tex --keepmsg
-        {prefix}tex --config
-        {prefix}tex --alwaysmath
     Description:
         Renders and displays LaTeX code.
 
@@ -90,6 +87,7 @@ async def cmd_tex(ctx):
         --colour:: Changes your colourscheme. One of default, white, black, transparent, or grey.
         --keepmsg:: Toggles whether I delete your source message or not.
         --alwaysmath:: Toggles whether {prefix}tex always renders in math mode.
+        --allowother:: Allows other users to use the showtex reaction on your messages.
     Examples:
         {prefix}tex This is a fraction: $\\frac{{1}}{{2}}$
         {prefix}$ \\int^\\infty_0 f(x)~dx
@@ -130,8 +128,20 @@ async def cmd_tex(ctx):
         else:
             await ctx.reply("`{0}tex` now render latex as usual.".format(ctx.used_prefix))
         return
+    elif ctx.flags["allowother"]:
+        allowed = await ctx.data.users.get(ctx.authid, "latex_allowother")
+        if allowed is None:
+            allowed = False
+        allowed = 1 - allowed
+        await ctx.data.users.set(ctx.authid, "latex_allowother", allowed)
+        if allowed:
+            await ctx.reply("Other people may now use the reaction to show tex on your message.")
+        else:
+            await ctx.reply("Other people may no longer use the reaction to sho tex on your message.")
+        return
+
     if ctx.arg_str == "":
-        await ctx.reply("Please give me something to compile! See `{0}help` or `{0}help tex` for usage!".format(ctx.used_prefix))
+        await ctx.reply("Please give me something to compile! See `{0}help` and `{0}help tex` for usage!".format(ctx.used_prefix))
         return
     ctx.objs["latex_listening"] = False
     ctx.objs["latex_source_deleted"] = False
@@ -208,9 +218,14 @@ async def reaction_edit_handler(ctx, out_msg):
         await ctx.bot.add_reaction(out_msg, ctx.objs["latex_show_emoji"])
     except discord.Forbidden:
         return
+    allow_other = await ctx.bot.data.users.get(ctx.authid, "latex_allowother")
 
     def check(reaction, user):
-        return ((reaction.emoji == ctx.objs["latex_del_emoji"]) or (reaction.emoji == ctx.objs["latex_show_emoji"])) and (not (user == ctx.me))
+        result = reaction.emoji == ctx.objs["latex_show_emoji"] and user == ctx.author
+        result = result or (reaction.emoji == ctx.objs["latex_del_emoji"] and (allow_other or user == ctx.author))
+        result = result and not user == ctx.me
+        return result
+
     while True:
         res = await ctx.bot.wait_for_reaction(message=out_msg,
                                               timeout=300,
