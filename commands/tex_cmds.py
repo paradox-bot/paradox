@@ -59,12 +59,13 @@ def _is_tex(msg):
 @cmds.cmd("tex",
           category="Maths",
           short_help="Renders LaTeX code",
-          aliases=["$", "$$", "align", "latex"])
+          aliases=[",", "$", "$$", "align", "latex"])
 @cmds.execute("flags", flags=["config", "keepmsg", "colour==", "alwaysmath", "allowother"])
 async def cmd_tex(ctx):
     """
     Usage:
         {prefix}tex <code>
+        {prefix}, <code>
         {prefix}$ <equation>
         {prefix}$$ <displayeqn>
         {prefix}align <align block>
@@ -72,8 +73,9 @@ async def cmd_tex(ctx):
     Description:
         Renders and displays LaTeX code.
 
-        Using $ instead of tex compiles
-        \\begin{{gather*}}<code>\\end{{gather*}}.
+        Using $ or , instead of tex compiles
+        \\begin{{gather*}}<code>\\end{{gather*}}
+        (You can treat this as a display equation with centering where \\\\ works.)
 
         Using $$ instead of tex compiles
         $$<code>$$.
@@ -171,7 +173,7 @@ async def parse_tex(ctx, source):
     always = await ctx.bot.data.users.get(ctx.authid, "latex_alwaysmath")
     if ctx.used_cmd_name == "latex" or (ctx.used_cmd_name == "tex" and not always):
         return source
-    if ctx.used_cmd_name == "$" or (ctx.used_cmd_name == "tex" and always):
+    if ctx.used_cmd_name in ["$", ","] or (ctx.used_cmd_name == "tex" and always):
         return "\\begin{{gather*}}\n{}\n\\end{{gather*}}".format(source)
     elif ctx.used_cmd_name == "$$":
         return "$${}$$".format(source)
