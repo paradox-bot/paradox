@@ -60,7 +60,7 @@ def _is_tex(msg):
           category="Maths",
           short_help="Renders LaTeX code",
           aliases=[",", "$", "$$", "align", "latex"])
-@cmds.execute("flags", flags=["config", "keepmsg", "colour==", "alwaysmath", "allowother"])
+@cmds.execute("flags", flags=["config", "keepmsg", "colour==", "alwaysmath", "allowother", "name"])
 async def cmd_tex(ctx):
     """
     Usage:
@@ -89,7 +89,8 @@ async def cmd_tex(ctx):
         --colour:: Changes your colourscheme. One of default, white, black, transparent, or grey.
         --keepmsg:: Toggles whether I delete your source message or not.
         --alwaysmath:: Toggles whether {prefix}tex always renders in math mode.
-        --allowother:: Allows other users to use the showtex reaction on your messages.
+        --allowother:: Toogles whether other users may use the reaction to show your message source.
+        --name:: Toggles whether your name appears on the output message. Note the name of the image is your userid.
     Examples:
         {prefix}tex This is a fraction: $\\frac{{1}}{{2}}$
         {prefix}$ \\int^\\infty_0 f(x)~dx
@@ -137,9 +138,20 @@ async def cmd_tex(ctx):
         allowed = 1 - allowed
         await ctx.data.users.set(ctx.authid, "latex_allowother", allowed)
         if allowed:
-            await ctx.reply("Other people may now use the reaction to show tex on your message.")
+            await ctx.reply("Other people may now use the reaction to view your message source.")
         else:
-            await ctx.reply("Other people may no longer use the reaction to sho tex on your message.")
+            await ctx.reply("Other people may no longer use the reaction to viw your message source.")
+        return
+    elif ctx.flags["name"]:
+        showname = await ctx.data.users.get(ctx.authid, "latex_showname")
+        if showname is None:
+            showname = True
+        showname = 1 - showname
+        await ctx.data.users.set(ctx.authid, "latex_showname", showname)
+        if showname:
+            await ctx.reply("Your name is now shown on the output message.")
+        else:
+            await ctx.reply("Your name is no longer shown on the output message. Note that your user id appears in the name of the output image.")
         return
 
     if ctx.arg_str == "":
@@ -202,11 +214,14 @@ async def make_latex(ctx):
     ctx.objs["latex_source_msg"] = "```tex\n{}\n```{}".format(ctx.objs["latex_source"], err_msg)
     ctx.objs["latex_del_emoji"] = ctx.bot.objects["emoji_tex_del"]
     ctx.objs["latex_show_emoji"] = ctx.bot.objects["emoji_tex_errors" if error else "emoji_tex_show"]
+
+    ctx.objs["latex_name"] = "**{}**:\n".format(ctx.author.name.replace("*", "\\*")) if (await ctx.data.users.get(ctx.authid, "latex_showname")) in [None, True] else ""
+
     file_name = "tex/{}.png".format(ctx.authid)
     exists = True if os.path.isfile(file_name) else False
     out_msg = await ctx.reply(file_name=file_name if exists else "tex/failed.png",
-                              message="**{}**:\n{}".format(ctx.author.name.replace("*", "\\*"),
-                                                           ("Compile Error! Click the {} reaction for details. (You may edit your message)".format(ctx.objs["latex_show_emoji"])) if error else ""))
+                              message="{}{}".format(ctx.objs["latex_name"],
+                                                    ("Compile Error! Click the {} reaction for details. (You may edit your message)".format(ctx.objs["latex_show_emoji"])) if error else ""))
     if exists:
         os.remove(file_name)
     ctx.objs["latex_show"] = 0
@@ -245,7 +260,7 @@ async def reaction_edit_handler(ctx, out_msg):
                 pass
             ctx.objs["latex_show"] = 1 - ctx.objs["latex_show"]
             await ctx.bot.edit_message(out_msg,
-                                       "**{}**:\n{}".format(ctx.author.name.replace("*", "\\*"), (ctx.objs["latex_source_msg"] if ctx.objs["latex_show"] else "")))
+                                       "{}{}".format(ctx.objs["latex_name"], (ctx.objs["latex_source_msg"] if ctx.objs["latex_show"] else "")))
     try:
         await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_del_emoji"], ctx.me)
         await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_show_emoji"], ctx.me)
