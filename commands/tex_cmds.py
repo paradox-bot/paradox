@@ -309,11 +309,11 @@ async def show_config(ctx):
           category="Maths",
           short_help="Change how your LaTeX compiles",
           aliases=["texconfig"])
-@cmds.execute("flags", flags=["reset", "add", "append", "approve==", "deny=="])
+@cmds.execute("flags", flags=["reset", "add", "append", "approve==", "remove", "deny=="])
 async def cmd_preamble(ctx):
     """
     Usage:
-        {prefix}preamble [code] [--reset] [--add]
+        {prefix}preamble [code] [--reset] [--add][--remove]
     Description:
         Displays the preamble currently used for compiling your latex code.
         If [code] is provided, sets this to be preamble instead.
@@ -321,6 +321,7 @@ async def cmd_preamble(ctx):
     Flags:2
         reset::  Resets your preamble to the default.
         add::  Adds the provided code to your current preamble.
+        remove:: Removes all lines from your preamble containing the given text.
     """
     user_id = ctx.flags["approve"] or ctx.flags["deny"]
     if user_id:
@@ -364,6 +365,13 @@ async def cmd_preamble(ctx):
         old_preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
         old_preamble = old_preamble if old_preamble else default_preamble
         new_preamble = "{}\n{}".format(old_preamble, new_preamble)
+
+    if ctx.flags["remove"]:
+        old_preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
+        old_preamble = old_preamble if old_preamble else default_preamble
+
+        # TODO: Fix, Ugly
+        new_preamble = "\n".join([line for line in old_preamble.split("\n") if ctx.arg_str not in line])
 
     await ctx.data.users.set(ctx.authid, "limbo_preamble", new_preamble)
 
