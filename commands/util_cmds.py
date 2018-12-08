@@ -52,7 +52,7 @@ async def cmd_rotate(ctx):
 
 
 async def timezone_lookup(ctx):
-    search_str = ctx.flags["set"]
+    search_str = ctx.flags["set"].strip("<>")
     if search_str in pytz.all_timezones:
         return search_str
     timestr = '%-I:%M %p'
