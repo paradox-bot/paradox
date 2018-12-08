@@ -60,7 +60,7 @@ def _is_tex(msg):
           category="Maths",
           short_help="Renders LaTeX code",
           aliases=[",", "$", "$$", "align", "latex"])
-@cmds.execute("flags", flags=["config", "keepmsg", "colour==", "alwaysmath", "allowother", "name"])
+@cmds.execute("flags", flags=["config", "keepmsg", "color==", "colour==", "alwaysmath", "allowother", "name"])
 async def cmd_tex(ctx):
     """
     Usage:
@@ -112,8 +112,8 @@ async def cmd_tex(ctx):
         else:
             await ctx.reply("I will not keep your message after compilation.")
         return
-    elif ctx.flags["colour"]:
-        colour = ctx.flags["colour"]
+    elif ctx.flags["colour"] or ctx.flags["color"]:
+        colour = ctx.flags["colour"] if ctx.flags["colour"] else ctx.flags["color"]
         if colour not in ["default", "white", "transparent", "black", "grey", "gray", "dark"]:
             await ctx.reply("Unknown colour scheme. Known colours are `default`, `white`, `transparent`, `black`, `dark` and `grey`.")
             return
