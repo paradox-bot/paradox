@@ -110,7 +110,7 @@ async def cmd_time(ctx):
     user = user.id
     tz = await ctx.data.users.get(user, "tz")
     if not tz:
-        general_prefix = (await ctx.bot.prefix_func(ctx))[0]
+        general_prefix = (await ctx.bot.get_prefixes(ctx))[0]
         if user == ctx.authid:
             await ctx.reply("You haven't set your timezone! Set it using `{0}time --set <timezone>`!`".format(general_prefix))
         else:
