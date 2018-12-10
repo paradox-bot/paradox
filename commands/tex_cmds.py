@@ -186,7 +186,7 @@ async def parse_tex(ctx, source):
     if ctx.used_cmd_name == "latex" or (ctx.used_cmd_name == "tex" and not always):
         return source
     if ctx.used_cmd_name in ["$", ","] or (ctx.used_cmd_name == "tex" and always):
-        return "\\begin{{gather*}}\n{}\n\\end{{gather*}}".format(source)
+        return "\\begin{{gather*}}\n{}\n\\end{{gather*}}".format(source.strip(","))
     elif ctx.used_cmd_name == "$$":
         return "$${}$$".format(source)
     elif ctx.used_cmd_name == "align":
