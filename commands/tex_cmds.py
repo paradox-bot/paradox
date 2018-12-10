@@ -238,9 +238,10 @@ async def reaction_edit_handler(ctx, out_msg):
     allow_other = await ctx.bot.data.users.get(ctx.authid, "latex_allowother")
 
     def check(reaction, user):
-        result = reaction.emoji == ctx.objs["latex_show_emoji"] and user == ctx.author
-        result = result or (reaction.emoji == ctx.objs["latex_del_emoji"] and (allow_other or user == ctx.author))
-        result = result and not user == ctx.me
+        if user == ctx.me:
+            return False
+        result = reaction.emoji == ctx.objs["latex_del_emoji"] and user == ctx.author
+        result = result or (reaction.emoji == ctx.objs["latex_show_emoji"] and (allow_other or user == ctx.author))
         return result
 
     while True:
@@ -260,7 +261,7 @@ async def reaction_edit_handler(ctx, out_msg):
                 pass
             ctx.objs["latex_show"] = 1 - ctx.objs["latex_show"]
             await ctx.bot.edit_message(out_msg,
-                                       "{}{}".format(ctx.objs["latex_name"], (ctx.objs["latex_source_msg"] if ctx.objs["latex_show"] else "")))
+                                       "{}{} ".format(ctx.objs["latex_name"], (ctx.objs["latex_source_msg"] if ctx.objs["latex_show"] else "")))
     try:
         await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_del_emoji"], ctx.me)
         await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_show_emoji"], ctx.me)
@@ -356,15 +357,16 @@ async def cmd_preamble(ctx):
             await ctx.reply("The preamble change has been denied")
         return
 
-    if not ctx.arg_str and not ctx.msg.attachments:
-        await show_config(ctx)
-        return
-
     if ctx.flags["reset"]:
         await ctx.data.users.set(ctx.authid, "latex_preamble", default_preamble)
         await ctx.data.users.set(ctx.authid, "limbo_preamble", "")
         await ctx.reply("Your LaTeX preamble has been reset to the default!")
         return
+
+    if not ctx.arg_str and not ctx.msg.attachments:
+        await show_config(ctx)
+        return
+
     ctx.objs["latex_handled"] = True
 
     file_name = "preamble.tex"
@@ -378,14 +380,22 @@ async def cmd_preamble(ctx):
 
     if ctx.flags["add"] or ctx.flags["append"]:
         old_preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
+        old_limbo = await ctx.data.users.get(ctx.authid, "limbo_preamble")
+        old_preamble = old_limbo if old_limbo else old_preamble
         old_preamble = old_preamble if old_preamble else default_preamble
+
         new_preamble = "{}\n{}".format(old_preamble, new_preamble)
 
     if ctx.flags["remove"]:
         old_preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
+        old_limbo = await ctx.data.users.get(ctx.authid, "limbo_preamble")
+        old_preamble = old_limbo if old_limbo else old_preamble
         old_preamble = old_preamble if old_preamble else default_preamble
 
         # TODO: Fix, Ugly
+        if ctx.arg_str not in old_preamble:
+            await ctx.reply("Couldn't find this in any line of your preamble!")
+            return
         new_preamble = "\n".join([line for line in old_preamble.split("\n") if ctx.arg_str not in line])
 
     await ctx.data.users.set(ctx.authid, "limbo_preamble", new_preamble)
