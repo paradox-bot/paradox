@@ -59,7 +59,7 @@ def _is_tex(msg):
 @cmds.cmd("tex",
           category="Maths",
           short_help="Renders LaTeX code",
-          aliases=[",", "$", "$$", "align", "latex"])
+          aliases=[",", "$", "$$", "align", "latex", "texw"])
 @cmds.execute("flags", flags=["config", "keepmsg", "color==", "colour==", "alwaysmath", "allowother", "name"])
 async def cmd_tex(ctx):
     """
@@ -191,6 +191,8 @@ async def parse_tex(ctx, source):
         return "$${}$$".format(source)
     elif ctx.used_cmd_name == "align":
         return "\\begin{{align*}}\n{}\n\\end{{align*}}".format(source)
+    elif ctx.used_cmd_name == "texw":
+        return "{{\\color{{white}}\\rule{{\\textwidth}}{{1pt}}}}\n{}".format(source)
     else:
         return source
 
