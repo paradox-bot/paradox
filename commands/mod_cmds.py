@@ -300,8 +300,8 @@ async def multi_mod_action(ctx, user_strs, action, strings, reason, finder=membe
         await ctx.reply("An unexpected error occurred while trying to post to the modlog.")
 
 
-async def request_reason(ctx):
-    reason = await ctx.input("📋 Please provide a reason! (`no` for no reason or `c` to abort ban)")
+async def request_reason(ctx, action="ban"):
+    reason = await ctx.input("📋 Please provide a reason! (`no` for no reason or `c` to abort {})".format(action))
     if reason.lower() == "no":
         reason = "None"
     elif reason.lower() == "c":
