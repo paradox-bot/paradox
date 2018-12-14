@@ -518,7 +518,7 @@ async def cmd_mute(ctx):
     dur = None
     if ctx.flags["t"]:
         dur = ctx.parse_dur(ctx.flags["t"])
-        if not dur.seconds:
+        if not dur:
             await ctx.reply("Didn't understand the duration given. See the help for usage.")
             return
 
