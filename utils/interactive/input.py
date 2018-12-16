@@ -3,9 +3,10 @@ import discord
 
 def load_into(bot):
     @bot.util
-    async def listen_for(ctx, chars=[], timeout=30, lower=True):
-        def check(message):
-            return ((message.content.lower() if lower else message.content) in chars)
+    async def listen_for(ctx, chars=[], check=None, timeout=30, lower=True):
+        if not check:
+            def check(message):
+                return ((message.content.lower() if lower else message.content) in chars)
         msg = await ctx.bot.wait_for_message(author=ctx.author, check=check, timeout=timeout)
         return msg
 

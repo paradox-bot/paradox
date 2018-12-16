@@ -70,7 +70,7 @@ async def timezone_lookup(ctx):
     block_strs = [["{0[0]:^{max_len}} {0[1]:^10}".format(tzpair, max_len=max_block_lens[i]) for tzpair in tzblock] for i, tzblock in enumerate(tz_blocks)]
     blocks = list(itertools.chain(*block_strs))
     tz_num = await ctx.selector("Multiple matching timezones found, please select one!", blocks)
-    return tzlist[tz_num][0] if tz_num else None
+    return tzlist[tz_num][0] if tz_num is not None else None
 
 
 @cmds.cmd("time",

@@ -54,6 +54,15 @@ class Server_Setting_Autorole_Bot(Server_Setting, settingTypes.ROLE):
     async def dyn_default(cls, ctx):
         return await ctx.server_conf.guild_autorole.get(ctx)
 
+
+@server_conf.setting
+class Server_Setting_selfroles(Server_Setting, settingTypes.ROLELIST):
+    name = "self_roles"
+    vis_name = "selfroles"
+    desc = "Roles which users can give themselves with giveme command"
+    default = None
+    category = "Guild settings"
+
 # Moderation settings
 
 
