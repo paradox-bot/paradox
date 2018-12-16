@@ -171,7 +171,7 @@ async def cmd_bancmd(ctx):
           category="Server Admin",
           short_help="Create or edit a server role.",
           aliases=["erole", "roleedit", "roledit", "editr"])
-@cmds.require("has_manage_server")
+@cmds.require("in_server_has_mod")
 @cmds.execute("flags", flags=["colour=", "color=", "name==", "perm==", "hoist=", "mention=", "pos=="])
 async def cmd_editrole(ctx):
     """
