@@ -783,10 +783,10 @@ async def cmd_giveme(ctx):
                 return
             roles = [lines[selection]]
     else:
-        roles = ctx.arg_str.split(",").strip()
+        roles = ctx.arg_str.split(",")
     msg_roles = []
     for role in roles:
-        msg_role = await ctx.find_role(role, create=True if mod else False, interactive=True, collection=None if ctx.flags["add"] else self_roles)
+        msg_role = await ctx.find_role(role.strip(), create=True if mod else False, interactive=True, collection=None if ctx.flags["add"] else self_roles)
         if msg_role is None:
             if role.isdigit() and ctx.flags["remove"]:
                 continue
