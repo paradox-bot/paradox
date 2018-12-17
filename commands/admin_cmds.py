@@ -63,46 +63,6 @@ async def cmd_restart(ctx):
     msg = await ctx.run_sh('./Nanny/scripts/redeploy.sh')
     await ctx.reply(msg)
 
-'''
-@cmds.cmd("masters",
-          category="Bot admin",
-          short_help="Modify or check the bot masters")
-@cmds.require("master_perm")
-async def cmd_masters(ctx):
-    """
-    Usage: {prefix}masters [list] | [+/add | -/remove] <userid/mention>
-
-    Adds or removes a bot master by id or mention, or lists all current masters.
-    """
-    masters = await ctx.bot.bot_conf["masters"].read(conf, None, message, client)
-    action = ctx.params[0]
-    if action in ['', 'list']:
-        await ctx.reply("My masters are:\n{}".format(masters))
-    else:
-        errmsg = await ctx.bot.bot_conf["masters"].write(conf, None, cargs, message, client, message.server, botdata)
-        await ctx.reply(errmsg)
-
-
-@cmds.cmd("blacklist",
-          category="Bot admin",
-          short_help="Modify or check the bot blacklist")
-@cmds.require("master_perm")
-async def cmd_blacklist(ctx):
-    """
-    Usage: {prefix}blacklist [list] | [+/add | -/remove] <userid/mention>
-
-    Adds or removes a blacklisted user by id or mention, or lists all current blacklisted users.
-    """
-    blist = await ctx.bot.bot_conf["blacklist"].read(conf, None, message, client)
-    action = ctx.params[0]
-    if action in ['', 'list']:
-        await ctx.reply("I have blacklisted:\n{}".format(blist))
-    else:
-        errmsg = await ctx.bot.bot_conf["blacklist"].write(conf, None, cargs, message, client, message.server, botdata)
-        await ctx.reply(errmsg)
-'''
-
-
 @cmds.cmd("logs",
           category="Bot admin",
           short_help="Reads and returns the logs")

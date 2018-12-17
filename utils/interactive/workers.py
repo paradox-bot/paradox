@@ -9,7 +9,8 @@ def load_into(bot):
         maybe_user_id = user_str.strip('<@!> ')
         if is_member:
             def is_user(member):
-                return ((user_str.lower() in member.display_name.lower()) or (user_str.lower() in member.name.lower()))
+                return ((user_str.lower() in member.display_name.lower()) or
+                       (user_str.lower() in member.name.lower()))
         else:
             def is_user(member):
                 return (user_str.lower() in member.name.lower())
@@ -59,7 +60,7 @@ def load_into(bot):
         pass
 
     @bot.util
-    async def find_role(ctx, userstr, create=False, interactive=False):
+    async def find_role(ctx, userstr, create=False, interactive=False, collection=None):
         if not ctx.server:
             ctx.cmd_err = (1, "This is not valid outside of a server!")
             return None
@@ -67,11 +68,14 @@ def load_into(bot):
             await ctx.reply("Looking up a role without a name! Something's wacky. Please check your input and try again")
             ctx.cmd_err = (-1, "")
             return None
-        roleid = userstr.strip('<#@&!>')
+
+        collection = collection if collection else ctx.server.roles
+
+        roleid = userstr.strip('<#@!>')
         if interactive:
             def check(role):
                 return (role.id == roleid) or (userstr.lower() in role.name.lower())
-            roles = list(filter(check, ctx.server.roles))
+            roles = list(filter(check, collection))
             if len(roles) == 0:
                 role = None
             else:
@@ -87,11 +91,11 @@ def load_into(bot):
             else:
                 def is_role(role):
                     return userstr.lower() in role.name.lower()
-            role = discord.utils.find(is_role, ctx.server.roles)
+            role = discord.utils.find(is_role, collection)
         if role:
             return role
         else:
-            msg = await ctx.reply("I can't find this role in this server!")
+            msg = await ctx.reply("Couldn't find a role matching `{}`!".format(userstr))
             if create:
                 role = await ctx.offer_create_role(userstr)
                 if not role:

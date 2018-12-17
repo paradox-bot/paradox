@@ -53,30 +53,29 @@ async def cmd_texlisten(ctx):
 
 
 def _is_tex(msg):
-    return (("$" in msg.clean_content) and 1 - (msg.clean_content.count("$") % 2) and msg.clean_content.strip("$")) or ("\\begin{" in msg.clean_content)
+    return (("$" in msg.clean_content) and 1 - (msg.clean_content.count("$") % 2) and msg.clean_content.strip("$")) or ("\\begin{" in msg.clean_content) or ("\\[" in msg.clean_content and "\\]" in msg.clean_content)
 
 
 @cmds.cmd("tex",
           category="Maths",
           short_help="Renders LaTeX code",
-          aliases=["$", "$$", "align", "latex"])
-@cmds.execute("flags", flags=["config", "keepmsg", "colour==", "alwaysmath"])
+          aliases=[",", "$", "$$", "align", "latex", "texw"])
+@cmds.execute("flags", flags=["config", "keepmsg", "color==", "colour==", "alwaysmath", "allowother", "name"])
 async def cmd_tex(ctx):
     """
     Usage:
         {prefix}tex <code>
+        {prefix}, <code>
         {prefix}$ <equation>
         {prefix}$$ <displayeqn>
         {prefix}align <align block>
         {prefix}tex --colour white | black | transparent | grey | dark
-        {prefix}tex --keepmsg
-        {prefix}tex --config
-        {prefix}tex --alwaysmath
     Description:
         Renders and displays LaTeX code.
 
-        Using $ instead of tex compiles
-        \\begin{{gather*}}<code>\\end{{gather*}}.
+        Using $ or , instead of tex compiles
+        \\begin{{gather*}}<code>\\end{{gather*}}
+        (You can treat this as a display equation with centering where \\\\ works.)
 
         Using $$ instead of tex compiles
         $$<code>$$.
@@ -90,6 +89,8 @@ async def cmd_tex(ctx):
         --colour:: Changes your colourscheme. One of default, white, black, transparent, or grey.
         --keepmsg:: Toggles whether I delete your source message or not.
         --alwaysmath:: Toggles whether {prefix}tex always renders in math mode.
+        --allowother:: Toogles whether other users may use the reaction to show your message source.
+        --name:: Toggles whether your name appears on the output message. Note the name of the image is your userid.
     Examples:
         {prefix}tex This is a fraction: $\\frac{{1}}{{2}}$
         {prefix}$ \\int^\\infty_0 f(x)~dx
@@ -111,8 +112,8 @@ async def cmd_tex(ctx):
         else:
             await ctx.reply("I will not keep your message after compilation.")
         return
-    elif ctx.flags["colour"]:
-        colour = ctx.flags["colour"]
+    elif ctx.flags["colour"] or ctx.flags["color"]:
+        colour = ctx.flags["colour"] if ctx.flags["colour"] else ctx.flags["color"]
         if colour not in ["default", "white", "transparent", "black", "grey", "gray", "dark"]:
             await ctx.reply("Unknown colour scheme. Known colours are `default`, `white`, `transparent`, `black`, `dark` and `grey`.")
             return
@@ -130,8 +131,31 @@ async def cmd_tex(ctx):
         else:
             await ctx.reply("`{0}tex` now render latex as usual.".format(ctx.used_prefix))
         return
+    elif ctx.flags["allowother"]:
+        allowed = await ctx.data.users.get(ctx.authid, "latex_allowother")
+        if allowed is None:
+            allowed = False
+        allowed = 1 - allowed
+        await ctx.data.users.set(ctx.authid, "latex_allowother", allowed)
+        if allowed:
+            await ctx.reply("Other people may now use the reaction to view your message source.")
+        else:
+            await ctx.reply("Other people may no longer use the reaction to viw your message source.")
+        return
+    elif ctx.flags["name"]:
+        showname = await ctx.data.users.get(ctx.authid, "latex_showname")
+        if showname is None:
+            showname = True
+        showname = 1 - showname
+        await ctx.data.users.set(ctx.authid, "latex_showname", showname)
+        if showname:
+            await ctx.reply("Your name is now shown on the output message.")
+        else:
+            await ctx.reply("Your name is no longer shown on the output message. Note that your user id appears in the name of the output image.")
+        return
+
     if ctx.arg_str == "":
-        await ctx.reply("Please give me something to compile! See `{0}help` or `{0}help tex` for usage!".format(ctx.used_prefix))
+        await ctx.reply("Please give me something to compile! See `{0}help` and `{0}help tex` for usage!".format(ctx.used_prefix))
         return
     ctx.objs["latex_listening"] = False
     ctx.objs["latex_source_deleted"] = False
@@ -161,12 +185,14 @@ async def parse_tex(ctx, source):
     always = await ctx.bot.data.users.get(ctx.authid, "latex_alwaysmath")
     if ctx.used_cmd_name == "latex" or (ctx.used_cmd_name == "tex" and not always):
         return source
-    if ctx.used_cmd_name == "$" or (ctx.used_cmd_name == "tex" and always):
-        return "\\begin{{gather*}}\n{}\n\\end{{gather*}}".format(source)
+    if ctx.used_cmd_name in ["$", ","] or (ctx.used_cmd_name == "tex" and always):
+        return "\\begin{{gather*}}\n{}\n\\end{{gather*}}".format(source.strip(","))
     elif ctx.used_cmd_name == "$$":
         return "$${}$$".format(source)
     elif ctx.used_cmd_name == "align":
         return "\\begin{{align*}}\n{}\n\\end{{align*}}".format(source)
+    elif ctx.used_cmd_name == "texw":
+        return "{{\\color{{white}}\\rule{{\\textwidth}}{{1pt}}}}\n{}".format(source)
     else:
         return source
 
@@ -190,11 +216,14 @@ async def make_latex(ctx):
     ctx.objs["latex_source_msg"] = "```tex\n{}\n```{}".format(ctx.objs["latex_source"], err_msg)
     ctx.objs["latex_del_emoji"] = ctx.bot.objects["emoji_tex_del"]
     ctx.objs["latex_show_emoji"] = ctx.bot.objects["emoji_tex_errors" if error else "emoji_tex_show"]
+
+    ctx.objs["latex_name"] = "**{}**:\n".format(ctx.author.name.replace("*", "\\*")) if (await ctx.data.users.get(ctx.authid, "latex_showname")) in [None, True] else ""
+
     file_name = "tex/{}.png".format(ctx.authid)
     exists = True if os.path.isfile(file_name) else False
     out_msg = await ctx.reply(file_name=file_name if exists else "tex/failed.png",
-                              message="**{}**:\n{}".format(ctx.author.name.replace("*", "\\*"),
-                                                           ("Compile Error! Click the {} reaction for details. (You may edit your message)".format(ctx.objs["latex_show_emoji"])) if error else ""))
+                              message="{}{}".format(ctx.objs["latex_name"],
+                                                    ("Compile Error! Click the {} reaction for details. (You may edit your message)".format(ctx.objs["latex_show_emoji"])) if error else ""))
     if exists:
         os.remove(file_name)
     ctx.objs["latex_show"] = 0
@@ -208,9 +237,15 @@ async def reaction_edit_handler(ctx, out_msg):
         await ctx.bot.add_reaction(out_msg, ctx.objs["latex_show_emoji"])
     except discord.Forbidden:
         return
+    allow_other = await ctx.bot.data.users.get(ctx.authid, "latex_allowother")
 
     def check(reaction, user):
-        return ((reaction.emoji == ctx.objs["latex_del_emoji"]) or (reaction.emoji == ctx.objs["latex_show_emoji"])) and (not (user == ctx.me))
+        if user == ctx.me:
+            return False
+        result = reaction.emoji == ctx.objs["latex_del_emoji"] and user == ctx.author
+        result = result or (reaction.emoji == ctx.objs["latex_show_emoji"] and (allow_other or user == ctx.author))
+        return result
+
     while True:
         res = await ctx.bot.wait_for_reaction(message=out_msg,
                                               timeout=300,
@@ -228,7 +263,7 @@ async def reaction_edit_handler(ctx, out_msg):
                 pass
             ctx.objs["latex_show"] = 1 - ctx.objs["latex_show"]
             await ctx.bot.edit_message(out_msg,
-                                       "**{}**:\n{}".format(ctx.author.name.replace("*", "\\*"), (ctx.objs["latex_source_msg"] if ctx.objs["latex_show"] else "")))
+                                       "{}{} ".format(ctx.objs["latex_name"], (ctx.objs["latex_source_msg"] if ctx.objs["latex_show"] else "")))
     try:
         await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_del_emoji"], ctx.me)
         await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_show_emoji"], ctx.me)
@@ -292,11 +327,11 @@ async def show_config(ctx):
           category="Maths",
           short_help="Change how your LaTeX compiles",
           aliases=["texconfig"])
-@cmds.execute("flags", flags=["reset", "add", "append", "approve==", "deny=="])
+@cmds.execute("flags", flags=["reset", "add", "append", "approve==", "remove", "deny=="])
 async def cmd_preamble(ctx):
     """
     Usage:
-        {prefix}preamble [code] [--reset] [--add]
+        {prefix}preamble [code] [--reset] [--add][--remove]
     Description:
         Displays the preamble currently used for compiling your latex code.
         If [code] is provided, sets this to be preamble instead.
@@ -304,6 +339,7 @@ async def cmd_preamble(ctx):
     Flags:2
         reset::  Resets your preamble to the default.
         add::  Adds the provided code to your current preamble.
+        remove:: Removes all lines from your preamble containing the given text.
     """
     user_id = ctx.flags["approve"] or ctx.flags["deny"]
     if user_id:
@@ -323,15 +359,16 @@ async def cmd_preamble(ctx):
             await ctx.reply("The preamble change has been denied")
         return
 
-    if not ctx.arg_str and not ctx.msg.attachments:
-        await show_config(ctx)
-        return
-
     if ctx.flags["reset"]:
         await ctx.data.users.set(ctx.authid, "latex_preamble", default_preamble)
         await ctx.data.users.set(ctx.authid, "limbo_preamble", "")
         await ctx.reply("Your LaTeX preamble has been reset to the default!")
         return
+
+    if not ctx.arg_str and not ctx.msg.attachments:
+        await show_config(ctx)
+        return
+
     ctx.objs["latex_handled"] = True
 
     file_name = "preamble.tex"
@@ -345,8 +382,16 @@ async def cmd_preamble(ctx):
 
     if ctx.flags["add"] or ctx.flags["append"]:
         old_preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
+        old_limbo = await ctx.data.users.get(ctx.authid, "limbo_preamble")
+        old_preamble = old_limbo if old_limbo else old_preamble
+        old_preamble = old_preamble if old_preamble else default_preamble
+
         new_preamble = "{}\n{}".format(old_preamble, new_preamble)
 
+    if ctx.flags["remove"]:
+        old_preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
+        old_limbo = await ctx.data.users.get(ctx.authid, "limbo_preamble")
+        old_preamble = old_limbo if old_limbo else old_preamble
     await ctx.data.users.set(ctx.authid, "limbo_preamble", new_preamble)
 
     in_file = (len(new_preamble) > 1000)
@@ -387,7 +432,10 @@ async def texcomp(ctx):
 
 async def register_tex_listeners(bot):
     bot.objects["user_tex_listeners"] = [str(userid) for userid in await bot.data.users.find("tex_listening", True, read=True)]
-    bot.objects["server_tex_listeners"] = [str(serverid) for serverid in await bot.data.servers.find("latex_listen_enabled", True, read=True)]
+    bot.objects["server_tex_listeners"] = {}
+    for serverid in await bot.data.servers.find("latex_listen_enabled", True, read=True):
+        channels = await bot.data.servers.get(serverid, "maths_channels")
+        bot.objects["server_tex_listeners"][str(serverid)] = channels if channels else []
     bot.objects["latex_messages"] = {}
     await bot.log("Loaded {} user tex listeners and {} server tex listeners.".format(len(bot.objects["user_tex_listeners"]), len(bot.objects["server_tex_listeners"])))
 
@@ -402,6 +450,8 @@ async def tex_listener(ctx):
     if not (ctx.authid in ctx.bot.objects["user_tex_listeners"] or (ctx.server and ctx.server.id in ctx.bot.objects["server_tex_listeners"])):
         return
     if not _is_tex(ctx.msg):
+        return
+    if ctx.server and (ctx.server.id in ctx.bot.objects["server_tex_listeners"]) and ctx.bot.objects["server_tex_listeners"][ctx.server.id] and not (ctx.ch.id in ctx.bot.objects["server_tex_listeners"][ctx.server.id]):
         return
     await ctx.bot.log("Recieved the following listening tex message from \"{ctx.author.name}\" in server \"{ctx.server.name}\":\n{ctx.cntnt}".format(ctx=ctx))
     ctx.objs["latex_handled"] = True

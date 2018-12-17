@@ -103,6 +103,9 @@ async def perm_kick_members(ctx):
 async def check_in_server_has_mod(ctx):
     if (ctx.user is None) or (ctx.server is None):
         return (2, "An internal error occurred.")
+    (code, msg) = await checks["has_manage_server"](ctx)
+    if code == 0:
+        return (code, msg)
     mod_role = await ctx.server_conf.mod_role.get(ctx)
     if mod_role:
         mod_role = discord.utils.get(ctx.server.roles, id=mod_role)
