@@ -63,6 +63,24 @@ class Server_Setting_selfroles(Server_Setting, settingTypes.ROLELIST):
     default = None
     category = "Guild settings"
 
+
+@server_conf.setting
+class Server_Setting_Clean_Channels(Server_Setting, settingTypes.ROLELIST):
+    name = "clean_channels"
+    vis_name = "clean_channels"
+    desc = "Automatically delete new messages in these channels."
+    category = "Guild settings"
+    default = None
+
+    @classmethod
+    async def write(cls, ctx, value):
+        result = await super().write(ctx, value)
+        cleaned = ctx.bot.objects["cleaned_channels"]
+        if (ctx.cmd_err and ctx.cmd_err[0] != 0):
+            return
+        cleaned[ctx.server.id] = value if value else []
+        return result
+
 # Moderation settings
 
 
@@ -199,8 +217,6 @@ class Server_Setting_Maths_Channels(Server_Setting, settingTypes.CHANNELLIST):
         result = await super().write(ctx, value)
         listens = ctx.bot.objects["server_tex_listeners"]
         if (ctx.cmd_err and ctx.cmd_err[0] != 0):
-            return
-        if ctx.server.id not in listens:
             return
         listens[ctx.server.id] = value if value else []
         return result
