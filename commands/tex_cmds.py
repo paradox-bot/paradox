@@ -392,6 +392,14 @@ async def cmd_preamble(ctx):
         old_preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
         old_limbo = await ctx.data.users.get(ctx.authid, "limbo_preamble")
         old_preamble = old_limbo if old_limbo else old_preamble
+        old_preamble = old_preamble if old_preamble else default_preamble
+
+        # TODO: Fix, Ugly
+        if ctx.arg_str not in old_preamble:
+            await ctx.reply("Couldn't find this in any line of your preamble!")
+            return
+        new_preamble = "\n".join([line for line in old_preamble.split("\n") if ctx.arg_str not in line])
+
     await ctx.data.users.set(ctx.authid, "limbo_preamble", new_preamble)
 
     in_file = (len(new_preamble) > 1000)
