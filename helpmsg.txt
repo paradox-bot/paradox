@@ -1,0 +1,37 @@
+Hi!
+
+My purpose in life is to render high quality LaTeX for you, fast and on demand. The rendering is highly customisable, and can be done automatically (see `automatic rendering` below) or by command.
+
+I render with a "best guess" approach (so that I can still show you something even if there is an error), and my replies have reactions which allow you to delete the output, show the source code and display any errors which may have occurred.
+
+Here is a short summary of how to use me.
+
+```ini
+[ Manual Rendering: ]
+
+;   {prefix}tex <code>:     Render <code> using raw LaTeX.
+;     {prefix}$ <math>:     Render <math> as an equation.
+If you are used to MathBot, {prefix}$ has essentially the same behaviour as =tex.
+```
+There are a few other rendering commands, for instance `{prefix}align` and `{prefix}$$`, you can see these by running `{prefix}help tex`.
+
+```ini
+[ Customisation: ]
+
+; {prefix}tex --colour white | black | transparent:     Change your latex colourscheme.
+;                            {prefix}tex --keepmsg:     Toggle whether I delete your source message after rendering.
+;                          {prefix}preamble [code]:     Change your preamble or show your current config.
+```
+In the custom preamble you may define your own commands, load your favourite packages, and do anything you can normally do in a standard latex preamble.
+If you are a LaTeX geek and have a long preamble, you can also upload a file with this command.
+
+With the ***automatic rendering*** feature I can automatically listen to messages and compile detected LaTeX!
+```ini
+[ Automatic Rendering: ]
+
+;       {prefix}texlisten:   Toggles whether I listen to you personally.
+; {prefix}config latex on:   Toggles whether I listen to every message in the server. This can only be done by moderators.
+```
+
+To see a complete list of all my commands, use `{prefix}list`. 
+If you have any questions please join my support server at {support} :relaxed: There, you can also see my older sister Paradøx who has a much wider range of abilities.

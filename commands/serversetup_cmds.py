@@ -1,6 +1,7 @@
 from paraCH import paraCH
 import discord
 import string
+import asyncio
 
 cmds = paraCH()
 
@@ -24,7 +25,7 @@ async def _config_pages(ctx, serv_conf, value=True):
         page_embed = discord.Embed(title="{} options:".format(page_name), color=discord.Colour.teal())
         for cat in page_cats:
             cat_msg = ""
-            if not cat in cats:
+            if cat not in cats:
                 continue
             for option in cats[cat]:
                 if value:
@@ -38,8 +39,6 @@ async def _config_pages(ctx, serv_conf, value=True):
         page_embed.set_footer(text="Use {}config <option> [value] to see or set an option.".format(ctx.used_prefix))
         pages.append(page_embed)
     return pages
-
-
 
 
 @cmds.cmd("config",
@@ -127,6 +126,7 @@ async def cmd_rmrole(ctx):
         return
     await ctx.reply("Successfully deleted the role.")
 
+
 @cmds.cmd("bancmd",
           category="Server Admin",
           short_help="Blacklist commands in the server.",
@@ -157,6 +157,9 @@ async def cmd_bancmd(ctx):
             bans.remove(cmd)
             unbans.append(cmd)
         else:
+            if cmd == "bancmd":
+                await ctx.reply("You can't ban bancmd!")
+                continue
             bans.append(cmd)
             newbans.append(cmd)
     newbanstr = "Banned commands: `{}`\n".format("`, `".join(newbans))
@@ -164,11 +167,12 @@ async def cmd_bancmd(ctx):
     await ctx.reply("{}{}".format(newbanstr if newbans else "", unbanstr if unbans else ""))
     await ctx.data.servers.set(ctx.server.id, "banned_cmds", bans)
 
+
 @cmds.cmd("editrole",
           category="Server Admin",
           short_help="Create or edit a server role.",
           aliases=["erole", "roleedit", "roledit", "editr"])
-@cmds.require("has_manage_server")
+@cmds.require("in_server_has_mod")
 @cmds.execute("flags", flags=["colour=", "color=", "name==", "perm==", "hoist=", "mention=", "pos=="])
 async def cmd_editrole(ctx):
     """
@@ -257,16 +261,70 @@ async def cmd_editrole(ctx):
         try:
             await ctx.bot.move_role(ctx.server, role, position)
 #            msg += "Moved role to position {}!".format(
-        except discord.Forbidden as e:
+        except discord.Forbidden:
             await ctx.reply("I am unable to move the role, insufficient permissions.")
             return
-        except discord.HTTPException as e:
+        except discord.HTTPException:
             await ctx.reply("Something went wrong while moving the role! Possibly I am of too low a rank.")
             return
     if edits:
         try:
             await ctx.bot.edit_role(ctx.server, role, **edits)
-        except discord.Forbidden as e:
+        except discord.Forbidden:
             await ctx.reply("I don't have enough permissions to make the specified edits.")
             return
     await ctx.reply("The role was modified successfully.")
+
+
+@cmds.cmd("cleanch",
+          category="Server Admin",
+          short_help="Enable or disable automatic deletion on a channel.",
+          aliases=["chclean"])
+@cmds.require("has_manage_server")
+async def cmd_cleanch(ctx):
+    """
+    Usage:
+        {prefix}cleanch
+    Description:
+        Enables or disables automatic deletion of messages in a channel.
+    """
+    if ctx.server.id not in ctx.bot.objects["cleaned_channels"]:
+        ctx.bot.objects["cleaned_channels"][ctx.server.id] = []
+    cleaned = ctx.bot.objects["cleaned_channels"][ctx.server.id]
+    if ctx.ch.id in cleaned:
+        cleaned.remove(ctx.ch.id)
+        await ctx.reply("I have stopped auto-deleting messages in this channel")
+    else:
+        cleaned.append(ctx.ch.id)
+        await ctx.reply("I will now auto-delete messages in this channel.")
+    await ctx.bot.data.servers.set(ctx.server.id, "clean_channels", cleaned)
+    return
+
+
+async def channel_cleaner(ctx):
+    if not ctx.server:
+        return
+    if not (ctx.server.id in ctx.bot.objects["cleaned_channels"] and ctx.ch.id in ctx.bot.objects["cleaned_channels"][ctx.server.id]):
+        return
+    await asyncio.sleep(30)
+    try:
+        await ctx.bot.delete_message(ctx.msg)
+    except discord.Forbidden:
+        pass
+    except discord.NotFound:
+        pass
+
+
+async def register_channel_cleaners(bot):
+    cleaned_channels = {}
+    for server in bot.servers:
+        channels = await bot.data.servers.get(server.id, "clean_channels")
+        if channels:
+            cleaned_channels[server.id] = channels
+    bot.objects["cleaned_channels"] = cleaned_channels
+    await bot.log("Loaded {} servers with channels to clean.".format(len(cleaned_channels)))
+
+
+def load_into(bot):
+    bot.add_after_event("ready", register_channel_cleaners)
+    bot.after_ctx_message(channel_cleaner)

@@ -76,9 +76,9 @@ async def cmd_tag(ctx):
         role = discord.utils.get(ctx.server.roles, id=roleid)
     if ctx.flags["info"]:
         embed = discord.Embed(title="Tag Info")
-        embed.add_field(name="Tag Name", value=tag["name"])
-        embed.add_field(name="Tag Content", value=tag["content"])
-        embed.add_field(name="Usable by", value=role.name if roleid and role else ("Everyone" if not roleid else "Noone"))
+        embed.add_field(name="Tag Name", value=tag["name"], inline=False)
+        embed.add_field(name="Tag Content", value=tag["content"], inline=False)
+        embed.add_field(name="Usable by", value=role.name if roleid and role else ("Everyone" if not roleid else "Noone"), inline=False)
         embed.set_footer(text="Created at {} by {} ({})".format(tag["time"], (await ctx.bot.get_user_info(tag["author"])).name, tag["author"]))
         await ctx.reply(embed=embed)
         return
@@ -117,9 +117,9 @@ async def create_tag(ctx):
             return None
 
     create_embed = discord.Embed(title="Creating Tag", author=ctx.author.display_name)
-    create_embed.add_field(name="Tag Name", value=tag_name if tag_name else "Not set")
-    create_embed.add_field(name="Tag Content", value=content if content else "Not set")
-    create_embed.add_field(name="Usable by", value="Everyone")
+    create_embed.add_field(name="Tag Name", value=tag_name if tag_name else "Not set", inline=False)
+    create_embed.add_field(name="Tag Content", value=content if content else "Not set", inline=False)
+    create_embed.add_field(name="Usable by", value="Everyone", inline=False)
     create_embed.set_footer(text="Created at {}".format(created_time_str))
     embed_msg = await ctx.reply(embed=create_embed)
 

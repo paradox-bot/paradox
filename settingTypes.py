@@ -130,7 +130,7 @@ class CHANNEL(paraSetting):
     """
     Channel type.
     """
-    accept = "Channel mention/id/name. Use None to reset"
+    accept = "Channel mention/id/name. Use 0 to clear the setting."
 
     @classmethod
     async def humanise(self, ctx, raw):
@@ -149,12 +149,12 @@ class CHANNEL(paraSetting):
         """
         User can enter a channel mention or an id, or even a partial name.
         """
-        if userstr.lower() in ["0", "none"]:
-            return None
         if not ctx.server:
             ctx.cmd_err = (1, "This is not valid outside of a server!")
             return None
         userstr = str(userstr)
+        if userstr.lower() in ["none", "0"]:
+            return None
         chid = userstr.strip('<#@!>')
         if chid.isdigit():
             def is_ch(ch):
@@ -166,8 +166,58 @@ class CHANNEL(paraSetting):
         if ch:
             return ch.id
         else:
-            ctx.cmd_err = (1, "I can't find this channel in this server!")
+            ctx.cmd_err = (1, "I can't find the channel `{}` in this server!".format(userstr))
             return None
+
+
+class SETTING_LIST(paraSetting):
+    """
+    List of a particular type of setting
+    """
+    setting_type = paraSetting
+
+    @classmethod
+    async def humanise(self, ctx, raw):
+        """
+        Expect a list of the raw type of the setting.
+        """
+        if not raw:
+            return "None"
+        humanised = []
+        for raw_item in raw:
+            humanised.append(await self.setting_type.humanise(ctx, raw_item))
+        return ", ".join(humanised)
+
+    @classmethod
+    async def understand(self, ctx, userstr):
+        """
+        User can enter a list of the userstrs accepted by the setting.
+        """
+        userstr = str(userstr)
+        userstrs = [us.strip() for us in userstr.split(",")]
+        items = []
+        for us in userstrs:
+            item = await self.setting_type.understand(ctx, us)
+            if item is None:
+                return None
+            items.append(item)
+        return items
+
+
+class CHANNELLIST(SETTING_LIST):
+    """
+    List of channels
+    """
+    accept = "Comma separated list of channel mentions/ids/names. Use 0 or None to clear the setting."
+    setting_type = CHANNEL
+
+
+class ROLELIST(SETTING_LIST):
+    """
+    List of channels
+    """
+    accept = "Comma separated list of rolw mentions/ids/names. Use 0 or None to clear the setting."
+    setting_type = ROLE
 
 
 """

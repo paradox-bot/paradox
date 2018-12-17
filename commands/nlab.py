@@ -95,16 +95,19 @@ async def cmd_nlab(ctx):
     emb_fields = []
     if in_title:
         in_title = list(in_title)
-        in_title_str = "\n".join(["[{}]({})".format(link[0], nlab_url.format(link[1])) for link in in_title][:8])
+        in_title_str = "\n".join(["[{}]({})".format(link[0], nlab_url.format(link[1])) for link in in_title][:10])
         emb_fields.append(("{} result{} where query appeared in title".format(len(in_title), "" if len(in_title) == 1 else "s"), in_title_str, 0))
     if in_body:
         in_body = list(in_body)
-        in_body_str = "\n".join(["[{}]({})".format(link[0], nlab_url.format(link[1])) for link in in_body][:8])
+        in_body_str = "\n".join(["[{}]({})".format(link[0], nlab_url.format(link[1])) for link in in_body][:10])
         emb_fields.append(("{} result{} where query appeared in body".format(len(in_body), "" if len(in_body) == 1 else "s"), in_body_str, 0))
     if not in_title and not in_body:
         await ctx.bot.edit_message(out_msg, "No results found at:\n{}".format(url))
         return
     embed = discord.Embed(title="Search results for {}".format(ctx.arg_str), description="From {}{}".format(url, direct_str), color=discord.Colour.light_grey())
     await ctx.emb_add_fields(embed, emb_fields)
-    print(embed.to_dict())
     await ctx.bot.edit_message(out_msg, new_content=" ", embed=embed)
+
+
+
+
