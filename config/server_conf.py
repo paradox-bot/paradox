@@ -65,7 +65,7 @@ class Server_Setting_selfroles(Server_Setting, settingTypes.ROLELIST):
 
 
 @server_conf.setting
-class Server_Setting_Clean_Channels(Server_Setting, settingTypes.ROLELIST):
+class Server_Setting_Clean_Channels(Server_Setting, settingTypes.CHANNELLIST):
     name = "clean_channels"
     vis_name = "clean_channels"
     desc = "Automatically delete new messages in these channels."
