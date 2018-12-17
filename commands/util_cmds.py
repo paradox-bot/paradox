@@ -435,7 +435,7 @@ async def cmd_timezone(ctx):
 
 
 async def timezone_lookup(ctx):
-    search_str = ctx.flags["set"]
+    search_str = ctx.flags["set"].strip("<>")
     if search_str in pytz.all_timezones:
         return search_str
     timestr = '%-I:%M %p'
@@ -453,7 +453,7 @@ async def timezone_lookup(ctx):
     block_strs = [["{0[0]:^{max_len}} {0[1]:^10}".format(tzpair, max_len=max_block_lens[i]) for tzpair in tzblock] for i, tzblock in enumerate(tz_blocks)]
     blocks = list(itertools.chain(*block_strs))
     tz_num = await ctx.selector("Multiple matching timezones found, please select one!", blocks)
-    return tzlist[tz_num][0] if tz_num else None
+    return tzlist[tz_num][0] if tz_num is not None else None
 
 
 @cmds.cmd("time",
@@ -495,8 +495,7 @@ async def cmd_time(ctx):
     if not tz:
         general_prefix = (await ctx.bot.get_prefixes(ctx))[0]
         if user == ctx.authid:
-<<<<<<< HEAD
-            await ctx.reply("You haven't set your timezone! Set it using `{0}time --set <timezone>`!`".format(ctx.used_prefix))
+            await ctx.reply("You haven't set your timezone! Set it using `{0}time --set <timezone>`!`".format(general_prefix))
         else:
             await ctx.reply("This user hasn't set their timezone. Ask them to set it using `{0}time --set <timezone>`!".format(general_prefix))
         return
