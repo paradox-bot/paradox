@@ -288,7 +288,9 @@ async def cmd_cleanch(ctx):
     Description:
         Enables or disables automatic deletion of messages in a channel.
     """
-    cleaned = ctx.bot.objects["cleaned_channels"][ctx.server.id] if ctx.server.id in ctx.bot.objects["cleaned_channels"] else []
+    if ctx.server.id in ctx.bot.objects["cleaned_channels"]:
+        ctx.bot.objects["cleaned_channels"][ctx.server.id] = []
+    cleaned = ctx.bot.objects["cleaned_channels"][ctx.server.id]
     if ctx.ch.id in cleaned:
         cleaned.remove(ctx.ch.id)
         await ctx.reply("I have stopped auto-deleting messages in this channel")
