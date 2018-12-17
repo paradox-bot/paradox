@@ -764,8 +764,11 @@ async def cmd_giveme(ctx):
 
     if ctx.flags["list"]:
         if self_roles:
-            role_list = "`{}`".format("`, `".join([role.name for role in self_roles]))
-            msg = "Self assignable roles for this server:\n{roles}\nUse `{prefix}giveme role1, role2,...` to add or remove your self assignable roles.".format(roles=role_list, prefix=ctx.used_prefix)
+            role_list = "```css\n{}\n```".format(", ".join([role.name for role in self_roles]))
+            msg = "**Self assignable roles for this server**:\
+                \n{roles}\
+                \nUse `{prefix}giveme role1, role2,...` to add or remove your self assignable roles.\
+                \nType the command again to remove the roles.".format(roles=role_list, prefix=ctx.used_prefix)
         else:
             msg = "No self assignable roles have been set for this server. Roles may be set using the `--add` flag on this command or the selfroles config option."
         await ctx.reply(msg)
