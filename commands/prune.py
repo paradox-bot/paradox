@@ -46,7 +46,7 @@ async def cmd_prune(ctx):
 
     if ctx.flags["from"]:
         user = await ctx.find_user(ctx.flags["from"], in_server=True, interactive=True)
-        if user in None:
+        if user is None:
             if ctx.cmd_err[0] != -1:
                 await ctx.reply("Couldn't find this user, aborting.".format(ctx.flags["from"]))
             else:
