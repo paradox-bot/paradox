@@ -70,6 +70,10 @@ def load_into(bot):
         pages = ["{}```\n{}\n```\nType the number of your selection or `c` to cancel.".format(message, "\n".join(block)) for block in blocks]
         out_msg = await ctx.pager(pages)
         result_msg = await ctx.listen_for([str(i + 1) for i in range(0, len(select_from))] + ["c"], timeout=timeout)
+        try:
+            await ctx.bot.delete_message(out_msg)
+        except discord.NotFound:
+            pass
         if not result_msg:
             await ctx.reply("Question timed out, aborting...")
             ctx.cmd_err = (-1, "")  # User cancelled or didn't respond
