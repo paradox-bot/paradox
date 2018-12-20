@@ -256,7 +256,7 @@ async def cmd_userinfo(ctx):
         if line_pos >= len(joined):
             break
         positions.append("{0:<4}{1}{2:<20}".format(str(line_pos + 1) + ".", " " * 4 + (">" if joined[line_pos] == user else " "), str(joined[line_pos])))
-    join_seq = "```\n{}\n```".format("\n".join(positions))
+    join_seq = "```markdown\n{}\n```".format("\n".join(positions))
 
     embed = discord.Embed(type="rich", color=colour, description=desc)
     embed.set_author(name="{user.name} (id: {user.id})".format(user=user),
@@ -752,8 +752,10 @@ async def cmd_role(ctx):
     Description:
         Provides information about the given role.
     """
+    server_roles = sorted(ctx.server.roles, key=lambda role: role.position)
+
     if ctx.arg_str.strip() == "":
-        await ctx.reply("You must give me a role!")
+        await ctx.pager(ctx.paginate_list([role.name for role in reversed(server_roles)]))
         return
     # TODO: Letting find_role handle all input and output for finding.
     role = await ctx.find_role(ctx.arg_str, create=False, interactive=True)
@@ -776,8 +778,7 @@ async def cmd_role(ctx):
     desc = ctx.prop_tabulate(prop_list, value_list)
 
     pos = role.position
-    server_roles = sorted(ctx.server.roles, key=lambda role: role.position)
-    position = "```\n"
+    position = "```markdown\n"
     for i in reversed(range(-3, 4)):
         line_pos = pos + i
         if line_pos < 0:
@@ -799,3 +800,32 @@ async def cmd_role(ctx):
     emb_fields = [("Position in the hierachy", position, 0)]
     await ctx.emb_add_fields(embed, emb_fields)
     await ctx.reply(embed=embed)
+
+
+@cmds.cmd(name="rolemembers",
+          category="Utility",
+          short_help="Lists members with a particular role.",
+          aliases=["rolemems", "whohas"])
+@cmds.require("in_server")
+async def cmd_rolemembers(ctx):
+    """
+    Usage:
+        {prefix}rolemembers <rolename>
+    Description:
+    Displays the users with this role.
+    """
+
+    if ctx.arg_str.strip() == "":
+        await ctx.reply("Please give me a role to list the members of.")
+        return
+
+    role = await ctx.find_role(ctx.arg_str, create=False, interactive=True)
+    if role is None:
+        return
+
+    members = [str(mem) for mem in ctx.server.members if role in mem.roles]
+    if len(members) == 0:
+        await ctx.reply("No members have this role")
+        return
+
+    await ctx.pager(ctx.paginate_list(members, title="Members in {}".format(role.name)))
