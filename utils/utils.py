@@ -3,7 +3,6 @@ import subprocess
 import datetime
 import discord
 import re
-import asyncio
 
 
 def load_into(bot):
@@ -21,9 +20,9 @@ def load_into(bot):
         reply_msg = ''
         if output[0][0] != 0:
             reply_msg += "{} {} ".format(output[0][0], output[0][1])
-        for i in range(1, len(output)-1):
+        for i in range(1, len(output) - 1):
             reply_msg += "{} {} ".format(output[i][0], output[i][1])
-        reply_msg += "and {} {}".format(output[len(output)-1][0], output[len(output)-1][1])
+        reply_msg += "and {} {}".format(output[len(output) - 1][0], output[len(output) - 1][1])
         return reply_msg
 
     @bot.util
@@ -72,7 +71,6 @@ def load_into(bot):
                 seconds += funcs[i[1]](i[0])
         return datetime.timedelta(seconds=seconds)
 
-
     @bot.util
     async def parse_flags(ctx, args, flags=[]):
         """
@@ -117,9 +115,9 @@ def load_into(bot):
             final_params = params
         for (i, index) in enumerate(indexes):
             if i == len(indexes) - 1:
-                flag_arg = " ".join(params[index[0]+1:])
+                flag_arg = " ".join(params[index[0] + 1:])
             else:
-                flag_arg = " ".join(params[index[0]+1:indexes[i+1][0]])
+                flag_arg = " ".join(params[index[0] + 1:indexes[i + 1][0]])
             flag_arg = flag_arg.strip()
             if index[1].endswith("=="):
                 final_flags[index[1][:-2]] = flag_arg
@@ -176,6 +174,7 @@ def load_into(bot):
         except discord.Forbidden:
             await ctx.reply("Cannot page results because I do not have permissions to add emojis!")
             return
+
         async def paging():
             page = 0
             while True:
@@ -227,3 +226,7 @@ def load_into(bot):
                 seconds += funcs[bit[1]](int(bit[0]))
         return datetime.timedelta(seconds=seconds)
 
+    @bot.util
+    def prop_tabulate(ctx, prop_list, value_list):
+        max_len = max(len(prop) for prop in prop_list)
+        return "\n".join(["`{}{}`:\t{}".format("​ " * (max_len - len(prop)), prop, prop_list[i]) for i, prop in enumerate(prop_list)])
