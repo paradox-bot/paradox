@@ -236,3 +236,19 @@ def load_into(bot):
                                                 prop,
                                                 ":" if len(prop) > 1 else "​ " * 2,
                                                 value_list[i]) for i, prop in enumerate(prop_list)])
+
+    @bot.util
+    def paginate_list(ctx, item_list, block_length=20, style="markdown", title=None):
+        lines = ["{0:<5}{1:<5}".format("{}.".format(i + 1), str(line)) for i, line in enumerate(item_list)]
+        page_blocks = [lines[i:i + block_length] for i in range(0, len(lines), block_length)]
+        pages = []
+        for i, block in enumerate(page_blocks):
+            pagenum = "Page {}/{}".format(i + 1, len(page_blocks))
+            if title:
+                header = "{} ({})".format(title, pagenum) if len(page_blocks) > 1 else title
+            else:
+                header = pagenum
+            header_line = "=" * len(header)
+            full_header = "{}\n{}\n".format(header, header_line) if len(page_blocks) > 1 or title else ""
+            pages.append("```{}\n{}{}```".format(style, full_header, "\n".join(block)))
+        return pages
