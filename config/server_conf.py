@@ -243,11 +243,12 @@ class Server_Setting_Latex_Listen(Server_Setting, settingTypes.BOOL):
     async def write(cls, ctx, value):
         result = await super().write(ctx, value)
         listens = ctx.bot.objects["server_tex_listeners"]
-        if value and not (ctx.cmd_err and ctx.cmd_err[0] != 0):
-            channels = await ctx.bot.data.servers.get(ctx.server.id, "maths_channels")
-            listens[str(ctx.server.id)] = channels if channels else []
-        else:
-            listens.pop(ctx.server.id)
+        if  not (ctx.cmd_err and ctx.cmd_err[0] != 0):
+            if value:
+                channels = await ctx.bot.data.servers.get(ctx.server.id, "maths_channels")
+                listens[str(ctx.server.id)] = channels if channels else []
+            else:
+                listens.pop(ctx.server.id)
         return result
 
 
