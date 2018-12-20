@@ -229,4 +229,4 @@ def load_into(bot):
     @bot.util
     def prop_tabulate(ctx, prop_list, value_list):
         max_len = max(len(prop) for prop in prop_list)
-        return "\n".join(["`{}{}`:\t{}".format("​ " * (max_len - len(prop)), prop, prop_list[i]) for i, prop in enumerate(prop_list)])
+        return "\n".join(["`{}{}`:\t{}".format("​ " * (max_len - len(prop)), prop, value_list[i]) for i, prop in enumerate(prop_list)])
