@@ -8,22 +8,25 @@ import re
 def load_into(bot):
 
     @bot.util
-    def strfdelta(ctx, delta, sec=False):
-        output = [[delta.days, 'day'],
-                  [delta.seconds // 3600, 'hour'],
-                  [delta.seconds // 60 % 60, 'minute']]
+    def strfdelta(ctx, delta, sec=False, minutes=True, short=False):
+        output = [[delta.days, 'd' if short else ' day'],
+                  [delta.seconds // 3600, 'h' if short else ' hour']]
+        if minutes:
+            output.append([delta.seconds // 60 % 60, 'm' if short else ' minute'])
         if sec:
-            output.append([delta.seconds % 60, 'second'])
+            output.append([delta.seconds % 60, 's' if short else ' second'])
         for i in range(len(output)):
-            if output[i][0] != 1:
+            if output[i][0] != 1 and not short:
                 output[i][1] += 's'
-        reply_msg = ''
+        reply_msg = []
         if output[0][0] != 0:
-            reply_msg += "{} {} ".format(output[0][0], output[0][1])
+            reply_msg.append("{}{} ".format(output[0][0], output[0][1]))
         for i in range(1, len(output) - 1):
-            reply_msg += "{} {} ".format(output[i][0], output[i][1])
-        reply_msg += "and {} {}".format(output[len(output) - 1][0], output[len(output) - 1][1])
-        return reply_msg
+            reply_msg.append("{}{} ".format(output[i][0], output[i][1]))
+        if not short and reply_msg:
+            reply_msg.append("and ")
+        reply_msg.append("{}{}".format(output[len(output) - 1][0], output[len(output) - 1][1]))
+        return "".join(reply_msg)
 
     @bot.util
     async def run_sh(ctx, to_run):
@@ -229,4 +232,7 @@ def load_into(bot):
     @bot.util
     def prop_tabulate(ctx, prop_list, value_list):
         max_len = max(len(prop) for prop in prop_list)
-        return "\n".join(["`{}{}`:\t{}".format("​ " * (max_len - len(prop)), prop, value_list[i]) for i, prop in enumerate(prop_list)])
+        return "\n".join(["`{}{}{}`\t{}".format("​ " * (max_len - len(prop)),
+                                                prop,
+                                                ":" if len(prop) > 1 else "​ " * 2,
+                                                value_list[i]) for i, prop in enumerate(prop_list)])

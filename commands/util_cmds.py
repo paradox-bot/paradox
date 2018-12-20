@@ -229,30 +229,42 @@ async def cmd_userinfo(ctx):
                   "online": "Online",
                   "idle": "Idle/Away"}
     colour = (user.colour if user.colour.value else discord.Colour.light_grey())
-    embed = discord.Embed(type="rich", color=colour)
-    embed.set_author(name="{user.name} ({user.id})".format(user=user),
+
+    name = "{}{}".format(bot_emoji if user.bot else "", user)
+    game = user.game if user.game else "Nothing"
+    status = statusdict[str(user.status)]
+    shared = "{} servers".format(len(list(filter(lambda m: m.id == user.id, ctx.bot.get_all_members()))))
+    joined_ago = "({} ago)".format(ctx.strfdelta(datetime.utcnow() - user.joined_at, minutes=False))
+    joined = user.joined_at.strftime("%-I:%M %p, %d/%m/%Y")
+    created_ago = "({} ago)".format(ctx.strfdelta(datetime.utcnow() - user.created_at, minutes=False))
+    created = user.created_at.strftime("%-I:%M %p, %d/%m/%Y")
+
+    prop_list = ["Full name", "Nickname", "Status", "Playing", "Seen in", "Joined at", "", "Created at", ""]
+    value_list = [name, user.display_name, status, game, shared, joined, joined_ago, created, created_ago]
+    desc = ctx.prop_tabulate(prop_list, value_list)
+
+    roles = [r.name for r in user.roles if r.name != "@everyone"]
+    roles = ('`' + '`, `'.join(roles) + '`') if roles else "None"
+
+    joined = sorted(ctx.server.members, key=lambda mem: mem.joined_at)
+    pos = joined.index(user)
+    positions = []
+    for i in range(-3, 4):
+        line_pos = pos + i
+        if line_pos < 0:
+            continue
+        if line_pos >= len(joined):
+            break
+        positions.append("{0:<4}{1}{2:<20}".format(str(line_pos + 1) + ".", " " * 4 + (">" if joined[line_pos] == user else " "), str(joined[line_pos])))
+    join_seq = "```\n{}\n```".format("\n".join(positions))
+
+    embed = discord.Embed(type="rich", color=colour, description=desc)
+    embed.set_author(name="{user.name} (id: {user.id})".format(user=user),
                      icon_url=user.avatar_url,
                      url=user.avatar_url)
     embed.set_thumbnail(url=user.avatar_url)
 
-    name = "{}{}".format(bot_emoji if user.bot else "", user)
-    game = "Playing {}".format(user.game if user.game else "nothing")
-    status = "{}, {}".format(statusdict[str(user.status)], game)
-    shared = len(list(filter(lambda m: m.id == user.id, ctx.bot.get_all_members())))
-    joined_ago = ctx.strfdelta(datetime.utcnow() - user.joined_at)
-    joined = user.joined_at.strftime("%-I:%M %p, %d/%m/%Y")
-    created_ago = ctx.strfdelta(datetime.utcnow() - user.created_at)
-    created = user.created_at.strftime("%-I:%M %p, %d/%m/%Y")
-    roles = [r.name for r in user.roles if r.name != "@everyone"]
-    roles = ('`' + '`, `'.join(roles) + '`') if roles else "None"
-
-    emb_fields = [("Full name", name, 0),
-                  ("Status", status, 0),
-                  ("Nickname", user.display_name, 0),
-                  ("Shared servers", shared, 0),
-                  ("Joined at", "{} ({} ago)".format(joined, joined_ago), 0),
-                  ("Created at", "{} ({} ago)".format(created, created_ago), 0),
-                  ("Roles", roles, 0)]
+    emb_fields = [("Roles", roles, 0), ("Join order", join_seq, 0)]
     await ctx.emb_add_fields(embed, emb_fields)
     await ctx.reply(embed=embed)
 
@@ -747,15 +759,21 @@ async def cmd_role(ctx):
     role = await ctx.find_role(ctx.arg_str, create=False, interactive=True)
     if role is None:
         return
-    title = "Roleinfo for `{role.name}` (id: `{role.id}`)".format(role=role)
+
+    title = "{role.name} (id: {role.id})".format(role=role)
+
     colour = role.colour if role.colour.value else discord.Colour.light_grey()
 #    thumbnail = "http://placehold.it/150x150.png/{}/000000?text={}".format(colour.strip("#"), colour)
     num_users = len([user for user in ctx.server.members if (role in user.roles)])
-    created_ago = ctx.strfdelta(datetime.utcnow() - role.created_at)
+    created_ago = "({} ago)".format(ctx.strfdelta(datetime.utcnow() - role.created_at, minutes=False))
     created = role.created_at.strftime("%-I:%M %p, %d/%m/%Y")
-    created_at = "{} ({} ago)".format(created, created_ago)
+#    created_at = "{} ({} ago)".format(created, created_ago)
     hoisted = "Yes" if role.hoist else "No"
     mentionable = "Yes" if role.mentionable else "No"
+
+    prop_list = ["Colour", "Hoisted", "Mentionable", "Number of members", "Created at", ""]
+    value_list = [str(role.colour), hoisted, mentionable, num_users, created, created_ago]
+    desc = ctx.prop_tabulate(prop_list, value_list)
 
     pos = role.position
     server_roles = sorted(ctx.server.roles, key=lambda role: role.position)
@@ -776,13 +794,8 @@ async def cmd_role(ctx):
         diff_str = "(This is your highest role!)"
     position += diff_str
 
-    embed = discord.Embed(title=title, colour=colour)
+    embed = discord.Embed(title=title, colour=colour, description=desc)
 #    embed.set_thumbnail(url=thumbnail)
-    emb_fields = [("Colour", str(role.colour), 0),
-                  ("Created at", created_at, 0),
-                  ("Hoisted", hoisted, 0),
-                  ("Mentionable", mentionable, 0),
-                  ("Number of members", num_users, 0),
-                  ("Position in the hierachy", position, 0)]
+    emb_fields = [("Position in the hierachy", position, 0)]
     await ctx.emb_add_fields(embed, emb_fields)
     await ctx.reply(embed=embed)
