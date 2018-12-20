@@ -24,17 +24,13 @@ async def _config_pages(ctx, serv_conf, value=True):
         page_cats = page[1]
         page_embed = discord.Embed(title="{} options:".format(page_name), color=discord.Colour.teal())
         for cat in page_cats:
-            cat_msg = ""
             if cat not in cats:
                 continue
+            value_list = []
             for option in cats[cat]:
-                if value:
-                    option_line = await serv_conf[option].hr_get(ctx)
-                else:
-                    option_line = serv_conf[option].desc
-                cat_msg += "`​{}{}`:\t {}\n".format(" " * (12 - len(option)),
-                                                    option, option_line)
-            cat_msg += "\n"
+                value_list.append(await serv_conf[option].hr_get(ctx) if value else serv_conf[option].desc)
+            cat_msg = ctx.prop_tabulate(cats[cat], value_list)
+
             page_embed.add_field(name=cat, value=cat_msg, inline=False)
         page_embed.set_footer(text="Use {}config <option> [value] to see or set an option.".format(ctx.used_prefix))
         pages.append(page_embed)
