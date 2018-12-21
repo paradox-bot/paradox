@@ -31,13 +31,14 @@ async def cmd_prune(ctx):
         --me:: Only delete my messages.
         --from:: Only delete messages from this user (interactive lookup).
         --force:: Force a prune without asking for confirmation.
+        --after:: Deletes all messages after (not including) the given message id
         -r::  Reason for the message purge (goes in the modlog).
     """
     # TODO: --after
     # TODO: --role? Maybe?
     # TODO: find_user won't work for users not in the server. Construct a collection based on message list.
     if not ctx.arg_str:
-        number = 100
+        number = 1000 if ctx.flags["after"] else 100
     elif not ctx.arg_str.isdigit():
         await ctx.reply("Please give me a valid number of messages to delete. See the help for this command for usage.")
         return
@@ -72,8 +73,15 @@ async def cmd_prune(ctx):
     count_dict = {"bots": {}, "users": {}}
     message_list = []
     i = 0
+    
+    after_msg_id = ctx.flags["after"] if ctx.flags["after"] else None
+    msg_found = False
+
     async for message in ctx.bot.logs_from(ctx.ch, limit=1000):
         if i == number:
+            break
+        if message.id == after_msg_id:
+            msg_found = True
             break
 
         to_delete = True
@@ -91,6 +99,10 @@ async def cmd_prune(ctx):
                 listing[message.author.id] = {"count": 0,
                                               "name": "{}".format(message.author)}
             listing[message.author.id]["count"] += 1
+
+    if ctx.flags["after"] and not msg_found:
+        await ctx.reply("The given message wasn't found in the last {} messages".format(number))
+        return
 
     bot_lines = "\n".join(["\t**{name}** ({key}): ***{count}*** messages".format(**count_dict["bots"][key], key=key) for key in count_dict["bots"]])
     user_lines = "\n".join(["\t**{name}** ({key}): ***{count}*** messages".format(**count_dict["users"][key], key=key) for key in count_dict["users"]])
