@@ -189,7 +189,6 @@ async def cmd_invite(ctx):
     await ctx.reply("Visit <{}> to invite me!".format(ctx.bot.objects["invite_link"]))
 
 
-
 @cmds.cmd("support",
           category="General",
           short_help="Sends the link to the bot guild")
@@ -218,10 +217,10 @@ async def cmd_serverinfo(ctx):
     regions = ctx.bot.objects["regions"]
     ver = {
         "none": "None",
-        "low": "1 - Must have a verified email",
-        "medium": "2 - Must also be registered for more than 5 minutes",
-        "high": "3 - Must also be member of the server for more than 10 minutes",
-        4: "4 - Must have a verified phone number"
+        "low": "Level 1 (Must have a verified email)",
+        "medium": "Level 2 (Registered for more than 5 minutes)",
+        "high": "Level 3 (Member for more than 10 minutes)",
+        4: "Level 4 (Verified phone number)"
     }
 
     mfa = {
@@ -252,30 +251,36 @@ async def cmd_serverinfo(ctx):
     Idle = ctx.bot.objects["emoji_idle"]
     Dnd = ctx.bot.objects["emoji_dnd"]
     Offline = ctx.bot.objects["emoji_offline"]
+
     server_owner = ctx.server.owner
-    owner = "{} ({})".format(server_owner, server_owner.id)
+    owner = "{} (id {})".format(server_owner, server_owner.id)
     members = "{} humans, {} bots | {} total".format(str(len([m for m in ctx.server.members if not m.bot])),
                                                      str(len([m for m in ctx.server.members if m.bot])),
                                                      ctx.server.member_count)
     created = ctx.server.created_at.strftime("%-I:%M %p, %d/%m/%Y")
-    created_ago = ctx.strfdelta(datetime.utcnow()-ctx.server.created_at)
+    created_ago = "({} ago)".format(ctx.strfdelta(datetime.utcnow() - ctx.server.created_at, minutes=False))
     channels = "{} text, {} voice | {} total".format(text, voice, total)
     status = "{} - **{}**\n{} - **{}**\n{} - **{}**\n{} - **{}**".format(Online, online, Idle, idle, Dnd, dnd, Offline, offline)
+    avatar_url = ctx.server.icon_url
+    icon = "[Icon Link]({})".format(avatar_url)
+    is_large = "More than 200 members" if ctx.server.large else "Less than 200 members"
 
-    emb_fields = [("Owner", owner, 0),
-                  ("Members", members, 0),
-                  ("ID", ctx.server.id, 0),
-                  ("Region", regions[str(ctx.server.region)], 0),
-                  ("Created at", "{} ({} ago)".format(created, created_ago), 0),
-                  ("Channels", channels, 0),
-                  ("Roles", len(ctx.server.roles), 0),
-                  ("Large Server", ctx.server.large, 0),
-                  ("Verification", ver[str(ctx.server.verification_level)], 0),
-                  ("2FA", mfa[ctx.server.mfa_level], 0),
-                  ("Member Status", status, 0)]
+    prop_list = ["Owner", "Region", "Icon", "Large server", "Verification", "2FA", "Roles", "Members", "Channels", "Created at", ""]
+    value_list = [owner,
+                  regions[str(ctx.server.region)],
+                  icon,
+                  is_large,
+                  ver[str(ctx.server.verification_level)],
+                  mfa[ctx.server.mfa_level],
+                  len(ctx.server.roles),
+                  members, channels, created, created_ago]
+    desc = ctx.prop_tabulate(prop_list, value_list)
 
-    embed = discord.Embed(color=server_owner.colour if server_owner.colour.value else discord.Colour.teal())
-    embed.set_author(name="{}".format(ctx.server))
+    embed = discord.Embed(color=server_owner.colour if server_owner.colour.value else discord.Colour.teal(), description=desc)
+    embed.set_author(name="{} (id: {})".format(ctx.server, ctx.server.id))
+    embed.set_thumbnail(url=avatar_url)
+
+    emb_fields = [("Member Status", status, 0)]
 
     await ctx.emb_add_fields(embed, emb_fields)
     await ctx.reply(embed=embed)
