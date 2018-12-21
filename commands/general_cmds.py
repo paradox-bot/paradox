@@ -206,14 +206,23 @@ async def cmd_support(ctx):
           category="General",
           short_help="Shows server info.",
           aliases=["sinfo", "si"])
+@cmds.execute("flags", flags=["icon"])
 @cmds.require("in_server")
 async def cmd_serverinfo(ctx):
     """
     Usage:
-        {prefix}serverinfo
+        {prefix}serverinfo [--icon]
     Description:
         Shows information about the server you are in.
+        With --icon, just displays the server icon.
     """
+    if ctx.flags["icon"]:
+        embed = discord.Embed(color=discord.Colour.light_grey())
+        embed.set_image(url=ctx.server.icon_url)
+
+        await ctx.reply(embed=embed)
+        return
+
     regions = ctx.bot.objects["regions"]
     ver = {
         "none": "None",
