@@ -69,3 +69,18 @@ class _dbDataManipulator:
         curs.execute('SELECT {} FROM {} WHERE {} = ?'.format(self.keyname, self.table, prop), (value,))
         values = curs.fetchall()
         return [value[0] for value in values]
+
+    async def find_not_empty(self, prop):
+        curs = self.conn.cursor()
+        await self.ensure_exists(prop)
+        curs.execute('SELECT {key} FROM {table} WHERE {prop} IS NOT NULL AND {prop} != \'\''.format(key=self.keyname, table=self.table, prop=prop))
+        values = curs.fetchall()
+        return [value[0] for value in values]
+
+    async def ensure_exists(self, prop):
+        curs = self.conn.cursor()
+        try:
+            curs.execute('ALTER TABLE {} ADD {} text'.format(self.table, prop))
+        except Exception:
+            pass
+
