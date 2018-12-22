@@ -9,6 +9,7 @@ import aiohttp
 from PIL import Image
 from io import BytesIO
 import itertools
+import string
 
 
 cmds = paraCH()
@@ -721,14 +722,13 @@ async def cmd_colour(ctx):
         if r.status == 200:
             js = await r.json()
             inverted = col_invert(hexstr)
-            embed = discord.Embed(title="Colour info for `#{}`".format(hexstr), color=discord.Colour(int(hexstr, 16)))
+            prop_list = ["rgb", "hsl", "hsv", "cmyk", "XYZ"]
+            grab = lambda prop: js[prop]["value"][len(prop):]
+            value_list = [grab(prop) for prop in prop_list]
+            desc = ctx.prop_tabulate(prop_list, value_list)
+            embed = discord.Embed(title="Colour info for `#{}`".format(hexstr), color=discord.Colour(int(hexstr, 16)), description=desc)
             embed.set_thumbnail(url="http://placehold.it/150x150.png/{}/{}?text={}".format(hexstr, inverted, "%23" + hexstr))
             embed.add_field(name="Closest named colour", value="`{}` (Hex `{}`)".format(js["name"]["value"], js["name"]["closest_named_hex"]))
-            embed.add_field(name="Values", value="```\n{}\n{}\n{}\n{}\n{}\n```".format(js["rgb"]["value"],
-                                                                                       js["hsl"]["value"],
-                                                                                       js["hsv"]["value"],
-                                                                                       js["cmyk"]["value"],
-                                                                                       js["XYZ"]["value"]))
             await ctx.reply(embed=embed)
         else:
             await ctx.reply("Sorry, something went wrong while fetching your colour! Please try again later")
