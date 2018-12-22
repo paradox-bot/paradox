@@ -1,3 +1,4 @@
 [submodule "contextBot"]
 	path = contextBot
 	url = http://gitlab.paradoxical.pw/Puerosola/pybot-ctx-CH.git
+  ignore = dirty
