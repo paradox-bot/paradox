@@ -215,6 +215,7 @@ async def make_latex(ctx):
 
     ctx.objs["latex_source_msg"] = "```tex\n{}\n```{}".format(ctx.objs["latex_source"], err_msg)
     ctx.objs["latex_del_emoji"] = ctx.bot.objects["emoji_tex_del"]
+    ctx.objs["latex_delsource_emoji"] = ctx.bot.objects["emoji_tex_delsource"]
     ctx.objs["latex_show_emoji"] = ctx.bot.objects["emoji_tex_errors" if error else "emoji_tex_show"]
 
     ctx.objs["latex_name"] = "**{}**:\n".format(ctx.author.name.replace("*", "\\*")) if (await ctx.data.users.get(ctx.authid, "latex_showname")) in [None, True] else ""
@@ -235,6 +236,9 @@ async def reaction_edit_handler(ctx, out_msg):
     try:
         await ctx.bot.add_reaction(out_msg, ctx.objs["latex_del_emoji"])
         await ctx.bot.add_reaction(out_msg, ctx.objs["latex_show_emoji"])
+        if not ctx.objs["latex_source_deleted"]:
+            await ctx.bot.add_reaction(out_msg, ctx.objs["latex_delsource_emoji"])
+
     except discord.Forbidden:
         return
     allow_other = await ctx.bot.data.users.get(ctx.authid, "latex_allowother")
@@ -244,6 +248,7 @@ async def reaction_edit_handler(ctx, out_msg):
             return False
         result = reaction.emoji == ctx.objs["latex_del_emoji"] and user == ctx.author
         result = result or (reaction.emoji == ctx.objs["latex_show_emoji"] and (allow_other or user == ctx.author))
+        result = result or (reaction.emoji == ctx.objs["latex_delsource_emoji"] and (user == ctx.author))
         return result
 
     while True:
@@ -252,6 +257,21 @@ async def reaction_edit_handler(ctx, out_msg):
                                               check=check)
         if res is None:
             break
+        if res.reaction.emoji == ctx.objs["latex_delsource_emoji"]:
+            try:
+                await ctx.bot.delete_message(ctx.msg)
+            except discord.NotFound:
+                pass
+            except discord.Forbidden:
+                pass
+            try:
+                await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_delsource_emoji"], ctx.me)
+                await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_delsource_emoji"], ctx.author)
+            except discord.NotFound:
+                pass
+            except discord.Forbidden:
+                pass
+
         if res.reaction.emoji == ctx.objs["latex_del_emoji"] and res.user == ctx.author:
             await ctx.bot.delete_message(out_msg)
             ctx.objs["latex_out_deleted"] = True
@@ -260,6 +280,8 @@ async def reaction_edit_handler(ctx, out_msg):
             try:
                 await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_show_emoji"], res.user)
             except discord.Forbidden:
+                pass
+            except discord.NotFound:
                 pass
             ctx.objs["latex_show"] = 1 - ctx.objs["latex_show"]
             await ctx.bot.edit_message(out_msg,
