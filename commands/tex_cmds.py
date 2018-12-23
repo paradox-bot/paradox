@@ -289,6 +289,7 @@ async def reaction_edit_handler(ctx, out_msg):
     try:
         await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_del_emoji"], ctx.me)
         await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_show_emoji"], ctx.me)
+        await ctx.bot.remove_reaction(out_msg, ctx.objs["latex_delsource_emoji"], ctx.me)
     except discord.Forbidden:
         pass
     except discord.NotFound:
