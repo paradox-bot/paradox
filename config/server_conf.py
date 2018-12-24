@@ -97,6 +97,15 @@ class Server_Setting_Autorole(Server_Setting, settingTypes.ROLE):
 
 
 @server_conf.setting
+class Server_Setting_Autoroles(Server_Setting, settingTypes.ROLELIST):
+    name = "guild_autoroles"
+    vis_name = "autoroles"
+    desc = "Roles automatically given to new members"
+    category = "Hidden Guild settings"
+    default = "0"
+
+
+@server_conf.setting
 class Server_Setting_Autorole_Bot(Server_Setting, settingTypes.ROLE):
     name = "guild_autorole_bot"
     vis_name = "autorole_bot"

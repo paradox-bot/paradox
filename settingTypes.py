@@ -216,7 +216,7 @@ class ROLELIST(SETTING_LIST):
     """
     List of channels
     """
-    accept = "Comma separated list of rolw mentions/ids/names. Use 0 or None to clear the setting."
+    accept = "Comma separated list of role mentions/ids/names. Use 0 or None to clear the setting."
     setting_type = ROLE
 
 

@@ -18,6 +18,16 @@ def load_into(bot):
                 """
                 pass
 
+        autoroles = await ctx.server_conf.guild_autoroles.get(ctx)
+        autoroles = autoroles if autoroles else []
+        autoroles = [discord.utils.get(ctx.server.roles, id=autorole) for autorole in autoroles]
+        for autorole in autoroles:
+            if autorole:
+                try:
+                    await ctx.bot.add_roles(ctx.member, autorole)
+                except Exception:
+                    pass
+
         if (await ctx.server_conf.join_msgs_enabled.get(ctx)):
             ch = await ctx.server_conf.join_ch.get(ctx)
             msg = await ctx.server_conf.join_msgs_msg.get(ctx)
