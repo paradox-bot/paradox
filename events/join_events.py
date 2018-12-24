@@ -1,6 +1,7 @@
 from contextBot.Context import Context
 import discord
 
+# TODO: Break this into separate modules
 
 def load_into(bot):
     @bot.event

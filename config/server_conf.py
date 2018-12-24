@@ -138,15 +138,6 @@ class Server_Setting_Clean_Channels(Server_Setting, settingTypes.CHANNELLIST):
 
 
 @server_conf.setting
-class Server_Setting_modlog_ch(Server_Setting, settingTypes.CHANNEL):
-    name = "modlog_ch"
-    vis_name = "modlog_ch"
-    desc = "Channel to report moderation events in"
-    default = None
-    category = "Moderation"
-
-
-@server_conf.setting
 class Server_Setting_modrole(Server_Setting, settingTypes.ROLE):
     name = "mod_role"
     vis_name = "modrole"
@@ -160,6 +151,24 @@ class Server_Setting_mute_role(Server_Setting, settingTypes.ROLE):
     name = "mute_role"
     vis_name = "mute_role"
     desc = "Role given to mute users (automatically set, but can be overridden)"
+    default = None
+    category = "Moderation"
+
+
+@server_conf.setting
+class Server_Setting_modlog_ch(Server_Setting, settingTypes.CHANNEL):
+    name = "modlog_ch"
+    vis_name = "modlog_ch"
+    desc = "Channel to report moderation events in"
+    default = None
+    category = "Moderation"
+
+
+@server_conf.setting
+class Server_Setting_joinlog_ch(Server_Setting, settingTypes.CHANNEL):
+    name = "joinlog_ch"
+    vis_name = "joinlog_ch"
+    desc = "Channel to send information about new users"
     default = None
     category = "Moderation"
 
