@@ -252,3 +252,17 @@ def load_into(bot):
             full_header = "{}\n{}\n".format(header, header_line) if len(page_blocks) > 1 or title else ""
             pages.append("```{}\n{}{}```".format(style, full_header, "\n".join(block)))
         return pages
+
+    @bot.util
+    def msg_string(ctx, msg, mask_link=False):
+        time = datetime.datetime.utcnow().strftime("%-I:%M %p, %d/%m/%Y")
+        user = str(msg.author)
+        attach_list = [attach["url"] for attach in msg.attachments if "url" in attach]
+        if mask_link:
+            attach_list = ["(Link)[{}]".format(url) for url in attach_list]
+        attachments = "\nAttachments: {}".format(", ".join(attach_list)) if attach_list else ""
+        return "`[{time}]` **{user}:** {message} {attachments}".format(time=time, user=user, message=msg.content, attachments=attachments)
+
+    @bot.util
+    def msg_jumpto(ctx,msg):
+        return "https://discordapp.com/channels/{}/{}/{}".format(msg.server.id, msg.channel.id, msg.id)
