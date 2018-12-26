@@ -2,6 +2,7 @@ import sys
 from io import StringIO
 import traceback
 import asyncio
+import discord
 
 from paraCH import paraCH
 
@@ -33,7 +34,8 @@ async def cmd_async(ctx):
 
 @cmds.cmd("exec",
           category="Bot admin",
-          short_help="Executes python code using exec and displays the output")
+          short_help="Executes python code using exec and displays the output",
+          aliases=["ex"])
 @cmds.require("exec_perm")
 async def cmd_exec(ctx):
     """
@@ -56,7 +58,8 @@ async def cmd_exec(ctx):
 
 @cmds.cmd("eval",
           category="Bot admin",
-          short_help="Executes python code using eval and displays the output")
+          short_help="Executes python code using eval and displays the output",
+          aliases=["ev"])
 @cmds.require("exec_perm")
 async def cmd_eval(ctx):
     """

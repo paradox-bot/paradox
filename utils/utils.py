@@ -2,27 +2,32 @@ import asyncio
 import subprocess
 import datetime
 import discord
+import re
+import iso8601
 
 
 def load_into(bot):
 
     @bot.util
-    def strfdelta(ctx, delta, sec=False):
-        output = [[delta.days, 'day'],
-                  [delta.seconds // 3600, 'hour'],
-                  [delta.seconds // 60 % 60, 'minute']]
+    def strfdelta(ctx, delta, sec=False, minutes=True, short=False):
+        output = [[delta.days, 'd' if short else ' day'],
+                  [delta.seconds // 3600, 'h' if short else ' hour']]
+        if minutes:
+            output.append([delta.seconds // 60 % 60, 'm' if short else ' minute'])
         if sec:
-            output.append([delta.seconds % 60, 'second'])
+            output.append([delta.seconds % 60, 's' if short else ' second'])
         for i in range(len(output)):
-            if output[i][0] != 1:
+            if output[i][0] != 1 and not short:
                 output[i][1] += 's'
-        reply_msg = ''
+        reply_msg = []
         if output[0][0] != 0:
-            reply_msg += "{} {} ".format(output[0][0], output[0][1])
-        for i in range(1, len(output)-1):
-            reply_msg += "{} {} ".format(output[i][0], output[i][1])
-        reply_msg += "and {} {}".format(output[len(output)-1][0], output[len(output)-1][1])
-        return reply_msg
+            reply_msg.append("{}{} ".format(output[0][0], output[0][1]))
+        for i in range(1, len(output) - 1):
+            reply_msg.append("{}{} ".format(output[i][0], output[i][1]))
+        if not short and reply_msg:
+            reply_msg.append("and ")
+        reply_msg.append("{}{}".format(output[len(output) - 1][0], output[len(output) - 1][1]))
+        return "".join(reply_msg)
 
     @bot.util
     async def run_sh(ctx, to_run):
@@ -46,7 +51,7 @@ def load_into(bot):
         return out.decode('utf-8')
 
     @bot.util
-    def convdatestring(ctx, datestring):
+    def convdatestring(datestring):
         datestring = datestring.strip(' ,')
         datearray = []
         funcs = {'d': lambda x: x * 24 * 60 * 60,
@@ -69,171 +74,6 @@ def load_into(bot):
             if i[1] in funcs:
                 seconds += funcs[i[1]](i[0])
         return datetime.timedelta(seconds=seconds)
-
-    @bot.util
-    async def find_user(ctx, user_str, in_server=False, interactive=False, limit=20):
-        if user_str == "":
-            return None
-        maybe_user_id = user_str.strip('<@!> ')
-
-        def is_user(member):
-            return ((member.id == maybe_user_id) or
-                    (user_str.lower() in member.display_name.lower()) or
-                    (user_str.lower() in member.name.lower()))
-
-        collection = ctx.server.members if in_server else ctx.bot.get_all_members
-        if interactive:
-            users = list(filter(is_user, collection))
-            if len(users) == 0:
-                return None
-            if len(users) > limit:
-                await ctx.reply("Over {} users found matching `{}`! Please refine your search".format(limit, user_str))
-                ctx.cmd_err = (-1, "")
-                return None
-            names = ["{} {}".format(user.display_name, ("({})".format(user.name)) if user.nick else "") for user in users]
-            selected = await ctx.selector("Multiple users found matching `{}`! Please select one.".format(user_str), names)
-            if selected is None:
-                return None
-            return users[selected]
-        else:
-            return discord.utils.find(is_user, collection)
-
-    @bot.util
-    async def listen_for(ctx, chars=[], timeout=30, lower=True):
-        def check(message):
-            return ((message.content.lower() if lower else message.content) in chars)
-        msg = await ctx.bot.wait_for_message(author=ctx.author, check=check, timeout=timeout)
-        return msg
-
-    @bot.util
-    async def input(ctx, msg, timeout=120):
-        offer_msg = await ctx.reply(msg)
-        result_msg = await ctx.bot.wait_for_message(author=ctx.author, timeout=timeout)
-        if result_msg is None:
-            return None
-        result = result_msg.content
-        try:
-            await ctx.bot.delete_message(offer_msg)
-            await ctx.bot.delete_message(result_msg)
-        except Exception:
-            pass
-        return result
-
-    @bot.util
-    async def ask(ctx, msg, timeout=30):
-        offer_msg = await ctx.reply(msg+" `y(es)`/`n(o)`")
-        result_msg = await ctx.listen_for(["y", "yes", "n", "no"])
-        if result_msg is None:
-            return None
-        result = result_msg.content.lower()
-        try:
-            await ctx.bot.delete_message(offer_msg)
-            await ctx.bot.delete_message(result_msg)
-        except Exception:
-            pass
-        if result in ["n", "no"]:
-            return 0
-        return 1
-
-    @bot.util
-    async def offer_create_role(ctx, input):
-        offer_msg = await ctx.reply("Would you like to create this role? `y(es)`/`n(o)`")
-        result_msg = await ctx.listen_for(["y", "yes", "n", "no"])
-        if result_msg is None:
-            return None
-        result = result_msg.content.lower()
-        try:
-            await ctx.bot.delete_message(offer_msg)
-            await ctx.bot.delete_message(result_msg)
-        except Exception:
-            pass
-        if result in ["n", "no"]:
-            return None
-        try:
-            # TODO: Lots of fancy stuff, move this out to an interactive create role utility
-            role = await ctx.bot.create_role(ctx.server, name=input)
-        except discord.Forbidden:
-            await ctx.reply("Sorry, it seems I don't have permissions to create a role!")
-            return None
-        await ctx.reply("You have created the role `{}`!".format(input))
-        return role
-
-    @bot.util
-    async def find_role(ctx, userstr, create=False, interactive=False):
-        if not ctx.server:
-            ctx.cmd_err = (1, "This is not valid outside of a server!")
-            return None
-        roleid = userstr.strip('<#@!>')
-        if interactive:
-            def check(role):
-                return (role.id == roleid) or (userstr in role.name)
-            roles = list(filter(check, ctx.server.roles))
-            if len(roles) == 0:
-                role = None
-            else:
-                selected = await ctx.selector("Multiple roles found! Please select one.",
-                                              [role.name for role in roles])
-                if selected is None:
-                    return None
-                role = roles[selected]
-        else:
-            if roleid.isdigit():
-                def is_role(role):
-                    return role.id == roleid
-            else:
-                def is_role(role):
-                    return userstr.lower() in role.name.lower()
-            role = discord.utils.find(is_role, ctx.server.roles)
-        if role:
-            return role
-        else:
-            msg = await ctx.reply("I can't find this role in this server!")
-            if create:
-                role = await ctx.offer_create_role(userstr)
-                if not role:
-                    ctx.cmd_err = (1, "Aborting...")
-                    return None
-                await ctx.bot.delete_message(msg)
-                return role
-            return None
-
-    @bot.util
-    async def selector(ctx, message, select_from, timeout=30):
-        """
-        Interactive method to ask the user to select an entry from a list.
-        Returns the index of the list which was selected,
-        or None if the request timed out or was cancelled.
-        TODO: Some sort of class integration for paging.
-
-        list select_from: List to select from
-        """
-        if len(select_from) == 0:
-            return None
-        if len(select_from) == 1:
-            return 0
-        lines = ["{:>3}:\t{}".format(i + 1, line) for (i, line) in enumerate(select_from)]
-        msg = message
-        msg += "```\n"
-        msg += "\n".join(lines)
-        msg += "```\n"
-        msg += "Type the number of your selection or `c` to cancel."
-        out_msg = await ctx.reply(msg)
-        result_msg = await ctx.listen_for([str(i+1) for i in range(0, len(select_from))] + ["c"], timeout=timeout)
-        await ctx.bot.delete_message(out_msg)
-        if not result_msg:
-            await ctx.reply("Question timed out, aborting...")
-            ctx.cmd_err = (-1, "")  # User cancelled or didn't respond
-            return None
-        result = result_msg.content
-        try:
-            await ctx.bot.delete_message(result_msg)
-        except discord.Forbidden:
-            pass
-        if result == "c":
-            await ctx.reply("Cancelled selection.")
-            ctx.cmd_err = (-1, "")  # User cancelled or didn't respond
-            return None
-        return int(result_msg.content) - 1
 
     @bot.util
     async def parse_flags(ctx, args, flags=[]):
@@ -265,6 +105,8 @@ def load_into(bot):
                 index = params.index("-" + clean_flag)
             elif (("--" + clean_flag) in params):
                 index = params.index("--" + clean_flag)
+            elif (("—" + clean_flag) in params):
+                index = params.index("—" + clean_flag)
 
             if index is None:
                 final_flags[clean_flag] = False
@@ -277,9 +119,9 @@ def load_into(bot):
             final_params = params
         for (i, index) in enumerate(indexes):
             if i == len(indexes) - 1:
-                flag_arg = " ".join(params[index[0]+1:])
+                flag_arg = " ".join(params[index[0] + 1:])
             else:
-                flag_arg = " ".join(params[index[0]+1:indexes[i+1][0]])
+                flag_arg = " ".join(params[index[0] + 1:indexes[i + 1][0]])
             flag_arg = flag_arg.strip()
             if index[1].endswith("=="):
                 final_flags[index[1][:-2]] = flag_arg
@@ -300,3 +142,132 @@ def load_into(bot):
     async def emb_add_fields(ctx, embed, emb_fields):
         for field in emb_fields:
             embed.add_field(name=str(field[0]), value=str(field[1]), inline=bool(field[2]))
+
+    @bot.util
+    async def get_raw_cmds(ctx):
+        handlers = ctx.bot.handlers
+        cmds = {}
+        for CH in handlers:
+            cmds = dict(cmds, **(CH.raw_cmds))
+        return cmds
+
+    @bot.util
+    async def pager(ctx, pages, embed=False):
+        """
+        Replies with the first page and provides reactions to page back and forth.
+        Reaction timeout is five minutes.
+        On timeout, returns the message (for easy deletion).
+        pages is either a list of messages or a list of embeds, depending on the embed flag.
+        """
+        arg = "embed" if embed else "message"
+        args = {}
+        args[arg] = pages[0]
+        out_msg = await ctx.reply(**args)
+        if len(pages) == 1:
+            return out_msg
+        args = {}
+        arg = "embed" if embed else "new_content"
+        emo_next = ctx.bot.objects["emoji_next"]
+        emo_prev = ctx.bot.objects["emoji_prev"]
+
+        def check(reaction, user):
+            return (reaction.emoji in [emo_next, emo_prev]) and (not (user == ctx.me))
+        try:
+            await ctx.bot.add_reaction(out_msg, emo_prev)
+            await ctx.bot.add_reaction(out_msg, emo_next)
+        except discord.Forbidden:
+            await ctx.reply("Cannot page results because I do not have permissions to add emojis!")
+            return
+
+        async def paging():
+            page = 0
+            while True:
+                res = await ctx.bot.wait_for_reaction(message=out_msg,
+                                                      timeout=300,
+                                                      check=check)
+                if res is None:
+                    break
+                try:
+                    await ctx.bot.remove_reaction(out_msg, res.reaction.emoji, res.user)
+                except discord.Forbidden:
+                    pass
+                page += 1 if res.reaction.emoji == emo_next else -1
+                if page == -1:
+                    page = len(pages) - 1
+                if page == len(pages):
+                    page = 0
+                args[arg] = pages[page]
+                await ctx.bot.edit_message(out_msg, **args)
+            try:
+                await ctx.bot.remove_reaction(out_msg, emo_prev, ctx.me)
+                await ctx.bot.remove_reaction(out_msg, emo_next, ctx.me)
+                await ctx.bot.clear_reactions(out_msg)
+            except discord.Forbidden:
+                pass
+        asyncio.ensure_future(paging())
+        return out_msg
+
+    @bot.util
+    async def from_now(ctx, time_diff):
+        now = datetime.datetime.utcnow().timestamp()
+        return now + time_diff
+
+    @bot.util
+    async def to_tstamp(ctx, days=0, hours=0, minutes=0, seconds=0):
+        return seconds + (minutes + (hours + days * 24) * 60) * 60
+
+    @bot.util
+    def parse_dur(ctx, time_str):
+        funcs = {'d': lambda x: x * 24 * 60 * 60,
+                 'h': lambda x: x * 60 * 60,
+                 'm': lambda x: x * 60,
+                 's': lambda x: x}
+        time_str = time_str.strip(" ,")
+        found = re.findall(r'(\d+)\s?(\w+?)', time_str)
+        seconds = 0
+        for bit in found:
+            if bit[1] in funcs:
+                seconds += funcs[bit[1]](int(bit[0]))
+        return datetime.timedelta(seconds=seconds)
+
+    @bot.util
+    def prop_tabulate(ctx, prop_list, value_list):
+        max_len = max(len(prop) for prop in prop_list)
+        return "\n".join(["`{}{}{}`\t{}".format("​ " * (max_len - len(prop)),
+                                                prop,
+                                                ":" if len(prop) > 1 else "​ " * 2,
+                                                value_list[i]) for i, prop in enumerate(prop_list)])
+
+    @bot.util
+    def paginate_list(ctx, item_list, block_length=20, style="markdown", title=None):
+        lines = ["{0:<5}{1:<5}".format("{}.".format(i + 1), str(line)) for i, line in enumerate(item_list)]
+        page_blocks = [lines[i:i + block_length] for i in range(0, len(lines), block_length)]
+        pages = []
+        for i, block in enumerate(page_blocks):
+            pagenum = "Page {}/{}".format(i + 1, len(page_blocks))
+            if title:
+                header = "{} ({})".format(title, pagenum) if len(page_blocks) > 1 else title
+            else:
+                header = pagenum
+            header_line = "=" * len(header)
+            full_header = "{}\n{}\n".format(header, header_line) if len(page_blocks) > 1 or title else ""
+            pages.append("```{}\n{}{}```".format(style, full_header, "\n".join(block)))
+        return pages
+
+    @bot.util
+    def msg_string(ctx, msg, mask_link=False, line_break=False, tz=None, clean=True):
+        timestr = "%-I:%M %p, %d/%m/%Y"
+        if tz:
+            time = iso8601.parse_date(msg.timestamp.isoformat()).astimezone(tz).strftime(timestr)
+        else:
+            time = msg.timestamp.strftime(timestr)
+        user = str(msg.author)
+        attach_list = [attach["url"] for attach in msg.attachments if "url" in attach]
+        if mask_link:
+            attach_list = ["[Link]({})".format(url) for url in attach_list]
+        attachments = "\nAttachments: {}".format(", ".join(attach_list)) if attach_list else ""
+        return "`[{time}]` **{user}:** {line_break}{message} {attachments}".format(time=time, user=user, line_break="\n" if line_break else "", message=msg.clean_content if clean else msg.content, attachments=attachments)
+
+    @bot.util
+    def msg_jumpto(ctx,msg):
+        return "https://discordapp.com/channels/{}/{}/{}".format(msg.server.id, msg.channel.id, msg.id)

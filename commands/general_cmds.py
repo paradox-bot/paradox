@@ -19,21 +19,25 @@ async def cmd_about(ctx):
     Description:
         Sends a message containing information about the bot.
     """
-    devs = ["298706728856453121", "299175087389802496", "225773687037493258", "300992784020668416"]  # TODO: Don't hard code these here!!
-    devnames = ', '.join([str(discord.utils.get(ctx.bot.get_all_members(), id=str(devs))) for devs in devs])
+    current_devs = ["299175087389802496", "408905098312548362", "300992784020668416"]
+    old_devs = ["298706728856453121",  "225773687037493258",]  # TODO: Don't hard code these here!!
+    current_devnames = ', '.join([str(discord.utils.get(ctx.bot.get_all_members(), id=str(devs))) for devs in current_devs])
+    old_devnames = ', '.join([str(discord.utils.get(ctx.bot.get_all_members(), id=str(devs))) for devs in old_devs])
     pform = platform.platform()
     py_vers = sys.version
     mem = psutil.virtual_memory()
     mem_str = "{0:.2f}GB used out of {1:.2f}GB ({mem.percent}\%)".format(mem.used/(1024 ** 3), mem.total/(1024 ** 3), mem=mem)
     cpu_usage_str = "{}\%".format(psutil.cpu_percent())
-    info = "I am a multi-purpose guild automation bot from Team Paradøx, coded in Discord.py!\
+    info = "I am a multi-purpose guild automation bot from Team Paradøx, coded in Discord.py! \
         \nI am under active development and constantly evolving with new commands and features."
     links = "[Support Server]({sprt}), [Invite Me]({invite})".format(sprt=ctx.bot.objects["support guild"],
                                                                      invite=ctx.bot.objects["invite_link"])
+    api_vers = "{} ({})".format(discord.__version__, discord.version_info[3])
 
     emb_fields = [("Info", info, 1),
-                  ("Developed by", devnames, 0),
+                  ("Developed by", "Current: {}.\nPast: {}.".format(current_devnames, old_devnames), 0),
                   ("Python version", py_vers, 0),
+                  ("Discord API version", api_vers, 0),
                   ("Platform", pform, 0),
                   ("Memory", mem_str, 0),
                   ("CPU usage", cpu_usage_str, 0),
@@ -85,7 +89,8 @@ async def cmd_feedback(ctx):
 
 @cmds.cmd("cheatreport",
           category="General",
-          short_help="Reports a user for cheating with rep/level/xp.")
+          short_help="Reports a user for cheating with rep/level/xp.",
+          aliases=["cr"])
 @cmds.execute("flags", flags=["e=="])
 async def cmd_cr(ctx):
     """
@@ -105,7 +110,7 @@ async def cmd_cr(ctx):
     evidence = ctx.flags['e'] if ctx.flags['e'] else "None. (Note that cheat reports without evidence are not recommended)"
     if not user.isdigit():
         if not ctx.server:
-            await ctx.reply("Please provide a valid userid when reporting from private message")
+            await ctx.reply("Please provide a valid user ID when reporting from private message")
             return
         user = await ctx.find_user(ctx.params[0], in_server=True, interactive=True)
         if ctx.cmd_err[0]:
@@ -133,7 +138,8 @@ async def cmd_cr(ctx):
 
 @cmds.cmd("ping",
           category="General",
-          short_help="Checks the bot's latency")
+          short_help="Checks the bot's latency",
+          aliases=["pong"])
 async def cmd_ping(ctx):
     """
     Usage:
@@ -149,10 +155,30 @@ async def cmd_ping(ctx):
     latency = ((emsg_tstamp - msg_tstamp).microseconds) // 1000
     await ctx.bot.edit_message(msg, "Ping: {}ms".format(str(latency)))
 
+@cmds.cmd("avatar",
+          category="General",
+          short_help="Obtains the mentioned user's avatar, or your own.",
+          aliases=["av"])
+@cmds.execute("user_lookup", in_server=True)
+async def cmd_avatar(ctx):
+    user = ctx.author
+    if ctx.arg_str != "":
+        user = ctx.objs["found_user"]
+        if not user:
+            await ctx.reply("I couldn't find any matching users in this server sorry!")
+            return
+    avatar = user.avatar_url if user.avatar_url else user.default_avatar_url
+    embed = discord.Embed(colour=discord.Colour.green())
+    embed.set_author(name="{}'s Avatar".format(user))
+    embed.set_image(url=avatar)
+
+    await ctx.reply(embed=embed)
+
 
 @cmds.cmd("invite",
           category="General",
-          short_help="Sends the bot's invite link")
+          short_help="Sends the bot's invite link",
+          aliases=["inv"])
 async def cmd_invite(ctx):
     """
     Usage:
@@ -160,7 +186,7 @@ async def cmd_invite(ctx):
     Description:
         Sends the link to invite the bot to your server.
     """
-    await ctx.reply("Here's my invite link! \n<{}>".format(ctx.bot.objects["invite_link"]))
+    await ctx.reply("Visit <{}> to invite me!".format(ctx.bot.objects["invite_link"]))
 
 
 @cmds.cmd("support",
@@ -178,38 +204,32 @@ async def cmd_support(ctx):
 
 @cmds.cmd("serverinfo",
           category="General",
-          short_help="Shows server info.")
+          short_help="Shows server info.",
+          aliases=["sinfo", "si"])
+@cmds.execute("flags", flags=["icon"])
 @cmds.require("in_server")
 async def cmd_serverinfo(ctx):
     """
     Usage:
-        {prefix}serverinfo
+        {prefix}serverinfo [--icon]
     Description:
         Shows information about the server you are in.
+        With --icon, just displays the server icon.
     """
-    regions = {
-        "brazil": "Brazil",
-        "eu-central": "Central Europe",
-        "hongkong": "Hong Kong",
-        "japan": "Japan",
-        "russia": "Russia",
-        "singapore": "Singapore",
-        "sydney": "Sydney",
-        "us-central": "Central United States",
-        "us-east": "Eastern United States",
-        "us-south": "Southern United States",
-        "us-west": "Western United States",
-        "eu-west": "Western Europe",
-        "vip-amsterdam": "Amsterdam (VIP)",
-        "vip-us-east": "Eastern United States (VIP)"
-    }
+    if ctx.flags["icon"]:
+        embed = discord.Embed(color=discord.Colour.light_grey())
+        embed.set_image(url=ctx.server.icon_url)
 
+        await ctx.reply(embed=embed)
+        return
+
+    regions = ctx.bot.objects["regions"]
     ver = {
         "none": "None",
-        "low": "1 - Must have a verified email",
-        "medium": "2 - Must also be registered for more than 5 minutes",
-        "high": "3 - Must also be member of the server for more than 10 minutes",
-        4: "4 - Must have a verified phone number"
+        "low": "Level 1 (Must have a verified email)",
+        "medium": "Level 2 (Registered for more than 5 minutes)",
+        "high": "Level 3 (Member for more than 10 minutes)",
+        4: "Level 4 (Verified phone number)"
     }
 
     mfa = {
@@ -240,30 +260,36 @@ async def cmd_serverinfo(ctx):
     Idle = ctx.bot.objects["emoji_idle"]
     Dnd = ctx.bot.objects["emoji_dnd"]
     Offline = ctx.bot.objects["emoji_offline"]
+
     server_owner = ctx.server.owner
-    owner = "{} ({})".format(server_owner, server_owner.id)
+    owner = "{} (id {})".format(server_owner, server_owner.id)
     members = "{} humans, {} bots | {} total".format(str(len([m for m in ctx.server.members if not m.bot])),
                                                      str(len([m for m in ctx.server.members if m.bot])),
                                                      ctx.server.member_count)
     created = ctx.server.created_at.strftime("%-I:%M %p, %d/%m/%Y")
-    created_ago = ctx.strfdelta(datetime.utcnow()-ctx.server.created_at)
+    created_ago = "({} ago)".format(ctx.strfdelta(datetime.utcnow() - ctx.server.created_at, minutes=False))
     channels = "{} text, {} voice | {} total".format(text, voice, total)
     status = "{} - **{}**\n{} - **{}**\n{} - **{}**\n{} - **{}**".format(Online, online, Idle, idle, Dnd, dnd, Offline, offline)
+    avatar_url = ctx.server.icon_url
+    icon = "[Icon Link]({})".format(avatar_url)
+    is_large = "More than 200 members" if ctx.server.large else "Less than 200 members"
 
-    emb_fields = [("Owner", owner, 0),
-                  ("Members", members, 0),
-                  ("ID", ctx.server.id, 0),
-                  ("Region", regions[str(ctx.server.region)], 0),
-                  ("Created at", "{} ({} ago)".format(created, created_ago), 0),
-                  ("Channels", channels, 0),
-                  ("Roles", len(ctx.server.roles), 0),
-                  ("Large Server", ctx.server.large, 0),
-                  ("Verification", ver[str(ctx.server.verification_level)], 0),
-                  ("2FA", mfa[ctx.server.mfa_level], 0),
-                  ("Member Status", status, 0)]
+    prop_list = ["Owner", "Region", "Icon", "Large server", "Verification", "2FA", "Roles", "Members", "Channels", "Created at", ""]
+    value_list = [owner,
+                  regions[str(ctx.server.region)],
+                  icon,
+                  is_large,
+                  ver[str(ctx.server.verification_level)],
+                  mfa[ctx.server.mfa_level],
+                  len(ctx.server.roles),
+                  members, channels, created, created_ago]
+    desc = ctx.prop_tabulate(prop_list, value_list)
 
-    embed = discord.Embed(color=server_owner.colour if server_owner.colour.value else discord.Colour.teal())
-    embed.set_author(name="{}".format(ctx.server))
+    embed = discord.Embed(color=server_owner.colour if server_owner.colour.value else discord.Colour.teal(), description=desc)
+    embed.set_author(name="{} (id: {})".format(ctx.server, ctx.server.id))
+    embed.set_thumbnail(url=avatar_url)
+
+    emb_fields = [("Member Status", status, 0)]
 
     await ctx.emb_add_fields(embed, emb_fields)
     await ctx.reply(embed=embed)

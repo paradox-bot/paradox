@@ -4,6 +4,8 @@ import settingTypes
 
 server_conf = Conf("s_conf")
 
+# TODO can do the write check with what's
+
 
 class Server_Setting(paraSetting):
     @classmethod
@@ -13,6 +15,10 @@ class Server_Setting(paraSetting):
 
     @classmethod
     async def write(cls, ctx, value):
+        (code, msg) = await ctx.CH.checks["in_server_has_mod"](ctx)
+        if code != 0:
+            ctx.cmd_err = (code, msg)
+            return
         return await ctx.data.servers.set(ctx.server.id, cls.name, value)
 
 
@@ -29,6 +35,59 @@ class Server_Setting_Prefix(Server_Setting, settingTypes.STR):
 
 
 @server_conf.setting
+class Server_Setting_Starboard(Server_Setting, settingTypes.BOOL):
+    name = "starboard_enabled"
+    vis_name = "starboard"
+    desc = "Enable/Disable Starboard"
+    category = "Starboard"
+    default = False
+
+    outputs = {True: "Enabled",
+               False: "Disabled"}
+
+    @classmethod
+    async def write(cls, ctx, value):
+        result = await super().write(ctx, value)
+        if ctx.cmd_err[0]:
+            return result
+        starboards = ctx.bot.objects["server_starboard_emojis"]
+        if value:
+            starboards[ctx.server.id] = await ctx.server_conf.starboard_emoji.get(ctx)
+            ctx.bot.objects["server_starboards"][ctx.server.id] = {}
+        else:
+            starboards.pop(ctx.server.id, None)
+        return result
+
+
+@server_conf.setting
+class Server_Setting_StarChan(Server_Setting, settingTypes.CHANNEL):
+    name = "starboard_channel"
+    vis_name = "star_channel"
+    desc = "Starboard channel"
+    category = "Starboard"
+    default = None
+
+
+@server_conf.setting
+class Server_Setting_StarEmoji(Server_Setting, settingTypes.EMOJI):
+    name = "starboard_emoji"
+    vis_name = "star_emoji"
+    desc = "Starboard emoji"
+    category = "Starboard"
+    default = "⭐"
+
+    @classmethod
+    async def write(cls, ctx, value):
+        result = await super().write(ctx, value)
+        if ctx.cmd_err[0]:
+            return result
+        starboards = ctx.bot.objects["server_starboard_emojis"]
+        if ctx.server.id in starboards:
+            starboards[ctx.server.id] = value if value else cls.default
+        return result
+
+
+@server_conf.setting
 class Server_Setting_Autorole(Server_Setting, settingTypes.ROLE):
     name = "guild_autorole"
     vis_name = "autorole"
@@ -36,7 +95,73 @@ class Server_Setting_Autorole(Server_Setting, settingTypes.ROLE):
     category = "Guild settings"
     default = "0"
 
+
+@server_conf.setting
+class Server_Setting_Autoroles(Server_Setting, settingTypes.ROLELIST):
+    name = "guild_autoroles"
+    vis_name = "autoroles"
+    desc = "Roles automatically given to new members"
+    category = "Hidden Guild settings"
+    default = "0"
+
+
+@server_conf.setting
+class Server_Setting_Autorole_Bot(Server_Setting, settingTypes.ROLE):
+    name = "guild_autorole_bot"
+    vis_name = "autorole_bot"
+    desc = "Role automatically given to new bots. By default same as autorole."
+    category = "Guild settings"
+
+    @classmethod
+    async def dyn_default(cls, ctx):
+        return await ctx.server_conf.guild_autorole.get(ctx)
+
+
+@server_conf.setting
+class Server_Setting_selfroles(Server_Setting, settingTypes.ROLELIST):
+    name = "self_roles"
+    vis_name = "selfroles"
+    desc = "Roles which users can give themselves with giveme command"
+    default = None
+    category = "Guild settings"
+
+
+@server_conf.setting
+class Server_Setting_Clean_Channels(Server_Setting, settingTypes.CHANNELLIST):
+    name = "clean_channels"
+    vis_name = "clean_channels"
+    desc = "Automatically delete new messages in these channels."
+    category = "Guild settings"
+    default = None
+
+    @classmethod
+    async def write(cls, ctx, value):
+        result = await super().write(ctx, value)
+        cleaned = ctx.bot.objects["cleaned_channels"]
+        if (ctx.cmd_err and ctx.cmd_err[0] != 0):
+            return
+        cleaned[ctx.server.id] = value if value else []
+        return result
+
 # Moderation settings
+
+
+@server_conf.setting
+class Server_Setting_modrole(Server_Setting, settingTypes.ROLE):
+    name = "mod_role"
+    vis_name = "modrole"
+    desc = "Role required to use moderation commands"
+    default = None
+    category = "Moderation"
+
+
+@server_conf.setting
+class Server_Setting_mute_role(Server_Setting, settingTypes.ROLE):
+    name = "mute_role"
+    vis_name = "mute_role"
+    desc = "Role given to mute users (automatically set, but can be overridden)"
+    default = None
+    category = "Moderation"
 
 
 @server_conf.setting
@@ -47,6 +172,14 @@ class Server_Setting_modlog_ch(Server_Setting, settingTypes.CHANNEL):
     default = None
     category = "Moderation"
 
+
+@server_conf.setting
+class Server_Setting_joinlog_ch(Server_Setting, settingTypes.CHANNEL):
+    name = "joinlog_ch"
+    vis_name = "joinlog_ch"
+    desc = "Channel to send information about new users"
+    default = None
+    category = "Moderation"
 
 # Join and leave message settings
 
@@ -109,6 +242,56 @@ class Server_Setting_Leave_Ch(Server_Setting, settingTypes.CHANNEL):
     desc = "Channel to post in when a user leaves"
     default = None
     category = "Leave message"
+
+
+# Maths related settings
+
+@server_conf.setting
+class Server_Setting_Latex_Listen(Server_Setting, settingTypes.BOOL):
+    name = "latex_listen_enabled"
+    vis_name = "latex"
+    desc = "Enables/Disables listening for LaTeX messages"
+    default = False
+    category = "Mathematical settings"
+
+    outputs = {True: "Enabled",
+               False: "Disabled"}
+
+    @classmethod
+    async def write(cls, ctx, value):
+        result = await super().write(ctx, value)
+        listens = ctx.bot.objects["server_tex_listeners"]
+        if  not (ctx.cmd_err and ctx.cmd_err[0] != 0):
+            if value:
+                channels = await ctx.bot.data.servers.get(ctx.server.id, "maths_channels")
+                listens[str(ctx.server.id)] = channels if channels else []
+            else:
+                listens.pop(ctx.server.id)
+        return result
+
+
+@server_conf.setting
+class Server_Setting_Maths_Channels(Server_Setting, settingTypes.CHANNELLIST):
+    name = "maths_channels"
+    vis_name = "latex_channels"
+    desc = "Only listen to LaTeX in these channels, if set"
+    category = "Mathematical settings"
+    default = None
+
+    @classmethod
+    async def humanise(cls, ctx, raw):
+        if not raw:
+            return "All channels"
+        return await super().humanise(ctx, raw)
+
+    @classmethod
+    async def write(cls, ctx, value):
+        result = await super().write(ctx, value)
+        listens = ctx.bot.objects["server_tex_listeners"]
+        if (ctx.cmd_err and ctx.cmd_err[0] != 0):
+            return
+        listens[ctx.server.id] = value if value else []
+        return result
 
 
 def load_into(bot):

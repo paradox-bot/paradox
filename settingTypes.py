@@ -7,12 +7,14 @@ class BOOL(paraSetting):
     """
     A sort of boolean type, more like a wrapper for a boolean.
     """
-    accept = "Yes/No, True/False, Enabled/Disabled"
+    accept = "Yes/No, On/Off, True/False, Enabled/Disabled"
     inputexps = {"^yes$": True,
                  "^true$": True,
+                 "^on$": True,
                  "^enabled?$": True,
                  "^no$": False,
                  "^false$": False,
+                 "^off$": False,
                  "^disabled?$": False}
     outputs = {True: "",
                False: ""}
@@ -87,18 +89,55 @@ class ROLE(paraSetting):
         return role.id if role else None
 
 
+class EMOJI(paraSetting):
+    """
+    EMOJI type.
+    """
+    accept = "Emoji, either built in or custom. Use None to reset"
+
+    @classmethod
+    async def humanise(self, ctx, raw):
+        """
+        Expect raw to be emoji id or unicode.
+        Empty values are None and 0.
+        """
+        if (not raw) or raw == "0":
+            return "None"
+        if raw.isdigit():
+            emoji = discord.utils.get(ctx.bot.get_all_emojis(), id=raw)
+            return str(emoji) if emoji else raw
+        else:
+            return raw
+
+    @classmethod
+    async def understand(self, ctx, userstr):
+        """
+        User can enter an emoji id, custom emoji, or unicode built in emoji.
+        """
+        if userstr.lower() in ["0", "none"]:
+            return None
+        if userstr.endswith(">") and userstr.startswith("<"):
+            # Probably a custom emoji
+            id_str = userstr[userstr.rfind(":") + 1:-1]
+            if id_str.isdigit():
+                return id_str
+        else:
+            # It's probably a built in emoji or nonsense. Either way, store it.
+            return userstr
+
+
 class CHANNEL(paraSetting):
     """
     Channel type.
     """
-    accept = "Channel mention/id/name"
+    accept = "Channel mention/id/name. Use 0 to clear the setting."
 
     @classmethod
     async def humanise(self, ctx, raw):
         """
         Expect raw to be channel id or 0, an empty.
         """
-        if not raw:
+        if not raw or raw == "0":
             return "None"
         channel = ctx.server.get_channel(raw)
         if channel:
@@ -114,6 +153,8 @@ class CHANNEL(paraSetting):
             ctx.cmd_err = (1, "This is not valid outside of a server!")
             return None
         userstr = str(userstr)
+        if userstr.lower() in ["none", "0"]:
+            return None
         chid = userstr.strip('<#@!>')
         if chid.isdigit():
             def is_ch(ch):
@@ -125,8 +166,58 @@ class CHANNEL(paraSetting):
         if ch:
             return ch.id
         else:
-            ctx.cmd_err = (1, "I can't find this channel in this server!")
+            ctx.cmd_err = (1, "I can't find the channel `{}` in this server!".format(userstr))
             return None
+
+
+class SETTING_LIST(paraSetting):
+    """
+    List of a particular type of setting
+    """
+    setting_type = paraSetting
+
+    @classmethod
+    async def humanise(self, ctx, raw):
+        """
+        Expect a list of the raw type of the setting.
+        """
+        if not raw:
+            return "None"
+        humanised = []
+        for raw_item in raw:
+            humanised.append(await self.setting_type.humanise(ctx, raw_item))
+        return ", ".join(humanised)
+
+    @classmethod
+    async def understand(self, ctx, userstr):
+        """
+        User can enter a list of the userstrs accepted by the setting.
+        """
+        userstr = str(userstr)
+        userstrs = [us.strip() for us in userstr.split(",")]
+        items = []
+        for us in userstrs:
+            item = await self.setting_type.understand(ctx, us)
+            if item is None:
+                return None
+            items.append(item)
+        return items
+
+
+class CHANNELLIST(SETTING_LIST):
+    """
+    List of channels
+    """
+    accept = "Comma separated list of channel mentions/ids/names. Use 0 or None to clear the setting."
+    setting_type = CHANNEL
+
+
+class ROLELIST(SETTING_LIST):
+    """
+    List of channels
+    """
+    accept = "Comma separated list of role mentions/ids/names. Use 0 or None to clear the setting."
+    setting_type = ROLE
 
 
 """

@@ -7,9 +7,22 @@
 # Nanny
 Nanny
 
+# ContextBot contents
+contextBot/*
+
 # Tex files
 **.aux
+**.out
+tex/*.dvi
+tex/*.tex
+tex/*.pdf
+tex/*.png
+tex/*.log
+
 **.synctex*
+
+# Notes dir
+notes/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

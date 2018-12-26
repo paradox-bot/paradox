@@ -3,9 +3,94 @@ import discord
 import aiohttp
 import asyncio
 from datetime import datetime, timedelta
+from NumericStringParser import NumericStringParser
+import urllib
+import random
 
 cmds = paraCH()
 
+
+@cmds.cmd("bin2ascii",
+          category="Fun stuff",
+          short_help="Converts binary to ascii",
+          aliases=["bin2a", "binarytoascii"])
+async def cmd_bin2ascii(ctx):
+    """
+    Usage:
+        {prefix}bin2ascii <binary string>
+    Description:
+        Converts the provided binary string into ascii, then sends the output.
+    Examples:
+        {prefix}bin2ascii 01001000 01101001 00100001
+    """
+    # Would be cool if example could use username
+    bitstr = ctx.arg_str.replace(' ', '')
+    if (not bitstr.isdigit()) or (len(bitstr) % 8 != 0):
+        await ctx.reply("Not a valid binary string!")
+        return
+    bytelist = map(''.join, zip(*[iter(bitstr)] * 8))
+    asciilist = [chr(sum([int(b) << 7 - n for (n, b) in enumerate(byte)])) for byte in bytelist]
+    await ctx.reply("Output: `{}`".format(''.join(asciilist)))
+
+@cmds.cmd("calc",
+          category="Fun stuff",
+          short_help="Calculator!")
+async def cmd_calc(ctx):
+    """
+    Usage:
+        {prefix}calc <what you want to calculate>
+    Description:
+        Calculates the given expression and returns the answer
+    Examples:
+        {prefix}calc 1+1
+    """
+    if not ctx.params[0]:
+        await ctx.reply("Please give me something to calculate!")
+        return
+    to_calc = ctx.arg_str.replace("`", "")
+    nsp = NumericStringParser()
+    response = nsp.eval(to_calc)
+    if response:
+        await ctx.reply("Answer: `{}`".format(response))
+    else:
+        await ctx.reply("Something went wrong calculating your expression! Please check your input and try again.")
+
+@cmds.cmd("image",
+          category="Fun Stuff",
+          short_help="Searches images for the specified text",
+          aliases=["imagesearch", "images"])
+async def cmd_image(ctx):
+    """
+    Usage:
+        {prefix}image <image text>
+    Description:
+        Replies with a random image matching the search description.
+    """
+    API_KEY = "10259038-12ef42751915ae10017141c86"
+    if not ctx.arg_str:
+        await ctx.reply("Please enter something to search for")
+        return
+    search_for = urllib.parse.quote_plus(ctx.arg_str)
+    async with aiohttp.get('https://pixabay.com/api/?key={}&q={}&image_type=photo'.format(API_KEY, search_for)) as r:
+        if r.status == 200:
+            js = await r.json()
+            hits = js['hits'] if 'hits' in js else None
+            if not hits:
+                await ctx.reply("Didn't get any results for this query!")
+                return
+            hit_pages = []
+            for hit in [random.choice(hits) for i in range(20)]:
+                embed = discord.Embed(title="Here you go!", color=discord.Colour.light_grey())
+                if "webformatURL" in hit:
+                    embed.set_image(url=hit["webformatURL"])
+                else:
+                    continue
+                embed.set_footer(text="Images thanks to the free https://pixabay.com API!")
+                hit_pages.append(embed)
+            await ctx.pager(hit_pages, embed=True)
+        else:
+            await ctx.reply("Something went wrong with your search, sorry!")
+            return
 
 @cmds.cmd("lenny",
           category="Fun stuff",
@@ -26,7 +111,8 @@ async def cmd_lenny(ctx):
 
 @cmds.cmd("dog",
           category="Fun Stuff",
-          short_help="Sends a random dog image")
+          short_help="Sends a random dog image",
+          aliases=["doge", "pupper", "doggo", "woof"])
 async def cmd_dog(ctx):
     """
     Usage:
@@ -45,9 +131,48 @@ async def cmd_dog(ctx):
             await ctx.reply(embed=embed)
 
 
+@cmds.cmd("duck",
+          category="Fun Stuff",
+          short_help="Sends a random duck image",
+          aliases=["quack"])
+@cmds.execute("flags", flags=["g"])
+async def cmd_duck(ctx):
+    """
+    Usage:
+        {prefix}duck
+    Description:
+        Replies with a random duck image!
+    Flags:2
+        -g:: Forces a gif
+    """
+    img_type = "gif" if ctx.flags["g"] else random.choice(["gif", "jpg"])
+    async with aiohttp.get('http://random-d.uk/api/v1/quack?type={}'.format(img_type)) as r:
+        if r.status == 200:
+            js = await r.json()
+            embed = discord.Embed(title="Quack!", color=discord.Colour.light_grey())
+            embed.set_image(url=js['url'])
+            try:
+                await ctx.reply(embed=embed)
+                return
+            except Exception:
+                pass
+        else:
+            await ctx.reply("The ducks are too powerful right now! Please try again later.")
+
+
+@cmds.cmd("sorry",
+          category="Fun Stuff",
+          short_help="Sorry, love.")
+async def cmd_sorry(ctx):
+
+   embed = discord.Embed(color=discord.Colour.purple())
+   embed.set_image(url="https://cdn.discordapp.com/attachments/309625872665542658/406040395462737921/image.png")
+   await ctx.reply(embed=embed)
+
 @cmds.cmd("cat",
           category="Fun Stuff",
-          short_help="Sends a random cat image")
+          short_help="Sends a random cat image",
+          aliases=["meow"])
 async def cmd_cat(ctx, recursion=0):
     """
     Usage:
@@ -70,7 +195,7 @@ async def cmd_cat(ctx, recursion=0):
                 asyncio.sleep(1)
                 await cmd_cat(ctx, recursion=recursion+1)
                 return
-        await ctx.reply("Sorry! The cats are too poweful right now. Please try again later!")
+        await ctx.reply("Sorry! The cats are too powerful right now. Please try again later!")
 
 
 @cmds.cmd("rep",
