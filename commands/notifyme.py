@@ -24,6 +24,9 @@ def check_listen(user, checks, msg_ctx):
     result = result and ("in" not in checks or msg_ctx.ch.id == checks["in"]["id"])
     return result
 
+async def check_can_view(user, ctx):
+    return ctx.ch.permissions_for(ctx.server.get_member(user.id)).read_messages
+
 
 async def check_to_str(ctx, check, markdown=True):
     items = []
@@ -197,6 +200,8 @@ async def fire_listeners(ctx):
         listener = listeners[userid]
         for check in listener["checks"]:
             if not check_listen(listener["user"], check, ctx):
+                continue
+            if not await check_can_view(listener["user"], ctx):
                 continue
             asyncio.ensure_future(notify_user(listener["user"], ctx, check))
             break
