@@ -22,6 +22,7 @@ def check_listen(user, checks, msg_ctx):
     result = result and ("rolementions" not in checks or checks["rolementions"]["id"] in msg_ctx.msg.raw_role_mentions)
     result = result and ("contains" not in checks or checks["contains"]["text"] in msg_ctx.msg.content)
     result = result and ("in" not in checks or msg_ctx.ch.id == checks["in"]["id"])
+    result = result and ("notbot" not in checks or not msg_ctx.author.bot)
     return result
 
 async def check_can_view(user, ctx):
@@ -45,6 +46,8 @@ async def check_to_str(ctx, check, markdown=True):
         items.append("(Contains \"{}\")".format(check["contains"]["text"]))
     if "in" in check:
         items.append("(Channel {})".format(discord.utils.get(ctx.bot.get_all_channels, id=check["in"]["id"])))
+    if "notbot" in check:
+        items.append("(Not a bot)")
 
     return (" **and** " if markdown else " and ").join(items)
 
@@ -53,7 +56,7 @@ async def check_to_str(ctx, check, markdown=True):
           category="Utility",
           short_help="Sends a DM when a message matching certain criteria are detected.",
           aliases=["tellme", "pounce", "listenfor"])
-@cmds.execute("flags", flags=["remove", "interactive", "delay", "mentions==", "contains==", "here", "from==", "rolementions==", "in=="])
+@cmds.execute("flags", flags=["remove", "interactive", "delay", "mentions==", "contains==", "here", "from==", "rolementions==", "in==", "notbot"])
 async def cmd_notifyme(ctx):
     """
     Usage:
@@ -74,6 +77,7 @@ async def cmd_notifyme(ctx):
         --here:: Requires message to be from this server.
         --from:: Requires message to be from the specified user.
         --rolementions:: Requires message to mention the specified role.
+        --notbot:: Requires the message not have been sent by a bot.
         --in:: Requires message to be in the specified channel. (TBD)
     """
     checks = await ctx.data.users.get(ctx.authid, "notifyme")
@@ -142,6 +146,8 @@ async def cmd_notifyme(ctx):
         check["server"] = {"id": ctx.server.id}
     if ctx.flags["contains"]:
         check["contains"] = {"text": ctx.flags["contains"].strip("\"")}
+    if ctx.flags["notbot"]:
+        check["notbot"] = True
 
     # Add to check list, register, and save
     if check in checks:
