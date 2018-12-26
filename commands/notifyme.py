@@ -209,6 +209,8 @@ async def fire_listeners(ctx):
                 continue
             if not await check_can_view(listener["user"], ctx):
                 continue
+            if ctx.author.id == listener["user"].id:
+                continue
             asyncio.ensure_future(notify_user(listener["user"], ctx, check))
             break
 
