@@ -3,6 +3,7 @@ import subprocess
 import datetime
 import discord
 import re
+import iso8601
 
 
 def load_into(bot):
@@ -252,3 +253,21 @@ def load_into(bot):
             full_header = "{}\n{}\n".format(header, header_line) if len(page_blocks) > 1 or title else ""
             pages.append("```{}\n{}{}```".format(style, full_header, "\n".join(block)))
         return pages
+
+    @bot.util
+    def msg_string(ctx, msg, mask_link=False, line_break=False, tz=None, clean=True):
+        timestr = "%-I:%M %p, %d/%m/%Y"
+        if tz:
+            time = iso8601.parse_date(msg.timestamp.isoformat()).astimezone(tz).strftime(timestr)
+        else:
+            time = msg.timestamp.strftime(timestr)
+        user = str(msg.author)
+        attach_list = [attach["url"] for attach in msg.attachments if "url" in attach]
+        if mask_link:
+            attach_list = ["[Link]({})".format(url) for url in attach_list]
+        attachments = "\nAttachments: {}".format(", ".join(attach_list)) if attach_list else ""
+        return "`[{time}]` **{user}:** {line_break}{message} {attachments}".format(time=time, user=user, line_break="\n" if line_break else "", message=msg.clean_content if clean else msg.content, attachments=attachments)
+
+    @bot.util
+    def msg_jumpto(ctx,msg):
+        return "https://discordapp.com/channels/{}/{}/{}".format(msg.server.id, msg.channel.id, msg.id)

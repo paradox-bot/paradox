@@ -65,9 +65,7 @@ def load_into(bot):
             return None
         if len(select_from) == 1:
             return 0
-        lines = ["{:>3}:\t{}".format(i + 1, line) for (i, line) in enumerate(select_from)]
-        blocks = [lines[i:i + max_len - 1] for i in range(0, len(lines), max_len)]
-        pages = ["{}```\n{}\n```\nType the number of your selection or `c` to cancel.".format(message, "\n".join(block)) for block in blocks]
+        pages = ["{}\n{}\nType the number of your selection or `c` to cancel.".format(message, page) for page in ctx.paginate_list(select_from, block_length=max_len)]
         out_msg = await ctx.pager(pages)
         result_msg = await ctx.listen_for([str(i + 1) for i in range(0, len(select_from))] + ["c"], timeout=timeout)
         try:
