@@ -126,7 +126,7 @@ async def cmd_dog(ctx):
             if not (dog.endswith("png") or dog.endswith("jpg") or dog.endswith("gif")):
                 await cmd_dog(ctx)
                 return
-            embed = discord.Embed(title="Woof!", color=discord.Colour.light_grey())
+            embed = discord.Embed(title="Woof!", description="[Click to view image]({})", color=discord.Colour.light_grey().format("https://random.dog/"+dog))
             embed.set_image(url="https://random.dog/"+dog)
             await ctx.reply(embed=embed)
 
