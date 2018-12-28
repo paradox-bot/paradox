@@ -186,7 +186,7 @@ async def cmd_invite(ctx):
     Description:
         Sends the link to invite the bot to your server.
     """
-    await ctx.reply("Visit <{}> to invite me!".format(ctx.bot.objects["invite_link"]))
+    await ctx.reply("Visit <{}> to invite me!\n\nIf you only want mathematical and moderation commands, invite TeXit at <https://discordapp.com/api/oauth2/authorize?client_id=510789298321096704&permissions=370752&scope=bot>.".format(ctx.bot.objects["invite_link"]))
 
 
 @cmds.cmd("support",
