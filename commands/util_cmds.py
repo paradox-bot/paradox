@@ -155,7 +155,8 @@ async def cmd_quote(ctx):
     if not ctx.flags["a"]:
         embed.set_author(name="{user.name}".format(user=message.author),
                          icon_url=message.author.avatar_url)
-    embed.set_footer(text=message.timestamp.strftime("[Jump to]({}) | Sent at %-I:%M %p, %d/%m/%Y in #{}".format(ctx.msg_jumpto(message), message.channel.name)))
+        embed.add_field(name="Message link", value="[Click to jump to message]({})".format(ctx.msg_jumpto(message)), inline=False)
+    embed.set_footer(text=message.timestamp.strftime("Sent at %-I:%M %p, %d/%m/%Y in #{}".format(message.channel.name)))
     if message.attachments:
         embed.set_image(url=message.attachments[0]["proxy_url"])
     await ctx.reply(embed=embed)
