@@ -153,7 +153,7 @@ async def cmd_quote(ctx):
         return
     embed = discord.Embed(colour=discord.Colour.light_grey(), description=message.content)
     if not ctx.flags["a"]:
-        embed.set_author(name="{user.name}".format(user=message.author),
+        embed.set_author(name="{user.name} [testity test test]({})".format(user=message.author, ctx.msg_jumpto(message)),
                          icon_url=message.author.avatar_url)
         embed.add_field(name="Message link", value="[Click to jump to message]({})".format(ctx.msg_jumpto(message)), inline=False)
     embed.set_footer(text=message.timestamp.strftime("Sent at %-I:%M %p, %d/%m/%Y in #{}".format(message.channel.name)))
