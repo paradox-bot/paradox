@@ -19,3 +19,7 @@ You can join the support guild [here.](https://discord.gg/ECbUu8u)
 
 # Documentation
 Command documentation can either be found with `~help cmdname` or on the [WIP Website.](https://paradoxical.pw)
+
+
+rt
+rghrgenhgrfehwbegruwebehvb2hbhvbwybwyb
