@@ -204,6 +204,8 @@ def load_into(bot):
                 await ctx.bot.clear_reactions(out_msg)
             except discord.Forbidden:
                 pass
+            except discord.NotFound:
+                pass
         asyncio.ensure_future(paging())
         return out_msg
 
