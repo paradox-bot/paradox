@@ -61,7 +61,7 @@ async def starboard_listener(bot, reaction, user):
     embed = discord.Embed(colour=discord.Colour.light_grey(), description=message.content)
     embed.set_author(name="{user.name}".format(user=message.author),
                      icon_url=message.author.avatar_url)
-    embed.add_field("[View message]({})".format(ctx.msg_jumpto(message)))
+    embed.add_field(name="[View message]({})".format(ctx.msg_jumpto(message)), value=, inline=False)
     embed.set_footer(text=message.timestamp.strftime("Sent at %-I:%M %p, %d/%m/%Y"))
     if message.attachments and "height" in message.attachments[0]:
         embed.set_image(url=message.attachments[0]["proxy_url"])
