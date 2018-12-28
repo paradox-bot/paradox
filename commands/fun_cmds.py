@@ -126,7 +126,7 @@ async def cmd_dog(ctx):
             if not (dog.endswith("png") or dog.endswith("jpg") or dog.endswith("gif")):
                 await cmd_dog(ctx)
                 return
-            embed = discord.Embed(title="Woof!", description="[Click to view image]({})".format("https://random.dog/"+dog), color=discord.Colour.light_grey())
+            embed = discord.Embed(description="[Woof!]({})".format("https://random.dog/"+dog), color=discord.Colour.light_grey())
             embed.set_image(url="https://random.dog/"+dog)
             await ctx.reply(embed=embed)
 
@@ -149,7 +149,7 @@ async def cmd_duck(ctx):
     async with aiohttp.get('http://random-d.uk/api/v1/quack?type={}'.format(img_type)) as r:
         if r.status == 200:
             js = await r.json()
-            embed = discord.Embed(title="Quack!", description="[Click to view image]({})".format(js['url']), color=discord.Colour.light_grey())
+            embed = discord.Embed(description="[Quack!]({})".format(js['url']), color=discord.Colour.light_grey())
             embed.set_image(url=js['url'])
             try:
                 await ctx.reply(embed=embed)
