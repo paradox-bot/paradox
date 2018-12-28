@@ -164,22 +164,24 @@ class Server_Setting_mute_role(Server_Setting, settingTypes.ROLE):
     category = "Moderation"
 
 
+# Logging settings
+
 @server_conf.setting
 class Server_Setting_modlog_ch(Server_Setting, settingTypes.CHANNEL):
-    name = "modlog_ch"
+    name = "modlog"
     vis_name = "modlog_ch"
     desc = "Channel to report moderation events in"
     default = None
-    category = "Moderation"
+    category = "Logging"
 
 
 @server_conf.setting
 class Server_Setting_joinlog_ch(Server_Setting, settingTypes.CHANNEL):
-    name = "joinlog_ch"
+    name = "joinlog"
     vis_name = "joinlog_ch"
     desc = "Channel to send information about new users"
     default = None
-    category = "Moderation"
+    category = "Logging"
 
 # Join and leave message settings
 
