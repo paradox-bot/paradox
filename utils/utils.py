@@ -152,7 +152,7 @@ def load_into(bot):
         return cmds
 
     @bot.util
-    async def pager(ctx, pages, embed=False):
+    async def pager(ctx, pages, embed=False, locked=True):
         """
         Replies with the first page and provides reactions to page back and forth.
         Reaction timeout is five minutes.
@@ -171,7 +171,7 @@ def load_into(bot):
         emo_prev = ctx.bot.objects["emoji_prev"]
 
         def check(reaction, user):
-            return (reaction.emoji in [emo_next, emo_prev]) and (not (user == ctx.me))
+            return (reaction.emoji in [emo_next, emo_prev]) and (not (user == ctx.me)) and (not locked or user == ctx.author)
         try:
             await ctx.bot.add_reaction(out_msg, emo_prev)
             await ctx.bot.add_reaction(out_msg, emo_next)
