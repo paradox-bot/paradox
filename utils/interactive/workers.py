@@ -10,10 +10,10 @@ def load_into(bot):
         if is_member:
             def is_user(member):
                 return ((user_str.lower() in member.display_name.lower()) or
-                       (user_str.lower() in member.name.lower()))
+                       (user_str.lower() in str(member).lower()))
         else:
             def is_user(member):
-                return (user_str.lower() in member.name.lower())
+                return (user_str.lower() in str(member).lower())
 
         collection = collection if collection else (ctx.server.members if in_server else ctx.bot.get_all_members())
         if maybe_user_id.isdigit():
@@ -23,10 +23,6 @@ def load_into(bot):
         if interactive:
             users = list(filter(is_user, collection))
             if len(users) == 0:
-                return None
-            if len(users) > limit:
-                await ctx.reply("Over {} users found matching `{}`! Please refine your search".format(limit, user_str))
-                ctx.cmd_err = (-1, "")
                 return None
             if len(users) == 1:
                 return users[0]
