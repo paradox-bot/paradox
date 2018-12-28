@@ -149,7 +149,7 @@ async def cmd_duck(ctx):
     async with aiohttp.get('http://random-d.uk/api/v1/quack?type={}'.format(img_type)) as r:
         if r.status == 200:
             js = await r.json()
-            embed = discord.Embed(title="Quack!", color=discord.Colour.light_grey())
+            embed = discord.Embed(title="Quack!", description="[Click to view image]({})".format(js['url']), color=discord.Colour.light_grey())
             embed.set_image(url=js['url'])
             try:
                 await ctx.reply(embed=embed)
