@@ -172,7 +172,7 @@ async def cmd_sorry(ctx):
 @cmds.cmd("cat",
           category="Fun Stuff",
           short_help="Sends a random cat image",
-          aliases=["meow"])
+          aliases=["meow", "purr", "pussy"])
 async def cmd_cat(ctx, recursion=0):
     """
     Usage:
