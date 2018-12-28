@@ -156,13 +156,24 @@ class Server_Setting_modrole(Server_Setting, settingTypes.ROLE):
 
 
 @server_conf.setting
+class Server_Setting_mute_role(Server_Setting, settingTypes.BOOL):
+    name = "role_persistence"
+    vis_name = "roles_persist"
+    desc = "Whether roles are re-added when a user leaves and rejoins."
+    default = True
+    category = "Moderation"
+
+    outputs = {True: "Enabled",
+               False: "Disabled"}
+
+
+@server_conf.setting
 class Server_Setting_mute_role(Server_Setting, settingTypes.ROLE):
     name = "mute_role"
     vis_name = "mute_role"
     desc = "Role given to mute users (automatically set, but can be overridden)"
     default = None
     category = "Moderation"
-
 
 # Logging settings
 
