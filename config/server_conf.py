@@ -179,8 +179,8 @@ class Server_Setting_mute_role(Server_Setting, settingTypes.ROLE):
 
 @server_conf.setting
 class Server_Setting_modlog_ch(Server_Setting, settingTypes.CHANNEL):
-    name = "modlog"
-    vis_name = "modlog_ch"
+    name = "modlog_ch"
+    vis_name = "modlog"
     desc = "Channel to report moderation events in"
     default = None
     category = "Logging"
@@ -188,8 +188,8 @@ class Server_Setting_modlog_ch(Server_Setting, settingTypes.CHANNEL):
 
 @server_conf.setting
 class Server_Setting_joinlog_ch(Server_Setting, settingTypes.CHANNEL):
-    name = "joinlog"
-    vis_name = "joinlog_ch"
+    name = "joinlog_ch"
+    vis_name = "joinlog"
     desc = "Channel to send information about new users"
     default = None
     category = "Logging"
