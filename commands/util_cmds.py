@@ -240,9 +240,16 @@ async def cmd_userinfo(ctx):
     joined = user.joined_at.strftime("%-I:%M %p, %d/%m/%Y")
     created_ago = "({} ago)".format(ctx.strfdelta(datetime.utcnow() - user.created_at, minutes=False))
     created = user.created_at.strftime("%-I:%M %p, %d/%m/%Y")
+    usernames = await ctx.bot.data.users.get(user.id, "name_history")
+    name_list = "{}{}".format("..., " if len(usernames) > 10 else "",
+                          ", ".join(usernames[-10:])) if usernames else "No recent past usernames."
+    nicknames = await ctx.bot.data.servers.get(ctx.server.id, "nickname_history")
+    nicknames = nicknames[user.id] if nicknames and user.id in nicknames else None
+    nickname_list = "{}{}".format("..., " if len(nicknames) > 10 else "",
+                                  ", ".join(nicknames[-10:])) if nicknames else "No recent past nicknames."
 
-    prop_list = ["Full name", "Nickname", "Status", "Playing", "Seen in", "Joined at", "", "Created at", ""]
-    value_list = [name, user.display_name, status, game, shared, joined, joined_ago, created, created_ago]
+    prop_list = ["Full name", "Nickname", "Names", "Nicknames", "Status", "Playing", "Seen in", "Joined at", "", "Created at", ""]
+    value_list = [name, user.display_name, name_list, nickname_list, status, game, shared, joined, joined_ago, created, created_ago]
     desc = ctx.prop_tabulate(prop_list, value_list)
 
     roles = [r.name for r in user.roles if r.name != "@everyone"]
