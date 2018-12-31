@@ -837,3 +837,28 @@ async def cmd_rolemembers(ctx):
         return
 
     await ctx.pager(ctx.paginate_list(members, title="Members in {}".format(role.name)))
+
+
+@cmds.cmd(name="names",
+         category="User Info",
+         short_help="Lists previous recorded names for a user.",
+         aliases=["namesfor", "whowas"])
+@cmds.execute("user_lookup", in_server=True, greedy=True)
+async def cmd_names(ctx):
+    """
+    Usage:
+        {prefix}names [user]
+    Description:
+        Displays the past names I have seen for the provided user, or yourself.
+    """
+    user = ctx.author
+    if ctx.arg_str != "":
+        user = ctx.objs["found_user"]
+        if not user:
+            await ctx.reply("I couldn't find any matching users in this server sorry!")
+            return
+    usernames = await ctx.bot.data.users.get(user.id, "name_history")
+    if not usernames:
+        await ctx.reply("I haven't seen this user change their name!")
+        return
+    await ctx.pager(ctx.paginate_list(usernames, title="Usernames for {}".format(user)))
