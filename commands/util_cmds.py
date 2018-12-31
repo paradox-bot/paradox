@@ -183,7 +183,7 @@ async def cmd_secho(ctx):
           category="Utility",
           short_help="Generates a bot invite link for a bot",
           aliases=["ibot"])
-@cmds.execute("user_lookup", in_server=False)
+@cmds.execute("user_lookup", in_server=False, greedy=True)
 async def cmd_invitebot(ctx):
     """
     Usage:
@@ -210,7 +210,7 @@ async def cmd_invitebot(ctx):
           short_help="Shows the user's information",
           aliases=["uinfo", "ui"])
 @cmds.require("in_server")
-@cmds.execute("user_lookup", in_server=True)
+@cmds.execute("user_lookup", in_server=True, greedy=True)
 async def cmd_userinfo(ctx):
     """
     Usage:
