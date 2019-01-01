@@ -235,7 +235,7 @@ async def cmd_invitebot(ctx):
         return
     if user:
         userid = user.id
-    await ctx.reply("https://discordapp.com/api/oauth2/authorize?client_id={}&permissions=0&scope=bot".format(userid))
+    await ctx.reply("<https://discordapp.com/api/oauth2/authorize?client_id={}&permissions=0&scope=bot>".format(userid))
 
 
 @cmds.cmd("userinfo",
