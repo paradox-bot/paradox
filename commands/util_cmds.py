@@ -65,6 +65,39 @@ async def cmd_echo(ctx):
     await ctx.reply(ctx.arg_str if ctx.arg_str else "I can't send an empty message!")
 
 
+@cmds.cmd("jumpto",
+          category="Utility",
+          short_help="Generates a jump to link with a given message ID.")
+@cmds.require("in_server")
+async def cmd_echo(ctx):
+
+    msgid = ctx.arg_str
+    if msgid == "" or not msgid.isdigit():
+        await ctx.reply("Please provide a valid message ID.")
+        return
+    message = None
+    try:
+        message = await ctx.bot.get_message(ctx.ch, msgid)
+    except Exception:
+        pass
+    for channel in ctx.server.channels:
+        if message:
+            break
+        if channel.type != discord.ChannelType.text:
+            continue
+        if channel == ctx.ch:
+            continue
+        try:
+            message = await ctx.bot.get_message(channel, msgid)
+        except Exception:
+            pass
+    if not message:
+        await ctx.reply("Couldn't find the message!")
+        return
+    embed = discord.Embed(colour=discord.Colour.green(), title="Jump to for message ID {}".format(msgid), description="[Click to jump to message]({})".format(ctx.msg_jumpto(msgid)))
+    await ctx.reply(embed=embed)
+    
+
 @cmds.cmd("pounce",
           category="Utility",
           short_help="Sends you a dm when someone says something")
@@ -115,7 +148,7 @@ async def cmd_pounce(ctx):
 
 @cmds.cmd("quote",
           category="Utility",
-          short_help="Quotes a message by id")
+          short_help="Quotes a message by ID")
 @cmds.execute("flags", flags=["a"])
 @cmds.require("in_server")
 async def cmd_quote(ctx):
@@ -130,7 +163,7 @@ async def cmd_quote(ctx):
     """
     msgid = ctx.arg_str
     if msgid == "" or not msgid.isdigit():
-        await ctx.reply("Please provide a valid message id")
+        await ctx.reply("Please provide a valid message ID.")
         return
     message = None
     try:
