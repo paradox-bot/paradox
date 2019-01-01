@@ -94,7 +94,7 @@ async def cmd_echo(ctx):
     if not message:
         await ctx.reply("Couldn't find the message!")
         return
-    embed = discord.Embed(colour=discord.Colour.green(), title="Jump to for message ID {}".format(msgid), description="[Click to jump to message]({})".format(ctx.msg_jumpto(msgid)))
+    embed = discord.Embed(colour=discord.Colour.green(), title="Jump to for message ID {}".format(message), description="[Click to jump to message]({})".format(ctx.msg_jumpto(msgid)))
     await ctx.reply(embed=embed)
 
 
@@ -188,7 +188,7 @@ async def cmd_quote(ctx):
     if not ctx.flags["a"]:
         embed.set_author(name="{user.name}".format(user=message.author),
                          icon_url=message.author.avatar_url)
-        embed.add_field(name="Message link", value="[Click to jump to message]({})".format(ctx.msg_jumpto(msgid)), inline=False)
+        embed.add_field(name="Message link", value="[Click to jump to message]({})".format(ctx.msg_jumpto(message)), inline=False)
     embed.set_footer(text=message.timestamp.strftime("Sent at %-I:%M %p, %d/%m/%Y in #{}".format(message.channel.name)))
     if message.attachments:
         embed.set_image(url=message.attachments[0]["proxy_url"])
