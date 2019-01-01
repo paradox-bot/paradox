@@ -94,7 +94,7 @@ async def cmd_echo(ctx):
     if not message:
         await ctx.reply("Couldn't find the message!")
         return
-    embed = discord.Embed(colour=discord.Colour.green(), title="Jump to for message ID {}".format(message), description="[Click to jump to message]({})".format(ctx.msg_jumpto(msgid)))
+    embed = discord.Embed(colour=discord.Colour.green(), title="Jump to for message ID {}".format(message), description="[Click to jump to message]({})".format(ctx.msg_jumpto(message)))
     await ctx.reply(embed=embed)
 
 
