@@ -105,6 +105,8 @@ async def cmd_rmrole(ctx):
     role = await ctx.find_role(ctx.arg_str, create=False, interactive=True)
     if role is None:
         return
+    if role.managed:
+        awakt ctx.reply("⚠ This role is managed by an integration. Are you sure you want to delete it? (interactive)")
     result = await ctx.ask("Are you sure you want to delete the role `{}`?".format(role.name))
     if result is None:
         await ctx.reply("Question timed out, aborting")
