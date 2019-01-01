@@ -118,7 +118,7 @@ async def cmd_rmrole(ctx):
         await ctx.reply("I am unable to delete that role, insufficient permissions.")
         return
     except Exception:
-        await ctx.reply("I am unable to delete that role, integration managed.")
+        await ctx.reply("I can't delete the `@everyone` role.")
         return
     await ctx.reply("Successfully deleted the role.")
 
