@@ -35,6 +35,7 @@ async def get_query(query, appid, **kwargs):
     async with aiohttp.get(ENDPOINT, params=payload) as r:
         if r.status == 200:
             data = await r.read()
+            print(data)
             return json.loads(data)
         else:
             return None
