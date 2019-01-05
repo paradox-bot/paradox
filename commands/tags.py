@@ -8,7 +8,7 @@ cmds = paraCH()
 @cmds.cmd("tag",
           category="Utility",
           short_help="Remember pieces of text",
-          aliases=["?", "tags"])
+          aliases=["tags"])
 @cmds.require("in_server")
 @cmds.execute("flags", flags=["create", "info", "update", "from=", "delete"])
 async def cmd_tag(ctx):
