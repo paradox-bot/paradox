@@ -36,7 +36,7 @@ async def get_query(query, appid, **kwargs):
         if r.status == 200:
             data = await r.read()
             print(data)
-            return json.loads(data)
+            return json.loads(data.decode('utf8'))
         else:
             return None
 
