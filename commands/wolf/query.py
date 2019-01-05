@@ -14,7 +14,8 @@ TEST_APPID = "47PUQG-WKJJPXQK7G"
 ENDPOINT = "http://api.wolframalpha.com/v2/query?"
 WEB = "https://www.wolframalpha.com/"
 
-FONT = ImageFont.truetype("/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf", 15, encoding="unic")
+# FONT = ImageFont.truetype("/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf", 15, encoding="unic")
+FONT = ImageFont.truetype("LiberationSans-Bold.ttf", 15, encoding="unic")
 
 # get the line size
 
