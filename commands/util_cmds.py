@@ -1,6 +1,6 @@
 from paraCH import paraCH
 import discord
-from datetime import datetime
+from datetime import datetime, timedelta
 from pytz import timezone
 import pytz
 import iso8601
@@ -226,15 +226,15 @@ async def cmd_userinfo(ctx):
             return
 
     bot_emoji = ctx.bot.objects["emoji_bot"]
-    statusdict = {"offline": "Offline/Invisible",
-                  "dnd": "Do Not Disturb",
-                  "online": "Online",
-                  "idle": "Idle/Away"}
+    statusdict = {"offline": ("Offline/Invisible", ctx.bot.objects["emoji_offline"]),
+                  "dnd": ("Do Not Disturb", ctx.bot.objects["emoji_dnd"]),
+                  "online": ("Online", ctx.bot.objects["emoji_online"]),
+                  "idle": ("Idle/Away", ctx.bot.objects["emoji_idle"])}
     colour = (user.colour if user.colour.value else discord.Colour.light_grey())
 
     name = "{}{}".format(bot_emoji if user.bot else "", user)
     game = user.game if user.game else "Nothing"
-    status = statusdict[str(user.status)]
+    status = "{1}{0}".format(*statusdict[str(user.status)])
     shared = "{} servers".format(len(list(filter(lambda m: m.id == user.id, ctx.bot.get_all_members()))))
     joined_ago = "({} ago)".format(ctx.strfdelta(datetime.utcnow() - user.joined_at, minutes=False))
     joined = user.joined_at.strftime("%-I:%M %p, %d/%m/%Y")
@@ -247,9 +247,23 @@ async def cmd_userinfo(ctx):
     nicknames = nicknames[user.id] if nicknames and user.id in nicknames else None
     nickname_list = "{}{}".format("..., " if len(nicknames) > 10 else "",
                                   ", ".join(nicknames[-10:])) if nicknames else "No recent past nicknames."
+    last_status = await ctx.bot.data.users.get(user.id, "previous_status")
+    if last_status:
+#        status_str = "{} -> {}".format(statusdict[last_status["before"]][1], statusdict[last_status["after"]][1])
+        status_str = "(Was {})".format(statusdict[last_status["before"]][0])
+        last_seen = int(datetime.utcnow().strftime('%s')) - last_status["time"]
+        if last_seen > 60:
+            seen_ago = "{} ago".format(ctx.strfdelta(timedelta(seconds=last_seen)))
+        else:
+            seen_ago = "Now"
+#        last_seen =  "{}, {}".format(seen_ago, status_str)
+    else:
+        seen_ago = "No status changes seen!"
+        status_str = ""
 
-    prop_list = ["Full name", "Nickname", "Names", "Nicknames", "Status", "Playing", "Seen in", "Joined at", "", "Created at", ""]
-    value_list = [name, user.display_name, name_list, nickname_list, status, game, shared, joined, joined_ago, created, created_ago]
+
+    prop_list = ["Full name", "Nickname", "Names", "Nicknames", "Status", "Playing", "Seen in", "Last seen", "", "Joined at", "", "Created at", ""]
+    value_list = [name, user.display_name, name_list, nickname_list, status, game, shared, seen_ago, status_str, joined, joined_ago, created, created_ago]
     desc = ctx.prop_tabulate(prop_list, value_list)
 
     roles = [r.name for r in user.roles if r.name != "@everyone"]
