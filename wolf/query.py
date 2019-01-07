@@ -22,7 +22,7 @@ FONT = ImageFont.truetype("wolf/wolf_font.ttf", 15, encoding="unic")
 
 
 def build_web_url(query):
-    return "{}input/?i={}".format(WEB, parse.quoteplus(query))
+    return "{}input/?i={}".format(WEB, parse.quote_plus(query))
 
 async def get_query(query, appid, **kwargs):
     payload = {"input": query,
@@ -169,9 +169,12 @@ async def cmd_query(ctx):
     result = await flatten_pods(result["queryresult"]["pods"])
     print(result)
     results = await glue_pods(result)
-
+    output_data = []
     for result in results:
-        with BytesIO() as output:
-            result.save(output, format="PNG")
-            output.seek(0)
-            await ctx.reply(file_data=output, file_name="wolf.png")
+        output = BytesIO()
+        result.save(output, format="PNG")
+        output.seek(0)
+        output_data.append(output)
+    embed = discord.Embed(description="[Display search on Wolfram]({})".format(build_web_url(ctx.arg_str)))
+#    await ctx.reply(file_data=output_data[0], file_name="wolf.png", embed=embed)
+    await ctx.reply(file_data=output_data[0], file_name="wolf.png", embed=embed)
