@@ -137,6 +137,8 @@ emojis = {"emoji_tex_del": "delete",
           "emoji_offline": "ParaInvis",
           "emoji_next": "Next",
           "emoji_more": "More",
+          "emoji_delete": "delete",
+          "emoji_loading": "loading",
           "emoji_prev": "Previous"}
 
 # ----Discord event handling----
