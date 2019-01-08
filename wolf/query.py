@@ -274,8 +274,7 @@ async def cmd_query(ctx):
         res = await ctx.bot.wait_for_reaction(message=out_msg,
                                               emoji=ctx.bot.objects["emoji_delete"],
                                               user=ctx.author,
-                                              timeout=300,
-                                              check=check)
+                                              timeout=300)
         if res is None:
             try:
                 await ctx.bot.remove_reaction(out_msg, ctx.bot.objects["emoji_delete"], ctx.me)
@@ -342,8 +341,7 @@ async def cmd_query(ctx):
         res = await ctx.bot.wait_for_reaction(message=out_msg,
                                               emoji=ctx.bot.objects["emoji_delete"],
                                               user=ctx.author,
-                                              timeout=300,
-                                              check=check)
+                                              timeout=300)
         if res is None:
             try:
                 await ctx.bot.remove_reaction(out_msg, ctx.bot.objects["emoji_delete"], ctx.me)
