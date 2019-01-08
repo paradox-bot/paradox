@@ -285,8 +285,6 @@ async def cmd_query(ctx):
             await ctx.bot.delete_message(out_msg)
         return
 
-        
-
     important, extra = triage_pods(result["queryresult"]["pods"])
 
     data = (await pods_to_filedata(important))[0]
