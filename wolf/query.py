@@ -355,8 +355,5 @@ async def cmd_query(ctx):
     for output in output_data:
         output.close()
 
-def load_appid(bot):
-    bot.objects["wolf_appid"] = bot.bot_conf.get("WOLF_APPID")
-
 def load_into(bot):
-    bot.add_after_event("on_ready", load_appid)
+    bot.objects["wolf_appid"] = bot.bot_conf.get("WOLF_APPID")
