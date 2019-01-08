@@ -89,7 +89,7 @@ Bot.log = log
 
 # Loading and initial objects
 
-bot.load("commands", "config", "events", "utils", ignore=["RCS", "__pycache__"])
+bot.load("commands", "config", "events", "utils", "wolf", ignore=["RCS", "__pycache__"])
 
 bot.objects["invite_link"] = "http://invite.paradoxical.pw"
 bot.objects["support guild"] = "https://discord.gg/ECbUu8u"
@@ -136,6 +136,9 @@ emojis = {"emoji_tex_del": "delete",
           "emoji_dnd": "ParaDND",
           "emoji_offline": "ParaInvis",
           "emoji_next": "Next",
+          "emoji_more": "More",
+          "emoji_delete": "delete",
+          "emoji_loading": "loading",
           "emoji_prev": "Previous"}
 
 # ----Discord event handling----
