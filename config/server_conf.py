@@ -210,6 +210,14 @@ class Server_Setting_userlog_events(Server_Setting, settingTypes.USEREVENTLIST):
     default = ["username", "nickname", "avatar", "roles"]
     category = "Logging"
 
+@server_conf.setting
+class Server_Setting_userlog_ignore(Server_Setting, settingTypes.MEMBERLIST):
+    name = "userlog_ignore"
+    vis_name = "userlog_ignore"
+    desc = "List of users ignored by userlog."
+    default = None
+    category = "Logging"
+
 # Join and leave message settings
 
 

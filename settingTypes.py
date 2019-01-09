@@ -149,6 +149,36 @@ class EMOJI(paraSetting):
             # It's probably a built in emoji or nonsense. Either way, store it.
             return userstr
 
+class MEMBER(paraSetting):
+    """
+    Member type
+    """
+    accept = "Member mention id/name. Use 0 to clear the setting."
+
+    @classmethod
+    async def humanise(self, ctx, raw):
+        """
+        Expect raw to be user id.
+        """
+        if not raw or raw == "0":
+            return "None"
+        member = ctx.server.get_member(raw)
+        if member:
+            return "{}".format(member)
+        return "{}".format(raw)
+
+    @classmethod
+    async def understand(self, ctx, userstr):
+        """
+        User may enter a mention, partial name or full name.
+        """
+        if userstr.lower() in ["0", "none"]:
+            return None
+        member = await ctx.find_user(userstr, interactive=True, in_server=True)
+        if not member:
+            return None
+        return member.id
+
 
 class CHANNEL(paraSetting):
     """
@@ -250,6 +280,12 @@ class ROLELIST(SETTING_LIST):
     accept = "Comma separated list of role mentions/ids/names. Use 0 or None to clear the setting"
     setting_type = ROLE
 
+class MEMBERLIST(SETTING_LIST):
+    """
+    List of members
+    """
+    accept = "Comma separated list of user mentions/ids/names. Use None to clear the setting"
+    setting_type = MEMBER
 
 """
 class YES_BOOL(BOOL):

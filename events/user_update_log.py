@@ -9,6 +9,10 @@ async def log_member_update(bot, before, after):
     if not userlog:
         return
 
+    log_ignore = await bot.data.servers.get(before.server.id, "userlog_ignore")
+    if before.id in log_ignore:
+        return
+
     events = await bot.data.servers.get(before.server.id, "userlog_events")
 
     desc_lines = []
