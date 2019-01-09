@@ -2,7 +2,6 @@ cd tex
 mkdir -p staging/$1/
 
 cp $1.tex staging/$1/
-cp fancycom.sty staging/$1/
 
 cd staging/$1/
 chmod -R o+rwx .
