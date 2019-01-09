@@ -190,8 +190,24 @@ class Server_Setting_modlog_ch(Server_Setting, settingTypes.CHANNEL):
 class Server_Setting_joinlog_ch(Server_Setting, settingTypes.CHANNEL):
     name = "joinlog_ch"
     vis_name = "joinlog"
-    desc = "Channel to send information about new users"
+    desc = "Channel to send information about users joining and leaving"
     default = None
+    category = "Logging"
+
+@server_conf.setting
+class Server_Setting_userlog_ch(Server_Setting, settingTypes.CHANNEL):
+    name = "userlog_ch"
+    vis_name = "userlog"
+    desc = "Channel to send information about user updates."
+    default = None
+    category = "Logging"
+
+@server_conf.setting
+class Server_Setting_userlog_events(Server_Setting, settingTypes.USEREVENTLIST):
+    name = "userlog_events"
+    vis_name = "userlog_events"
+    desc = "Which events to log in the userlog"
+    default = ["username", "nickname", "avatar", "roles"]
     category = "Logging"
 
 # Join and leave message settings

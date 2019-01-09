@@ -50,6 +50,30 @@ class STR(paraSetting):
             return userstr[1:-1]
         return userstr
 
+class LIMITED_STR(STR):
+    """
+    One of a specific set of acceptable strings.
+    """
+    acceptable = ["None"]
+
+    @classmethod
+    async def humanise(cls, ctx, raw):
+        return "{}".format(str(raw))
+
+    @classmethod
+    async def understand(cls, ctx, userstr):
+        userstr = await STR.understand(ctx, userstr)
+        if userstr not in cls.acceptable:
+            ctx.cmd_err = (1, "I don't understand \"{}\". Acceptable values are: {}".format(userstr, ",".join(cls.acceptable)))
+            return None
+        return userstr
+
+
+class USEREVENT(LIMITED_STR):
+    acceptable = ["username, nickname, roles, avatar"]
+    accept = "One of {}".format(", ".join(acceptable))
+
+
 
 class FMTSTR(STR):
     """
@@ -208,15 +232,22 @@ class CHANNELLIST(SETTING_LIST):
     """
     List of channels
     """
-    accept = "Comma separated list of channel mentions/ids/names. Use 0 or None to clear the setting."
+    accept = "Comma separated list of channel mentions/ids/names. Use 0 or None to clear the setting"
     setting_type = CHANNEL
+
+class USEREVENTLIST(SETTING_LIST):
+    """
+    List of user events
+    """
+    accept = "Comma separated list of user events (possible events are {})".format(", ".join(USEREVENT.acceptable))
+    setting_type = USEREVENT
 
 
 class ROLELIST(SETTING_LIST):
     """
-    List of channels
+    List of roles
     """
-    accept = "Comma separated list of role mentions/ids/names. Use 0 or None to clear the setting."
+    accept = "Comma separated list of role mentions/ids/names. Use 0 or None to clear the setting"
     setting_type = ROLE
 
 
