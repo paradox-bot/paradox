@@ -250,7 +250,7 @@ async def cmd_query(ctx):
         return
 
     link = "[Display search on Wolfram]({})".format(build_web_url(ctx.arg_str))
-    if not result["queryresult"]["success"]:
+    if not result["queryresult"]["success"] or result["queryresult"]["numpods"] == 0:
         desc = "Wolfram Alpha doesn't understand your query!\n Perhaps try rephrasing your question?\n{}".format(link)
         embed = discord.Embed(description=desc)
         embed.set_footer(icon_url=ctx.author.avatar_url, text="Requested by {}".format(ctx.author))
