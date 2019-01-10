@@ -1,7 +1,14 @@
 from paraCH import paraCH
 import discord
+import aiohttp
+
 cmds = paraCH()
 
+status_dict = {"online": discord.Status.online,
+               "offline": discord.Status.offline,
+               "idle": discord.Status.idle,
+               "dnd": discord.Status.dnd,
+               "invisible": discord.Status.invisible}
 
 @cmds.cmd("shutdown",
           category="Bot admin")
@@ -11,24 +18,39 @@ async def cmd_shutdown(ctx):
     await ctx.bot.logout()
 
 
-@cmds.cmd("setgame",
+@cmds.cmd("setinfo",
           category="Bot admin",
-          short_help="Sets my playing status!")
+          short_help="Set my game, avatar, and status")
+@cmds.execute("flags", flags=["game==", "avatar==", "status="])
 @cmds.require("master_perm")
 async def cmd_setgame(ctx):
     """
     Usage:
-        {prefix}setgame <status>
+        {prefix}setinfo --game game --status status --avatar avatar_url
     Description:
-        Sets my playing status to <status>, The following expansions are made:
+        The following expansions are made in game
             $users$: Number of users I can see.
             $servers$: Number of servers I am in.
             $channels$: Number of channels I am in.
+        The status must be one of online, idle, dnd, invisible.
     """
-    ctx.bot.objects["GAME"] = ctx.arg_str
-    status = await ctx.ctx_format(ctx.arg_str)
-    await ctx.bot.change_presence(game=discord.Game(name=status))
-    await ctx.reply("Game changed to: \'{}\'".format(status))
+    if ctx.flags["game"]:
+        game = ctx.flags["game"]
+        ctx.bot.objects["GAME"] = game
+        status = await ctx.ctx_format(game)
+        await ctx.bot.change_presence(game=discord.Game(name=status))
+        await ctx.reply("Game changed to: \'{}\'".format(status))
+    if ctx.flags["avatar"]:
+        avatar_url = ctx.flags["avatar"]
+        async with aiohttp.get(avatar_url) as r:
+            response = await r.read()
+        await ctx.bot.edit_profile(avatar=response)
+    if ctx.flags["status"]:
+        status = ctx.flags["status"]
+        if status not in status_dict:
+            await ctx.reply("Invalid status given!")
+        else:
+            await ctx.bot.change_presence(status=status_dict[status])
 
 @cmds.cmd("dm",
           category="Bot admin",
