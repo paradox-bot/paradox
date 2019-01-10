@@ -3,7 +3,7 @@ import shutil
 import os
 from datetime import datetime
 
-from botdata import BotData
+from paradata import BotData
 from botconf import Conf
 
 from contextBot.Context import Context
@@ -35,7 +35,9 @@ EMOJI_SERVER = conf.get("EMOJI_SERVER")
 # ------------------------------
 # Initialise data
 BOT_DATA_FILE = conf.get("BOT_DATA_FILE")
-botdata = BotData(BOT_DATA_FILE)
+CURRENT_APP = conf.get("APP")
+
+botdata = BotData(BOT_DATA_FILE, app=CURRENT_APP)
 
 # Initialise logs
 LOGNAME = conf.get("LOGFILE")
@@ -91,6 +93,7 @@ Bot.log = log
 
 bot.load("commands", "config", "events", "utils", "wolf", ignore=["RCS", "__pycache__"])
 
+bot.objects["app"] = CURRENT_APP
 bot.objects["invite_link"] = "http://invite.paradoxical.pw"
 bot.objects["support guild"] = "https://discord.gg/ECbUu8u"
 bot.objects["sorted cats"] = ["General",
