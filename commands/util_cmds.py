@@ -315,9 +315,7 @@ async def prim_cmd_discrim(ctx):
     user_info = [(str(m), "({})".format(m.id)) for m in found_members]
     max_len = len(max(list(zip(*user_info))[0], key=len))
     user_strs = ["{0[0]:^{max_len}} {0[1]:^25}".format(user, max_len=max_len) for user in user_info]
-    await ctx.reply("`{2}` user{1} found:```asciidoc\n= Users found =\n{0}\n```".format('\n'.join(user_strs),
-                                                                                        "s" if len(user_strs) > 1 else "",
-                                                                                        len(user_strs)))
+    await ctx.pager(ctx.paginate_list(user_strs, title="{} user{} found".format(len(user_strs), "s" if len(user_strs) > 1 else "", discrim)))
     # TODO: Make this splittable across codeblocks
 
 
