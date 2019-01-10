@@ -64,7 +64,7 @@ def load_into(bot):
             ctx.cmd_err = (1, "This is not valid outside of a server!")
             return None
         if userstr == "":
-            await ctx.reply("Looking up a role without a name! Something's wacky. Please check your input and try again")
+            await ctx.reply("No role name was provided. Please try again.")
             ctx.cmd_err = (-1, "")
             return None
 
