@@ -52,17 +52,19 @@ class _propTableManipulator:
     def map_prop(self, prop):
         return "{}_{}".format(self.app, prop) if (prop in self.propmap and not self.propmap[prop] and self.app) else prop
 
-    def ensure_exists(self, prop, shared=True):
-        if prop in self.propmap:
-            if self.propmap[prop] != shared:
+    def ensure_exists(self, *props, shared=True):
+        for prop in props:
+            if prop in self.propmap:
+                if self.propmap[prop] != shared:
+                    cursor = self.conn.cursor()
+                    cursor.execute('UPDATE {}_props SET shared = ? WHERE property = ?'.format(self.table), (shared, prop))
+                    self.propmap[prop] = shared
+                    self.conn.commit()
+            else:
                 cursor = self.conn.cursor()
-                cursor.execute('UPDATE {}_props SET shared = ? WHERE property = ?'.format(self.table), (shared, prop))
-                self.propmap[prop] = shared
-        else:
-            cursor = self.conn.cursor()
-            cursor.execute('INSERT INTO {}_props VALUES (?, ?)'.format(self.table), (prop, shared))
-            self.propmap = self.get_propmap()
-            self.conn.commit()
+                cursor.execute('INSERT INTO {}_props VALUES (?, ?)'.format(self.table), (prop, shared))
+                self.propmap = self.get_propmap()
+                self.conn.commit()
 
     async def get(self, *args, default=None):
         if len(args) != len(self.keys) + 1:

@@ -54,8 +54,10 @@ else:
     with open(LOGFILE, "w") as file:
         pass
 
-
+# -------------------------------
 # Get the valid prefixes in given context
+
+
 async def get_prefixes(ctx):
         """
         Returns a list of valid prefixes in this context.
@@ -89,26 +91,32 @@ async def log(bot, logMessage):
         await bot.send_message(discord.utils.get(bot.get_all_channels(), id=LOG_CHANNEL), log)
 Bot.log = log
 
-# Loading and initial objects
 
-bot.load("commands", "config", "events", "utils", "wolf", ignore=["RCS", "__pycache__"])
+# --------------------------------
 
-bot.objects["app"] = CURRENT_APP
-bot.objects["invite_link"] = "http://invite.paradoxical.pw"
-bot.objects["support guild"] = "https://discord.gg/ECbUu8u"
-bot.objects["sorted cats"] = ["General",
-                              "Fun Stuff",
+# Load shared config and utils
+bot.load("config", "utils", ignore=["RCS", "__pycache__"])
+
+# Add shared bot info
+bot.objects["sorted cats"] = ["Info",
+                              "Fun",
                               "Social",
                               "Utility",
-                              "User info",
                               "Moderation",
                               "Server Admin",
                               "Maths",
+                              "Meta",
                               "Misc"]
 
 bot.objects["sorted_conf_pages"] = [("General", ["Guild settings", "Starboard", "Mathematical settings"]),
                                     ("Manual Moderation", ["Moderation", "Logging"]),
                                     ("Join/Leave Messages", ["Join message", "Leave message"])]
+
+# Pass to app to load app-specific objects and resources
+bot.load("apps/shared",
+         "apps/{}".format(CURRENT_APP if CURRENT_APP else "default"),
+         ignore=["RCS", "__pycache__"])
+
 
 bot.objects["regions"] = {
     "brazil": "Brazil",
@@ -162,10 +170,12 @@ async def on_ready():
     GAME = await Context(bot=bot).ctx_format(GAME)
     await bot.change_presence(status=discord.Status.online, game=discord.Game(name=GAME))
     log_msg = "Logged in as\n{bot.user.name}\n{bot.user.id}\
+        \nUsing configuration {app}.\
         \nLogged into {n} servers.\
         \nLoaded {CH} command handlers.\
         \nListening for {cmds} command keywords.\
         \nReady to process commands.".format(bot=bot,
+                                             app=bot.objects["app"],
                                              n=len(bot.servers),
                                              CH=len(bot.handlers),
                                              cmds=len(bot.cmd_cache))
@@ -193,7 +203,7 @@ async def on_ready():
 async def publish_ready(bot):
     bot.objects["ready"] = True
 
-bot.add_after_event("ready", publish_ready)
+bot.add_after_event("ready", publish_ready, priority=100)
 # ----Event loops----
 # ----End event loops----
 

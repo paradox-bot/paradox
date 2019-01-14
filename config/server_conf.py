@@ -156,7 +156,7 @@ class Server_Setting_modrole(Server_Setting, settingTypes.ROLE):
 
 
 @server_conf.setting
-class Server_Setting_mute_role(Server_Setting, settingTypes.BOOL):
+class Server_Setting_role_persistence(Server_Setting, settingTypes.BOOL):
     name = "role_persistence"
     vis_name = "roles_persist"
     desc = "Whether roles are re-added when a user leaves and rejoins."
@@ -177,6 +177,7 @@ class Server_Setting_mute_role(Server_Setting, settingTypes.ROLE):
 
 # Logging settings
 
+
 @server_conf.setting
 class Server_Setting_modlog_ch(Server_Setting, settingTypes.CHANNEL):
     name = "modlog_ch"
@@ -194,6 +195,7 @@ class Server_Setting_joinlog_ch(Server_Setting, settingTypes.CHANNEL):
     default = None
     category = "Logging"
 
+
 @server_conf.setting
 class Server_Setting_userlog_ch(Server_Setting, settingTypes.CHANNEL):
     name = "userlog_ch"
@@ -202,6 +204,7 @@ class Server_Setting_userlog_ch(Server_Setting, settingTypes.CHANNEL):
     default = None
     category = "Logging"
 
+
 @server_conf.setting
 class Server_Setting_userlog_events(Server_Setting, settingTypes.USEREVENTLIST):
     name = "userlog_events"
@@ -209,6 +212,7 @@ class Server_Setting_userlog_events(Server_Setting, settingTypes.USEREVENTLIST):
     desc = "Which events to log in the userlog"
     default = ["username", "nickname", "avatar", "roles"]
     category = "Logging"
+
 
 @server_conf.setting
 class Server_Setting_userlog_ignore(Server_Setting, settingTypes.MEMBERLIST):
@@ -219,18 +223,6 @@ class Server_Setting_userlog_ignore(Server_Setting, settingTypes.MEMBERLIST):
     category = "Logging"
 
 # Join and leave message settings
-
-
-@server_conf.setting
-class Server_Setting_Join(Server_Setting, settingTypes.BOOL):
-    name = "join_msgs_enabled"
-    vis_name = "join"
-    desc = "Enables/Disables join messages"
-    default = False
-    category = "Join message"
-
-    outputs = {True: "Enabled",
-               False: "Disabled"}
 
 
 @server_conf.setting
@@ -249,18 +241,6 @@ class Server_Setting_Join_Ch(Server_Setting, settingTypes.CHANNEL):
     desc = "Channel to post in when a user joins"
     default = None
     category = "Join message"
-
-
-@server_conf.setting
-class Server_Setting_Leave(Server_Setting, settingTypes.BOOL):
-    name = "leave_msgs_enabled"
-    vis_name = "leave"
-    desc = "Enables/Disables leave messages"
-    default = False
-    category = "Leave message"
-
-    outputs = {True: "Enabled",
-               False: "Disabled"}
 
 
 @server_conf.setting
@@ -298,7 +278,7 @@ class Server_Setting_Latex_Listen(Server_Setting, settingTypes.BOOL):
     async def write(cls, ctx, value):
         result = await super().write(ctx, value)
         listens = ctx.bot.objects["server_tex_listeners"]
-        if  not (ctx.cmd_err and ctx.cmd_err[0] != 0):
+        if not (ctx.cmd_err and ctx.cmd_err[0] != 0):
             if value:
                 channels = await ctx.bot.data.servers.get(ctx.server.id, "maths_channels")
                 listens[str(ctx.server.id)] = channels if channels else []
@@ -334,3 +314,4 @@ class Server_Setting_Maths_Channels(Server_Setting, settingTypes.CHANNELLIST):
 def load_into(bot):
     bot.add_to_ctx(server_conf, name="server_conf")
     bot.s_conf = server_conf
+    bot.settingTypes = settingTypes
