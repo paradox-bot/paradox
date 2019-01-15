@@ -8,6 +8,16 @@ class paraCMD(Command):
         super().__init__(name, func, CH, **kwargs)
         self.parse_help()
         self.aliases = aliases
+        self.flags = kwargs["flags"] if "flags" in kwargs else None
+
+    async def run(self, ctx):
+        if self.flags:
+            (params, arg_str, flags) = await ctx.parse_flags(ctx.arg_str, self.flags)
+            ctx.flags = flags
+            ctx.params = params
+            ctx.arg_str = arg_str
+
+        await super().run(ctx)
 
     def parse_help(self):
         lines = self.long_help.split("\n")

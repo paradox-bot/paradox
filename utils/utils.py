@@ -152,7 +152,7 @@ def load_into(bot):
         return cmds
 
     @bot.util
-    async def pager(ctx, pages, embed=False):
+    async def pager(ctx, pages, embed=False, locked=True, **kwargs):
         """
         Replies with the first page and provides reactions to page back and forth.
         Reaction timeout is five minutes.
@@ -162,7 +162,7 @@ def load_into(bot):
         arg = "embed" if embed else "message"
         args = {}
         args[arg] = pages[0]
-        out_msg = await ctx.reply(**args)
+        out_msg = await ctx.reply(**args, **kwargs)
         if len(pages) == 1:
             return out_msg
         args = {}
@@ -171,7 +171,7 @@ def load_into(bot):
         emo_prev = ctx.bot.objects["emoji_prev"]
 
         def check(reaction, user):
-            return (reaction.emoji in [emo_next, emo_prev]) and (not (user == ctx.me))
+            return (reaction.emoji in [emo_next, emo_prev]) and (not (user == ctx.me)) and (not locked or user == ctx.author)
         try:
             await ctx.bot.add_reaction(out_msg, emo_prev)
             await ctx.bot.add_reaction(out_msg, emo_next)
@@ -203,6 +203,8 @@ def load_into(bot):
                 await ctx.bot.remove_reaction(out_msg, emo_next, ctx.me)
                 await ctx.bot.clear_reactions(out_msg)
             except discord.Forbidden:
+                pass
+            except discord.NotFound:
                 pass
         asyncio.ensure_future(paging())
         return out_msg
@@ -269,5 +271,12 @@ def load_into(bot):
         return "`[{time}]` **{user}:** {line_break}{message} {attachments}".format(time=time, user=user, line_break="\n" if line_break else "", message=msg.clean_content if clean else msg.content, attachments=attachments)
 
     @bot.util
-    def msg_jumpto(ctx,msg):
+    def msg_jumpto(ctx, msg):
         return "https://discordapp.com/channels/{}/{}/{}".format(msg.server.id, msg.channel.id, msg.id)
+
+    @bot.util
+    async def confirm_sent(ctx, msg=None, reply=None):
+        try:
+            await ctx.bot.add_reaction(msg if msg else ctx.msg, "✅")
+        except discord.Forbidden:
+            await ctx.reply(reply if reply else "Check your DMs!")

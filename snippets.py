@@ -17,14 +17,16 @@ async def snip_serverlist(ctx):
 
 
 @snip("user_lookup")
-async def snip_user_lookup(ctx, in_server=False):
+async def snip_user_lookup(ctx, in_server=False, greedy=False, func=None):
     """
     Snippet to look up a user, assuming a partial user sting, mention, or id was given as the first arg.
 
     Expected to interactively ask and select if multiple users are found.
     Sets ctx.objs["found_user"]
+    If greedy is set uses the entire arg-str to lookup the 
     """
-    ctx.objs["found_user"] = await ctx.find_user(ctx.params[0], in_server, interactive=True)
+    content = func(ctx) if func is not None else (ctx.arg_str if greedy else ctx.params[0])
+    ctx.objs["found_user"] = await ctx.find_user(content, in_server, interactive=True)
     return ctx.objs["found_user"]
 
 @snip("dm")

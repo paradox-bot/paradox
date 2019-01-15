@@ -1,0 +1,5 @@
+Hi!
+
+I am a high quality LaTeX rendering, utility, and moderation bot created to enhance mathematical discussion.
+
+Use `{prefix}list` to see all my commands and `{prefix}help cmd` to get detailed help for `cmd`.
