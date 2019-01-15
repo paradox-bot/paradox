@@ -8,6 +8,6 @@ I have many informative commands that you can use to obtain user, role, and serv
 Of course, you need some fun commands. I have image grabbing commands (dog, cat, duck), image search, and Lenny. ( ͡° ͜ʖ ͡°)
 
 If you wish to view the entire list of commands, use `{prefix}list`.
-I can be invited at <{invite_link}> and if you love me, please consider donating to my developers to cover server costs and support future development at <{donate}>.
+I can be invited at <https://invite.paradoxical.pw> and if you love me, please consider donating to my developers to cover server costs and support future development at <{donate}>.
 
 Need help with Paradøx? Head to our server for support or if you're just looking for a nice chat! <invite>
