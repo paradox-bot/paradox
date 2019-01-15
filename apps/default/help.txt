@@ -10,4 +10,4 @@ Of course, you need some fun commands. I have image grabbing commands (dog, cat,
 If you wish to view the entire list of commands, use `{prefix}list`.
 I can be invited at <https://invite.paradoxical.pw> and if you love me, please consider donating to my developers to cover server costs and support future development at <{donate}>.
 
-Need help with Paradøx? Head to our server for support or if you're just looking for a nice chat! <{invite}>
+Need help with Paradøx? Head to our server for support or if you're just looking for a nice chat! <{support}>
