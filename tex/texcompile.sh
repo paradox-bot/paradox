@@ -6,7 +6,7 @@ cp $1.tex staging/$1/
 cd staging/$1/
 chmod -R o+rwx .
 
-sudo -u latex TEXINPUTS=:../../ pdflatex -no-shell-escape $1.tex >> texout.log 2>&1
+sudo -u latex TEXINPUTS=:../../../resources pdflatex -no-shell-escape $1.tex >> texout.log 2>&1
 if [ $? != 0 ];
 then
     grep -A 10 -m 1 "^!" $1.log;
