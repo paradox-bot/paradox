@@ -69,7 +69,7 @@ async def cmd_tex(ctx):
         {prefix}$ <equation>
         {prefix}$$ <displayeqn>
         {prefix}align <align block>
-        {prefix}tex --colour white | black | transparent | grey | dark
+        {prefix}tex --colour white | black | grey | dark
     Description:
         Renders and displays LaTeX code.
 
@@ -86,7 +86,7 @@ async def cmd_tex(ctx):
         Use the reactions to delete the message and show your code, respectively.
     Flags:2
         --config:: Shows you your current config.
-        --colour:: Changes your colourscheme. One of default, white, black, transparent, or grey.
+        --colour:: Changes your colourscheme. One of default, white, black, or grey.
         --keepmsg:: Toggles whether I delete your source message or not.
         --alwaysmath:: Toggles whether {prefix}tex always renders in math mode.
         --allowother:: Toogles whether other users may use the reaction to show your message source.
@@ -114,8 +114,8 @@ async def cmd_tex(ctx):
         return
     elif ctx.flags["colour"] or ctx.flags["color"]:
         colour = ctx.flags["colour"] if ctx.flags["colour"] else ctx.flags["color"]
-        if colour not in ["default", "white", "transparent", "black", "grey", "gray", "dark"]:
-            await ctx.reply("Unknown colour scheme. Known colours are `default`, `white`, `transparent`, `black`, `dark` and `grey`.")
+        if colour not in ["default", "white", "black", "grey", "gray", "dark"]:
+            await ctx.reply("Unknown colour scheme. Known colours are `default`, `white`, `black`, `dark` and `grey`.")
             return
         await ctx.data.users.set(ctx.authid, "latex_colour", colour)
         await ctx.reply("Your colour scheme has been changed to {}".format(colour))
