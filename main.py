@@ -79,16 +79,18 @@ bot = Bot(data=botdata,
           log_file=LOGFILE)
 
 bot.DEBUG = conf.get("DEBUG")
+bot.objects["logfile"] = open(bot.LOGFILE, 'a+')
 
 
 async def log(bot, logMessage):
     print(logMessage)
-    with open(bot.LOGFILE, 'a+') as logfile:
-        logfile.write(logMessage + "\n")
-    ctx = Context(bot=bot)
-    log_splits = await ctx.msg_split(logMessage, True)
-    for log in log_splits:
-        await bot.send_message(discord.utils.get(bot.get_all_channels(), id=LOG_CHANNEL), log)
+    bot.objects["logfile"].write(logMessage + "\n")
+    if bot.DEBUG > 1:
+        ctx = Context(bot=bot)
+        log_splits = await ctx.msg_split(logMessage, True)
+        for log in log_splits:
+            await bot.send_message(discord.utils.get(bot.get_all_channels(), id=LOG_CHANNEL), log)
+
 Bot.log = log
 
 
