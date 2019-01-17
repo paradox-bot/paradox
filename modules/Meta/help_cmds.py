@@ -22,8 +22,14 @@ async def cmd_help(ctx):
     msg = ""
     all_commands = await ctx.get_cmds()  # Should probably be cached from ctx init
     if ctx.arg_str == "":
-        help_msg = ctx.bot.objects["help_str"].format(prefix=ctx.used_prefix, support=ctx.bot.objects["support_guild"], donate=ctx.bot.objects["donate_link"])
-        await ctx.reply(help_msg, dm=True)
+        help_msg = ctx.bot.objects["help_str"].format(prefix=ctx.used_prefix,
+                                                      user=ctx.author,
+                                                      invite=ctx.bot.objects["invite_link"],
+                                                      support=ctx.bot.objects["support_guild"],
+                                                      donate=ctx.bot.objects["donate_link"])
+        help_file = ctx.bot.objects["help_file"] if "help_file" in ctx.bot.objects else None
+        help_embed = ctx.bot.objects["help_embed"] if "help_embed" in ctx.bot.objects else None
+        await ctx.reply(help_msg, file_name=help_file, embed=help_embed, dm=True)
         try:
             await ctx.bot.add_reaction(ctx.msg, "✅")
         except discord.Forbidden:

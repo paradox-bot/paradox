@@ -221,7 +221,7 @@ def triage_pods(pod_list):
 @cmds.cmd("query",
           category="Maths",
           short_help="Sends a query to Wolfram Alpha",
-          aliases=["wolf", "w", "?w", "??w"])
+          aliases=["ask", "wolf", "w", "?w"])
 @cmds.execute("flags", flags=["text"])
 async def cmd_query(ctx):
     """
