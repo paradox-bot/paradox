@@ -50,7 +50,6 @@ async def get_query(query, appid, **kwargs):
         if r.status == 200:
             # Read the response, interp as json, and return
             data = await r.read()
-            print(data)
             return json.loads(data.decode('utf8'))
         else:
             # If some error occurs, unintelligently fail out
@@ -88,7 +87,7 @@ async def glue_pods(flat_pods):
     Returns:
         A list of PIL images containing the given pods glued and split as required.
     """
-    indent_width = 20
+    indent_width = 10
     before_title_gap = 10
     image_border = 5
     margin = 5
@@ -261,7 +260,6 @@ async def cmd_query(ctx):
         fields = await pods_to_textdata(result["queryresult"]["pods"])
         embed = discord.Embed(description=link)
         embed.set_footer(icon_url=ctx.author.avatar_url, text="Requested by {}".format(ctx.author))
-        print(fields)
         await ctx.emb_add_fields(embed, fields)
         await ctx.bot.delete_message(temp_msg)
         out_msg = await ctx.reply(embed=embed)
