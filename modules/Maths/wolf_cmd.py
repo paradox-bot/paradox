@@ -202,7 +202,7 @@ async def pods_to_textdata(pod_data):
 
 def triage_pods(pod_list):
     if "primary" in pod_list[0] and pod_list[0]["primary"]:
-        return (pod_list[0], pod_list[1:])
+        return ([pod_list[0]], pod_list[1:])
     else:
         important = [pod_list[0]]
         important.extend([pod for pod in pod_list if ("primary" in pod and pod["primary"])])
