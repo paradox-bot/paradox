@@ -92,28 +92,32 @@ async def make_muted(ctx):
         await ctx.reply("Set Muted role to existing role named Muted. You can change this in the config.")
         return role
 
+    out_msg = await ctx.reply("Creating Mute role, please wait...")
     role_name = "Muted"
     colour = discord.Colour.red()
     perms = discord.Permissions.none()
     perms.send_messages = False
     role = None
-    overwrite = discord.PermissionsOverwrite()
+    overwrite = discord.PermissionOverwrite()
     overwrite.send_messages = False
     try:
         role = await ctx.bot.create_role(ctx.server, name=role_name, colour=colour, permissions=perms)
-        my_position = max(r.position for r in ctx.me.roles if r.permissions.manage_roles)
-        await ctx.bot.move_role(role, my_position - 1)
+        hot_roles = [r.position for r in ctx.me.roles if r.permissions.manage_roles or r.permissions.administrator]
+        if hot_roles:
+            hot_position = max(hot_roles)
+            await ctx.bot.move_role(ctx.server, role, hot_position - 1)
     except discord.Forbidden:
-        return None
-    for channel in ctx.server.channels:
-        try:
-            await ctx.bot.edit_channel_permissions(channel, role, overwrite)
-        except discord.Forbidden:
-            pass
+        hot_roles = None
+    if hot_roles:
+        for channel in ctx.server.channels:
+            try:
+                await ctx.bot.edit_channel_permissions(channel, role, overwrite)
+            except discord.Forbidden:
+                pass
 
-    await ctx.server_conf.mute_role.set(ctx, role.id)
-    await ctx.reply("Created new Mute role Muted. Please check the permission restrictions are correct.")
-    return role
+        await ctx.server_conf.mute_role.set(ctx, role.id)
+        await ctx.bot.edit_message(out_msg, "Created new Mute role Muted. Please check the permission restrictions are correct.")
+        return role
 
 
 async def mute(ctx, user, **kwargs):
