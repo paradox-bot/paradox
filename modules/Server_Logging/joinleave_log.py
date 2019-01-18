@@ -11,7 +11,7 @@ async def log_member_update(bot, before, after):
         return
 
     log_ignore = await bot.data.servers.get(before.server.id, "userlog_ignore")
-    if before.id in log_ignore:
+    if log_ignore and (before.id in log_ignore):
         return
 
     events = await bot.data.servers.get(before.server.id, "userlog_events")
