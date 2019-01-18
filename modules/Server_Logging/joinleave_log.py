@@ -1,66 +1,89 @@
+from contextBot.Context import Context
 import discord
 from datetime import datetime
 
+statusdict = {"offline": "Offline/Invisible",
+              "dnd": "Do Not Disturb",
+              "online": "Online",
+              "idle": "Idle/Away"}
 
-async def log_member_update(bot, before, after):
-    userlog = await bot.data.servers.get(before.server.id, "userlog_ch")
-    if not userlog:
+
+async def log_join(bot, member):
+    joinlog = await bot.data.servers.get(member.server.id, "joinlog_ch")
+    if not joinlog:
         return
-    userlog = before.server.get_channel(userlog)
-    if not userlog:
-        return
-
-    log_ignore = await bot.data.servers.get(before.server.id, "userlog_ignore")
-    if log_ignore and (before.id in log_ignore):
-        return
-
-    events = await bot.data.servers.get(before.server.id, "userlog_events")
-
-    desc_lines = []
-    image_url = None
-    if (events is None or "username" in events) and before.name != after.name:
-        desc_lines.append("**Username Changed** for {}".format(after.mention))
-        desc_lines.append("`Before:` {}".format(before.name))
-        desc_lines.append("`After:` {}".format(after.name))
-
-    if (events is None or "nickname" in events) and before.nick != after.nick:
-        desc_lines.append("**Nickname Changed** for {}".format(after.mention))
-        desc_lines.append("`Before:` {}".format(before.nick))
-        desc_lines.append("`After:` {}".format(after.nick))
-
-    if (events is None or "avatar" in events) and before.avatar_url != after.avatar_url:
-        desc_lines.append("**Avatar Changed** for {}".format(after.mention))
-        old_av = "[Old Avatar]({})".format(before.avatar_url) if before.avatar_url else "None"
-        new_av = "[New Avatar]({})".format(after.avatar_url) if after.avatar_url else "None"
-        desc_lines.append("`Before:` {}".format(old_av))
-        desc_lines.append("`After:` {}".format(new_av))
-        image_url = after.avatar_url if after.avatar_url else None
-
-    if (events is None or "roles" in events) and before.roles != after.roles:
-        before_roles = [role.name for role in before.roles]
-        after_roles = [role.name for role in after.roles]
-        added_roles = [role for role in after_roles if role not in before_roles]
-        removed_roles = [role for role in before_roles if role not in after_roles]
-        desc_lines.append("**Roles Updated** for {}".format(after.mention))
-        if added_roles:
-            desc_lines.append("Added roles `{}`".format("`, `".join(added_roles)))
-        if removed_roles:
-            desc_lines.append("Removed roles `{}`".format("`, `".join(removed_roles)))
-
-    if not desc_lines:
+    joinlog = member.server.get_channel(joinlog)
+    if not joinlog:
         return
 
-    description = "\n".join(desc_lines)
-    colour = (after.colour if after.colour.value else discord.Colour.light_grey())
+    ctx = Context(bot=bot, member=member)
 
-    embed = discord.Embed(color=colour, description=description)
-    if image_url:
-        embed.set_thumbnail(url=image_url)
+    user = member
+    colour = (user.colour if user.colour.value else discord.Colour.light_grey())
+
+    game = user.game if user.game else "Nothing"
+    status = statusdict[str(user.status)]
+    shared = "{} servers".format(len(list(filter(lambda m: m.id == user.id, ctx.bot.get_all_members()))))
+    created_ago = "({} ago)".format(ctx.strfdelta(datetime.utcnow() - user.created_at))
+    created = user.created_at.strftime("%-I:%M %p, %d/%m/%Y")
+
+    prop_list = ["Status", "Playing", "Seen in", "Created at", ""]
+    value_list = [status, game, shared, created, created_ago]
+    desc = ctx.prop_tabulate(prop_list, value_list)
+
+    embed = discord.Embed(type="rich", color=colour, description=desc)
+    embed.set_author(name="New {usertype} joined: {user} (id: {user.id})".format(usertype="bot" if user.bot else "user", user=user),
+                     icon_url=user.avatar_url,
+                     url=user.avatar_url)
+    embed.set_thumbnail(url=user.avatar_url)
     embed.set_footer(text=datetime.utcnow().strftime("Sent at %-I:%M %p, %d/%m/%Y"))
-    await bot.send_message(userlog, embed=embed)
+
+    await ctx.send(joinlog, embed=embed)
+
+
+async def log_leave(bot, member):
+    joinlog = await bot.data.servers.get(member.server.id, "joinlog_ch")
+    if not joinlog:
+        return
+    joinlog = member.server.get_channel(joinlog)
+    if not joinlog:
+        return
+
+    ctx = Context(bot=bot, member=member)
+
+    user = member
+    colour = (user.colour if user.colour.value else discord.Colour.light_grey())
+
+    joined_ago = "({} ago)".format(ctx.strfdelta(datetime.utcnow() - user.joined_at))
+    joined = user.joined_at.strftime("%-I:%M %p, %d/%m/%Y")
+    usernames = await ctx.bot.data.users.get(user.id, "name_history")
+    name_list = "{}{}".format("..., " if len(usernames) > 10 else "",
+                              ", ".join(usernames[-10:])) if usernames else "No recent past usernames."
+    nicknames = await ctx.bot.data.members.get(ctx.server.id, user.id, "nickname_history")
+    nickname_list = "{}{}".format("..., " if len(nicknames) > 10 else "",
+                                  ", ".join(nicknames[-10:])) if nicknames else "No recent past nicknames."
+
+    roles = [r.name for r in user.roles if r.name != "@everyone"]
+    roles = ('`' + '`, `'.join(roles) + '`') if roles else "None"
+
+    prop_list = ["Past names", "Past nicks", "Joined at", "", "Roles"]
+    value_list = [name_list, nickname_list, joined, joined_ago, roles]
+    desc = ctx.prop_tabulate(prop_list, value_list)
+
+    embed = discord.Embed(type="rich", color=colour, description=desc)
+    embed.set_author(name="{usertype} left: {user} (id: {user.id})".format(usertype="Bot" if user.bot else "User", user=user),
+                     icon_url=user.avatar_url,
+                     url=user.avatar_url)
+    embed.set_thumbnail(url=user.avatar_url)
+    embed.set_footer(text=datetime.utcnow().strftime("Sent at %-I:%M %p, %d/%m/%Y"))
+
+    await ctx.send(joinlog, embed=embed)
 
 
 def load_into(bot):
-    bot.data.servers.ensure_exists("userlog_ignore", "userlog_events", "userlog_ch", shared=False)
+    bot.data.servers.ensure_exists("joinlog_ch", shared=False)
+    bot.data.users.ensure_exists("name_history", shared=True)
+    bot.data.members.ensure_exists("nickname_history", shared=True)
 
-    bot.add_after_event("member_update", log_member_update, priority=9)
+    bot.add_after_event("member_join", log_join)
+    bot.add_after_event("member_remove", log_leave)
