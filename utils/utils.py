@@ -287,15 +287,17 @@ def load_into(bot):
         return (code == 0)
 
     @bot.util
-    async def offer_delete(ctx, out_msg):
+    async def offer_delete(ctx, out_msg, to_delete=None):
         mod_role = await ctx.server_conf.mod_role.get(ctx)
 
         def check(reaction, user):
+            if user == ctx.me:
+                return False
             result = user == ctx.author
             result = result or (mod_role and mod_role in [role.id for role in user.roles])
-            result = result or ctx.user.server_permissions.administrator
-            result = result or ctx.user.server_permissions.manage_messages
-            result = result or ctx.user == ctx.server.owner
+            result = result or user.server_permissions.administrator
+            result = result or user.server_permissions.manage_messages
+            result = result or user == ctx.server.owner
             return result
         try:
             await ctx.bot.add_reaction(out_msg, ctx.bot.objects["emoji_delete"])
@@ -312,4 +314,11 @@ def load_into(bot):
             except discord.NotFound:
                 pass
         elif res.reaction.emoji == ctx.bot.objects["emoji_delete"]:
-            await ctx.bot.delete_message(out_msg)
+            to_delete = to_delete if to_delete is not None else [out_msg]
+            for msg in to_delete:
+                try:
+                    await ctx.bot.delete_message(msg)
+                except discord.NotFound:
+                    pass
+                except discord.Forbidden:
+                    pass

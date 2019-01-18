@@ -1,5 +1,6 @@
 from paraCH import paraCH
 import discord
+import asyncio
 import aiohttp
 from urllib import parse
 import json
@@ -255,22 +256,7 @@ async def cmd_query(ctx):
         await ctx.emb_add_fields(embed, fields)
         await ctx.bot.delete_message(temp_msg)
         out_msg = await ctx.reply(embed=embed)
-        try:
-            await ctx.bot.add_reaction(out_msg, ctx.bot.objects["emoji_delete"])
-        except discord.Forbidden:
-            return
-
-        res = await ctx.bot.wait_for_reaction(message=out_msg,
-                                              emoji=ctx.bot.objects["emoji_delete"],
-                                              user=ctx.author,
-                                              timeout=300)
-        if res is None:
-            try:
-                await ctx.bot.remove_reaction(out_msg, ctx.bot.objects["emoji_delete"], ctx.me)
-            except discord.NotFound:
-                pass
-        elif res.reaction.emoji == ctx.bot.objects["emoji_delete"]:
-            await ctx.bot.delete_message(out_msg)
+        await ctx.offer_delete(out_msg)
         return
 
     important, extra = triage_pods(result["queryresult"]["pods"])
@@ -283,62 +269,41 @@ async def cmd_query(ctx):
 
     await ctx.bot.delete_message(temp_msg)
     out_msg = await ctx.reply(file_data=data, file_name="wolf.png", embed=embed)
-
-    try:
-        if extra:
+    asyncio.ensure_future(ctx.offer_delete(out_msg))
+   
+    if extra:
+        try:
             await ctx.bot.add_reaction(out_msg, ctx.bot.objects["emoji_more"])
-        await ctx.bot.add_reaction(out_msg, ctx.bot.objects["emoji_delete"])
-    except discord.Forbidden:
-        return
-
-    def check(reaction, user):
-        return reaction.emoji in [ctx.bot.objects["emoji_more"], ctx.bot.objects["emoji_delete"]]
-
-    res = await ctx.bot.wait_for_reaction(message=out_msg,
-                                          user=ctx.author,
-                                          timeout=300,
-                                          check=check)
-    if res is None:
-        try:
-            await ctx.bot.remove_reaction(out_msg, ctx.bot.objects["emoji_more"], ctx.me)
-            await ctx.bot.remove_reaction(out_msg, ctx.bot.objects["emoji_delete"], ctx.me)
-        except discord.NotFound:
-            pass
-    elif res.reaction.emoji == ctx.bot.objects["emoji_delete"]:
-        await ctx.bot.delete_message(out_msg)
-    elif res.reaction.emoji == ctx.bot.objects["emoji_more"]:
-        temp_msg = await ctx.reply("Processing results, please wait. {}".format(loading_emoji))
-
-        output_data[0].seek(0)
-        output_data.extend(await pods_to_filedata(extra))
-        try:
-            await ctx.bot.delete_message(out_msg)
-            await ctx.bot.delete_message(temp_msg)
-        except discord.NotFound:
-            pass
-
-        out_msgs = []
-        for file_data in output_data[:-1]:
-            out_msgs.append(await ctx.reply(file_data=file_data, file_name="wolf.png"))
-        out_msgs.append(await ctx.reply(file_data=output_data[-1], file_name="wolf.png", embed=embed))
-        out_msg = out_msgs[-1]
-        try:
-            await ctx.bot.add_reaction(out_msg, ctx.bot.objects["emoji_delete"])
         except discord.Forbidden:
-            return
+            pass
+        else:
+            res = await ctx.bot.wait_for_reaction(message=out_msg,
+                                                  user=ctx.author,
+                                                  emoji=ctx.bot.objects["emoji_more"],
+                                                  timeout=300)
+            if res is None:
+                try:
+                    await ctx.bot.remove_reaction(out_msg, ctx.bot.objects["emoji_more"], ctx.me)
+                except discord.NotFound:
+                    pass
+            elif res.reaction.emoji == ctx.bot.objects["emoji_more"]:
+                temp_msg = await ctx.reply("Processing results, please wait. {}".format(loading_emoji))
 
-        res = await ctx.bot.wait_for_reaction(message=out_msg,
-                                              emoji=ctx.bot.objects["emoji_delete"],
-                                              user=ctx.author,
-                                              timeout=300)
-        if res is None:
-            try:
-                await ctx.bot.remove_reaction(out_msg, ctx.bot.objects["emoji_delete"], ctx.me)
-            except discord.NotFound:
-                pass
-        elif res.reaction.emoji == ctx.bot.objects["emoji_delete"]:
-            for msg in out_msgs:
-                await ctx.bot.delete_message(msg)
+                output_data[0].seek(0)
+                output_data.extend(await pods_to_filedata(extra))
+                try:
+                    await ctx.bot.delete_message(out_msg)
+                    await ctx.bot.delete_message(temp_msg)
+                except discord.NotFound:
+                    pass
+
+                out_msgs = []
+                for file_data in output_data[:-1]:
+                    out_msgs.append(await ctx.reply(file_data=file_data, file_name="wolf.png"))
+                out_msgs.append(await ctx.reply(file_data=output_data[-1], file_name="wolf.png", embed=embed))
+                out_msg = out_msgs[-1]
+                await ctx.offer_delete(out_msg, to_delete=out_msgs)
+
     for output in output_data:
         output.close()
 
