@@ -11,9 +11,9 @@ class ModEvent:
     TODO: Ticket numbers and stuff.
     """
     actions = {"ban": "User Banned",
-               "multi-ban": "Multiple-User Ban",
+               "multi-ban": "Users Banned",
                "hackban": "User Hackbanned",
-               "multi-hackban": "Multiple-User Hackban",
+               "multi-hackban": "Users Hackbanned",
                "kick": "User Kicked",
                "multi-kick": "Users Kicked",
                "unban": "User Unbanned",
@@ -93,7 +93,7 @@ async def make_muted(ctx):
         return role
 
     role_name = "Muted"
-    colour = discord.Colour.red()
+    colour = discord.Colour.orange()
     perms = discord.Permissions.none()
     perms.send_messages = False
     role = None
