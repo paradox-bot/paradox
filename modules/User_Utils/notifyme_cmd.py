@@ -111,7 +111,8 @@ async def cmd_notifyme(ctx):
             check_strs = []
             for check in checks:
                 check_strs.append(await check_to_str(ctx, check, markdown=False))
-            await ctx.pager(ctx.paginate_list(check_strs, title="Current active pounces"))
+            await ctx.pager(ctx.paginate_list(check_strs, title="Current active pounces"), dm=ctx.bot.objects["brief"])
+            await ctx.confirm_sent(ctx.msg, "Sent your pounces")
         return
 
     if ctx.arg_str:
