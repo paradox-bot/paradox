@@ -140,7 +140,7 @@ async def cmd_tex(ctx):
         if allowed:
             await ctx.reply("Other people may now use the reaction to view your message source.")
         else:
-            await ctx.reply("Other people may no longer use the reaction to viw your message source.")
+            await ctx.reply("Other people may no longer use the reaction to view your message source.")
         return
     elif ctx.flags["name"]:
         showname = await ctx.data.users.get(ctx.authid, "latex_showname")
@@ -350,7 +350,7 @@ async def show_config(ctx):
           category="Maths",
           short_help="Change how your LaTeX compiles",
           aliases=["texconfig"])
-@cmds.execute("flags", flags=["reset", "add", "append", "approve==", "remove", "deny=="])
+@cmds.execute("flags", flags=["reset", "add", "append", "approve==", "remove", "retract", "deny=="])
 async def cmd_preamble(ctx):
     """
     Usage:
@@ -363,6 +363,7 @@ async def cmd_preamble(ctx):
         reset::  Resets your preamble to the default.
         add::  Adds the provided code to your current preamble.
         remove:: Removes all lines from your preamble containing the given text.
+        retract:: Retract a pending preamble.
     """
     user_id = ctx.flags["approve"] or ctx.flags["deny"]
     if user_id:
@@ -386,6 +387,11 @@ async def cmd_preamble(ctx):
         await ctx.data.users.set(ctx.authid, "latex_preamble", default_preamble)
         await ctx.data.users.set(ctx.authid, "limbo_preamble", "")
         await ctx.reply("Your LaTeX preamble has been reset to the default!")
+        return
+
+    if ctx.flags["retract"]:
+        await ctx.data.users.set(ctx.authid, "limbo_preamble", "")
+        await ctx.reply("You have retracted your preamble request.")
         return
 
     if not ctx.arg_str and not ctx.msg.attachments:
