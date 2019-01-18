@@ -91,6 +91,8 @@ async def cmd_list(ctx):
             await ctx.confirm_sent(reply="Sending compact command list to your DMs!")
 
     else:
+        await ctx.confirm_sent(reply="Sending command list to your DMs!")
+
         cat_msgs = {}
         for cmd in sorted(commands):
             command = commands[cmd]
@@ -104,14 +106,13 @@ async def cmd_list(ctx):
                 continue
             cat_msgs[cat.lower()] += "```"
             if len(msg) + len(cat_msgs[cat.lower()]) > 1990:
-                await ctx.reply(msg, dm=True)
+                if not (await ctx.reply(msg, dm=True)):
+                    return
                 msg = ""
             msg += cat_msgs[cat.lower()]
 
-        await ctx.confirm_sent(reply="Sending command list to your DMs!")
-
         more_help = "Use `{0.used_prefix}help <cmd>` to get detailed help on a command, or `{0.used_prefix}list --brief` to obtain a more compact listing.".format(ctx)
 
-        out_msg = ctx.reply(msg, split=True, dm=True)
+        out_msg = await ctx.reply(msg, dm=True)
         if out_msg:
             await ctx.reply(more_help, dm=True)
