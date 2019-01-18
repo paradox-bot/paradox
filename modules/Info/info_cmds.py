@@ -128,7 +128,7 @@ async def cmd_userinfo(ctx):
                   "idle": ("Idle/Away", ctx.bot.objects["emoji_idle"])}
     colour = (user.colour if user.colour.value else discord.Colour.light_grey())
 
-    name = "{}{}".format(bot_emoji if user.bot else "", user)
+    name = "{} {}".format(user, bot_emoji if user.bot else "")
     game = user.game if user.game else "Nothing"
     status = "{1}{0}".format(*statusdict[str(user.status)])
     shared = "{} servers".format(len(list(filter(lambda m: m.id == user.id, ctx.bot.get_all_members()))))

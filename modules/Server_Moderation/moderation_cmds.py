@@ -11,9 +11,9 @@ class ModEvent:
     TODO: Ticket numbers and stuff.
     """
     actions = {"ban": "User Banned",
-               "multi-ban": "Multiple-User Ban",
+               "multi-ban": "Users Banned",
                "hackban": "User Hackbanned",
-               "multi-hackban": "Multiple-User Hackban",
+               "multi-hackban": "Users Hackbanned",
                "kick": "User Kicked",
                "multi-kick": "Users Kicked",
                "unban": "User Unbanned",

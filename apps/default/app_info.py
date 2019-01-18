@@ -1,4 +1,4 @@
-HELP_FILE = "apps/test/help.txt"
+HELP_FILE = "apps/default/help.txt"
 
 with open(HELP_FILE, "r") as help_file:
     help_str = help_file.read()
