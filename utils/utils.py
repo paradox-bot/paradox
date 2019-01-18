@@ -280,3 +280,36 @@ def load_into(bot):
             await ctx.bot.add_reaction(msg if msg else ctx.msg, "✅")
         except discord.Forbidden:
             await ctx.reply(reply if reply else "Check your DMs!")
+
+    @bot.util
+    async def has_mod(ctx, user):
+        (code, msg) = await ctx.CH.checks["in_server_has_mod"](ctx)
+        return (code == 0)
+
+    @bot.util
+    async def offer_delete(ctx, out_msg):
+        mod_role = await ctx.server_conf.mod_role.get(ctx)
+
+        def check(reaction, user):
+            result = user == ctx.author
+            result = result or (mod_role and mod_role in [role.id for role in user.roles])
+            result = result or ctx.user.server_permissions.administrator
+            result = result or ctx.user.server_permissions.manage_messages
+            result = result or ctx.user == ctx.server.owner
+            return result
+        try:
+            await ctx.bot.add_reaction(out_msg, ctx.bot.objects["emoji_delete"])
+        except discord.Forbidden:
+            return
+
+        res = await ctx.bot.wait_for_reaction(message=out_msg,
+                                              emoji=ctx.bot.objects["emoji_delete"],
+                                              check=check,
+                                              timeout=300)
+        if res is None:
+            try:
+                await ctx.bot.remove_reaction(out_msg, ctx.bot.objects["emoji_delete"], ctx.me)
+            except discord.NotFound:
+                pass
+        elif res.reaction.emoji == ctx.bot.objects["emoji_delete"]:
+            await ctx.bot.delete_message(out_msg)
