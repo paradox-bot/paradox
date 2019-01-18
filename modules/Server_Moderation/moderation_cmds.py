@@ -93,7 +93,7 @@ async def make_muted(ctx):
         return role
 
     role_name = "Muted"
-    colour = discord.Colour.orange()
+    colour = discord.Colour.red()
     perms = discord.Permissions.none()
     perms.send_messages = False
     role = None
