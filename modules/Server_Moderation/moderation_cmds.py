@@ -518,8 +518,8 @@ async def cmd_mute(ctx):
         {prefix}mute -m <user1> [user2] [user3]... [-r <reason>] [-f] [-t time]
     Description:
         Mutes the users listed with an optional reason. (WIP)
-        <Required>, [Optional]
         Multi mute currently supports up to 20 users.
+        <Required>, [Optional]
     Flags:3
         -m::  **multi** Allows multiple user mutes. (20 maximum)
         -r::  **reason** Reason for the mute.
@@ -565,8 +565,8 @@ async def cmd_unmute(ctx):
         {prefix}unmute <user1> [user2] [user3]... [-r <reason>] [-f]
     Description:
         Unmutes the users listed with an optional reason. (WIP)
-        <Required>, [Optional]
         Multi unmute currently supports up to 20 users.
+        <Required>, [Optional]
     Flags:3
         -m::  **multi** Allows multiple user unmutes. (20 maximum)
         -r::  **reason** Reason for the unmute.
