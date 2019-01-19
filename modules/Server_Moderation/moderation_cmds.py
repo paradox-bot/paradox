@@ -363,10 +363,12 @@ async def cmd_hackban(ctx):
         Hackbans the users listed with an optional reason.
         Hackbanning allows you to ban without the user being in the server.
         This is not an interactive command, you provide a userid for the users you wish to ban.
+        Multi hackban currently supports up to 20 users.
+        <Required>, [Optional] 
     Flags:3
-        -m::  **multi**, allows mutiple user bans.
+        -m::  **multi**, allows mutiple user bans. (20 maximum)
         -r::  **reason**, reason for the ban
-        -p::  **purge**, purge <days> days of message history. (Default 1)
+        -p::  **purge**, purge <days> days of message history. (1 day by default)
         -f::  **fake**, pretends to hackban.
     """
     if ctx.arg_str.strip() == "":
@@ -400,8 +402,10 @@ async def cmd_unban(ctx):
     Description:
         Unbans the listed users with optional reason.
         Partial names are supported.
+        Multi unban currently supports up to 20 users.
+        <Required>, [Optional]
     Flags:3
-        -m::  **multi** allows mutiple user unbans.
+        -m::  **multi** allows mutiple user unbans. (20 maximum)
         -r::  **reason** Reason for unbanning
     """
     if ctx.arg_str.strip() == "":
@@ -436,10 +440,12 @@ async def cmd_ban(ctx):
     Description:
         Bans the users listed with an optional reason.
         Partial names are supported.
+        Multi ban currently supports up to 20 bans.
+        <Required>, [Optional]
     Flags:3
-        -m::  **multi** Allows mutiple user bans.
+        -m::  **multi** Allows mutiple user bans. (20 maximum)
         -r::  **reason** Reason for the ban
-        -p::  **purge** Purge <days> days of message history. **Default 1**
+        -p::  **purge** Purge <days> days of message history. (1 day by default)
         -f::  **fake** Pretends to ban.
     """
     if ctx.arg_str.strip() == "":
@@ -474,10 +480,12 @@ async def cmd_softban(ctx):
     Description:
         Softbans (bans and unbans) the users listed with an optional reason.
         Partial names are supported.
+        Multi softban currently supports up to 20 users.
+        <Required>, [Optional]
     Flags:3
-        -m::  **multi** Allows mutiple user bans.
+        -m::  **multi** Allows mutiple user bans. (20 maximum)
         -r::  **reason** Reason for the ban
-        -p::  **purge** Purge <days> days of message history. **Default 1**
+        -p::  **purge** Purge <days> days of message history. (1 day by default)
         -f::  **fake** Pretends to softban.
     """
     if ctx.arg_str.strip() == "":
@@ -510,8 +518,10 @@ async def cmd_mute(ctx):
         {prefix}mute -m <user1> [user2] [user3]... [-r <reason>] [-f] [-t time]
     Description:
         Mutes the users listed with an optional reason. (WIP)
+        <Required>, [Optional]
+        Multi mute currently supports up to 20 users.
     Flags:3
-        -m::  **multi** Allows multiple user mutes.
+        -m::  **multi** Allows multiple user mutes. (20 maximum)
         -r::  **reason** Reason for the mute.
         -f::  **fake** Pretends to mute.
         -t::  **time** Optional time to mute for.
@@ -555,8 +565,10 @@ async def cmd_unmute(ctx):
         {prefix}unmute <user1> [user2] [user3]... [-r <reason>] [-f]
     Description:
         Unmutes the users listed with an optional reason. (WIP)
+        <Required>, [Optional]
+        Multi unmute currently supports up to 20 users.
     Flags:3
-        -m::  **multi** Allows multiple user unmutes.
+        -m::  **multi** Allows multiple user unmutes. (20 maximum)
         -r::  **reason** Reason for the unmute.
         -f::  **fake** Pretends to unmute.
     """
@@ -591,8 +603,10 @@ async def cmd_kick(ctx):
         {prefix}kick <user1> [user2] [user3]... [-r <reason>] [-f]
     Description:
         Kicks the users listed with an optional reason.
+        Multi kick currently supports up to 20 users.
+        <Required>, [Optional]
     Flags:3
-        -m::  **multi** Allows multiple user kicks.
+        -m::  **multi** Allows multiple user kicks. (20 maximum)
         -r::  **reason** Reason for the kick.
         -f::  **fake** Pretends to kick.
     """
@@ -627,8 +641,9 @@ async def cmd_giverole(ctx):
     Description:
         Gives the specified roles to the provided user.
         Provides a friendlier alternative to {prefix}rolemod.
+        <Required>, [Optional]
     Examples:
-        {prefix}gr Para Bots root
+        {prefix}gr JetRaidz Member
     """
     if len(ctx.params) < 2:
         await ctx.reply("Please provide a user and at least one role to add.")
@@ -653,6 +668,7 @@ async def cmd_rolemod(ctx):
     Description:
         Modifies the specified user(s) roles.
         All listed roles must be prefixed with + or -, the roles with + will be added and the roles with - will be removed.
+        <Required>, [Optional]
     Example:
         {prefix}rmod Para +Bots -Member
     """
