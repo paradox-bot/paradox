@@ -22,7 +22,8 @@ async def cmd_shutdown(ctx):
 
 @cmds.cmd("setinfo",
           category="Bot admin",
-          short_help="Set my game, avatar, and status")
+          short_help="Set my game, avatar, and status",
+          aliases=["status", "setgame", "setstatus"])
 @cmds.execute("flags", flags=["game==", "avatar==", "status="])
 @cmds.require("master_perm")
 async def cmd_setgame(ctx):
