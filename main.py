@@ -167,7 +167,7 @@ async def on_ready():
     bot.objects["ready"] = False
     GAME = conf.getStr("GAME")
     if GAME == "":
-        GAME = "in $servers$ servers!"
+        GAME = "Type {}help for usage!".format(PREFIX)
     bot.objects["GAME"] = GAME
     GAME = await Context(bot=bot).ctx_format(GAME)
     await bot.change_presence(status=discord.Status.online, game=discord.Game(name=GAME))
