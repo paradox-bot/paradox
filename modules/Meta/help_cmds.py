@@ -17,23 +17,25 @@ async def cmd_help(ctx):
     Description:
         Shows detailed help on the requested command or sends you a general help message.
     """
-    help_keys = {"prefix": ctx.used_prefix,
+    prefix = ctx.bot.prefix
+    here_prefix = await ctx.bot.data.servers.get(ctx.server.id, "guild_prefix")
+    here_prefix = here_prefix if here_prefix else prefix
+
+    help_keys = {"prefix": prefix,
                  "msg": ctx.msg}
     msg = ""
     all_commands = await ctx.get_cmds()  # Should probably be cached from ctx init
     if ctx.arg_str == "":
-        help_msg = ctx.bot.objects["help_str"].format(prefix=ctx.used_prefix,
+        help_msg = ctx.bot.objects["help_str"].format(prefix=prefix,
                                                       user=ctx.author,
                                                       invite=ctx.bot.objects["invite_link"],
                                                       support=ctx.bot.objects["support_guild"],
                                                       donate=ctx.bot.objects["donate_link"])
         help_file = ctx.bot.objects["help_file"] if "help_file" in ctx.bot.objects else None
         help_embed = ctx.bot.objects["help_embed"] if "help_embed" in ctx.bot.objects else None
-        await ctx.reply(help_msg, file_name=help_file, embed=help_embed, dm=True)
-        try:
-            await ctx.bot.add_reaction(ctx.msg, "✅")
-        except discord.Forbidden:
-            await ctx.reply("Help sent!")
+        out = await ctx.reply(help_msg, file_name=help_file, embed=help_embed, dm=True)
+        if out:
+            await ctx.reply("A brief description and guide on how to use me was sent to your DMs! Please use `{prefix}list` to see a list of all my commands, and `{prefix}help cmd` to get detailed help on a command!".format(prefix=here_prefix))
     else:
         cmd = ctx.params[0]
         if cmd in all_commands:
