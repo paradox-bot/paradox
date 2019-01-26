@@ -15,7 +15,7 @@ cmds = paraCH()
 
 # TODO: Factor out into a util file everything except commands.
 
-header = "\\documentclass[preview, 12pt]{standalone}\
+header = "\\documentclass[preview, border=5pt, 12pt]{standalone}\
           \n\\nonstopmode\
           \n\\everymath{\\displaystyle}\
           \n\\usepackage[mathletters]{ucs}\
