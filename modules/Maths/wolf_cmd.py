@@ -240,7 +240,7 @@ async def cmd_query(ctx):
         await ctx.reply("Did not get a valid response from Wolfram Alpha. If the problem persists, please contact support.")
         return
 
-    link = "[Display search on Wolfram]({})".format(build_web_url(ctx.arg_str))
+    link = "[Display results online and refine query]({})".format(build_web_url(ctx.arg_str))
     if not result["queryresult"]["success"] or result["queryresult"]["numpods"] == 0:
         desc = "Wolfram Alpha doesn't understand your query!\n Perhaps try rephrasing your question?\n{}".format(link)
         embed = discord.Embed(description=desc)
