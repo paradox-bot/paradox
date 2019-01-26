@@ -290,15 +290,19 @@ def load_into(bot):
     async def offer_delete(ctx, out_msg, to_delete=None):
         mod_role = await ctx.server_conf.mod_role.get(ctx) if ctx.server else None
 
-        def check(reaction, user):
-            if user == ctx.me:
-                return False
-            result = user == ctx.author
-            result = result or (mod_role and mod_role in [role.id for role in user.roles])
-            result = result or user.server_permissions.administrator
-            result = result or user.server_permissions.manage_messages
-            result = result or user == ctx.server.owner
-            return result
+        if ctx.server:
+            def check(reaction, user):
+                if user == ctx.me:
+                    return False
+                result = user == ctx.author
+                result = result or (mod_role and mod_role in [role.id for role in user.roles])
+                result = result or user.server_permissions.administrator
+                result = result or user.server_permissions.manage_messages
+                result = result or user == ctx.server.owner
+                return result
+        else:
+            def check(reaction, user):
+                return user == ctx.author
         try:
             await ctx.bot.add_reaction(out_msg, ctx.bot.objects["emoji_delete"])
         except discord.Forbidden:
