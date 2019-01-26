@@ -315,14 +315,12 @@ def load_into(bot):
         if res is None:
             try:
                 await ctx.bot.remove_reaction(out_msg, ctx.bot.objects["emoji_delete"], ctx.me)
-            except discord.NotFound:
+            except Exception:
                 pass
         elif res.reaction.emoji == ctx.bot.objects["emoji_delete"]:
             to_delete = to_delete if to_delete is not None else [out_msg]
             for msg in to_delete:
                 try:
                     await ctx.bot.delete_message(msg)
-                except discord.NotFound:
-                    pass
-                except discord.Forbidden:
+                except Exception:
                     pass
