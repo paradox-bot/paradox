@@ -18,7 +18,7 @@ async def cmd_help(ctx):
         Shows detailed help on the requested command or sends you a general help message.
     """
     prefix = ctx.bot.prefix
-    here_prefix = await ctx.bot.data.servers.get(ctx.server.id, "guild_prefix")
+    here_prefix = await ctx.bot.data.servers.get(ctx.server.id, "guild_prefix") if ctx.server else None
     here_prefix = here_prefix if here_prefix else prefix
 
     help_keys = {"prefix": prefix,

@@ -288,7 +288,7 @@ def load_into(bot):
 
     @bot.util
     async def offer_delete(ctx, out_msg, to_delete=None):
-        mod_role = await ctx.server_conf.mod_role.get(ctx)
+        mod_role = await ctx.server_conf.mod_role.get(ctx) if ctx.server else None
 
         def check(reaction, user):
             if user == ctx.me:
