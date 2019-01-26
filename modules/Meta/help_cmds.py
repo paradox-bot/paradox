@@ -34,7 +34,7 @@ async def cmd_help(ctx):
         help_file = ctx.bot.objects["help_file"] if "help_file" in ctx.bot.objects else None
         help_embed = ctx.bot.objects["help_embed"] if "help_embed" in ctx.bot.objects else None
         out = await ctx.reply(help_msg, file_name=help_file, embed=help_embed, dm=True)
-        if out:
+        if out and ctx.server:
             await ctx.reply("A brief description and guide on how to use me was sent to your DMs! Please use `{prefix}list` to see a list of all my commands, and `{prefix}help cmd` to get detailed help on a command!".format(prefix=here_prefix))
     else:
         cmd = ctx.params[0]
