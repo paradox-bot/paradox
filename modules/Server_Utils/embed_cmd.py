@@ -1,17 +1,10 @@
 from paraCH import paraCH
 import discord
 import string
+import asyncio
 
 
 cmds = paraCH()
-
-
-class TimedOutError(Exception):
-    pass
-
-
-class UserCancelled(Exception):
-    pass
 
 
 discordColours = {"teal": discord.Colour.teal(),
@@ -36,167 +29,78 @@ discordColours = {"teal": discord.Colour.teal(),
                   "darker grey": discord.Colour.darker_grey()}
 
 
-async def print_menu(ctx, items, title=None):
-    item_names = [item[0] for item in items]
-    nice_list = ctx.paginate_list(item_names, title=title)[0]
-
-    message = ctx.objs["menu_msg"] if "menu_msg" in ctx.objs else None
-    if message is None:
-        message = await ctx.reply(nice_list)
-    else:
-        await ctx.bot.edit_message(message, nice_list)
-    return message
+root_menu = []
+field_menu = []
 
 
-async def run_menu(ctx, items, title=None, message=None, on_redraw=None):
-    ctx.objs["menu_msg"] = message
-    ctx.objs["menu_items"] = items
-    ctx.objs["menu_title"] = title
-    ctx.objs["menu_done"] = False
-
-    while True:
-        ctx.objs["menu_msg"] = await print_menu(ctx, ctx.objs["menu_items"], title=ctx.objs["menu_title"])
-        listening = [str(i + 1) for i in range(0, len(items))]
-        listening.append("c")
-        result = await ctx.listen_for(listening, timeout=60)
-
-        if result is None:
-            await ctx.bot.edit_message(ctx.objs["menu_msg"], "Menu timed out, aborting.")
-            return False
-
-        try:
-            await ctx.bot.delete_message(result)
-        except discord.Forbidden:
-            pass
-        except discord.NotFound:
-            pass
-
-        result = result.content
-
-        if result == "c":
-            await ctx.bot.edit_message(ctx.objs["menu_msg"], "User cancelled, aborting.")
-            return False
-
-        try:
-            await ctx.objs["menu_items"][int(result) - 1][1](ctx)
-        except TimedOutError:
-            await ctx.bot.edit_message(ctx.objs["menu_msg"], "Menu timed out, aborting.")
-            return False
-
-        if ctx.objs["menu_done"]:
-            return True
-
-        if on_redraw:
-            await on_redraw(ctx)
-
+# Define callback functions for the menu
 
 async def update_preview(ctx):
     try:
         await ctx.bot.edit_message(ctx.objs["embed_preview_msg"], embed=ctx.objs["embed_embed"])
     except discord.HTTPException:
-        await ctx.reply("The embed contains errors and cannot be updated!")
+        await ctx.bot.edit_message(ctx.objs["embed_preview_msg"], "This embed contains errors and cannot be updated! Please re-enter your last input.")
 
 
-async def wait_for_string(ctx, max_len, check=None):
-    invalid = True
-    to_delete = []
-    to_return = None
-
-    while invalid:
-        output = await ctx.bot.wait_for_message(author=ctx.author, timeout=600, channel=ctx.ch)
-        to_delete.append(output)
-        if output is None:
-            break
-
-        if output.content != "c":
-            if check is not None:
-                err = check(ctx, output.content)
-                if err:
-                    to_delete.append(await ctx.reply(err))
-                    continue
-            if len(output.content) > max_len:
-                to_delete.append(await ctx.reply("This is too long! Please try again."))
-                continue
-            else:
-                invalid = False
-                to_return = output.content
-        else:
-            invalid = False
-
-    for msg in to_delete:
-        try:
-            await ctx.bot.delete_message(msg)
-        except discord.Forbidden:
-            pass
-        except discord.NotFound:
-            pass
-
-    if invalid:
-        raise TimedOutError()
-    return to_return
+async def root_callback(ctx, result):
+    await root_menu[result][1](ctx)
+    asyncio.ensure_future(update_preview(ctx))
 
 
+async def field_callback(ctx, result):
+    await field_menu[result][1](ctx)
+    asyncio.ensure_future(update_preview(ctx))
+
+
+# Define menu items
+
+def menu_item(item_list, item_name):
+    def wrapper(func):
+        item_list.append((item_name, func))
+    return wrapper
+
+
+@menu_item(root_menu, "Set Title")
 async def set_title(ctx):
-    new_msg = "Please enter the title! (Max 256 characters, type c to cancel.)"
-    await ctx.bot.edit_message(ctx.objs["menu_msg"], new_msg)
+    await ctx.bot.edit_message(ctx.objs["menu"]["msg"], "Please enter the title! (Max 256 characters, type c to cancel.)")
 
-    output = await wait_for_string(ctx, 256)
-
+    output = await ctx.wait_for_string(max_len=256)
     if output is not None:
         ctx.objs["embed_embed"].title = output
 
 
-async def set_description(ctx):
-    new_msg = "Please enter the description! (Type c to cancel.)"
-    await ctx.bot.edit_message(ctx.objs["menu_msg"], new_msg)
-
-    output = await wait_for_string(ctx, 2048)
-
-    if output is not None:
-        ctx.objs["embed_embed"].description = output
-
-
-async def set_url(ctx):
-    new_msg = "Please enter the url! (Must be a valid url, type c to cancel.)"
-    await ctx.bot.edit_message(ctx.objs["menu_msg"], new_msg)
-
-    output = await wait_for_string(ctx, 2000)
-
-    if output is not None:
-        ctx.objs["embed_embed"].url = output
-
-
-async def set_footer(ctx):
-    new_msg = "Please enter the footer text! (Type c to cancel.)"
-    await ctx.bot.edit_message(ctx.objs["menu_msg"], new_msg)
-
-    output = await wait_for_string(ctx, 2048)
-
-    if output is not None:
-        ctx.objs["embed_embed"].set_footer(text=output, icon_url=ctx.objs["embed_embed"].footer.icon_url)
-
-
-async def set_image(ctx):
-    new_msg = "Please enter the embed image url! (Must end with png/gif/jpg, type c to cancel.)"
-    await ctx.bot.edit_message(ctx.objs["menu_msg"], new_msg)
-
-    new_image = await wait_for_string(ctx, 2048)
-
-    if new_image is not None:
-        ctx.objs["embed_embed"].set_image(url=new_image)
-
-
+@menu_item(root_menu, "Set Author")
 async def set_author(ctx):
     new_msg = "Please enter the author name! (Max 256 characters, type c to cancel.)"
-    await ctx.bot.edit_message(ctx.objs["menu_msg"], new_msg)
+    await ctx.bot.edit_message(ctx.objs["menu"]["msg"], new_msg)
 
-    new_author = await wait_for_string(ctx, 256)
-
+    new_author = await ctx.wait_for_string(max_len=256)
     if new_author is not None:
         ctx.objs["embed_embed"].set_author(name=new_author, url=ctx.objs["embed_embed"].author.url, icon_url=ctx.objs["embed_embed"].author.icon_url)
 
 
-def colour_check(ctx, user_str):
+@menu_item(root_menu, "Set Author Icon")
+async def set_author_icon(ctx):
+    new_msg = "Please submit the author icon! (Must be a valid URL, type c to cancel.)"
+    await ctx.bot.edit_message(ctx.objs["menu"]["msg"], new_msg)
+
+    output = await ctx.wait_for_string()
+    if output is not None:
+        ctx.objs["embed_embed"].set_author(name=ctx.objs["embed_embed"].author.name, url=ctx.objs["embed_embed"].author.url, icon_url=output)
+
+
+@menu_item(root_menu, "Set Author URL")
+async def set_author_url(ctx):
+    new_msg = "Please enter the author URL! (Must be a valid URL, type c to cancel.)"
+    await ctx.bot.edit_message(ctx.objs["menu"]["msg"], new_msg)
+
+    output = await ctx.wait_for_string()
+    if output is not None:
+        ctx.objs["embed_embed"].set_author(name=ctx.objs["embed_embed"].author.name, url=output, icon_url=ctx.objs["embed_embed"].author.icon_url)
+
+
+def colour_check(ctx, msg):
+    user_str = msg.content
     if user_str.lower() in discordColours:
         return None
     user_str = user_str.strip("#")
@@ -204,12 +108,12 @@ def colour_check(ctx, user_str):
         return "Colour not recognised!"
 
 
+@menu_item(root_menu, "Set Colour")
 async def set_colour(ctx):
     new_msg = "Please enter a colour! (Either a valid hex code or a named colour, type c to cancel.)"
-    await ctx.bot.edit_message(ctx.objs["menu_msg"], new_msg)
+    await ctx.bot.edit_message(ctx.objs["menu"]["msg"], new_msg)
 
-    output = await wait_for_string(ctx, 20, check=colour_check)
-
+    output = await ctx.wait_for_string(check=colour_check)
     if output is not None:
         if output.lower() in discordColours:
             colour = discordColours[output.lower()]
@@ -219,13 +123,166 @@ async def set_colour(ctx):
         ctx.objs["embed_embed"].colour = colour
 
 
-async def close_menu(ctx):
-    await ctx.bot.delete_message(ctx.objs["menu_msg"])
-    ctx.objs["menu_done"] = True
+@menu_item(root_menu, "Set URL")
+async def set_url(ctx):
+    new_msg = "Please enter the url! (Must be a valid url, type c to cancel.)"
+    await ctx.bot.edit_message(ctx.objs["menu"]["msg"], new_msg)
+
+    output = await ctx.wait_for_string()
+    if output is not None:
+        ctx.objs["embed_embed"].url = output
 
 
-async def go_up(ctx):
-    ctx.objs["menu_done"] = True
+@menu_item(root_menu, "Set Description")
+async def set_description(ctx):
+    new_msg = "Please enter the description! (Type c to cancel.)"
+    await ctx.bot.edit_message(ctx.objs["menu"]["msg"], new_msg)
+
+    output = await ctx.wait_for_string()
+    if output is not None:
+        ctx.objs["embed_embed"].description = output
+
+
+@menu_item(root_menu, "Set Image")
+async def set_image(ctx):
+    new_msg = "Please submit the embed image! (Must be a valid URL, type c to cancel.)"
+    await ctx.bot.edit_message(ctx.objs["menu"]["msg"], new_msg)
+
+    new_image = await ctx.wait_for_string()
+    if new_image is not None:
+        ctx.objs["embed_embed"].set_image(url=new_image)
+
+
+@menu_item(root_menu, "Set Thumbnail")
+async def set_thumbnail(ctx):
+    new_msg = "Please submit the thumbnail image! (Must be a valid URL, type c to cancel.)"
+    await ctx.bot.edit_message(ctx.objs["menu"]["msg"], new_msg)
+
+    new_image = await ctx.wait_for_string()
+    if new_image is not None:
+        ctx.objs["embed_embed"].set_thumbnail(url=new_image)
+
+
+@menu_item(root_menu, "Set Footer Text")
+async def set_footer(ctx):
+    new_msg = "Please enter the footer text! (Type c to cancel.)"
+    await ctx.bot.edit_message(ctx.objs["menu"]["msg"], new_msg)
+
+    output = await ctx.wait_for_string()
+    if output is not None:
+        ctx.objs["embed_embed"].set_footer(text=output, icon_url=ctx.objs["embed_embed"].footer.icon_url)
+
+
+@menu_item(root_menu, "Set Footer Icon")
+async def set_footer_icon(ctx):
+    new_msg = "Please submit the footer image! (Must be a valid URL, type c to cancel.)"
+    await ctx.bot.edit_message(ctx.objs["menu"]["msg"], new_msg)
+
+    output = await ctx.wait_for_string()
+    if output is not None:
+        ctx.objs["embed_embed"].set_footer(text=ctx.objs["embed_embed"].footer.text, icon_url=output)
+
+
+@menu_item(root_menu, "Modify Fields")
+async def field_edit(ctx):
+    await ctx.menu([item[0] for item in field_menu], field_callback, menu_msg=ctx.objs["menu"]["msg"], title="Embed Editor -> Modify Fields", prompt="Please type the number of your selection:")
+
+
+@menu_item(root_menu, "Save and Exit")
+async def save_and_exit(ctx):
+    server_embeds = await ctx.data.servers.get(ctx.server.id, "server_embeds")
+    server_embeds = server_embeds if server_embeds else {}
+    if "embed_name" in ctx.objs and ctx.objs["embed_name"]:
+        embed_name = ctx.objs["embed_name"]
+    else:
+        new_msg = "Please enter a short name for this embed, for viewing and editing."
+        await ctx.bot.edit_message(ctx.objs["menu"]["msg"], new_msg)
+
+        embed_name = await ctx.wait_for_string()
+
+    if embed_name is not None:
+        if embed_name in server_embeds:
+            resp = await ctx.ask("Are you sure you want to overwrite the stored embed `{}`?".format(embed_name))
+            if resp is None or resp == 0:
+                return None
+        server_embeds[embed_name] = ctx.objs["embed_embed"].to_dict()
+        await ctx.data.servers.set(ctx.server.id, "server_embeds", server_embeds)
+        await ctx.reply("The embed has been saved!\n To view the embed use `{prefix}embed {name}`, and reopen the Embed Editor with `{prefix}editembed {name}`.".format(prefix=ctx.used_prefix, name=embed_name))
+        await ctx.bot.edit_message(ctx.objs["embed_preview_msg"], " ")
+        asyncio.ensure_future(ctx.offer_delete(ctx.objs["embed_preview_msg"]))
+        ctx.objs["menu"]["done"] = True
+
+
+@menu_item(root_menu, "Exit without saving")
+async def exit_no_save(ctx):
+    ctx["menu"]["done"] = True
+
+
+async def ask_for_field(ctx):
+    field = {"name": None,
+             "value": None,
+             "inline": None}
+    await ctx.bot.edit_message(ctx.objs["menu"]["msg"], "Please enter the field name. (256 characters max, press c to cancel.))")
+    field_name = await ctx.wait_for_string(max_len=256)
+    if field_name is None:
+        return None
+    field["name"] = field_name
+
+    await ctx.bot.edit_message(ctx.objs["menu"]["msg"], "Please enter the field value. (1024 characters max, press c to cancel.))")
+    field_value = await ctx.wait_for_string(max_len=1024)
+    if field_value is None:
+        return None
+    field["value"] = field_value
+
+    inline = await ctx.ask("Should the field be displayed inline?", use_msg=ctx.objs["menu"]["msg"])
+    if inline is None:
+        return None
+    field["inline"] = True if inline == 1 else False
+    return field
+
+
+@menu_item(field_menu, "Add field")
+async def add_field(ctx):
+    field = await ask_for_field(ctx)
+    if field is not None:
+        ctx.objs["embed_embed"].add_field(name=field["name"], value=field["value"], inline=field["inline"])
+
+
+@menu_item(field_menu, "Remove Field")
+async def remove_field(ctx):
+    fields = ctx.objs["embed_embed"].fields
+    if not fields:
+        await ctx.bot.edit_message(ctx.objs["menu"]["msg"], "There are no fields to remove! Type anything to continue.")
+        await ctx.wait_for_string()
+        return
+
+    result = await ctx.silent_selector("Please select a field to remove", [field.name for field in fields], use_msg=ctx.objs["menu"]["msg"])
+    if result is None:
+        return
+
+    ctx.objs["embed_embed"].remove_field(result)
+
+
+@menu_item(field_menu, "Edit Field")
+async def edit_field(ctx):
+    fields = ctx.objs["embed_embed"].fields
+    if not fields:
+        await ctx.bot.edit_message(ctx.objs["menu"]["msg"], "There are no fields to edit! Type anything to continue.")
+        await ctx.wait_for_string()
+        return
+
+    result = await ctx.silent_selector("Please select a field to edit", [field.name for field in fields], use_msg=ctx.objs["menu"]["msg"])
+    if result is None:
+        return
+
+    field = await ask_for_field(ctx)
+    if field is not None:
+        ctx.objs["embed_embed"].set_field_at(result, name=field["name"], value=field["value"], inline=field["inline"])
+
+
+@menu_item(field_menu, "Back to Embed Editor")
+async def go_back(ctx):
+    ctx.objs["menu"]["done"] = True
 
 
 async def init_embed(ctx):
@@ -235,66 +292,74 @@ async def init_embed(ctx):
     ctx.objs["embed_embed"] = embed
 
 
-async def add_field(ctx):
-    pass
+async def get_server_embed(ctx):
+    server_embeds = await ctx.data.servers.get(ctx.server.id, "server_embeds")
+    if not server_embeds:
+        await ctx.reply("There are no saved embeds in this server! Moderators may create embeds using `{}buildembed`".format(ctx.used_prefix))
+        return
+    if ctx.arg_str == "":
+        keys = list(server_embeds.keys())
+        result = await ctx.selector("Please select an embed!", keys)
+        if result is None:
+            return
+        name = keys[result]
+    elif ctx.arg_str not in server_embeds:
+        await ctx.reply("No embed exists with this name! Use `{}{}` to see a list of embeds".format(ctx.used_prefix, ctx.used_cmd_name))
+        return
+    else:
+        name = ctx.arg_str
 
-
-async def remove_field(ctx):
-    pass
-
-
-async def edit_field(ctx):
-    pass
-
-
-def submenu(func):
-    async def wrapper(ctx):
-        items = ctx.objs["menu_items"]
-        title = ctx.objs["menu_title"]
-        await func(ctx)
-        ctx.objs["menu_items"] = items
-        ctx.objs["menu_title"] = title
-        ctx.objs["menu_done"] = False
-    return wrapper
-
-
-menu_title = "Please select an action, or type cancel"
-
-field_menu = [("Add Field", add_field),
-              ("Remove Field", remove_field),
-              ("Edit Field", edit_field),
-              ("Back to main menu", go_up)]
-
-
-@submenu
-async def field_edit(ctx):
-    await run_menu(ctx, field_menu, message=ctx.objs["menu_msg"], title=menu_title, on_redraw=update_preview)
-
-base_menu = [("Set Title", set_title),
-             ("Set Description", set_description),
-             ("Set URL", set_url),
-             ("Set Colour", set_colour),
-             ("Set Footer", set_footer),
-             ("Set Image", set_image),
-#                 "Set Thumbnail",
-             ("Set Author", set_author),
-             ("Modify fields", field_edit),
-             ("Save and exit", close_menu)
-             ]
+    embed = server_embeds[name]
+    proper_embed = discord.Embed.from_data(embed)
+    if "footer" in embed:
+        proper_embed._footer = embed["footer"]
+    if "image" in embed:
+        proper_embed._image = embed["image"]
+    return name, proper_embed
 
 
 @cmds.cmd("buildembed",
           category="Utility",
           short_help="Interactively build an embed to be retrieved later",
-          aliases=["newembed"])
+          aliases=["newembed", "editembed"])
 @cmds.require("in_server")
+@cmds.require("in_server_has_mod")
 async def cmd_buildembed(ctx):
     """
     Usage:
         {prefix}buildembed
+        {prefix}editembed <embedname>
     Description:
-        Interactively creates an embed which may be used elsewhere in the server.
+        Interactively creates or edits an embed which may be used elsewhere in the server.
     """
-    ctx.objs["embed_preview"] = await init_embed(ctx)
+    if ctx.used_cmd_name in ["buildembed", "newembed"]:
+        ctx.objs["embed_preview"] = await init_embed(ctx)
+    else:
+        fetch_embed = await get_server_embed(ctx)
+        if fetch_embed is None:
+            return
+        name, embed = fetch_embed
+        ctx.objs["embed_preview_msg"] = await ctx.reply("Preview:", embed=embed)
+        ctx.objs["embed_embed"] = embed
+        ctx.objs["embed_name"] = name
 
-    await run_menu(ctx, base_menu, title=menu_title, on_redraw=update_preview)
+    await ctx.outer_menu([item[0] for item in root_menu], root_callback, title="Embed Editor", prompt="Please type the number of your selection:")
+
+
+@cmds.cmd("embed",
+          category="Utility",
+          short_help="View an embed created with the Embed Editor",
+          aliases=["newembed"])
+@cmds.require("in_server")
+async def cmd_embed(ctx):
+    """
+    Usage:
+        {prefix}embed [embedname]
+    Description:
+        Displays an embed created with the embed editor.
+        If no name is given, and there is more than one available embed, supplies a list of the server embeds.
+    """
+    fetch_embed = await get_server_embed(ctx)
+    if fetch_embed is None:
+        return
+    await ctx.reply(embed=fetch_embed[1])
