@@ -321,18 +321,18 @@ async def get_server_embed(ctx):
 @cmds.cmd("buildembed",
           category="Utility",
           short_help="Interactively build an embed to be retrieved later",
-          aliases=["newembed", "editembed"])
+          aliases=["editembed", "embededitor"])
 @cmds.require("in_server")
 @cmds.require("in_server_has_mod")
 async def cmd_buildembed(ctx):
     """
     Usage:
-        {prefix}buildembed
+        {prefix}newembed
         {prefix}editembed <embedname>
     Description:
         Interactively creates or edits an embed which may be used elsewhere in the server.
     """
-    if ctx.used_cmd_name in ["buildembed", "newembed"]:
+    if ctx.used_cmd_name.lower() == "buildembed":
         ctx.objs["embed_preview"] = await init_embed(ctx)
     else:
         fetch_embed = await get_server_embed(ctx)
