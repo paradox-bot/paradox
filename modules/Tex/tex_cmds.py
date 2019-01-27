@@ -350,18 +350,18 @@ async def show_config(ctx):
           category="Maths",
           short_help="Change how your LaTeX compiles",
           aliases=["texconfig"])
-@cmds.execute("flags", flags=["reset", "add", "append", "approve==", "remove", "retract", "deny=="])
+@cmds.execute("flags", flags=["reset", "replace", "add", "approve==", "remove", "retract", "deny=="])
 async def cmd_preamble(ctx):
     """
     Usage:
-        {prefix}preamble [code] [--reset] [--add][--remove]
+        {prefix}preamble [code] [--reset] [--replace] [--remove]
     Description:
         Displays the preamble currently used for compiling your latex code.
-        If [code] is provided, sets this to be preamble instead.
+        If [code] is provided, adds this to your preamble, or replaces it with --replace
         Note that preambles must currently be approved by a bot manager, to prevent abuse.
     Flags:2
         reset::  Resets your preamble to the default.
-        add::  Adds the provided code to your current preamble.
+        replace:: replaces your preamble with this code
         remove:: Removes all lines from your preamble containing the given text.
         retract:: Retract a pending preamble.
     """
@@ -409,7 +409,7 @@ async def cmd_preamble(ctx):
     else:
         new_preamble = ctx.arg_str
 
-    if ctx.flags["add"] or ctx.flags["append"]:
+    if not ctx.flags["replace"]:
         old_preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
         old_limbo = await ctx.data.users.get(ctx.authid, "limbo_preamble")
         old_preamble = old_limbo if old_limbo else old_preamble
