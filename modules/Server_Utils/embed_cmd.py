@@ -215,7 +215,7 @@ async def save_and_exit(ctx):
 
 @menu_item(root_menu, "Exit without saving")
 async def exit_no_save(ctx):
-    ctx["menu"]["done"] = True
+    ctx.objs["menu"]["done"] = True
 
 
 async def ask_for_field(ctx):
