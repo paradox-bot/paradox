@@ -286,6 +286,8 @@ async def cmd_query(ctx):
                     await ctx.bot.remove_reaction(out_msg, ctx.bot.objects["emoji_more"], ctx.me)
                 except discord.NotFound:
                     pass
+                except Exception:
+                    pass
             elif res.reaction.emoji == ctx.bot.objects["emoji_more"]:
                 temp_msg = await ctx.reply("Processing results, please wait. {}".format(loading_emoji))
 
