@@ -49,7 +49,9 @@ async def cmd_rotate(ctx):
     with BytesIO() as output:
         rotated.convert("RGB").save(output, format="JPEG", quality=85, optimize=True)
         output.seek(0)
-        await ctx.bot.send_file(ctx.ch, fp=output, filename="{}.png".format(file_dict["id"]))
+        out_msg = await ctx.bot.send_file(ctx.ch, fp=output, filename="{}.png".format(file_dict["id"]))
+        if out_msg:
+            await ctx.offer_delete(out_msg)
 
 
 async def timezone_lookup(ctx):
