@@ -288,6 +288,8 @@ def load_into(bot):
 
     @bot.util
     async def offer_delete(ctx, out_msg, to_delete=None):
+        if out_msg is None and to_delete is None:
+            return
         mod_role = await ctx.server_conf.mod_role.get(ctx) if ctx.server else None
 
         if ctx.server:
