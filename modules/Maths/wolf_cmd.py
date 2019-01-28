@@ -246,7 +246,7 @@ async def cmd_query(ctx):
         embed = discord.Embed(description=desc)
         embed.set_footer(icon_url=ctx.author.avatar_url, text="Requested by {}".format(ctx.author))
         await ctx.bot.delete_message(temp_msg)
-        await ctx.reply(embed=embed)
+        await ctx.offer_delete(await ctx.reply(embed=embed))
         return
 
     if ctx.flags["text"]:
