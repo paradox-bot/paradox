@@ -319,7 +319,7 @@ async def get_server_embed(ctx):
 
 
 @cmds.cmd("buildembed",
-          category="Utility",
+          category="Server Admin",
           short_help="Interactively build an embed to be retrieved later",
           aliases=["editembed", "embededitor"])
 @cmds.require("in_server")
