@@ -78,7 +78,8 @@ async def timezone_lookup(ctx):
 
 @cmds.cmd("time",
           category="Utility",
-          short_help="Shows the current time for a user")
+          short_help="Shows the current time for a user",
+          aliases=["ti"])
 @cmds.execute("user_lookup", in_server=True)
 @cmds.execute("flags", flags=["set=="])
 async def cmd_time(ctx):
