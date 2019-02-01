@@ -64,7 +64,7 @@ class paraSetting(ConfSetting):
         Obtains a raw value using read, returns a useable value
         """
         raw = await cls.read(ctx)
-        return raw if raw else (await cls.dyn_default(ctx))
+        return raw if raw is not None else (await cls.dyn_default(ctx))
 
     @classmethod
     async def set(cls, ctx, value):
