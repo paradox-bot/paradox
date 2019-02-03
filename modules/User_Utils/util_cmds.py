@@ -51,7 +51,10 @@ async def cmd_rotate(ctx):
         bbox = rotated.getbbox()
         rotated = rotated.crop(bbox)
         with BytesIO() as output:
-            rotated.convert("RGB").save(output, exif=exif, format="JPEG", quality=85, optimize=True)
+            if exif:
+                rotated.convert("RGB").save(output, exif=exif, format="JPEG", quality=85, optimize=True)
+            else:
+                rotated.convert("RGB").save(output, format="JPEG", quality=85, optimize=True)
             output.seek(0)
             out_msg = await ctx.bot.send_file(ctx.ch, fp=output, filename="{}.png".format(file_dict["id"]))
             if out_msg:
