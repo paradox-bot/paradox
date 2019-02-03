@@ -30,20 +30,14 @@ async def log_joined_server(bot, server):
     bots = 0
     known = 0
     unknown = 0
-    servers = bot.servers
+    other_members = list(set([mem.id for mem in bot.get_all_members() if mem.server != server]))
+
     for member in server.members:
         if member.bot:
             bots += 1
-            continue
-        k = False
-        for serv in servers:
-            if serv == server:
-                continue
-            if member in serv.members:
-                known += 1
-                k = True
-                break
-        if not k:
+        elif member.id in other_members:
+            known += 1
+        else:
             unknown += 1
 
     mem1 = "people I know" if known != 1 else "person I know"
@@ -65,7 +59,7 @@ async def log_joined_server(bot, server):
     embed.add_field(name="Region", value=bot.objects["regions"][str(server.region)], inline=False)
     embed.add_field(name="Created at", value="{}".format(created), inline=False)
     embed.add_field(name="Members", value=mem_str, inline=False)
-    embed.add_field(name="Now playing in", value="{} servers".format(len(servers)), inline=False)
+    embed.add_field(name="Now playing in", value="{} servers".format(len(bot.servers)), inline=False)
     embed.set_footer(text=datetime.utcnow().strftime("Joined at %-I:%M %p, %d/%m/%Y"))
 
     log_ch = bot.objects["server_change_log_channel"]

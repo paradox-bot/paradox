@@ -6,7 +6,7 @@ import pytz
 import iso8601
 import traceback
 import aiohttp
-from PIL import Image
+from PIL import Image, ImageChops
 from io import BytesIO
 import itertools
 
@@ -44,12 +44,18 @@ async def cmd_rotate(ctx):
 
     async with aiohttp.get(image_url) as r:
         response = await r.read()
-    im = Image.open(BytesIO(response))
-    rotated = im.rotate(amount, expand=1)
-    with BytesIO() as output:
-        rotated.convert("RGB").save(output, format="JPEG", quality=85, optimize=True)
-        output.seek(0)
-        await ctx.bot.send_file(ctx.ch, fp=output, filename="{}.png".format(file_dict["id"]))
+
+    with Image.open(BytesIO(response)) as im:
+        exif = im.info.get('exif', None)
+        rotated = im.rotate(amount, expand=1)
+        bbox = rotated.getbbox()
+        rotated = rotated.crop(bbox)
+        with BytesIO() as output:
+            rotated.convert("RGB").save(output, exif=exif, format="JPEG", quality=85, optimize=True)
+            output.seek(0)
+            out_msg = await ctx.bot.send_file(ctx.ch, fp=output, filename="{}.png".format(file_dict["id"]))
+            if out_msg:
+                await ctx.offer_delete(out_msg)
 
 
 async def timezone_lookup(ctx):
@@ -76,7 +82,8 @@ async def timezone_lookup(ctx):
 
 @cmds.cmd("time",
           category="Utility",
-          short_help="Shows the current time for a user")
+          short_help="Shows the current time for a user",
+          aliases=["ti"])
 @cmds.execute("user_lookup", in_server=True)
 @cmds.execute("flags", flags=["set=="])
 async def cmd_time(ctx):

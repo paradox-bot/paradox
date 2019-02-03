@@ -70,7 +70,7 @@ async def cmd_dm(ctx):
     if len(ctx.params) < 2:
         await ctx.reply("Please see Usage.")
         return
-    await ctx.run("dm", user_info = ctx.params[0], message = " ".join(ctx.params[1:]))
+    await ctx.run("dm", user_info=ctx.params[0], message=" ".join(ctx.params[1:]))
     await ctx.reply("Done.")
 
 @cmds.cmd("logs",

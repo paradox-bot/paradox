@@ -127,7 +127,7 @@ async def cmd_secho(ctx):
           category="Utility",
           short_help="Generates a bot invite link for a bot",
           aliases=["ibot"])
-@cmds.execute("user_lookup", in_server=False, greedy=True)
+@cmds.execute("user_lookup", in_server=True, greedy=True)
 async def cmd_invitebot(ctx):
     """
     Usage:

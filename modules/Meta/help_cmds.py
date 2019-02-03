@@ -17,17 +17,25 @@ async def cmd_help(ctx):
     Description:
         Shows detailed help on the requested command or sends you a general help message.
     """
-    help_keys = {"prefix": ctx.used_prefix,
+    prefix = ctx.bot.prefix
+    here_prefix = await ctx.bot.data.servers.get(ctx.server.id, "guild_prefix") if ctx.server else None
+    here_prefix = here_prefix if here_prefix else prefix
+
+    help_keys = {"prefix": prefix,
                  "msg": ctx.msg}
     msg = ""
     all_commands = await ctx.get_cmds()  # Should probably be cached from ctx init
     if ctx.arg_str == "":
-        help_msg = ctx.bot.objects["help_str"].format(prefix=ctx.used_prefix, support=ctx.bot.objects["support_guild"], donate=ctx.bot.objects["donate_link"])
-        await ctx.reply(help_msg, dm=True)
-        try:
-            await ctx.bot.add_reaction(ctx.msg, "✅")
-        except discord.Forbidden:
-            await ctx.reply("Help sent!")
+        help_msg = ctx.bot.objects["help_str"].format(prefix=prefix,
+                                                      user=ctx.author,
+                                                      invite=ctx.bot.objects["invite_link"],
+                                                      support=ctx.bot.objects["support_guild"],
+                                                      donate=ctx.bot.objects["donate_link"])
+        help_file = ctx.bot.objects["help_file"] if "help_file" in ctx.bot.objects else None
+        help_embed = ctx.bot.objects["help_embed"] if "help_embed" in ctx.bot.objects else None
+        out = await ctx.reply(help_msg, file_name=help_file, embed=help_embed, dm=True)
+        if out and ctx.server:
+            await ctx.reply("A brief description and guide on how to use me was sent to your DMs! Please use `{prefix}list` to see a list of all my commands, and `{prefix}help cmd` to get detailed help on a command!".format(prefix=here_prefix))
     else:
         cmd = ctx.params[0]
         if cmd in all_commands:
@@ -85,6 +93,8 @@ async def cmd_list(ctx):
             await ctx.confirm_sent(reply="Sending compact command list to your DMs!")
 
     else:
+        await ctx.confirm_sent(reply="Sending command list to your DMs!")
+
         cat_msgs = {}
         for cmd in sorted(commands):
             command = commands[cmd]
@@ -98,14 +108,13 @@ async def cmd_list(ctx):
                 continue
             cat_msgs[cat.lower()] += "```"
             if len(msg) + len(cat_msgs[cat.lower()]) > 1990:
-                await ctx.reply(msg, dm=True)
+                if not (await ctx.reply(msg, dm=True)):
+                    return
                 msg = ""
             msg += cat_msgs[cat.lower()]
 
-        await ctx.confirm_sent(reply="Sending command list to your DMs!")
-
         more_help = "Use `{0.used_prefix}help <cmd>` to get detailed help on a command, or `{0.used_prefix}list --brief` to obtain a more compact listing.".format(ctx)
 
-        out_msg = ctx.reply(msg, split=True, dm=True)
+        out_msg = await ctx.reply(msg, dm=True)
         if out_msg:
             await ctx.reply(more_help, dm=True)

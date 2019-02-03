@@ -17,6 +17,8 @@ async def recall_roles(bot, member):
                 await bot.add_roles(member, actual_role)
             except discord.Forbidden:
                 pass
+            except discord.NotFound:
+                pass
 
 
 async def store_roles(bot, member):

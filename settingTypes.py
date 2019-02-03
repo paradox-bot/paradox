@@ -209,6 +209,8 @@ class CHANNEL(paraSetting):
         userstr = str(userstr)
         if userstr.lower() in ["none", "0"]:
             return None
+        if userstr == ".":
+            return ctx.ch.id
         chid = userstr.strip('<#@!>')
         if chid.isdigit():
             def is_ch(ch):

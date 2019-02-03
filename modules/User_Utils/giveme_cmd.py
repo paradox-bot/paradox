@@ -18,7 +18,7 @@ async def cmd_giveme(ctx):
     Description:
         Toggle your self assignable roles, or manage the server's self assignable roles.
         Roles will be created if they do not exist.
-        If not roles are given, does an interactive lookup.
+        If no roles are given, does an interactive lookup.
     Flags:2
         list:: List the self-assignable roles in the server.
         add:: Add new self assignable roles.

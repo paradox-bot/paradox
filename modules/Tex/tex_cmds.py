@@ -15,7 +15,7 @@ cmds = paraCH()
 
 # TODO: Factor out into a util file everything except commands.
 
-header = "\\documentclass[preview, 12pt]{standalone}\
+header = "\\documentclass[preview, border=5pt, 12pt]{standalone}\
           \n\\nonstopmode\
           \n\\everymath{\\displaystyle}\
           \n\\usepackage[mathletters]{ucs}\
@@ -24,7 +24,8 @@ header = "\\documentclass[preview, 12pt]{standalone}\
 default_preamble = "\\usepackage{amsmath}\
                     \n\\usepackage{fancycom}\
                     \n\\usepackage{color}\
-                    \n\\usepackage{tikz-cd}"
+                    \n\\usepackage{tikz-cd}\
+                    \n\\usepackage{physics}"
 
 
 @cmds.cmd("texlisten",
@@ -69,7 +70,7 @@ async def cmd_tex(ctx):
         {prefix}$ <equation>
         {prefix}$$ <displayeqn>
         {prefix}align <align block>
-        {prefix}tex --colour white | black | transparent | grey | dark
+        {prefix}tex --colour white | black | grey | dark
     Description:
         Renders and displays LaTeX code.
 
@@ -86,7 +87,7 @@ async def cmd_tex(ctx):
         Use the reactions to delete the message and show your code, respectively.
     Flags:2
         --config:: Shows you your current config.
-        --colour:: Changes your colourscheme. One of default, white, black, transparent, or grey.
+        --colour:: Changes your colourscheme. One of default, white, black, or grey.
         --keepmsg:: Toggles whether I delete your source message or not.
         --alwaysmath:: Toggles whether {prefix}tex always renders in math mode.
         --allowother:: Toogles whether other users may use the reaction to show your message source.
@@ -114,8 +115,8 @@ async def cmd_tex(ctx):
         return
     elif ctx.flags["colour"] or ctx.flags["color"]:
         colour = ctx.flags["colour"] if ctx.flags["colour"] else ctx.flags["color"]
-        if colour not in ["default", "white", "transparent", "black", "grey", "gray", "dark"]:
-            await ctx.reply("Unknown colour scheme. Known colours are `default`, `white`, `transparent`, `black`, `dark` and `grey`.")
+        if colour not in ["default", "white", "black", "grey", "gray", "dark"]:
+            await ctx.reply("Unknown colour scheme. Known colours are `default`, `white`, `black`, `dark` and `grey`.")
             return
         await ctx.data.users.set(ctx.authid, "latex_colour", colour)
         await ctx.reply("Your colour scheme has been changed to {}".format(colour))
@@ -140,7 +141,7 @@ async def cmd_tex(ctx):
         if allowed:
             await ctx.reply("Other people may now use the reaction to view your message source.")
         else:
-            await ctx.reply("Other people may no longer use the reaction to viw your message source.")
+            await ctx.reply("Other people may no longer use the reaction to view your message source.")
         return
     elif ctx.flags["name"]:
         showname = await ctx.data.users.get(ctx.authid, "latex_showname")
@@ -298,21 +299,48 @@ async def reaction_edit_handler(ctx, out_msg):
 
 
 async def show_config(ctx):
-    embed = discord.Embed(title="LaTeX config", color=discord.Colour.light_grey())
+    # Grab the config values
+    grab = ["latex_keep_msg", "latex_colour", "latex_alwaysmath", "latex_allowother", "latex_showname"]
+    grab_names = ["keepmsg", "colour", "alwaysmath", "allowother", "showname"]
+
+    values = []
+    for to_grab in grab:
+        values.append(await ctx.data.users.get(ctx.authid, to_grab))
+
+    value_lines = []
+    value_lines.append("Keeping your message after compilation" if values[0] or values[0] is None else "Deleting your message after compilation")
+    value_lines.append("Using colourscheme `{}`".format(values[1] if values[1] is not None else "default"))
+    value_lines.append(("`{}tex` renders in mathmode" if values[2] else "`{}tex` renders in textmode").format(ctx.used_prefix))
+    value_lines.append("Other uses may view your source and errors" if values[3] else "Other users may not view your source and errors")
+    value_lines.append("Your name shows on the compiled output" if values[4] or values[4] is None else "Your name is hidden on the compiled output")
+
+    desc = "**Config Option Values:**\n{}".format(ctx.prop_tabulate(grab_names, value_lines))
+
+    # Initialise the embed
+    embed = discord.Embed(title="Personal LaTeX Configuration", color=discord.Colour.light_grey(), description=desc)
 
     preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
-    preamble = preamble if preamble else default_preamble
-    preamble_message = "```tex\n{}\n```".format(preamble)
+    header = ""
+    if not preamble:
+        header = "No custom user preamble set, using default preamble."
+        preamble = default_preamble
+        if ctx.server:
+            server_preamble = await ctx.data.servers.get(ctx.server.id, "server_latex_preamble")
+            if server_preamble:
+                header = "No custom user preamble set, using server preamble."
+                preamble = server_preamble
+
+    preamble_message = "{}```tex\n{}\n```".format(header, preamble)
 
     if len(preamble) > 1000:
         temp_file = StringIO()
         temp_file.write(preamble)
 
-        preamble_message = "Sent via direct message"
+        preamble_message = "{}\nSent via direct message".format(header)
 
         temp_file.seek(0)
         try:
-            await ctx.bot.send_file(ctx.author, fp=temp_file, filename="current_preamble.tex", content="Your current preamble")
+            await ctx.bot.send_file(ctx.author, fp=temp_file, filename="current_preamble.tex", content="Current active preamble")
         except discord.Forbidden:
             preamble_message = "Attempted to send your preamble file by direct message, but couldn't reach you."
 
@@ -335,34 +363,108 @@ async def show_config(ctx):
     if new_preamble:
         embed.add_field(name="Awaiting approval", value=new_preamble_message, inline=False)
 
-    colour = await ctx.data.users.get(ctx.authid, "latex_colour")
-    colour = colour if colour else "default"
-    embed.add_field(name="Output colourscheme (colour)", value=colour, inline=False)
-
-    keep = await ctx.data.users.get(ctx.authid, "latex_keep_message")
-    keep = "Yes" if keep or (keep is None) else "No"
-    embed.add_field(name="Whether to keep source message after rendering (keepmsg)", value=keep, inline=False)
-
     await ctx.reply(embed=embed)
+
+
+@cmds.cmd("serverpreamble",
+          category="Maths",
+          short_help="Change the server LaTeX preamble",
+          flags=["reset", "replace", "remove"])
+@cmds.require("in_server")
+@cmds.require("in_server_has_mod")
+async def cmd_serverpreamble(ctx):
+    """
+    Usage:
+        {prefix}serverpreamble [code] [--reset] [--replace] [--remove]
+    Description:
+        Modifies or displays the current server preamble.
+        The server preamble is used for compilation when a user in the server has no personal preamble.
+        If [code] is provided, adds this to the server preamble, or replaces it with --replace
+    Flags:2
+        reset::  Resets your preamble to the default.
+        replace:: replaces your preamble with this code
+        remove:: Removes all lines from your preamble containing the given text.
+    """
+    if ctx.flags["reset"]:
+        await ctx.data.servers.set(ctx.server.id, "server_latex_preamble", None)
+        await ctx.reply("The server preamble has been reset to the default!")
+        return
+
+    current_preamble = await ctx.data.servers.get(ctx.server.id, "server_latex_preamble")
+    current_preamble = current_preamble if current_preamble else default_preamble
+
+    if not ctx.arg_str and not ctx.msg.attachments:
+        if len(current_preamble) > 1000:
+            temp_file = StringIO()
+            temp_file.write(current_preamble)
+
+            temp_file.seek(0)
+            await ctx.reply(file_data=temp_file, file_name="server_preamble.tex", message="Current server preamble")
+        else:
+            await ctx.reply("Current server preamble:\n```tex\n{}```".format(current_preamble))
+        return
+
+    ctx.objs["latex_handled"] = True
+
+    file_name = "preamble.tex"
+    if ctx.msg.attachments:
+        file_info = ctx.msg.attachments[0]
+        async with aiohttp.get(file_info['url']) as r:
+            new_preamble = await r.text()
+        file_name = file_info['filename']
+    else:
+        new_preamble = ctx.arg_str
+
+    if not ctx.flags["replace"]:
+        new_preamble = "{}\n{}".format(current_preamble, new_preamble)
+
+    if ctx.flags["remove"]:
+        if ctx.arg_str not in current_preamble:
+            await ctx.reply("Couldn't find this string in any line of the server preamble!")
+            return
+        new_preamble = "\n".join([line for line in current_preamble.split("\n") if ctx.arg_str not in line])
+
+    await ctx.data.servers.set(ctx.server.id, "server_latex_preamble", new_preamble)
+
+    in_file = (len(new_preamble) > 1000)
+    if in_file:
+        temp_file = StringIO()
+        temp_file.write(new_preamble)
+
+    preamble_message = "See file below!" if in_file else "```tex\n{}\n```".format(new_preamble)
+
+    embed = discord.Embed(title="New Server Preamble", color=discord.Colour.blue()) \
+        .set_author(name="{} ({})".format(ctx.author, ctx.authid),
+                    icon_url=ctx.author.avatar_url) \
+        .add_field(name="Preamble", value=preamble_message, inline=False) \
+        .add_field(name="Server", value="{} ({})".format(ctx.server.name, ctx.server.id), inline=False) \
+        .set_footer(text=datetime.utcnow().strftime("Sent from {} at %-I:%M %p, %d/%m/%Y".format(ctx.server.name if ctx.server else "private message")))
+
+    await ctx.bot.send_message(ctx.bot.objects["preamble_channel"], embed=embed)
+    if in_file:
+        temp_file.seek(0)
+        await ctx.bot.send_file(ctx.bot.objects["preamble_channel"], fp=temp_file, filename=file_name)
+    await ctx.reply("Your server preamble has been updated!")
 
 
 @cmds.cmd("preamble",
           category="Maths",
           short_help="Change how your LaTeX compiles",
           aliases=["texconfig"])
-@cmds.execute("flags", flags=["reset", "add", "append", "approve==", "remove", "deny=="])
+@cmds.execute("flags", flags=["reset", "replace", "add", "approve==", "remove", "retract", "deny=="])
 async def cmd_preamble(ctx):
     """
     Usage:
-        {prefix}preamble [code] [--reset] [--add][--remove]
+        {prefix}preamble [code] [--reset] [--replace] [--remove]
     Description:
         Displays the preamble currently used for compiling your latex code.
-        If [code] is provided, sets this to be preamble instead.
+        If [code] is provided, adds this to your preamble, or replaces it with --replace
         Note that preambles must currently be approved by a bot manager, to prevent abuse.
     Flags:2
         reset::  Resets your preamble to the default.
-        add::  Adds the provided code to your current preamble.
+        replace:: replaces your preamble with this code
         remove:: Removes all lines from your preamble containing the given text.
+        retract:: Retract a pending preamble.
     """
     user_id = ctx.flags["approve"] or ctx.flags["deny"]
     if user_id:
@@ -383,9 +485,14 @@ async def cmd_preamble(ctx):
         return
 
     if ctx.flags["reset"]:
-        await ctx.data.users.set(ctx.authid, "latex_preamble", default_preamble)
+        await ctx.data.users.set(ctx.authid, "latex_preamble", None)
         await ctx.data.users.set(ctx.authid, "limbo_preamble", "")
         await ctx.reply("Your LaTeX preamble has been reset to the default!")
+        return
+
+    if ctx.flags["retract"]:
+        await ctx.data.users.set(ctx.authid, "limbo_preamble", "")
+        await ctx.reply("You have retracted your preamble request.")
         return
 
     if not ctx.arg_str and not ctx.msg.attachments:
@@ -403,25 +510,23 @@ async def cmd_preamble(ctx):
     else:
         new_preamble = ctx.arg_str
 
-    if ctx.flags["add"] or ctx.flags["append"]:
-        old_preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
-        old_limbo = await ctx.data.users.get(ctx.authid, "limbo_preamble")
-        old_preamble = old_limbo if old_limbo else old_preamble
-        old_preamble = old_preamble if old_preamble else default_preamble
+    current_preamble = await ctx.data.users.get(ctx.authid, "limbo_preamble")
+    if not current_preamble:
+        current_preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
+        if not current_preamble and ctx.server:
+            current_preamble = await ctx.data.servers.get(ctx.server.id, "server_latex_preamble")
+        if not current_preamble:
+            current_preamble = default_preamble
 
-        new_preamble = "{}\n{}".format(old_preamble, new_preamble)
+    if not ctx.flags["replace"]:
+        new_preamble = "{}\n{}".format(current_preamble, new_preamble)
 
     if ctx.flags["remove"]:
-        old_preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
-        old_limbo = await ctx.data.users.get(ctx.authid, "limbo_preamble")
-        old_preamble = old_limbo if old_limbo else old_preamble
-        old_preamble = old_preamble if old_preamble else default_preamble
-
         # TODO: Fix, Ugly
-        if ctx.arg_str not in old_preamble:
+        if ctx.arg_str not in current_preamble:
             await ctx.reply("Couldn't find this in any line of your preamble!")
             return
-        new_preamble = "\n".join([line for line in old_preamble.split("\n") if ctx.arg_str not in line])
+        new_preamble = "\n".join([line for line in current_preamble.split("\n") if ctx.arg_str not in line])
 
     await ctx.data.users.set(ctx.authid, "limbo_preamble", new_preamble)
 
@@ -448,8 +553,13 @@ async def cmd_preamble(ctx):
 async def texcomp(ctx):
     fn = "tex/{}.tex".format(ctx.authid)
     shutil.copy('tex/preamble.tex', fn)
+
     preamble = await ctx.data.users.get(ctx.authid, "latex_preamble")
-    preamble = preamble if preamble else default_preamble
+    if not preamble and ctx.server:
+        preamble = await ctx.data.servers.get(ctx.server.id, "server_latex_preamble")
+    if not preamble:
+        preamble = default_preamble
+
     with open(fn, 'w') as work:
         work.write(header + preamble)
         work.write('\n' + '\\begin{document}' + '\n')

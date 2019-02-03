@@ -1,6 +1,6 @@
 from paraCH import paraCH
-import asyncio
 import discord
+import asyncio
 import aiohttp
 from urllib import parse
 import json
@@ -16,11 +16,13 @@ WEB = "https://www.wolframalpha.com/"
 # truetype/liberation2/LiberationSans-Bold.ttf
 FONT = ImageFont.truetype("resources/wolf_font.ttf", 15, encoding="unic")
 
+
 def build_web_url(query):
     """
     Returns the url for Wolfram Alpha search for this query.
     """
     return "{}input/?i={}".format(WEB, parse.quote_plus(query))
+
 
 async def get_query(query, appid, **kwargs):
     """
@@ -50,11 +52,11 @@ async def get_query(query, appid, **kwargs):
         if r.status == 200:
             # Read the response, interp as json, and return
             data = await r.read()
-            print(data)
             return json.loads(data.decode('utf8'))
         else:
             # If some error occurs, unintelligently fail out
             return None
+
 
 async def assemble_pod_image(atoms, dimensions):
     """
@@ -75,10 +77,11 @@ async def assemble_pod_image(atoms, dimensions):
     # Iterate through the atoms and paste or write each one on as appropriate
     for atom in atoms:
         if "text" in atom:
-            draw.text(atom["coord"], atom["text"], fill=(0,0,0), font=FONT)
+            draw.text(atom["coord"], atom["text"], fill=(0, 0, 0), font=FONT)
         if "image" in atom:
             im.paste(atom["image"], atom["coord"])
     return im
+
 
 async def glue_pods(flat_pods):
     """
@@ -88,8 +91,7 @@ async def glue_pods(flat_pods):
     Returns:
         A list of PIL images containing the given pods glued and split as required.
     """
-    indent_width = 20
-    before_title_gap = 10
+    indent_width = 10
     image_border = 5
     margin = 5
 
@@ -102,28 +104,29 @@ async def glue_pods(flat_pods):
 
     for pod in flat_pods:
         if y_coord > split_height:
-            splits.append( (atoms, (max_width, y_coord)) )
+            splits.append((atoms, (max_width, y_coord)))
             max_width = 0
             y_coord = 5
             atoms = []
 
-        indent = pod[2]*indent_width
+        indent = pod[2] * indent_width
         if pod[0]:
             atoms.append({"coord": (margin + indent, y_coord), "text": pod[0]})
             text_width, text_height = FONT.getsize(pod[0])
             y_coord += text_height
-            max_width = max(text_width + indent + 2*margin, max_width)
+            max_width = max(text_width + indent + 2 * margin, max_width)
         if pod[1]:
             y_coord += image_border
             atoms.append({"coord": (margin + indent + indent_width, y_coord), "image": pod[1]})
             y_coord += pod[1].height
             y_coord += image_border
             max_width = max(pod[1].width + indent + indent_width + image_border + margin, max_width)
-    splits.append( (atoms, (max_width, y_coord)) )
+    splits.append((atoms, (max_width, y_coord)))
     split_images = []
     for split in splits:
         split_images.append(await assemble_pod_image(*split))
     return split_images
+
 
 async def flatten_pods(pod_data, level=0, text=False, text_field="plaintext"):
     """
@@ -139,7 +142,7 @@ async def flatten_pods(pod_data, level=0, text=False, text_field="plaintext"):
         elif "title" in pod:
             flat_pods.append((pod["title"], None, level))
         if "subpods" in pod:
-            flat_pods.extend(await flatten_pods(pod["subpods"], level=level+1, text=text))
+            flat_pods.extend(await flatten_pods(pod["subpods"], level=level + 1, text=text))
     return flat_pods
 
 
@@ -154,6 +157,7 @@ async def handle_image(image_data):
             response = await resp.read()
     image = Image.open(BytesIO(response))
     return smart_trim(image, border=10)
+
 
 def smart_trim(im, border=0):
     bg = Image.new(im.mode, im.size, border)
@@ -173,6 +177,7 @@ async def pods_to_filedata(pod_data):
         output.seek(0)
         output_data.append(output)
     return output_data
+
 
 async def pods_to_textdata(pod_data):
     flat_pods = await flatten_pods(pod_data, text=True)
@@ -195,20 +200,9 @@ async def pods_to_textdata(pod_data):
     return fields
 
 
-async def handle_request(ctx, query, appid, simple=True, **kwargs):
-    result = await get_query(query, appid, **kwargs)
-    if result is None:
-        await ctx.reply("I cannot communicate to Wolfram at the moment! Please try again in a moment.")
-        return None
-    resp = result["queryresult"]
-    if not res["success"]:
-        # TODO: Offer alternatives
-        await ctx.reply("Wolfram Alpha didn't send back a result. Perhaps try rephrasing your query?")
-        return None
-
 def triage_pods(pod_list):
     if "primary" in pod_list[0] and pod_list[0]["primary"]:
-        return (pod_list[0], pod_list[1:])
+        return ([pod_list[0]], pod_list[1:])
     else:
         important = [pod_list[0]]
         important.extend([pod for pod in pod_list if ("primary" in pod and pod["primary"])])
@@ -221,7 +215,7 @@ def triage_pods(pod_list):
 @cmds.cmd("query",
           category="Maths",
           short_help="Sends a query to Wolfram Alpha",
-          aliases=["wolf", "w", "?w", "??w"])
+          aliases=["ask", "wolf", "w", "?w"])
 @cmds.execute("flags", flags=["text"])
 async def cmd_query(ctx):
     """
@@ -233,8 +227,6 @@ async def cmd_query(ctx):
     Flags:2
         text:: Attempts to reply with a copyable plaintext version of the output.
     """
-    # TODO: Reactions to change mode of output
-    
     loading_emoji = "<a:{}:{}>".format(ctx.bot.objects["emoji_loading"].name, ctx.bot.objects["emoji_loading"].id)
 
     temp_msg = await ctx.reply("Sending query to Wolfram Alpha, please wait. {}".format(loading_emoji))
@@ -248,39 +240,23 @@ async def cmd_query(ctx):
         await ctx.reply("Did not get a valid response from Wolfram Alpha. If the problem persists, please contact support.")
         return
 
-    link = "[Display search on Wolfram]({})".format(build_web_url(ctx.arg_str))
+    link = "[Display results online and refine query]({})".format(build_web_url(ctx.arg_str))
     if not result["queryresult"]["success"] or result["queryresult"]["numpods"] == 0:
         desc = "Wolfram Alpha doesn't understand your query!\n Perhaps try rephrasing your question?\n{}".format(link)
         embed = discord.Embed(description=desc)
         embed.set_footer(icon_url=ctx.author.avatar_url, text="Requested by {}".format(ctx.author))
         await ctx.bot.delete_message(temp_msg)
-        await ctx.reply(embed=embed)
+        await ctx.offer_delete(await ctx.reply(embed=embed))
         return
 
     if ctx.flags["text"]:
         fields = await pods_to_textdata(result["queryresult"]["pods"])
         embed = discord.Embed(description=link)
         embed.set_footer(icon_url=ctx.author.avatar_url, text="Requested by {}".format(ctx.author))
-        print(fields)
         await ctx.emb_add_fields(embed, fields)
         await ctx.bot.delete_message(temp_msg)
         out_msg = await ctx.reply(embed=embed)
-        try:
-            await ctx.bot.add_reaction(out_msg, ctx.bot.objects["emoji_delete"])
-        except discord.Forbidden:
-            return
-
-        res = await ctx.bot.wait_for_reaction(message=out_msg,
-                                              emoji=ctx.bot.objects["emoji_delete"],
-                                              user=ctx.author,
-                                              timeout=300)
-        if res is None:
-            try:
-                await ctx.bot.remove_reaction(out_msg, ctx.bot.objects["emoji_delete"], ctx.me)
-            except discord.NotFound:
-                pass
-        elif res.reaction.emoji == ctx.bot.objects["emoji_delete"]:
-            await ctx.bot.delete_message(out_msg)
+        await ctx.offer_delete(out_msg)
         return
 
     important, extra = triage_pods(result["queryresult"]["pods"])
@@ -293,64 +269,46 @@ async def cmd_query(ctx):
 
     await ctx.bot.delete_message(temp_msg)
     out_msg = await ctx.reply(file_data=data, file_name="wolf.png", embed=embed)
-
-    try:
-        if extra:
+    asyncio.ensure_future(ctx.offer_delete(out_msg))
+   
+    if extra:
+        try:
             await ctx.bot.add_reaction(out_msg, ctx.bot.objects["emoji_more"])
-        await ctx.bot.add_reaction(out_msg, ctx.bot.objects["emoji_delete"])
-    except discord.Forbidden:
-        return
-
-    def check(reaction, user):
-        return reaction.emoji in [ctx.bot.objects["emoji_more"], ctx.bot.objects["emoji_delete"]]
-
-    res = await ctx.bot.wait_for_reaction(message=out_msg,
-                                          user=ctx.author,
-                                          timeout=300,
-                                          check=check)
-    if res is None:
-        try:
-            await ctx.bot.remove_reaction(out_msg, ctx.bot.objects["emoji_more"], ctx.me)
-            await ctx.bot.remove_reaction(out_msg, ctx.bot.objects["emoji_delete"], ctx.me)
-        except discord.NotFound:
-            pass
-    elif res.reaction.emoji == ctx.bot.objects["emoji_delete"]:
-        await ctx.bot.delete_message(out_msg)
-    elif res.reaction.emoji == ctx.bot.objects["emoji_more"]:
-        temp_msg = await ctx.reply("Processing results, please wait. {}".format(loading_emoji))
-
-        output_data[0].seek(0)
-        output_data.extend(await pods_to_filedata(extra))
-        try:
-            await ctx.bot.delete_message(out_msg)
-            await ctx.bot.delete_message(temp_msg)
-        except discord.NotFound:
-            pass
-
-        out_msgs = []
-        for file_data in output_data[:-1]:
-            out_msgs.append(await ctx.reply(file_data=file_data, file_name="wolf.png"))
-        out_msgs.append(await ctx.reply(file_data=output_data[-1], file_name="wolf.png", embed=embed))
-        out_msg = out_msgs[-1]
-        try:
-            await ctx.bot.add_reaction(out_msg, ctx.bot.objects["emoji_delete"])
         except discord.Forbidden:
-            return
+            pass
+        else:
+            res = await ctx.bot.wait_for_reaction(message=out_msg,
+                                                  user=ctx.author,
+                                                  emoji=ctx.bot.objects["emoji_more"],
+                                                  timeout=300)
+            if res is None:
+                try:
+                    await ctx.bot.remove_reaction(out_msg, ctx.bot.objects["emoji_more"], ctx.me)
+                except discord.NotFound:
+                    pass
+                except Exception:
+                    pass
+            elif res.reaction.emoji == ctx.bot.objects["emoji_more"]:
+                temp_msg = await ctx.reply("Processing results, please wait. {}".format(loading_emoji))
 
-        res = await ctx.bot.wait_for_reaction(message=out_msg,
-                                              emoji=ctx.bot.objects["emoji_delete"],
-                                              user=ctx.author,
-                                              timeout=300)
-        if res is None:
-            try:
-                await ctx.bot.remove_reaction(out_msg, ctx.bot.objects["emoji_delete"], ctx.me)
-            except discord.NotFound:
-                pass
-        elif res.reaction.emoji == ctx.bot.objects["emoji_delete"]:
-            for msg in out_msgs:
-                await ctx.bot.delete_message(msg)
+                output_data[0].seek(0)
+                output_data.extend(await pods_to_filedata(extra))
+                try:
+                    await ctx.bot.delete_message(out_msg)
+                    await ctx.bot.delete_message(temp_msg)
+                except discord.NotFound:
+                    pass
+
+                out_msgs = []
+                for file_data in output_data[:-1]:
+                    out_msgs.append(await ctx.reply(file_data=file_data, file_name="wolf.png"))
+                out_msgs.append(await ctx.reply(file_data=output_data[-1], file_name="wolf.png", embed=embed))
+                out_msg = out_msgs[-1]
+                await ctx.offer_delete(out_msg, to_delete=out_msgs)
+
     for output in output_data:
         output.close()
+
 
 def load_into(bot):
     bot.objects["wolf_appid"] = bot.bot_conf.get("WOLF_APPID")

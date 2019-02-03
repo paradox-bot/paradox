@@ -25,6 +25,9 @@ async def snip_user_lookup(ctx, in_server=False, greedy=False, func=None):
     Sets ctx.objs["found_user"]
     If greedy is set uses the entire arg-str to lookup the 
     """
+    if not ctx.arg_str or (in_server and not ctx.server):
+        ctx.objs["found_user"] = None
+        return None
     content = func(ctx) if func is not None else (ctx.arg_str if greedy else ctx.params[0])
     ctx.objs["found_user"] = await ctx.find_user(content, in_server, interactive=True)
     return ctx.objs["found_user"]

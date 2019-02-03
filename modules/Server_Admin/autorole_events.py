@@ -1,8 +1,9 @@
 import discord
 
+
 async def give_autorole(bot, member):
     server = member.server
-    autorole = await bot.data.servers.get(server.id, "guild_autorole_bot" if ctx.member.bot else "guild_autorole")
+    autorole = await bot.data.servers.get(server.id, "guild_autorole_bot" if member.bot else "guild_autorole")
     if not autorole:
         return
 
@@ -18,6 +19,7 @@ async def give_autorole(bot, member):
         """
         pass
 
+
 async def give_autoroles(bot, member):
     server = member.server
     autoroles = await bot.data.servers.get(server.id, "guild_autoroles")
@@ -28,7 +30,7 @@ async def give_autoroles(bot, member):
     for autorole in autoroles:
         if autorole:
             try:
-                await ctx.bot.add_roles(ctx.member, autorole)
+                await bot.add_roles(member, autorole)
             except Exception:
                 pass
 

@@ -280,3 +280,49 @@ def load_into(bot):
             await ctx.bot.add_reaction(msg if msg else ctx.msg, "✅")
         except discord.Forbidden:
             await ctx.reply(reply if reply else "Check your DMs!")
+
+    @bot.util
+    async def has_mod(ctx, user):
+        (code, msg) = await ctx.CH.checks["in_server_has_mod"](ctx)
+        return (code == 0)
+
+    @bot.util
+    async def offer_delete(ctx, out_msg, to_delete=None):
+        if out_msg is None and to_delete is None:
+            return
+        mod_role = await ctx.server_conf.mod_role.get(ctx) if ctx.server else None
+
+        if ctx.server:
+            def check(reaction, user):
+                if user == ctx.me:
+                    return False
+                result = user == ctx.author
+                result = result or (mod_role and mod_role in [role.id for role in user.roles])
+                result = result or user.server_permissions.administrator
+                result = result or user.server_permissions.manage_messages
+                result = result or user == ctx.server.owner
+                return result
+        else:
+            def check(reaction, user):
+                return user == ctx.author
+        try:
+            await ctx.bot.add_reaction(out_msg, ctx.bot.objects["emoji_delete"])
+        except discord.Forbidden:
+            return
+
+        res = await ctx.bot.wait_for_reaction(message=out_msg,
+                                              emoji=ctx.bot.objects["emoji_delete"],
+                                              check=check,
+                                              timeout=300)
+        if res is None:
+            try:
+                await ctx.bot.remove_reaction(out_msg, ctx.bot.objects["emoji_delete"], ctx.me)
+            except Exception:
+                pass
+        elif res.reaction.emoji == ctx.bot.objects["emoji_delete"]:
+            to_delete = to_delete if to_delete is not None else [out_msg]
+            for msg in to_delete:
+                try:
+                    await ctx.bot.delete_message(msg)
+                except Exception:
+                    pass

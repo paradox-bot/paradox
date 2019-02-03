@@ -16,11 +16,12 @@ def load_into(bot):
                 return (user_str.lower() in str(member).lower())
 
         collection = collection if collection else (ctx.server.members if in_server else ctx.bot.get_all_members())
-        collection_names = [user.name for user in collection]
+        collection = list(collection)
         if maybe_user_id.isdigit():
-            user = discord.utils.find(lambda mem: mem.id == maybe_user_id, collection)
+            user = discord.utils.get(collection, id=maybe_user_id)
             if user:
                 return user
+        collection_names = [user.name for user in collection]
         if interactive:
             users = list(filter(is_user, collection))
             if len(users) == 0:

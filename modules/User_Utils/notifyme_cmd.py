@@ -61,6 +61,7 @@ async def cmd_notifyme(ctx):
     """
     Usage:
         {prefix}notifyme
+        {prefix}notifyme <text>
         {prefix}notifyme [conditions]
         {prefix}notifyme --mentions me
         {prefix}notifyme --remove
@@ -102,7 +103,7 @@ async def cmd_notifyme(ctx):
         if not ctx.server:
             await ctx.reply("You can only use these flags in a server!")
             return
-    if not any([ctx.flags[flag] for flag in ctx.flags]):
+    if not any([ctx.flags[flag] for flag in ctx.flags]) and not ctx.arg_str:
         # Do print list stuff
         if not checks:
             await ctx.reply("You haven't set any checks yet!")
@@ -110,8 +111,12 @@ async def cmd_notifyme(ctx):
             check_strs = []
             for check in checks:
                 check_strs.append(await check_to_str(ctx, check, markdown=False))
-            await ctx.pager(ctx.paginate_list(check_strs, title="Current active pounces"))
+            await ctx.pager(ctx.paginate_list(check_strs, title="Current active pounces"), dm=ctx.bot.objects["brief"])
+            await ctx.confirm_sent(ctx.msg, "Sent your pounces")
         return
+
+    if ctx.arg_str:
+        ctx.flags["contains"] = ctx.arg_str
 
     # Do Construct new notify predicate stuff
 

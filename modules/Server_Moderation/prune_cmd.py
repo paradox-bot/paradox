@@ -72,7 +72,7 @@ async def cmd_prune(ctx):
     count_dict = {"bots": {}, "users": {}}
     message_list = []
     i = 0
-    
+
     after_msg_id = ctx.flags["after"] if ctx.flags["after"] else None
     msg_found = False
 
