@@ -43,7 +43,7 @@ async def cmd_image(ctx):
                     continue
                 embed.set_footer(text="Images thanks to the free https://pixabay.com API!")
                 hit_pages.append(embed)
-            await ctx.pager(hit_pages, embed=True)
+            await ctx.offer_delete(await ctx.pager(hit_pages, embed=True))
         else:
             await ctx.reply("Something went wrong with your search, sorry!")
             return
