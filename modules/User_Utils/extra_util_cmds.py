@@ -83,7 +83,8 @@ async def cmd_quote(ctx):
         message = await ctx.bot.get_message(ctx.ch, msgid)
     except Exception:
         pass
-    message = await ctx.find_message(msgid, ignore=[ctx.ch])
+    if not message:
+        message = await ctx.find_message(msgid, ignore=[ctx.ch])
 
     if not message:
         await ctx.bot.edit_message(out_msg, "Couldn't find the message!")
