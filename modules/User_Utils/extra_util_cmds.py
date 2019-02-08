@@ -76,34 +76,31 @@ async def cmd_quote(ctx):
     if msgid == "" or not msgid.isdigit():
         await ctx.reply("Please provide a valid message ID.")
         return
+    out_msg = await ctx.reply("Searching for message, please wait {}".format(ctx.aemoji_mention(ctx.bot.objects["emoji_loading"])))
+
     message = None
     try:
         message = await ctx.bot.get_message(ctx.ch, msgid)
     except Exception:
         pass
-    for channel in ctx.server.channels:
-        if message:
-            break
-        if channel.type != discord.ChannelType.text:
-            continue
-        if channel == ctx.ch:
-            continue
-        try:
-            message = await ctx.bot.get_message(channel, msgid)
-        except Exception:
-            pass
+    message = await ctx.find_message(msgid, ignore=[ctx.ch])
+
     if not message:
-        await ctx.reply("Couldn't find the message!")
+        await ctx.bot.edit_message(out_msg, "Couldn't find the message!")
         return
-    embed = discord.Embed(colour=discord.Colour.light_grey(), description=message.content)
+
+    embed = discord.Embed(colour=discord.Colour.light_grey(),
+                          description=message.content,
+                          title="Click to jump to message",
+                          url=ctx.msg_jumpto(message))
+
     if not ctx.flags["a"]:
         embed.set_author(name="{user.name}".format(user=message.author),
                          icon_url=message.author.avatar_url)
-        embed.add_field(name="Message link", value="[Click to jump to message]({})".format(ctx.msg_jumpto(message)), inline=False)
     embed.set_footer(text=message.timestamp.strftime("Sent at %-I:%M %p, %d/%m/%Y in #{}".format(message.channel.name)))
     if message.attachments:
         embed.set_image(url=message.attachments[0]["proxy_url"])
-    await ctx.reply(embed=embed)
+    await ctx.bot.edit_message(out_msg, " ", embed=embed)
 
 
 @cmds.cmd("secho",
