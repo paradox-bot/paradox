@@ -344,3 +344,7 @@ def load_into(bot):
             if message:
                 break
         return message
+
+    @bot.util
+    def aemoji_mention(ctx, emoji):
+        return "<a:{}:{}>".format(emoji.name, emoji.id)
