@@ -292,22 +292,22 @@ async def init_embed(ctx):
     ctx.objs["embed_embed"] = embed
 
 
-async def get_server_embed(ctx):
+async def get_server_embed(ctx, emb_name):
     server_embeds = await ctx.data.servers.get(ctx.server.id, "server_embeds")
     if not server_embeds:
         await ctx.reply("There are no saved embeds in this server! Moderators may create embeds using `{}buildembed`".format(ctx.used_prefix))
         return
-    if ctx.arg_str == "":
+    if emb_name == "":
         keys = list(server_embeds.keys())
         result = await ctx.selector("Please select an embed!", keys)
         if result is None:
             return
         name = keys[result]
-    elif ctx.arg_str not in server_embeds:
-        await ctx.reply("No embed exists with this name! Use `{}{}` to see a list of embeds".format(ctx.used_prefix, ctx.used_cmd_name))
+    elif emb_name not in server_embeds:
+        await ctx.reply("No embed exists with this name! Use `{}embed` to see a list of embeds.".format(ctx.used_prefix))
         return
     else:
-        name = ctx.arg_str
+        name = emb_name
 
     embed = server_embeds[name]
     proper_embed = discord.Embed.from_data(embed)
@@ -335,7 +335,7 @@ async def cmd_buildembed(ctx):
     if ctx.used_cmd_name.lower() == "buildembed":
         ctx.objs["embed_preview"] = await init_embed(ctx)
     else:
-        fetch_embed = await get_server_embed(ctx)
+        fetch_embed = await get_server_embed(ctx, ctx.arg_str)
         if fetch_embed is None:
             return
         name, embed = fetch_embed
@@ -346,10 +346,46 @@ async def cmd_buildembed(ctx):
     await ctx.outer_menu([item[0] for item in root_menu], root_callback, title="Embed Editor", prompt="Please type the number of your selection:")
 
 
+@cmds.cmd("embedinto",
+          category="ServerAdmin",
+          short_help="Embed a stored embed into a message")
+@cmds.require("in_server")
+@cmds.require("in_server_has_mod")
+async def cmd_embedinto(ctx):
+    """
+    Usage:
+        {prefix}embedinto <msgid> [embedname]
+    Description:
+        Embeds the given embed into the given message.
+        This may also be used to edit an embed in a previous message.
+        If no embed name is given, will do an interactive lookup.
+    """
+    if ctx.arg_str == "":
+        await ctx.reply("Please supply the message id to embed into.")
+        return
+
+    fetch_embed = await get_server_embed(ctx, ctx.arg_str[len(ctx.params[0]):].strip() if len(ctx.params) > 1 else "")
+    if fetch_embed is None:
+        return
+
+    out_msg = await ctx.reply("Searching for message, please wait {}".format(ctx.aemoji_mention(ctx.bot.objects["emoji_loading"])))
+
+    message = await ctx.find_message(ctx.params[0])
+    if not message:
+        await ctx.bot.edit_message(out_msg, "No message with this id found!")
+    elif message.author != ctx.me:
+        await ctx.bot.edit_message(out_msg, "I can't embed into someone else's message!")
+    else:
+        try:
+            await ctx.bot.edit_message(message, embed=fetch_embed[1])
+            await ctx.bot.edit_message(out_msg, "Successfully embedded into the message!")
+        except Exception:
+            await ctx.bot.edit_message(out_msg, "An unknown error occurred while embedding!")
+
+
 @cmds.cmd("embed",
           category="Utility",
-          short_help="View an embed created with the Embed Editor",
-          aliases=["newembed"])
+          short_help="View an embed created with the Embed Editor")
 @cmds.require("in_server")
 async def cmd_embed(ctx):
     """
@@ -359,7 +395,7 @@ async def cmd_embed(ctx):
         Displays an embed created with the embed editor.
         If no name is given, and there is more than one available embed, supplies a list of the server embeds.
     """
-    fetch_embed = await get_server_embed(ctx)
+    fetch_embed = await get_server_embed(ctx, ctx.arg_str)
     if fetch_embed is None:
         return
-    await ctx.reply(embed=fetch_embed[1])
+    await ctx.offer_delete(ctx.reply(embed=fetch_embed[1]))
