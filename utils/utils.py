@@ -326,3 +326,21 @@ def load_into(bot):
                     await ctx.bot.delete_message(msg)
                 except Exception:
                     pass
+
+    @bot.util
+    async def find_message(ctx, msgid, chlist=None, ignore=[]):
+        message = None
+        chlist = ctx.server.channels if chlist is None else chlist
+
+        for channel in chlist:
+            if channel in ignore:
+                continue
+            if channel.type != discord.ChannelType.text:
+                continue
+            try:
+                message = await ctx.bot.get_message(channel, msgid)
+            except Exception:
+                pass
+            if message:
+                break
+        return message
