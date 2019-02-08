@@ -55,7 +55,7 @@ async def check_to_str(ctx, check, markdown=True):
 @cmds.cmd("notifyme",
           category="Utility",
           short_help="DMs you messages matching given criteria.",
-          aliases=["tellme", "pounce", "listenfor"])
+          aliases=["tellme", "pounce", "listenfor", "notify"])
 @cmds.execute("flags", flags=["remove", "interactive", "delay", "mentions==", "contains==", "here", "from==", "rolementions==", "in==", "notbot"])
 async def cmd_notifyme(ctx):
     """
