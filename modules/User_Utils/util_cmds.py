@@ -6,7 +6,7 @@ import pytz
 import iso8601
 import traceback
 import aiohttp
-from PIL import Image, ImageChops
+from PIL import Image
 from io import BytesIO
 import itertools
 
