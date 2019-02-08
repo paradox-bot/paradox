@@ -152,7 +152,7 @@ def load_into(bot):
             # Listen for a valid reply
             listening = [str(i + 1) for i in range(0, len(items))]
             listening.append("c")
-            result = await ctx.listen_for(listening, timeout=60)
+            result = await ctx.listen_for(listening, timeout=600)
 
             if result is not None:
                 # Attempt to delete the user message
