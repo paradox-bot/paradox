@@ -398,4 +398,4 @@ async def cmd_embed(ctx):
     fetch_embed = await get_server_embed(ctx, ctx.arg_str)
     if fetch_embed is None:
         return
-    await ctx.offer_delete(ctx.reply(embed=fetch_embed[1]))
+    await ctx.offer_delete(await ctx.reply(embed=fetch_embed[1]))
