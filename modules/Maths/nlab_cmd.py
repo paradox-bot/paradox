@@ -98,7 +98,7 @@ async def cmd_nlab(ctx):
         await ctx.reply("Give me something to search for!")
         return
 
-    loading_emoji = "<a:{}:{}>".format(ctx.bot.objects["emoji_loading"].name, ctx.bot.objects["emoji_loading"].id)
+    loading_emoji = ctx.aemoji_mention(ctx.bot.objects["emoji_loading"])
 
     out_msg = await ctx.reply("Searching the ncatlab, please wait. {}".format(loading_emoji))
 
