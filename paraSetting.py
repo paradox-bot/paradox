@@ -12,7 +12,7 @@ class paraSetting(ConfSetting):
     accept = ""  # Human readable string describing what the acceptable values are.
     category = ""  # Setting category
 
-    write_perm = "has_manage_server"  # Require to pass this check before reading a setting
+    write_perm = "in_server_has_mod"  # Require to pass this check before reading a setting
     read_perm = None  # TODO
 
     checks = checks  # Default checks dict is just checks
@@ -50,9 +50,10 @@ class paraSetting(ConfSetting):
         Attempts to set a value from user input
         """
         if cls.write_perm:
-            await cls.checks[cls.write_perm](ctx)
-            if ctx.cmd_err[0]:
-                return ctx.cmd_err[0]
+            cmd_err = await cls.checks[cls.write_perm](ctx)
+            if cmd_err[0]:
+                ctx.cmd_err = cmd_err
+                return cmd_err[0]
         value = await cls.understand(ctx, value)
         return ctx.cmd_err[0] if ctx.cmd_err[0] else (await cls.set(ctx, value))
 
