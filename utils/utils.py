@@ -35,10 +35,10 @@ def load_into(bot):
         Runs a command asynchronously in a subproccess shell.
         """
         process = await asyncio.create_subprocess_shell(to_run, stdout=asyncio.subprocess.PIPE)
-        if ctx.bot.DEBUG > 1:
+        if ctx.bot.DEBUG > 2:
             await ctx.log("Running the shell command:\n{}\nwith pid {}".format(to_run, str(process.pid)))
         stdout, stderr = await process.communicate()
-        if ctx.bot.DEBUG > 1:
+        if ctx.bot.DEBUG > 2:
             await ctx.log("Completed the shell command:\n{}\n{}".format(to_run, "with errors." if process.returncode != 0 else ""))
         return stdout.decode().strip()
 
