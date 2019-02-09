@@ -348,3 +348,14 @@ def load_into(bot):
     @bot.util
     def aemoji_mention(ctx, emoji):
         return "<a:{}:{}>".format(emoji.name, emoji.id)
+
+    @bot.util
+    async def safe_delete_msgs(ctx, msgs):
+        try:
+            await asyncio.gather(*[ctx.bot.delete_message(msg) for msg in msgs])
+        except discord.Forbidden:
+            pass
+        except discord.NotFound:
+            pass
+        except Exception:
+            pass

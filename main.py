@@ -9,6 +9,8 @@ from botconf import Conf
 from contextBot.Context import Context
 from contextBot.Bot import Bot
 
+from cachetools import LRUCache
+
 
 # Configuration file for environment variables.
 
@@ -97,7 +99,7 @@ Bot.log = log
 # --------------------------------
 
 # Load shared config and utils
-bot.load("config", "utils", ignore=["RCS", "__pycache__"])
+bot.load("config", "global_events", "utils", ignore=["RCS", "__pycache__"])
 
 # Add shared bot info
 bot.objects["sorted cats"] = ["Info",
@@ -154,6 +156,13 @@ emojis = {"emoji_tex_del": "delete",
           "emoji_loading": "loading",
           "emoji_prev": "Previous"}
 
+
+# Initialise bot objects
+
+bot.objects["ready"] = False
+bot.objects["command_cache"] = LRUCache(1000)
+
+
 # ----Discord event handling----
 
 
@@ -164,7 +173,6 @@ def get_emoji(name):
 
 @bot.event
 async def on_ready():
-    bot.objects["ready"] = False
     GAME = conf.getStr("GAME")
     if GAME == "":
         GAME = "Type {}help for usage!".format(PREFIX)

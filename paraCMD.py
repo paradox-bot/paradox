@@ -9,6 +9,7 @@ class paraCMD(Command):
         self.parse_help()
         self.aliases = aliases
         self.flags = kwargs["flags"] if "flags" in kwargs else None
+        self.edit_handler = kwargs.get("edit_handler", None)
 
     async def run(self, ctx):
         if self.flags:

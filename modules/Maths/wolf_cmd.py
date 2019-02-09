@@ -215,7 +215,8 @@ def triage_pods(pod_list):
 @cmds.cmd("query",
           category="Maths",
           short_help="Sends a query to Wolfram Alpha",
-          aliases=["ask", "wolf", "w", "?w"])
+          aliases=["ask", "wolf", "w", "?w"],
+          edit_handler=cmds.edit_handler_rerun)
 @cmds.execute("flags", flags=["text"])
 async def cmd_query(ctx):
     """
@@ -233,7 +234,11 @@ async def cmd_query(ctx):
     loading_emoji = "<a:{}:{}>".format(ctx.bot.objects["emoji_loading"].name, ctx.bot.objects["emoji_loading"].id)
 
     temp_msg = await ctx.reply("Sending query to Wolfram Alpha, please wait. {}".format(loading_emoji))
-    result = await get_query(ctx.arg_str, ctx.bot.objects["wolf_appid"])
+    try:
+        result = await get_query(ctx.arg_str, ctx.bot.objects["wolf_appid"])
+    except Exception:
+        await ctx.reply("An unknown exception occurred while fetching the Wolfram Alpha query. If the problem persists please contact support.")
+        return
     if not result:
         await ctx.bot.delete_message(temp_msg)
         await ctx.reply("Failed to get a response from Wolfram Alpha. If the problem persists, please contact support.")
@@ -270,7 +275,7 @@ async def cmd_query(ctx):
     embed = discord.Embed(description=link)
     embed.set_footer(icon_url=ctx.author.avatar_url, text="Requested by {}".format(ctx.author))
 
-    await ctx.bot.delete_message(temp_msg)
+    await ctx.safe_delete_msgs([temp_msg])
     out_msg = await ctx.reply(file_data=data, file_name="wolf.png", embed=embed)
     asyncio.ensure_future(ctx.offer_delete(out_msg))
 
@@ -307,7 +312,7 @@ async def cmd_query(ctx):
                     out_msgs.append(await ctx.reply(file_data=file_data, file_name="wolf.png"))
                 out_msgs.append(await ctx.reply(file_data=output_data[-1], file_name="wolf.png", embed=embed))
                 out_msg = out_msgs[-1]
-                await ctx.offer_delete(out_msg, to_delete=out_msgs)
+                asyncio.ensure_future(ctx.offer_delete(out_msg, to_delete=out_msgs))
 
     for output in output_data:
         output.close()

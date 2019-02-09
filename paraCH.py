@@ -4,6 +4,8 @@ from paraCMD import paraCMD
 from snippets import snippets
 from checks import checks
 
+import asyncio
+
 
 class paraCH(CommandHandler):
     name = "General commands"
@@ -35,6 +37,7 @@ class paraCH(CommandHandler):
             ban_cmds = await ctx.data.servers.get(ctx.server.id, "banned_cmds")
             if ban_cmds and ctx.cmd.name in ban_cmds:
                 ctx.cmd_err = (1, "")
+        ctx.bot.objects["command_cache"][ctx.msg.id] = ctx
 
     def build_cmd(self, name, func, aliases=[], **kwargs):
         cmd = super().build_cmd(name, func, aliases=aliases, **kwargs)
@@ -46,3 +49,10 @@ class paraCH(CommandHandler):
     def append(self, CH):
         super().append(CH)
         self.raw_cmds.update(CH.raw_cmds)
+
+    @staticmethod
+    async def edit_handler_rerun(ctx, after):
+        asyncio.ensure_future(ctx.safe_delete_msgs(ctx.sent_messages))
+        ctx.update_message(after)
+
+        await ctx.bot.parse_cmd(ctx.used_prefix, ctx)
