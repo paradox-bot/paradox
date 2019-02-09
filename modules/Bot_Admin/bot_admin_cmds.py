@@ -13,8 +13,9 @@ status_dict = {"online": discord.Status.online,
                "invisible": discord.Status.invisible}
 
 @cmds.cmd("shutdown",
-          category="Bot admin")
-@cmds.require("master_perm")
+          category="Bot admin",
+          aliases=["restart"])
+@cmds.require("manager_perm")
 async def cmd_shutdown(ctx):
     await ctx.reply("Shutting down, cya another day~")
     await ctx.bot.logout()
