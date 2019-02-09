@@ -227,6 +227,9 @@ async def cmd_query(ctx):
     Flags:2
         text:: Attempts to reply with a copyable plaintext version of the output.
     """
+    if ctx.arg_str == "":
+        await ctx.reply("Please submit a valid query! For example, `{}ask differentiate x+y^2 with respect to x`.".format(ctx.used_prefix))
+        return
     loading_emoji = "<a:{}:{}>".format(ctx.bot.objects["emoji_loading"].name, ctx.bot.objects["emoji_loading"].id)
 
     temp_msg = await ctx.reply("Sending query to Wolfram Alpha, please wait. {}".format(loading_emoji))
@@ -270,7 +273,7 @@ async def cmd_query(ctx):
     await ctx.bot.delete_message(temp_msg)
     out_msg = await ctx.reply(file_data=data, file_name="wolf.png", embed=embed)
     asyncio.ensure_future(ctx.offer_delete(out_msg))
-   
+
     if extra:
         try:
             await ctx.bot.add_reaction(out_msg, ctx.bot.objects["emoji_more"])
