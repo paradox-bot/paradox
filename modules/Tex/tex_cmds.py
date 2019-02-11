@@ -155,7 +155,7 @@ async def cmd_tex(ctx):
             await ctx.reply("Your name is no longer shown on the output message. Note that your user id appears in the name of the output image.")
         return
 
-    if ctx.arg_str == "":
+    if ctx.arg_str == "" and ctx.userd_cmd_name != ",":
         await ctx.reply("Please give me something to compile! See `{0}help` and `{0}help tex` for usage!".format(ctx.used_prefix))
         return
     ctx.objs["latex_listening"] = False
