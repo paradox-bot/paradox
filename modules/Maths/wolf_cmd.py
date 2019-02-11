@@ -234,8 +234,12 @@ async def cmd_query(ctx):
     loading_emoji = "<a:{}:{}>".format(ctx.bot.objects["emoji_loading"].name, ctx.bot.objects["emoji_loading"].id)
 
     temp_msg = await ctx.reply("Sending query to Wolfram Alpha, please wait. {}".format(loading_emoji))
+
+    appid = await ctx.data.servers.get(ctx.server.id, "wolf_app_id") if ctx.server else None
+    appid = appid if appid else ctx.bot.objects["wolf_appid"]
+
     try:
-        result = await get_query(ctx.arg_str, ctx.bot.objects["wolf_appid"])
+        result = await get_query(ctx.arg_str, appid)
     except Exception:
         await ctx.reply("An unknown exception occurred while fetching the Wolfram Alpha query. If the problem persists please contact support.")
         return
@@ -320,3 +324,4 @@ async def cmd_query(ctx):
 
 def load_into(bot):
     bot.objects["wolf_appid"] = bot.bot_conf.get("WOLF_APPID")
+    bot.data.servers.ensure_exists("wolf_app_id")
