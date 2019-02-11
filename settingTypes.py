@@ -1,4 +1,5 @@
 import re
+
 import discord
 from paraSetting import paraSetting
 
@@ -8,16 +9,17 @@ class BOOL(paraSetting):
     A sort of boolean type, more like a wrapper for a boolean.
     """
     accept = "Yes/No, On/Off, True/False, Enabled/Disabled"
-    inputexps = {"^yes$": True,
-                 "^true$": True,
-                 "^on$": True,
-                 "^enabled?$": True,
-                 "^no$": False,
-                 "^false$": False,
-                 "^off$": False,
-                 "^disabled?$": False}
-    outputs = {True: "",
-               False: ""}
+    inputexps = {
+        "^yes$": True,
+        "^true$": True,
+        "^on$": True,
+        "^enabled?$": True,
+        "^no$": False,
+        "^false$": False,
+        "^off$": False,
+        "^disabled?$": False
+    }
+    outputs = {True: "", False: ""}
 
     @classmethod
     async def humanise(cls, ctx, raw):
@@ -28,7 +30,10 @@ class BOOL(paraSetting):
         for pattern in cls.inputexps:
             if re.match(pattern, userstr, re.I):
                 return cls.inputexps[pattern]
-        ctx.cmd_err = (1, "I don't understand this value. Acceptable values are: {}".format(cls.accept))
+        ctx.cmd_err = (
+            1,
+            "I don't understand this value. Acceptable values are: {}".format(
+                cls.accept))
         return None
 
 
@@ -157,16 +162,20 @@ class CHANNEL(paraSetting):
             return None
         chid = userstr.strip('<#@!>')
         if chid.isdigit():
+
             def is_ch(ch):
                 return ch.id == chid
         else:
+
             def is_ch(ch):
                 return userstr.lower() in ch.name.lower()
+
         ch = discord.utils.find(is_ch, ctx.server.channels)
         if ch:
             return ch.id
         else:
-            ctx.cmd_err = (1, "I can't find the channel `{}` in this server!".format(userstr))
+            ctx.cmd_err = (1, "I can't find the channel `{}` in this server!".
+                           format(userstr))
             return None
 
 
@@ -277,8 +286,6 @@ class userList(paraSetting):
             (self.error, self.errmsg) = (1, "I don't understand your input. Valid input is: `{}`".format(self.accept))
             return self.raw
 '''
-
-
 """
 class userBlackList(userList):
     name = "List of users"
@@ -297,8 +304,6 @@ class userMasterList(userList):
     str_removed_from_list = "I have rejected this master."
     str_added_to_list = "I accept this user as a new master."
 """
-
-
 '''
 class SERVER(_settingType):
     """

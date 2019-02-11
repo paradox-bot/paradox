@@ -1,19 +1,18 @@
-from paraCH import paraCH
 import discord
+from paraCH import paraCH
+
 cmds = paraCH()
 
 
-@cmds.cmd("shutdown",
-          category="Bot admin")
+@cmds.cmd("shutdown", category="Bot admin")
 @cmds.require("master_perm")
 async def cmd_shutdown(ctx):
     await ctx.reply("Shutting down, cya another day~")
     await ctx.bot.logout()
 
 
-@cmds.cmd("setgame",
-          category="Bot admin",
-          short_help="Sets my playing status!")
+@cmds.cmd(
+    "setgame", category="Bot admin", short_help="Sets my playing status!")
 @cmds.require("master_perm")
 async def cmd_setgame(ctx):
     """
@@ -30,9 +29,8 @@ async def cmd_setgame(ctx):
     await ctx.bot.change_presence(game=discord.Game(name=status))
     await ctx.reply("Game changed to: \'{}\'".format(status))
 
-@cmds.cmd("dm",
-          category="Bot admin",
-          short_help="dms a user")
+
+@cmds.cmd("dm", category="Bot admin", short_help="dms a user")
 @cmds.require("master_perm")
 async def cmd_dm(ctx):
     """
@@ -45,12 +43,12 @@ async def cmd_dm(ctx):
     if len(ctx.params) < 2:
         await ctx.reply("Please see Usage.")
         return
-    await ctx.run("dm", user_info = ctx.params[0], message = " ".join(ctx.params[1:]))
+    await ctx.run(
+        "dm", user_info=ctx.params[0], message=" ".join(ctx.params[1:]))
     await ctx.reply("Done.")
 
-@cmds.cmd("restart",
-          category="Bot admin",
-          short_help="Restart the bot.")
+
+@cmds.cmd("restart", category="Bot admin", short_help="Restart the bot.")
 @cmds.require("manager_perm")
 async def cmd_restart(ctx):
     """
@@ -63,9 +61,9 @@ async def cmd_restart(ctx):
     msg = await ctx.run_sh('./Nanny/scripts/redeploy.sh')
     await ctx.reply(msg)
 
-@cmds.cmd("logs",
-          category="Bot admin",
-          short_help="Reads and returns the logs")
+
+@cmds.cmd(
+    "logs", category="Bot admin", short_help="Reads and returns the logs")
 @cmds.require("master_perm")
 async def cmd_logs(ctx):
     """
@@ -78,7 +76,8 @@ async def cmd_logs(ctx):
         try:
             await ctx.reply(file_name=ctx.bot.log_file)
         except Exception:
-            await ctx.reply("I couldn't send you the logfile! Perhaps it is too big")
+            await ctx.reply(
+                "I couldn't send you the logfile! Perhaps it is too big")
     elif ctx.params[0].isdigit():
         logs = await ctx.tail(ctx.bot.log_file, ctx.params[0])
         await ctx.reply("Here are your logs:\n```{}```".format(logs))

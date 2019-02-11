@@ -1,8 +1,8 @@
 '''
     Class which stores all required botdata in an sqllite database
 '''
-import sqlite3 as sq
 import json
+import sqlite3 as sq
 
 
 class BotData:
@@ -13,15 +13,20 @@ class BotData:
         self.conn = sq.connect(dbfile)
         cursor = self.conn.cursor()
         try:
-            cursor.execute('CREATE TABLE {} (userid INTEGER PRIMARY KEY)'.format(self.userTable))
+            cursor.execute(
+                'CREATE TABLE {} (userid INTEGER PRIMARY KEY)'.format(
+                    self.userTable))
         except Exception:
             pass
         try:
-            cursor.execute('CREATE TABLE {} (serverid INTEGER PRIMARY KEY)'.format(self.serverTable))
+            cursor.execute(
+                'CREATE TABLE {} (serverid INTEGER PRIMARY KEY)'.format(
+                    self.serverTable))
         except Exception:
             pass
         self.users = _dbDataManipulator(self.userTable, "userid", self.conn)
-        self.servers = _dbDataManipulator(self.serverTable, "serverid", self.conn)
+        self.servers = _dbDataManipulator(self.serverTable, "serverid",
+                                          self.conn)
 
     def close(self):
         self.conn.commit()
@@ -40,22 +45,31 @@ class _dbDataManipulator:
             curs.execute('ALTER TABLE {} ADD {} text'.format(self.table, prop))
         except Exception:
             pass
-        curs.execute('SELECT {} FROM {} WHERE {} = ?'.format(prop, self.table, self.keyname), (key,))
+        curs.execute(
+            'SELECT {} FROM {} WHERE {} = ?'.format(prop, self.table,
+                                                    self.keyname), (key, ))
         value = curs.fetchone()
         return json.loads(value[0]) if (value and value[0]) else default
 
     async def set(self, key, prop, value):
         cursor = self.conn.cursor()
         try:
-            cursor.execute('ALTER TABLE {} ADD {} text'.format(self.table, prop))
+            cursor.execute('ALTER TABLE {} ADD {} text'.format(
+                self.table, prop))
         except Exception:
             pass
-        cursor.execute('SELECT EXISTS(SELECT 1 FROM {} WHERE {} = ?)'.format(self.table, self.keyname), (key,))
+        cursor.execute(
+            'SELECT EXISTS(SELECT 1 FROM {} WHERE {} = ?)'.format(
+                self.table, self.keyname), (key, ))
         exists = cursor.fetchone()
         if not exists[0]:
-            cursor.execute('INSERT INTO {} ({}) VALUES (?)'.format(self.table, self.keyname), (key,))
+            cursor.execute(
+                'INSERT INTO {} ({}) VALUES (?)'.format(
+                    self.table, self.keyname), (key, ))
 
-        cursor.execute('UPDATE {} SET {} = ? WHERE {} = ?'.format(self.table, prop, self.keyname), (json.dumps(value), key))
+        cursor.execute(
+            'UPDATE {} SET {} = ? WHERE {} = ?'.format(
+                self.table, prop, self.keyname), (json.dumps(value), key))
         self.conn.commit()
 
     async def find(self, prop, value, read=False):
@@ -66,14 +80,18 @@ class _dbDataManipulator:
             curs.execute('ALTER TABLE {} ADD {} text'.format(self.table, prop))
         except Exception:
             pass
-        curs.execute('SELECT {} FROM {} WHERE {} = ?'.format(self.keyname, self.table, prop), (value,))
+        curs.execute(
+            'SELECT {} FROM {} WHERE {} = ?'.format(self.keyname, self.table,
+                                                    prop), (value, ))
         values = curs.fetchall()
         return [value[0] for value in values]
 
     async def find_not_empty(self, prop):
         curs = self.conn.cursor()
         await self.ensure_exists(prop)
-        curs.execute('SELECT {key} FROM {table} WHERE {prop} IS NOT NULL AND {prop} != \'\''.format(key=self.keyname, table=self.table, prop=prop))
+        curs.execute(
+            'SELECT {key} FROM {table} WHERE {prop} IS NOT NULL AND {prop} != \'\''
+            .format(key=self.keyname, table=self.table, prop=prop))
         values = curs.fetchall()
         return [value[0] for value in values]
 
@@ -83,4 +101,3 @@ class _dbDataManipulator:
             curs.execute('ALTER TABLE {} ADD {} text'.format(self.table, prop))
         except Exception:
             pass
-

@@ -1,7 +1,8 @@
-from paraCH import paraCH
-import discord
-from datetime import datetime
 import asyncio
+from datetime import datetime
+
+import discord
+from paraCH import paraCH
 
 cmds = paraCH()
 
@@ -10,27 +11,31 @@ class ModEvent:
     """
     TODO: Ticket numbers and stuff.
     """
-    actions = {"ban": "User Banned",
-               "multi-ban": "Multiple-User Ban",
-               "hackban": "User Hackbanned",
-               "multi-hackban": "Multiple-User Hackban",
-               "kick": "User Kicked",
-               "multi-kick": "Users Kicked",
-               "unban": "User Unbanned",
-               "multi-unban": "Users Unbanned",
-               "mute": "User Muted",
-               "multi-mute": "Users Muted",
-               "unmute": "User Unmuted",
-               "multi-unmute": "Users Unmuted",
-               "softban": "User Softbanned",
-               "multi-softban": "Users Softbanned"}
+    actions = {
+        "ban": "User Banned",
+        "multi-ban": "Multiple-User Ban",
+        "hackban": "User Hackbanned",
+        "multi-hackban": "Multiple-User Hackban",
+        "kick": "User Kicked",
+        "multi-kick": "Users Kicked",
+        "unban": "User Unbanned",
+        "multi-unban": "Users Unbanned",
+        "mute": "User Muted",
+        "multi-mute": "Users Muted",
+        "unmute": "User Unmuted",
+        "multi-unmute": "Users Unmuted",
+        "softban": "User Softbanned",
+        "multi-softban": "Users Softbanned"
+    }
 
     def __init__(self, ctx, action, mod, users, reason="None", timeout=0):
         self.ctx = ctx
         self.action = action
         self.mod = mod
         self.users = users
-        self.user_strs = ["`{0.name}` (ID: `{0.id}`)".format(user) for user in users]
+        self.user_strs = [
+            "`{0.name}` (ID: `{0.id}`)".format(user) for user in users
+        ]
         self.timeout = timeout
         self.reason = reason
         self.init_time = datetime.utcnow()
@@ -40,12 +45,24 @@ class ModEvent:
         """
         TODO: timeout in sensible form
         """
-        embed = discord.Embed(title=self.actions[self.action], color=discord.Colour.red())
-        embed.add_field(name="User{}:".format("s" if len(self.users) > 1 else ""), value="\n".join(self.user_strs), inline=False)
+        embed = discord.Embed(
+            title=self.actions[self.action], color=discord.Colour.red())
+        embed.add_field(
+            name="User{}:".format("s" if len(self.users) > 1 else ""),
+            value="\n".join(self.user_strs),
+            inline=False)
         if self.timeout:
-            embed.add_field(name="Expires:", value="{} hour{}".format(self.timeout, "s" if self.timeout > 1 else ""), inline=False)
+            embed.add_field(
+                name="Expires:",
+                value="{} hour{}".format(self.timeout,
+                                         "s" if self.timeout > 1 else ""),
+                inline=False)
         embed.add_field(name="Reason", value=self.reason, inline=False)
-        embed.set_footer(icon_url=self.mod.avatar_url, text=self.init_time.strftime("Acting Moderator: {} at %-I:%M %p, %d/%m/%Y".format(self.mod)))
+        embed.set_footer(
+            icon_url=self.mod.avatar_url,
+            text=self.init_time.strftime(
+                "Acting Moderator: {} at %-I:%M %p, %d/%m/%Y".format(
+                    self.mod)))
         self.embed = embed
         return embed
 
@@ -62,7 +79,8 @@ class ModEvent:
         if not self.embed:
             await self.embedify()
         try:
-            self.modlog_msg = await self.ctx.bot.send_message(modlog,  embed=self.embed)
+            self.modlog_msg = await self.ctx.bot.send_message(
+                modlog, embed=self.embed)
         except discord.Forbidden:
             return 1
         except Exception:
@@ -74,7 +92,7 @@ async def ban(ctx, user, **kwargs):
     """
     Todo: on rewrite, make this post reason
     """
-#    ban_reason = kwargs["ban_reason"]
+    #    ban_reason = kwargs["ban_reason"]
     days = kwargs["days"]
     try:
         await ctx.bot.ban(user, int(days))
@@ -84,6 +102,7 @@ async def ban(ctx, user, **kwargs):
         return 2
     return 0
 
+
 async def make_muted(ctx):
     role_name = "Muted"
     colour = discord.Colour.red()
@@ -91,7 +110,8 @@ async def make_muted(ctx):
     perms.send_messages = False
     role = None
     try:
-        role = await ctx.bot.create_role(ctx.server, name=role_name, colour=colour, permissions=perms)
+        role = await ctx.bot.create_role(
+            ctx.server, name=role_name, colour=colour, permissions=perms)
         await ctx.server_conf.mute_role.set(ctx, role.id)
     except discord.Forbidden:
         pass
@@ -114,11 +134,15 @@ async def mute(ctx, user, **kwargs):
         return 2
     dur = kwargs.get("duration", None)
     if dur and dur.seconds:
-        mod_event = ModEvent(ctx, "unmute", ctx.author, [user], "Scheduled Unmute after " + ctx.strfdelta(dur))
+        mod_event = ModEvent(ctx, "unmute", ctx.author, [user],
+                             "Scheduled Unmute after " + ctx.strfdelta(dur))
+
         async def unmute_scheduled(bot):
             await ctx.bot.remove_roles(user, role)
             await mod_event.modlog_post()
-        await ctx.bot.schedule(await ctx.from_now(dur.seconds), unmute_scheduled)
+
+        await ctx.bot.schedule(await ctx.from_now(dur.seconds),
+                               unmute_scheduled)
     return 0
 
 
@@ -141,7 +165,7 @@ async def softban(ctx, user, **kwargs):
     """
     Todo: on rewrite, make this post reason
     """
-#    ban_reason = kwargs["ban_reason"]
+    #    ban_reason = kwargs["ban_reason"]
     days = kwargs["days"]
     try:
         await ctx.bot.ban(user, int(days))
@@ -196,32 +220,47 @@ async def role_finder(ctx, user_str, msg):
     role = await ctx.find_role(user_str, interactive=True, create=True)
     if role is None:
         if ctx.cmd_err[0] != -1:
-            msg = msg + "\t🚨 Couldn't find role `{}`, skipping\n".format(user_str)
+            msg = msg + "\t🚨 Couldn't find role `{}`, skipping\n".format(
+                user_str)
         else:
-            msg = msg + "\t🗑 Role selection aborted for `{}`, skipping\n".format(user_str)
+            msg = msg + "\t🗑 Role selection aborted for `{}`, skipping\n".format(
+                user_str)
             ctx.cmd_err = (0, "")
     return (role, msg)
 
 
-async def member_finder(ctx, user_str, msg, hack=False, collection=None, is_member=True):
+async def member_finder(ctx,
+                        user_str,
+                        msg,
+                        hack=False,
+                        collection=None,
+                        is_member=True):
     if hack:
         if user_str.isdigit():
             try:
                 print(user_str)
                 member_info = await ctx.bot.get_user_info(user_str.strip())
             except discord.NotFound:
-                msg += "\t🚨 User with id `{}` does not exist, skipping\n".format(user_str)
+                msg += "\t🚨 User with id `{}` does not exist, skipping\n".format(
+                    user_str)
                 return (None, msg)
             member = discord.Object(id=user_str)
             member.server = ctx.server
             member.name = member_info.name
             return (member, msg)
-    user = await ctx.find_user(user_str, in_server=True, interactive=True, collection=collection, is_member=is_member)
+    user = await ctx.find_user(
+        user_str,
+        in_server=True,
+        interactive=True,
+        collection=collection,
+        is_member=is_member)
     if user is None:
         if ctx.cmd_err[0] != -1:
-            msg = msg + "\t🚨 Couldn't find user `{}`, skipping\n".format(user_str)
+            msg = msg + "\t🚨 Couldn't find user `{}`, skipping\n".format(
+                user_str)
         else:
-            msg = msg + "\t🗑 User selection aborted for `{}`, skipping\n".format(user_str)
+            msg = msg + "\t🗑 User selection aborted for `{}`, skipping\n".format(
+                user_str)
             ctx.cmd_err = (0, "")
     return (user, msg)
 
@@ -232,7 +271,12 @@ async def user_finder(ctx, user_str, msg):
 
 
 async def ban_finder(ctx, user_str, msg):
-    user, msg = await member_finder(ctx, user_str, msg, collection=await ctx.bot.get_bans(ctx.server), is_member=False)
+    user, msg = await member_finder(
+        ctx,
+        user_str,
+        msg,
+        collection=await ctx.bot.get_bans(ctx.server),
+        is_member=False)
     return (user, msg)
 
 
@@ -242,7 +286,8 @@ async def role_result(ctx, result, msg, role, **kwargs):
     elif result == 1:
         msg += "\tInsufficient permissions to add role `{}`.".format(role)
     else:
-        msg += "\tUnknown error while adding role `{}`, aborting sequence.".format(role)
+        msg += "\tUnknown error while adding role `{}`, aborting sequence.".format(
+            role)
         return (1, msg)
     return (0, msg)
 
@@ -260,7 +305,8 @@ async def mod_result(ctx, result, msg, user, **kwargs):
         return (1, msg)
 
 
-async def multi_action(ctx, user_strs, action, finder, result_func, start_str, **kwargs):
+async def multi_action(ctx, user_strs, action, finder, result_func, start_str,
+                       **kwargs):
     founds = []
     msg = start_str
     out_msg = await ctx.reply(msg)
@@ -285,23 +331,44 @@ async def multi_action(ctx, user_strs, action, finder, result_func, start_str, *
     return founds
 
 
-async def multi_mod_action(ctx, user_strs, action, strings, reason, finder=member_finder, **kwargs):
-    users = await multi_action(ctx, user_strs, action, finder, mod_result, strings["start"], strings=strings, reason=reason, **kwargs)
+async def multi_mod_action(ctx,
+                           user_strs,
+                           action,
+                           strings,
+                           reason,
+                           finder=member_finder,
+                           **kwargs):
+    users = await multi_action(
+        ctx,
+        user_strs,
+        action,
+        finder,
+        mod_result,
+        strings["start"],
+        strings=strings,
+        reason=reason,
+        **kwargs)
     if len(users) == 0:
         return
-    action = strings["action_name"] if len(users) == 1 else strings["action_multi_name"]
+    action = strings["action_name"] if len(
+        users) == 1 else strings["action_multi_name"]
     mod_event = ModEvent(ctx, action, ctx.author, users, reason)
     result = await mod_event.modlog_post()
     if result == 1:
-        await ctx.reply("I tried to post to the modlog, but lack the permissions.")  # TODO: Offer to repost after modlog works.
+        await ctx.reply(
+            "I tried to post to the modlog, but lack the permissions."
+        )  # TODO: Offer to repost after modlog works.
     elif result == 2:
         await ctx.reply("I can't access the set modlog channel.")
     elif result == 3:
-        await ctx.reply("An unexpected error occurred while trying to post to the modlog.")
+        await ctx.reply(
+            "An unexpected error occurred while trying to post to the modlog.")
 
 
 async def request_reason(ctx, action="ban"):
-    reason = await ctx.input("📋 Please provide a reason! (`no` for no reason or `c` to abort {})".format(action))
+    reason = await ctx.input(
+        "📋 Please provide a reason! (`no` for no reason or `c` to abort {})".
+        format(action))
     if reason.lower() == "no":
         reason = "None"
     elif reason.lower() == "c":
@@ -321,7 +388,8 @@ async def mod_parse(ctx, multi=True, purge=True, purge_default="0"):
             reason = ctx.flags["r"]
         else:
             users = [ctx.params[0]]
-            reason = ctx.flags["r"] if ctx.flags["r"] else (" ".join(ctx.params[1:]) if len(ctx.params) > 0 else "")
+            reason = ctx.flags["r"] if ctx.flags["r"] else (
+                " ".join(ctx.params[1:]) if len(ctx.params) > 0 else "")
     reason = reason if reason else (await request_reason(ctx))
     if not reason:
         return (None, None, None) if purge else (None, None)
@@ -338,10 +406,11 @@ async def mod_parse(ctx, multi=True, purge=True, purge_default="0"):
     return (reason, users, purge_days) if purge else (reason, users)
 
 
-@cmds.cmd("hackban",
-          category="Moderation",
-          short_help="Hackbans users",
-          aliases=["hb"])
+@cmds.cmd(
+    "hackban",
+    category="Moderation",
+    short_help="Hackbans users",
+    aliases=["hb"])
 @cmds.execute("flags", flags=["r==", "p=", "m", "f"])
 @cmds.require("in_server")
 @cmds.require("in_server_can_hackban")
@@ -368,18 +437,36 @@ async def cmd_hackban(ctx):
         return
 
     action_func = test_action if ctx.flags["f"] else ban
-    strings = {"action_name": "hackban",
-               "action_multi_name": "multi-hackban",
-               "start": "Hackbanning... \n",
-               "fail_unknown": "🚨 Encountered an unexpected fatal error hackbanning `{user.name}` (id: `{user.id}`)! Aborting hackban sequence..."}
-    strings["results"] = {0: "✅ Successfully hackbanned `{user.name}` (id: `{user.id}`)" + (" and purged `{}` days of messages.".format(purge_days) if int(purge_days) > 0 else "!"),
-                          1: "🚨 Failed to hackban `{user.name}` (id: `{user.id}`), insufficient permissions."}
-    await multi_mod_action(ctx, users, action_func, strings, reason, finder=user_finder, days=int(purge_days), ban_reason="{}: {}".format(ctx.author, reason))
+    strings = {
+        "action_name":
+        "hackban",
+        "action_multi_name":
+        "multi-hackban",
+        "start":
+        "Hackbanning... \n",
+        "fail_unknown":
+        "🚨 Encountered an unexpected fatal error hackbanning `{user.name}` (id: `{user.id}`)! Aborting hackban sequence..."
+    }
+    strings["results"] = {
+        0:
+        "✅ Successfully hackbanned `{user.name}` (id: `{user.id}`)" +
+        (" and purged `{}` days of messages.".format(purge_days)
+         if int(purge_days) > 0 else "!"),
+        1:
+        "🚨 Failed to hackban `{user.name}` (id: `{user.id}`), insufficient permissions."
+    }
+    await multi_mod_action(
+        ctx,
+        users,
+        action_func,
+        strings,
+        reason,
+        finder=user_finder,
+        days=int(purge_days),
+        ban_reason="{}: {}".format(ctx.author, reason))
 
 
-@cmds.cmd("unban",
-          category="Moderation",
-          short_help="Unbans users")
+@cmds.cmd("unban", category="Moderation", short_help="Unbans users")
 @cmds.execute("flags", flags=["r==", "m"])
 @cmds.require("in_server")
 @cmds.require("in_server_can_unban")
@@ -403,19 +490,37 @@ async def cmd_unban(ctx):
         return
 
     action_func = unban
-    strings = {"action_name": "unban",
-               "action_multi_name": "multi-unban",
-               "start": "Unbanning... \n",
-               "fail_unknown": "🚨 Encountered an unexpected fatal error unbanning `{user.name}` (id: `{user.id}`)! Aborting unban sequence..."}
-    strings["results"] = {0: "✅ Successfully unbanned `{user.name}` (id: `{user.id}`).",
-                          1: "🚨 Failed to unban `{user.name}` (id: `{user.id}`), insufficient permissions."}
-    await multi_mod_action(ctx, users, action_func, strings, reason, finder=ban_finder, ban_reason="{}: {}".format(ctx.author, reason))
+    strings = {
+        "action_name":
+        "unban",
+        "action_multi_name":
+        "multi-unban",
+        "start":
+        "Unbanning... \n",
+        "fail_unknown":
+        "🚨 Encountered an unexpected fatal error unbanning `{user.name}` (id: `{user.id}`)! Aborting unban sequence..."
+    }
+    strings["results"] = {
+        0:
+        "✅ Successfully unbanned `{user.name}` (id: `{user.id}`).",
+        1:
+        "🚨 Failed to unban `{user.name}` (id: `{user.id}`), insufficient permissions."
+    }
+    await multi_mod_action(
+        ctx,
+        users,
+        action_func,
+        strings,
+        reason,
+        finder=ban_finder,
+        ban_reason="{}: {}".format(ctx.author, reason))
 
 
-@cmds.cmd("ban",
-          category="Moderation",
-          short_help="Bans users",
-          aliases=["b", "banne", "bean"])
+@cmds.cmd(
+    "ban",
+    category="Moderation",
+    short_help="Bans users",
+    aliases=["b", "banne", "bean"])
 @cmds.execute("flags", flags=["r==", "p=", "f", "m"])
 @cmds.require("in_server")
 @cmds.require("in_server_can_ban")
@@ -441,19 +546,39 @@ async def cmd_ban(ctx):
         return
 
     action_func = test_action if ctx.flags["f"] else ban
-    strings = {"action_name": "ban",
-               "action_multi_name": "multi-ban",
-               "start": "Banning... \n",
-               "fail_unknown": "🚨 Encountered an unexpected fatal error banning `{user.name}`! Aborting ban sequence..."}
-    strings["results"] = {0: "✅ Successfully banned `{user.name}`" + (" and purged `{}` days of messages.".format(purge_days) if int(purge_days) > 0 else "!"),
-                          1: "🚨 Failed to ban `{user.name}`, insufficient permissions."}
-    await multi_mod_action(ctx, users, action_func, strings, reason, days=int(purge_days), ban_reason="{}: {}".format(ctx.author, reason))
+    strings = {
+        "action_name":
+        "ban",
+        "action_multi_name":
+        "multi-ban",
+        "start":
+        "Banning... \n",
+        "fail_unknown":
+        "🚨 Encountered an unexpected fatal error banning `{user.name}`! Aborting ban sequence..."
+    }
+    strings["results"] = {
+        0:
+        "✅ Successfully banned `{user.name}`" +
+        (" and purged `{}` days of messages.".format(purge_days)
+         if int(purge_days) > 0 else "!"),
+        1:
+        "🚨 Failed to ban `{user.name}`, insufficient permissions."
+    }
+    await multi_mod_action(
+        ctx,
+        users,
+        action_func,
+        strings,
+        reason,
+        days=int(purge_days),
+        ban_reason="{}: {}".format(ctx.author, reason))
 
 
-@cmds.cmd("softban",
-          category="Moderation",
-          short_help="Softbans users",
-          aliases=["sb"])
+@cmds.cmd(
+    "softban",
+    category="Moderation",
+    short_help="Softbans users",
+    aliases=["sb"])
 @cmds.execute("flags", flags=["r==", "p=", "f", "m"])
 @cmds.require("in_server")
 @cmds.require("in_server_can_softban")
@@ -479,18 +604,34 @@ async def cmd_softban(ctx):
         return
 
     action_func = test_action if ctx.flags["f"] else softban
-    strings = {"action_name": "softban",
-               "action_multi_name": "multi-softban",
-               "start": "Softbanning... \n",
-               "fail_unknown": "🚨 Encountered an unexpected fatal error softbanning `{user.name}`! Aborting softban sequence..."}
-    strings["results"] = {0: "✅ Softbanned `{user.name}`" + " and purged `{}` days of messages.".format(purge_days),
-                          1: "🚨 Failed to softban `{user.name}`, insufficient permissions."}
-    await multi_mod_action(ctx, users, action_func, strings, reason, days=int(purge_days), ban_reason="{}: {}".format(ctx.author, reason))
+    strings = {
+        "action_name":
+        "softban",
+        "action_multi_name":
+        "multi-softban",
+        "start":
+        "Softbanning... \n",
+        "fail_unknown":
+        "🚨 Encountered an unexpected fatal error softbanning `{user.name}`! Aborting softban sequence..."
+    }
+    strings["results"] = {
+        0:
+        "✅ Softbanned `{user.name}`" +
+        " and purged `{}` days of messages.".format(purge_days),
+        1:
+        "🚨 Failed to softban `{user.name}`, insufficient permissions."
+    }
+    await multi_mod_action(
+        ctx,
+        users,
+        action_func,
+        strings,
+        reason,
+        days=int(purge_days),
+        ban_reason="{}: {}".format(ctx.author, reason))
 
 
-@cmds.cmd("mute",
-          category="Moderation",
-          short_help="Mutes users (WIP)")
+@cmds.cmd("mute", category="Moderation", short_help="Mutes users (WIP)")
 @cmds.execute("flags", flags=["r==", "f", "t==", "m"])
 @cmds.require("in_server")
 @cmds.require("in_server_can_mute")
@@ -519,25 +660,36 @@ async def cmd_mute(ctx):
     if ctx.flags["t"]:
         dur = ctx.parse_dur(ctx.flags["t"])
         if not dur:
-            await ctx.reply("Didn't understand the duration given. See the help for usage.")
+            await ctx.reply(
+                "Didn't understand the duration given. See the help for usage."
+            )
             return
 
-
-
     action_func = test_action if ctx.flags["f"] else mute
-    strings = {"action_name": "mute",
-               "action_multi_name": "multi-mute",
-               "start": "Muting... \n" if not dur else "Temp-Muting for `{}`... \n".format(ctx.strfdelta(dur)),
-               "fail_unknown": "🚨 Encountered an unexpected fatal error muting `{user.name}`! Aborting sequence..."}
-    strings["results"] = {0: "Muted `{user.name}`!",
-                          1: "🚨 Failed to mute `{user.name}`! (Insufficient Permissions)",
-                          -1: "Failed to find or create a mute role. Please set a mute role in config or ensure I have permissions to create it."}
-    await multi_mod_action(ctx, users, action_func, strings, reason, duration=dur)
+    strings = {
+        "action_name":
+        "mute",
+        "action_multi_name":
+        "multi-mute",
+        "start":
+        "Muting... \n" if not dur else "Temp-Muting for `{}`... \n".format(
+            ctx.strfdelta(dur)),
+        "fail_unknown":
+        "🚨 Encountered an unexpected fatal error muting `{user.name}`! Aborting sequence..."
+    }
+    strings["results"] = {
+        0:
+        "Muted `{user.name}`!",
+        1:
+        "🚨 Failed to mute `{user.name}`! (Insufficient Permissions)",
+        -1:
+        "Failed to find or create a mute role. Please set a mute role in config or ensure I have permissions to create it."
+    }
+    await multi_mod_action(
+        ctx, users, action_func, strings, reason, duration=dur)
 
 
-@cmds.cmd("unmute",
-          category="Moderation",
-          short_help="Unmutes users (WIP)")
+@cmds.cmd("unmute", category="Moderation", short_help="Unmutes users (WIP)")
 @cmds.execute("flags", flags=["r==", "f", "m"])
 @cmds.require("in_server")
 @cmds.require("in_server_can_unmute")
@@ -561,20 +713,26 @@ async def cmd_unmute(ctx):
         return
 
     action_func = test_action if ctx.flags["f"] else unmute
-    strings = {"action_name": "unmute",
-               "action_multi_name": "multi-unmute",
-               "start": "Unmuting... \n",
-               "fail_unknown": "🚨 Encountered an unexpected fatal error unmuting `{user.name}`! Aborting sequence..."}
-    strings["results"] = {0: "Unmuted `{user.name}`!",
-                          1: "🚨 Failed to unmute `{user.name}`! (Insufficient Permissions)",
-                          -1: "Failed to find a mute role."}
+    strings = {
+        "action_name":
+        "unmute",
+        "action_multi_name":
+        "multi-unmute",
+        "start":
+        "Unmuting... \n",
+        "fail_unknown":
+        "🚨 Encountered an unexpected fatal error unmuting `{user.name}`! Aborting sequence..."
+    }
+    strings["results"] = {
+        0: "Unmuted `{user.name}`!",
+        1: "🚨 Failed to unmute `{user.name}`! (Insufficient Permissions)",
+        -1: "Failed to find a mute role."
+    }
     await multi_mod_action(ctx, users, action_func, strings, reason)
 
 
-@cmds.cmd("kick",
-          category="Moderation",
-          short_help="Kicks users",
-          aliases=["k"])
+@cmds.cmd(
+    "kick", category="Moderation", short_help="Kicks users", aliases=["k"])
 @cmds.execute("flags", flags=["r==", "f", "m"])
 @cmds.require("in_server")
 @cmds.require("in_server_can_kick")
@@ -597,19 +755,28 @@ async def cmd_kick(ctx):
         return
 
     action_func = test_action if ctx.flags["f"] else kick
-    strings = {"action_name": "kick",
-               "action_multi_name": "multi-kick",
-               "start": "Kicking... \n",
-               "fail_unknown": "🚨 Encountered an unexpected fatal error kicking `{user.name}`! Aborting kick sequence..."}
-    strings["results"] = {0: "✅ Kicked `{user.name}`.",
-                          1: "🚨 Failed to kick `{user.name}`, insufficient permissions."}
+    strings = {
+        "action_name":
+        "kick",
+        "action_multi_name":
+        "multi-kick",
+        "start":
+        "Kicking... \n",
+        "fail_unknown":
+        "🚨 Encountered an unexpected fatal error kicking `{user.name}`! Aborting kick sequence..."
+    }
+    strings["results"] = {
+        0: "✅ Kicked `{user.name}`.",
+        1: "🚨 Failed to kick `{user.name}`, insufficient permissions."
+    }
     await multi_mod_action(ctx, ctx.params, action_func, strings, reason)
 
 
-@cmds.cmd("giverole",
-          category="Moderation",
-          short_help="Give role(s) to a member",
-          aliases=["gr"])
+@cmds.cmd(
+    "giverole",
+    category="Moderation",
+    short_help="Give role(s) to a member",
+    aliases=["gr"])
 @cmds.require("in_server")
 @cmds.require("has_manage_server")
 @cmds.execute("user_lookup", in_server=True)
@@ -630,13 +797,21 @@ async def cmd_giverole(ctx):
     if not user:
         await ctx.reply("No users matching that criteria were found.")
         return
-    await multi_action(ctx, ctx.params[1:], giverole, role_finder, role_result, "Adding Roles to `{}`...\n".format(user.name), user=user)
+    await multi_action(
+        ctx,
+        ctx.params[1:],
+        giverole,
+        role_finder,
+        role_result,
+        "Adding Roles to `{}`...\n".format(user.name),
+        user=user)
 
 
-@cmds.cmd("rolemod",
-          category="Moderation",
-          short_help="Modify role(s) for member(s)!",
-          aliases=["rmod"])
+@cmds.cmd(
+    "rolemod",
+    category="Moderation",
+    short_help="Modify role(s) for member(s)!",
+    aliases=["rmod"])
 @cmds.require("in_server")
 @cmds.require("has_manage_server")
 async def cmd_rolemod(ctx):
@@ -661,7 +836,7 @@ async def cmd_rolemod(ctx):
         if param.startswith("+") or param.startswith("-"):
             if len(param) == 1:
                 if i < n - 1:
-                    obj = ctx.params[i+1]
+                    obj = ctx.params[i + 1]
                     i += 1
                 else:
                     break
@@ -692,16 +867,25 @@ async def cmd_rolemod(ctx):
             if i >= len(real_users):
                 started = True
                 user_lines.append("\tIdentifying `{}`".format(users[i]))
-                await ctx.bot.edit_message(out_msg, "{}{}{}".format(intro, "\n".join(user_lines), error_lines))
-                user = await ctx.find_user(users[i], in_server=True, interactive=True)
+                await ctx.bot.edit_message(
+                    out_msg, "{}{}{}".format(intro, "\n".join(user_lines),
+                                             error_lines))
+                user = await ctx.find_user(
+                    users[i], in_server=True, interactive=True)
                 real_users.append(user)
                 if user is None:
                     if ctx.cmd_err[0] != -1:
-                        user_lines[i] = "\t🚨 Couldn't find user `{}`, skipping".format(users[i])
+                        user_lines[
+                            i] = "\t🚨 Couldn't find user `{}`, skipping".format(
+                                users[i])
                     else:
-                        user_lines[i] = "\t🗑 User selection aborted for `{}`, skipping".format(users[i])
+                        user_lines[
+                            i] = "\t🗑 User selection aborted for `{}`, skipping".format(
+                                users[i])
                         ctx.cmd_err = (0, "")
-                    await ctx.bot.edit_message(out_msg, "{}{}{}".format(intro, "\n".join(user_lines), error_lines))
+                    await ctx.bot.edit_message(
+                        out_msg, "{}{}{}".format(intro, "\n".join(user_lines),
+                                                 error_lines))
                     continue
             if real_users[i] is None:
                 continue
@@ -711,22 +895,31 @@ async def cmd_rolemod(ctx):
             try:
                 if role[0] > 0:
                     await ctx.bot.add_roles(user, role[1])
-                    user_lines[i] += "{}`+{}`".format("" if started else ", ", role[1].name)
+                    user_lines[i] += "{}`+{}`".format("" if started else ", ",
+                                                      role[1].name)
                 else:
                     await ctx.bot.remove_roles(user, role[1])
-                    user_lines[i] += "{}`-{}`".format("" if started else ", ", role[1].name)
+                    user_lines[i] += "{}`-{}`".format("" if started else ", ",
+                                                      role[1].name)
             except discord.Forbidden:
                 if not error_lines:
                     error_lines = "\nErrors:\n"
-                error_lines += ("\tI don't have permissions to {} `{}`!\n".format("add role `{}` to".format(role[1].name) if role[0] > 0 else "remove role `{}` from".format(role[1].name), user))
+                error_lines += (
+                    "\tI don't have permissions to {} `{}`!\n".format(
+                        "add role `{}` to".format(role[1].name) if role[0] > 0
+                        else "remove role `{}` from".format(role[1].name),
+                        user))
                 await asyncio.sleep(1)
-            await ctx.bot.edit_message(out_msg, "{}{}{}".format(intro, "\n".join(user_lines), error_lines))
+            await ctx.bot.edit_message(
+                out_msg, "{}{}{}".format(intro, "\n".join(user_lines),
+                                         error_lines))
 
 
-@cmds.cmd("giveme",
-          category="Moderation",
-          short_help="Request self roles or list the current roles!",
-          aliases=["selfrole", "srole", "iam"])
+@cmds.cmd(
+    "giveme",
+    category="Moderation",
+    short_help="Request self roles or list the current roles!",
+    aliases=["selfrole", "srole", "iam"])
 @cmds.require("in_server")
 @cmds.execute("flags", flags=["add", "remove", "list"])
 async def cmd_giveme(ctx):
@@ -764,11 +957,13 @@ async def cmd_giveme(ctx):
 
     if ctx.flags["list"]:
         if self_roles:
-            role_list = "```css\n{}\n```".format(", ".join([role.name for role in self_roles]))
+            role_list = "```css\n{}\n```".format(", ".join(
+                [role.name for role in self_roles]))
             msg = "**Self assignable roles for this server**:\
                 \n{roles}\
                 \nUse `{prefix}giveme role1, role2,...` to add or remove your self assignable roles.\
-                \nType the command again to remove the roles.".format(roles=role_list, prefix=ctx.used_prefix)
+                \nType the command again to remove the roles.".format(
+                roles=role_list, prefix=ctx.used_prefix)
         else:
             msg = "No self assignable roles have been set for this server. Roles may be set using the `--add` flag on this command or the selfroles config option."
         await ctx.reply(msg)
@@ -781,7 +976,9 @@ async def cmd_giveme(ctx):
             return
         else:
             lines = [role.name for role in self_roles]
-            selection = await ctx.selector("Please select which self assignable role you wish to toggle.", lines)
+            selection = await ctx.selector(
+                "Please select which self assignable role you wish to toggle.",
+                lines)
             if selection is None:
                 return
             roles = [lines[selection]]
@@ -789,7 +986,11 @@ async def cmd_giveme(ctx):
         roles = ctx.arg_str.split(",")
     msg_roles = []
     for role in roles:
-        msg_role = await ctx.find_role(role.strip(), create=True if mod else False, interactive=True, collection=None if ctx.flags["add"] else self_roles)
+        msg_role = await ctx.find_role(
+            role.strip(),
+            create=True if mod else False,
+            interactive=True,
+            collection=None if ctx.flags["add"] else self_roles)
         if msg_role is None:
             if role.isdigit() and ctx.flags["remove"]:
                 continue
@@ -803,14 +1004,17 @@ async def cmd_giveme(ctx):
                 if role in self_roles:
                     self_roles.remove(role)
         else:
-            self_roles.extend([role for role in msg_roles if role not in self_roles])
-        await ctx.data.servers.set(ctx.server.id, "self_roles", [role.id for role in self_roles])
+            self_roles.extend(
+                [role for role in msg_roles if role not in self_roles])
+        await ctx.data.servers.set(ctx.server.id, "self_roles",
+                                   [role.id for role in self_roles])
         await ctx.reply("Server self roles updated!")
         return
 
     bad_roles = [role for role in msg_roles if role not in self_roles]
     if bad_roles:
-        await ctx.reply("`{}` is not a self-assignable role.".format(bad_roles[0].name))
+        await ctx.reply("`{}` is not a self-assignable role.".format(
+            bad_roles[0].name))
         return
 
     for role in msg_roles:
@@ -820,7 +1024,8 @@ async def cmd_giveme(ctx):
             else:
                 await ctx.bot.add_roles(ctx.author, role)
         except discord.Forbidden:
-            await ctx.reply("I don't have permissions to update these roles for you!")
+            await ctx.reply(
+                "I don't have permissions to update these roles for you!")
             return
     await ctx.reply("Updated your roles!")
     # TODO: Make interactive system with no arg_str, with comma separated list of numbers selecting roles

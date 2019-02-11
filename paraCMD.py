@@ -1,6 +1,7 @@
-from contextBot.Command import Command
 import re
 import textwrap
+
+from contextBot.Command import Command
 
 
 class paraCMD(Command):
@@ -18,7 +19,8 @@ class paraCMD(Command):
         for i in range(0, len(lines)):
             if re.match(r"^.*:[0-9]?$", lines[i]):
                 if field_name and field:
-                    help_fields.append((field_name, field + ("" if table_field else "\n```")))
+                    help_fields.append(
+                        (field_name, field + ("" if table_field else "\n```")))
                     table_field = False
                 if re.match(r"^.*:[0-9]$", lines[i]):
                     field_name = lines[i][:-2]
@@ -33,9 +35,14 @@ class paraCMD(Command):
                     if "::" in lines[i]:
                         row = lines[i].strip().split("::")
                         row_name, row_content = row
-                        field += "`​{}{}`: {}\n".format(" " * (field_len - len(row_name)), row_name, row_content)
+                        field += "`​{}{}`: {}\n".format(
+                            " " * (field_len - len(row_name)), row_name,
+                            row_content)
                 else:
                     field += lines[i].strip() + "\n"
         if field_name and field:
-            help_fields.append((field_name, field + ("" if table_field else "\n```")))
-        self.help_fields = list(map(lambda f: (f[0], (textwrap.dedent(f[1])).strip()), help_fields))
+            help_fields.append((field_name,
+                                field + ("" if table_field else "\n```")))
+        self.help_fields = list(
+            map(lambda f: (f[0], (textwrap.dedent(f[1])).strip()),
+                help_fields))

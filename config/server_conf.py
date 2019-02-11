@@ -1,6 +1,6 @@
+import settingTypes
 from contextBot.Conf import Conf
 from paraSetting import paraSetting
-import settingTypes
 
 server_conf = Conf("s_conf")
 
@@ -42,8 +42,7 @@ class Server_Setting_Starboard(Server_Setting, settingTypes.BOOL):
     category = "Starboard"
     default = False
 
-    outputs = {True: "Enabled",
-               False: "Disabled"}
+    outputs = {True: "Enabled", False: "Disabled"}
 
     @classmethod
     async def write(cls, ctx, value):
@@ -52,7 +51,8 @@ class Server_Setting_Starboard(Server_Setting, settingTypes.BOOL):
             return result
         starboards = ctx.bot.objects["server_starboard_emojis"]
         if value:
-            starboards[ctx.server.id] = await ctx.server_conf.starboard_emoji.get(ctx)
+            starboards[
+                ctx.server.id] = await ctx.server_conf.starboard_emoji.get(ctx)
             ctx.bot.objects["server_starboards"][ctx.server.id] = {}
         else:
             starboards.pop(ctx.server.id, None)
@@ -143,6 +143,7 @@ class Server_Setting_Clean_Channels(Server_Setting, settingTypes.CHANNELLIST):
         cleaned[ctx.server.id] = value if value else []
         return result
 
+
 # Moderation settings
 
 
@@ -181,6 +182,7 @@ class Server_Setting_joinlog_ch(Server_Setting, settingTypes.CHANNEL):
     default = None
     category = "Moderation"
 
+
 # Join and leave message settings
 
 
@@ -192,8 +194,7 @@ class Server_Setting_Join(Server_Setting, settingTypes.BOOL):
     default = False
     category = "Join message"
 
-    outputs = {True: "Enabled",
-               False: "Disabled"}
+    outputs = {True: "Enabled", False: "Disabled"}
 
 
 @server_conf.setting
@@ -222,8 +223,7 @@ class Server_Setting_Leave(Server_Setting, settingTypes.BOOL):
     default = False
     category = "Leave message"
 
-    outputs = {True: "Enabled",
-               False: "Disabled"}
+    outputs = {True: "Enabled", False: "Disabled"}
 
 
 @server_conf.setting
@@ -246,6 +246,7 @@ class Server_Setting_Leave_Ch(Server_Setting, settingTypes.CHANNEL):
 
 # Maths related settings
 
+
 @server_conf.setting
 class Server_Setting_Latex_Listen(Server_Setting, settingTypes.BOOL):
     name = "latex_listen_enabled"
@@ -254,16 +255,16 @@ class Server_Setting_Latex_Listen(Server_Setting, settingTypes.BOOL):
     default = False
     category = "Mathematical settings"
 
-    outputs = {True: "Enabled",
-               False: "Disabled"}
+    outputs = {True: "Enabled", False: "Disabled"}
 
     @classmethod
     async def write(cls, ctx, value):
         result = await super().write(ctx, value)
         listens = ctx.bot.objects["server_tex_listeners"]
-        if  not (ctx.cmd_err and ctx.cmd_err[0] != 0):
+        if not (ctx.cmd_err and ctx.cmd_err[0] != 0):
             if value:
-                channels = await ctx.bot.data.servers.get(ctx.server.id, "maths_channels")
+                channels = await ctx.bot.data.servers.get(
+                    ctx.server.id, "maths_channels")
                 listens[str(ctx.server.id)] = channels if channels else []
             else:
                 listens.pop(ctx.server.id)

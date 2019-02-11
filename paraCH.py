@@ -1,8 +1,7 @@
+from checks import checks
 from contextBot.CommandHandler import CommandHandler
 from paraCMD import paraCMD
-
 from snippets import snippets
-from checks import checks
 
 
 class paraCH(CommandHandler):
@@ -20,12 +19,15 @@ class paraCH(CommandHandler):
         if ctx.author.bot:
             ctx.cmd_err = (1, "")
         if "ready" not in ctx.bot.objects:
-            ctx.cmd_err = (1, "Bot is restarting, please try again in a moment.")
+            ctx.cmd_err = (1,
+                           "Bot is restarting, please try again in a moment.")
             return
         if not ctx.bot.objects["ready"]:
-            await ctx.reply("I have just restarted and am loading myself, please wait!")
+            await ctx.reply(
+                "I have just restarted and am loading myself, please wait!")
             await ctx.bot.wait_until_ready()
-        if int(ctx.authid) in ctx.bot.bot_conf.getintlist("blacklisted_users") and ctx.used_cmd_name != "texlisten":
+        if int(ctx.authid) in ctx.bot.bot_conf.getintlist(
+                "blacklisted_users") and ctx.used_cmd_name != "texlisten":
             ctx.cmd_err = (1, "")
         try:
             await ctx.bot.send_typing(ctx.ch)

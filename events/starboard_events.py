@@ -1,6 +1,7 @@
 import discord
 from contextBot.Context import Context
 
+
 """
 star format:
     source_msg_id,
@@ -11,12 +12,14 @@ star format:
 async def register_starboard_emojis(bot):
     bot.objects["server_starboard_emojis"] = {}
     bot.objects["server_starboards"] = {}
-    for serverid in await bot.data.servers.find("starboard_enabled", True, read=True):
+    for serverid in await bot.data.servers.find(
+            "starboard_enabled", True, read=True):
         emoji = await bot.data.servers.get(str(serverid), "starboard_emoji")
         emoji = emoji if emoji else bot.s_conf.starboard_emoji.default
         bot.objects["server_starboard_emojis"][str(serverid)] = emoji
         bot.objects["server_starboards"][str(serverid)] = {}
-    await bot.log("Loaded {} servers with active starboards.".format(len(bot.objects["server_starboard_emojis"])))
+    await bot.log("Loaded {} servers with active starboards.".format(
+        len(bot.objects["server_starboard_emojis"])))
 
 
 async def starboard_listener(bot, reaction, user):
@@ -27,7 +30,8 @@ async def starboard_listener(bot, reaction, user):
     if message.server.id not in bot.objects["server_starboard_emojis"]:
         return
     sb_emoji = bot.objects["server_starboard_emojis"][message.server.id]
-    emoji = reaction.emoji if isinstance(reaction.emoji, str) else reaction.emoji.id
+    emoji = reaction.emoji if isinstance(reaction.emoji,
+                                         str) else reaction.emoji.id
 
     if emoji != sb_emoji:
         return
@@ -50,18 +54,23 @@ async def starboard_listener(bot, reaction, user):
     if reaction.count == 0:
         if message.id in server_board:
             try:
-                await bot.delete_message(await bot.get_message(sb_channel, server_board[message.id]))
+                await bot.delete_message(await bot.get_message(
+                    sb_channel, server_board[message.id]))
             except discord.NotFound:
                 pass
             server_board.pop(message.id, None)
             return
 
-    post_msg = "{} {} in {}".format(str(reaction.emoji), reaction.count, message.channel.mention)
+    post_msg = "{} {} in {}".format(
+        str(reaction.emoji), reaction.count, message.channel.mention)
 
-    embed = discord.Embed(colour=discord.Colour.light_grey(), description=message.content)
-    embed.set_author(name="{user.name}".format(user=message.author),
-                     icon_url=message.author.avatar_url)
-    embed.set_footer(text=message.timestamp.strftime("Sent at %-I:%M %p, %d/%m/%Y"))
+    embed = discord.Embed(
+        colour=discord.Colour.light_grey(), description=message.content)
+    embed.set_author(
+        name="{user.name}".format(user=message.author),
+        icon_url=message.author.avatar_url)
+    embed.set_footer(
+        text=message.timestamp.strftime("Sent at %-I:%M %p, %d/%m/%Y"))
     if message.attachments and "height" in message.attachments[0]:
         embed.set_image(url=message.attachments[0]["proxy_url"])
 

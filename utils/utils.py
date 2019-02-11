@@ -1,19 +1,20 @@
 import asyncio
-import subprocess
 import datetime
-import discord
 import re
+import subprocess
+
+import discord
 import iso8601
 
 
 def load_into(bot):
-
     @bot.util
     def strfdelta(ctx, delta, sec=False, minutes=True, short=False):
         output = [[delta.days, 'd' if short else ' day'],
                   [delta.seconds // 3600, 'h' if short else ' hour']]
         if minutes:
-            output.append([delta.seconds // 60 % 60, 'm' if short else ' minute'])
+            output.append(
+                [delta.seconds // 60 % 60, 'm' if short else ' minute'])
         if sec:
             output.append([delta.seconds % 60, 's' if short else ' second'])
         for i in range(len(output)):
@@ -26,7 +27,8 @@ def load_into(bot):
             reply_msg.append("{}{} ".format(output[i][0], output[i][1]))
         if not short and reply_msg:
             reply_msg.append("and ")
-        reply_msg.append("{}{}".format(output[len(output) - 1][0], output[len(output) - 1][1]))
+        reply_msg.append("{}{}".format(output[len(output) - 1][0],
+                                       output[len(output) - 1][1]))
         return "".join(reply_msg)
 
     @bot.util
@@ -34,18 +36,24 @@ def load_into(bot):
         """
         Runs a command asynchronously in a subproccess shell.
         """
-        process = await asyncio.create_subprocess_shell(to_run, stdout=asyncio.subprocess.PIPE)
+        process = await asyncio.create_subprocess_shell(
+            to_run, stdout=asyncio.subprocess.PIPE)
         if ctx.bot.DEBUG > 1:
-            await ctx.log("Running the shell command:\n{}\nwith pid {}".format(to_run, str(process.pid)))
+            await ctx.log("Running the shell command:\n{}\nwith pid {}".format(
+                to_run, str(process.pid)))
         stdout, stderr = await process.communicate()
         if ctx.bot.DEBUG > 1:
-            await ctx.log("Completed the shell command:\n{}\n{}".format(to_run, "with errors." if process.returncode != 0 else ""))
+            await ctx.log("Completed the shell command:\n{}\n{}".format(
+                to_run, "with errors." if process.returncode != 0 else ""))
         return stdout.decode().strip()
 
     @bot.util
     async def tail(ctx, filename, n):
-        p1 = subprocess.Popen('tail -n ' + str(n) + ' ' + filename,
-                              shell=True, stdin=None, stdout=subprocess.PIPE)
+        p1 = subprocess.Popen(
+            'tail -n ' + str(n) + ' ' + filename,
+            shell=True,
+            stdin=None,
+            stdout=subprocess.PIPE)
         out, err = p1.communicate()
         p1.stdout.close()
         return out.decode('utf-8')
@@ -54,10 +62,12 @@ def load_into(bot):
     def convdatestring(datestring):
         datestring = datestring.strip(' ,')
         datearray = []
-        funcs = {'d': lambda x: x * 24 * 60 * 60,
-                 'h': lambda x: x * 60 * 60,
-                 'm': lambda x: x * 60,
-                 's': lambda x: x}
+        funcs = {
+            'd': lambda x: x * 24 * 60 * 60,
+            'h': lambda x: x * 60 * 60,
+            'm': lambda x: x * 60,
+            's': lambda x: x
+        }
         currentnumber = ''
         for char in datestring:
             if char.isdigit():
@@ -141,7 +151,8 @@ def load_into(bot):
     @bot.util
     async def emb_add_fields(ctx, embed, emb_fields):
         for field in emb_fields:
-            embed.add_field(name=str(field[0]), value=str(field[1]), inline=bool(field[2]))
+            embed.add_field(
+                name=str(field[0]), value=str(field[1]), inline=bool(field[2]))
 
     @bot.util
     async def get_raw_cmds(ctx):
@@ -171,24 +182,28 @@ def load_into(bot):
         emo_prev = ctx.bot.objects["emoji_prev"]
 
         def check(reaction, user):
-            return (reaction.emoji in [emo_next, emo_prev]) and (not (user == ctx.me))
+            return (reaction.emoji in [emo_next, emo_prev
+                                       ]) and (not (user == ctx.me))
+
         try:
             await ctx.bot.add_reaction(out_msg, emo_prev)
             await ctx.bot.add_reaction(out_msg, emo_next)
         except discord.Forbidden:
-            await ctx.reply("Cannot page results because I do not have permissions to add emojis!")
+            await ctx.reply(
+                "Cannot page results because I do not have permissions to add emojis!"
+            )
             return
 
         async def paging():
             page = 0
             while True:
-                res = await ctx.bot.wait_for_reaction(message=out_msg,
-                                                      timeout=300,
-                                                      check=check)
+                res = await ctx.bot.wait_for_reaction(
+                    message=out_msg, timeout=300, check=check)
                 if res is None:
                     break
                 try:
-                    await ctx.bot.remove_reaction(out_msg, res.reaction.emoji, res.user)
+                    await ctx.bot.remove_reaction(out_msg, res.reaction.emoji,
+                                                  res.user)
                 except discord.Forbidden:
                     pass
                 page += 1 if res.reaction.emoji == emo_next else -1
@@ -204,6 +219,7 @@ def load_into(bot):
                 await ctx.bot.clear_reactions(out_msg)
             except discord.Forbidden:
                 pass
+
         asyncio.ensure_future(paging())
         return out_msg
 
@@ -218,10 +234,12 @@ def load_into(bot):
 
     @bot.util
     def parse_dur(ctx, time_str):
-        funcs = {'d': lambda x: x * 24 * 60 * 60,
-                 'h': lambda x: x * 60 * 60,
-                 'm': lambda x: x * 60,
-                 's': lambda x: x}
+        funcs = {
+            'd': lambda x: x * 24 * 60 * 60,
+            'h': lambda x: x * 60 * 60,
+            'm': lambda x: x * 60,
+            's': lambda x: x
+        }
         time_str = time_str.strip(" ,")
         found = re.findall(r'(\d+)\s?(\w+?)', time_str)
         seconds = 0
@@ -233,41 +251,71 @@ def load_into(bot):
     @bot.util
     def prop_tabulate(ctx, prop_list, value_list):
         max_len = max(len(prop) for prop in prop_list)
-        return "\n".join(["`{}{}{}`\t{}".format("​ " * (max_len - len(prop)),
-                                                prop,
-                                                ":" if len(prop) > 1 else "​ " * 2,
-                                                value_list[i]) for i, prop in enumerate(prop_list)])
+        return "\n".join([
+            "`{}{}{}`\t{}".format("​ " * (max_len - len(prop)), prop,
+                                  ":" if len(prop) > 1 else "​ " * 2,
+                                  value_list[i])
+            for i, prop in enumerate(prop_list)
+        ])
 
     @bot.util
-    def paginate_list(ctx, item_list, block_length=20, style="markdown", title=None):
-        lines = ["{0:<5}{1:<5}".format("{}.".format(i + 1), str(line)) for i, line in enumerate(item_list)]
-        page_blocks = [lines[i:i + block_length] for i in range(0, len(lines), block_length)]
+    def paginate_list(ctx,
+                      item_list,
+                      block_length=20,
+                      style="markdown",
+                      title=None):
+        lines = [
+            "{0:<5}{1:<5}".format("{}.".format(i + 1), str(line))
+            for i, line in enumerate(item_list)
+        ]
+        page_blocks = [
+            lines[i:i + block_length]
+            for i in range(0, len(lines), block_length)
+        ]
         pages = []
         for i, block in enumerate(page_blocks):
             pagenum = "Page {}/{}".format(i + 1, len(page_blocks))
             if title:
-                header = "{} ({})".format(title, pagenum) if len(page_blocks) > 1 else title
+                header = "{} ({})".format(
+                    title, pagenum) if len(page_blocks) > 1 else title
             else:
                 header = pagenum
             header_line = "=" * len(header)
-            full_header = "{}\n{}\n".format(header, header_line) if len(page_blocks) > 1 or title else ""
-            pages.append("```{}\n{}{}```".format(style, full_header, "\n".join(block)))
+            full_header = "{}\n{}\n".format(
+                header, header_line) if len(page_blocks) > 1 or title else ""
+            pages.append("```{}\n{}{}```".format(style, full_header,
+                                                 "\n".join(block)))
         return pages
 
     @bot.util
-    def msg_string(ctx, msg, mask_link=False, line_break=False, tz=None, clean=True):
+    def msg_string(ctx,
+                   msg,
+                   mask_link=False,
+                   line_break=False,
+                   tz=None,
+                   clean=True):
         timestr = "%-I:%M %p, %d/%m/%Y"
         if tz:
-            time = iso8601.parse_date(msg.timestamp.isoformat()).astimezone(tz).strftime(timestr)
+            time = iso8601.parse_date(
+                msg.timestamp.isoformat()).astimezone(tz).strftime(timestr)
         else:
             time = msg.timestamp.strftime(timestr)
         user = str(msg.author)
-        attach_list = [attach["url"] for attach in msg.attachments if "url" in attach]
+        attach_list = [
+            attach["url"] for attach in msg.attachments if "url" in attach
+        ]
         if mask_link:
             attach_list = ["[Link]({})".format(url) for url in attach_list]
-        attachments = "\nAttachments: {}".format(", ".join(attach_list)) if attach_list else ""
-        return "`[{time}]` **{user}:** {line_break}{message} {attachments}".format(time=time, user=user, line_break="\n" if line_break else "", message=msg.clean_content if clean else msg.content, attachments=attachments)
+        attachments = "\nAttachments: {}".format(
+            ", ".join(attach_list)) if attach_list else ""
+        return "`[{time}]` **{user}:** {line_break}{message} {attachments}".format(
+            time=time,
+            user=user,
+            line_break="\n" if line_break else "",
+            message=msg.clean_content if clean else msg.content,
+            attachments=attachments)
 
     @bot.util
-    def msg_jumpto(ctx,msg):
-        return "https://discordapp.com/channels/{}/{}/{}".format(msg.server.id, msg.channel.id, msg.id)
+    def msg_jumpto(ctx, msg):
+        return "https://discordapp.com/channels/{}/{}/{}".format(
+            msg.server.id, msg.channel.id, msg.id)

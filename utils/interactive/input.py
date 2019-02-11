@@ -5,15 +5,20 @@ def load_into(bot):
     @bot.util
     async def listen_for(ctx, chars=[], check=None, timeout=30, lower=True):
         if not check:
+
             def check(message):
-                return ((message.content.lower() if lower else message.content) in chars)
-        msg = await ctx.bot.wait_for_message(author=ctx.author, check=check, timeout=timeout)
+                return ((message.content.lower()
+                         if lower else message.content) in chars)
+
+        msg = await ctx.bot.wait_for_message(
+            author=ctx.author, check=check, timeout=timeout)
         return msg
 
     @bot.util
     async def input(ctx, msg, timeout=120):
         offer_msg = await ctx.reply(msg)
-        result_msg = await ctx.bot.wait_for_message(author=ctx.author, timeout=timeout)
+        result_msg = await ctx.bot.wait_for_message(
+            author=ctx.author, timeout=timeout)
         if result_msg is None:
             return None
         result = result_msg.content
@@ -27,7 +32,8 @@ def load_into(bot):
     @bot.util
     async def ask(ctx, msg, timeout=30):
         offer_msg = await ctx.reply(msg + " `y(es)`/`n(o)`")
-        result_msg = await ctx.listen_for(["y", "yes", "n", "no"], timeout=timeout)
+        result_msg = await ctx.listen_for(["y", "yes", "n", "no"],
+                                          timeout=timeout)
         if result_msg is None:
             return None
         result = result_msg.content.lower()
@@ -65,9 +71,15 @@ def load_into(bot):
             return None
         if len(select_from) == 1:
             return 0
-        pages = ["{}\n{}\nType the number of your selection or `c` to cancel.".format(message, page) for page in ctx.paginate_list(select_from, block_length=max_len)]
+        pages = [
+            "{}\n{}\nType the number of your selection or `c` to cancel.".
+            format(message, page)
+            for page in ctx.paginate_list(select_from, block_length=max_len)
+        ]
         out_msg = await ctx.pager(pages)
-        result_msg = await ctx.listen_for([str(i + 1) for i in range(0, len(select_from))] + ["c"], timeout=timeout)
+        result_msg = await ctx.listen_for(
+            [str(i + 1) for i in range(0, len(select_from))] + ["c"],
+            timeout=timeout)
         try:
             await ctx.bot.delete_message(out_msg)
         except discord.NotFound:

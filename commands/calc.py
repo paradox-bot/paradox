@@ -1,13 +1,15 @@
-from paraCH import paraCH
-import aiohttp
 import json
+
+import aiohttp
+from paraCH import paraCH
 
 cmds = paraCH()
 
 
-@cmds.cmd("calc",
-          category="Maths",
-          short_help="Calculate short mathematical expressions.")
+@cmds.cmd(
+    "calc",
+    category="Maths",
+    short_help="Calculate short mathematical expressions.")
 async def cmd_rotate(ctx):
     """
     Usage:
@@ -27,18 +29,24 @@ async def cmd_rotate(ctx):
     """
     API_ADDR = 'http://api.mathjs.org/v4/'
     if not ctx.arg_str:
-        await ctx.reply("Please give me something to evaluate. See help for usage details.")
+        await ctx.reply(
+            "Please give me something to evaluate. See help for usage details."
+        )
         return
     exprs = ctx.arg_str.split('\n')
-    request = {"expr": exprs,
-               "precision": 14}
+    request = {"expr": exprs, "precision": 14}
     async with aiohttp.ClientSession() as session:
         async with session.post(API_ADDR, data=json.dumps(request)) as resp:
             answer = await resp.json()
     if "error" not in answer or "result" not in answer:
-        await ctx.reply("Something unknown went wrong, sorry! Could not complete your request.")
+        await ctx.reply(
+            "Something unknown went wrong, sorry! Could not complete your request."
+        )
         return
     if answer["error"]:
-        await ctx.reply("The following error occured while calculating:\n`{}`".format(answer["error"]))
+        await ctx.reply(
+            "The following error occured while calculating:\n`{}`".format(
+                answer["error"]))
         return
-    await ctx.reply("Result{}:\n```\n{}\n```".format("s" if len(exprs) > 1 else "", "\n".join(answer["result"])))
+    await ctx.reply("Result{}:\n```\n{}\n```".format(
+        "s" if len(exprs) > 1 else "", "\n".join(answer["result"])))

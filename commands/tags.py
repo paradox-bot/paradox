@@ -1,14 +1,14 @@
-from paraCH import paraCH
 import discord
-
+from paraCH import paraCH
 
 cmds = paraCH()
 
 
-@cmds.cmd("tag",
-          category="Utility",
-          short_help="Remember pieces of text",
-          aliases=["?", "tags"])
+@cmds.cmd(
+    "tag",
+    category="Utility",
+    short_help="Remember pieces of text",
+    aliases=["?", "tags"])
 @cmds.require("in_server")
 @cmds.execute("flags", flags=["create", "info", "update", "from=", "delete"])
 async def cmd_tag(ctx):
@@ -38,7 +38,8 @@ async def cmd_tag(ctx):
     current_tags = current_tags if current_tags else {}
     if ctx.arg_str == "":
         if current_tags:
-            await ctx.reply("Available tags are `{}`.".format("`, `".join(current_tags.keys())))
+            await ctx.reply("Available tags are `{}`.".format("`, `".join(
+                current_tags.keys())))
         else:
             await ctx.reply("No tags have been created on this server.")
         return
@@ -54,10 +55,12 @@ async def cmd_tag(ctx):
                 if tag_info is None:
                     return
 
-                current_tags = await ctx.bot.data.servers.get(ctx.server.id, "tags")
+                current_tags = await ctx.bot.data.servers.get(
+                    ctx.server.id, "tags")
                 current_tags = current_tags if current_tags else {}
                 current_tags[tag_info["name"]] = tag_info
-                await ctx.bot.data.servers.set(ctx.server.id, "tags", current_tags)
+                await ctx.bot.data.servers.set(ctx.server.id, "tags",
+                                               current_tags)
             return
     tag = current_tags[ctx.arg_str]
 
@@ -78,16 +81,25 @@ async def cmd_tag(ctx):
         embed = discord.Embed(title="Tag Info")
         embed.add_field(name="Tag Name", value=tag["name"], inline=False)
         embed.add_field(name="Tag Content", value=tag["content"], inline=False)
-        embed.add_field(name="Usable by", value=role.name if roleid and role else ("Everyone" if not roleid else "Noone"), inline=False)
-        embed.set_footer(text="Created at {} by {} ({})".format(tag["time"], (await ctx.bot.get_user_info(tag["author"])).name, tag["author"]))
+        embed.add_field(
+            name="Usable by",
+            value=role.name if roleid and role else
+            ("Everyone" if not roleid else "Noone"),
+            inline=False)
+        embed.set_footer(
+            text="Created at {} by {} ({})".format(tag["time"], (
+                await ctx.bot.get_user_info(tag["author"])
+            ).name, tag["author"]))
         await ctx.reply(embed=embed)
         return
     if roleid:
         if not role:
-            await ctx.reply("The required role to use this tag no longer exists.")
+            await ctx.reply(
+                "The required role to use this tag no longer exists.")
             return
         if role not in ctx.member.roles:
-            await ctx.reply("You don't have the required role to use this tag.")
+            await ctx.reply("You don't have the required role to use this tag."
+                            )
             return
     await ctx.reply(current_tags[ctx.arg_str]["content"])
 
@@ -113,18 +125,27 @@ async def create_tag(ctx):
             message = await ctx.bot.get_message(ctx.ch, ctx.flags["from"])
             content = message.content
         except discord.NotFound:
-            await ctx.reply("I couldn't find a message with this id in this channel!")
+            await ctx.reply(
+                "I couldn't find a message with this id in this channel!")
             return None
 
-    create_embed = discord.Embed(title="Creating Tag", author=ctx.author.display_name)
-    create_embed.add_field(name="Tag Name", value=tag_name if tag_name else "Not set", inline=False)
-    create_embed.add_field(name="Tag Content", value=content if content else "Not set", inline=False)
+    create_embed = discord.Embed(
+        title="Creating Tag", author=ctx.author.display_name)
+    create_embed.add_field(
+        name="Tag Name",
+        value=tag_name if tag_name else "Not set",
+        inline=False)
+    create_embed.add_field(
+        name="Tag Content",
+        value=content if content else "Not set",
+        inline=False)
     create_embed.add_field(name="Usable by", value="Everyone", inline=False)
     create_embed.set_footer(text="Created at {}".format(created_time_str))
     embed_msg = await ctx.reply(embed=create_embed)
 
     if not tag_name:
-        tag_name = await ctx.input("Please enter the tag name (or `cancel` to abort)")
+        tag_name = await ctx.input(
+            "Please enter the tag name (or `cancel` to abort)")
         if tag_name in ["cancel", "Cancel"]:
             await ctx.reply("User canceled, aborting")
             tag_name = None
@@ -140,7 +161,9 @@ async def create_tag(ctx):
         await ctx.bot.edit_message(embed_msg, embed=create_embed)
 
     if not content:
-        content = await ctx.input("Please enter the content you want for the tag (or `cancel` to abort)")
+        content = await ctx.input(
+            "Please enter the content you want for the tag (or `cancel` to abort)"
+        )
         if content in ["cancel", "Cancel"]:
             await ctx.reply("User canceled, aborting")
             content = None
@@ -155,7 +178,9 @@ async def create_tag(ctx):
         create_embed.set_field_at(1, name="Tag Content", value=content)
         await ctx.bot.edit_message(embed_msg, embed=create_embed)
 
-    role_name = await ctx.input("Enter the role required to use this tag, or `everyone` or `.` if everyone can use it (or `cancel` to abort)")
+    role_name = await ctx.input(
+        "Enter the role required to use this tag, or `everyone` or `.` if everyone can use it (or `cancel` to abort)"
+    )
     if role_name in ["cancel", "Cancel"]:
         await ctx.reply("User canceled, aborting")
         role_name = None
@@ -173,12 +198,15 @@ async def create_tag(ctx):
         except discord.NotFound:
             pass
         return None
-    create_embed.set_field_at(2, name="Usable by", value=role.name if role else "Everyone")
+    create_embed.set_field_at(
+        2, name="Usable by", value=role.name if role else "Everyone")
     await ctx.bot.edit_message(embed_msg, embed=create_embed)
     await ctx.reply("Your tag `{}` has been created!".format(tag_name))
-    return {"name": tag_name,
-            "content": content,
-            "role": role.id if role else None,
-            "time": created_time_str,
-            "author": ctx.authid,
-            "server": ctx.server.id}
+    return {
+        "name": tag_name,
+        "content": content,
+        "role": role.id if role else None,
+        "time": created_time_str,
+        "author": ctx.authid,
+        "server": ctx.server.id
+    }

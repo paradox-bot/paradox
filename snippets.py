@@ -5,6 +5,7 @@ def snip(name):
     def decorator(func):
         snippets[name] = func
         return func
+
     return decorator
 
 
@@ -24,8 +25,10 @@ async def snip_user_lookup(ctx, in_server=False):
     Expected to interactively ask and select if multiple users are found.
     Sets ctx.objs["found_user"]
     """
-    ctx.objs["found_user"] = await ctx.find_user(ctx.params[0], in_server, interactive=True)
+    ctx.objs["found_user"] = await ctx.find_user(
+        ctx.params[0], in_server, interactive=True)
     return ctx.objs["found_user"]
+
 
 @snip("dm")
 async def snip_dm(ctx, user_info=None, message=None):
@@ -38,6 +41,7 @@ async def snip_dm(ctx, user_info=None, message=None):
         return
     await ctx.send(user, message)
 
+
 @snip("rep cooldown")
 async def snip_rep_cooldown(ctx, userid=None):
     """
@@ -47,6 +51,7 @@ async def snip_rep_cooldown(ctx, userid=None):
         userid = ctx.authid
     await ctx.data.users.set(userid, "last_rep_time", "0")
     await ctx.reply("The cooldown has been reset")
+
 
 @snip("flags")
 async def snip_flags(ctx, flags=[], override=True):
