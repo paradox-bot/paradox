@@ -1,14 +1,12 @@
-from paraCH import paraCH
-import discord
 from datetime import datetime
+
+import discord
+from paraCH import paraCH
 
 cmds = paraCH()
 
 
-@cmds.cmd("prune",
-          category="Moderation",
-          short_help="Prunes messages",
-          aliases=["purge"])
+@cmds.cmd("prune", category="Moderation", short_help="Prunes messages", aliases=["purge"])
 @cmds.execute("flags", flags=["r==", "bot", "bots", "user", "embed", "file", "me", "from==", "after==", "force"])
 @cmds.require("in_server")
 @cmds.require("in_server_has_mod")
@@ -66,7 +64,9 @@ async def cmd_prune(ctx):
     except discord.NotFound:
         pass
     except discord.Forbidden:
-        await ctx.reply("I do not have permissions to delete messages here. If this is in error, please give me the MANAGE_MESSAGES permission.")
+        await ctx.reply(
+            "I do not have permissions to delete messages here. If this is in error, please give me the MANAGE_MESSAGES permission."
+        )
         return
 
     count_dict = {"bots": {}, "users": {}}
@@ -95,16 +95,21 @@ async def cmd_prune(ctx):
             message_list.append(message)
             listing = count_dict["bots" if message.author.bot else "users"]
             if message.author.id not in listing:
-                listing[message.author.id] = {"count": 0,
-                                              "name": "{}".format(message.author)}
+                listing[message.author.id] = {"count": 0, "name": "{}".format(message.author)}
             listing[message.author.id]["count"] += 1
 
     if ctx.flags["after"] and not msg_found:
         await ctx.reply("The given message wasn't found in the last {} messages".format(number))
         return
 
-    bot_lines = "\n".join(["\t**{name}** ({key}): ***{count}*** messages".format(**count_dict["bots"][key], key=key) for key in count_dict["bots"]])
-    user_lines = "\n".join(["\t**{name}** ({key}): ***{count}*** messages".format(**count_dict["users"][key], key=key) for key in count_dict["users"]])
+    bot_lines = "\n".join([
+        "\t**{name}** ({key}): ***{count}*** messages".format(**count_dict["bots"][key], key=key)
+        for key in count_dict["bots"]
+    ])
+    user_lines = "\n".join([
+        "\t**{name}** ({key}): ***{count}*** messages".format(**count_dict["users"][key], key=key)
+        for key in count_dict["users"]
+    ])
     bot_counts = "__**Bots**__\n{}".format(bot_lines) if bot_lines else ""
     user_counts = "__**Users**__\n{}".format(user_lines) if user_lines else ""
     if len(message_list) == 0:
@@ -114,7 +119,8 @@ async def cmd_prune(ctx):
     abort = False
     if not ctx.flags["force"]:
         out_msg = await ctx.reply("Purging **{}** messages. Message Breakdown:\
-                                  \n{}\n--------------------\nPlease type `confirm` to delete the above messages or `abort` to abort now.".format(len(message_list), counts))
+                                  \n{}\n--------------------\nPlease type `confirm` to delete the above messages or `abort` to abort now."
+                                  .format(len(message_list), counts))
         reply_msg = await ctx.listen_for(chars=["abort", "confirm"], timeout=60)
         if reply_msg is None:
             await ctx.reply("Confirmation request timed out, aborting purge.")
@@ -150,11 +156,12 @@ async def cmd_prune(ctx):
     if abort:
         return
 
+
 #    final_message = "Purged **{}** messages. Message breakdown:\n{}".format(len(message_list), counts)
 #    await ctx.reply(final_message)
 
-    # modlog posting should be integrated with mod commands
-    # have a modlog method which makes an embed post labelled with time and moderator name.
+# modlog posting should be integrated with mod commands
+# have a modlog method which makes an embed post labelled with time and moderator name.
     modlog = await ctx.server_conf.modlog_ch.get(ctx)
     if not modlog:
         return
@@ -162,10 +169,15 @@ async def cmd_prune(ctx):
     if not modlog:
         return
 
-    embed = discord.Embed(title="Messages purged", color=discord.Colour.red(), description="**{}** messages purged in {}.".format(len(message_list), ctx.ch.mention))
+    embed = discord.Embed(
+        title="Messages purged",
+        color=discord.Colour.red(),
+        description="**{}** messages purged in {}.".format(len(message_list), ctx.ch.mention))
     embed.add_field(name="Message Breakdown", value=counts, inline=False)
     embed.add_field(name="Reason", value=reason, inline=False)
-    embed.set_footer(icon_url=ctx.author.avatar_url, text=datetime.utcnow().strftime("Acting Moderator: {} at %-I:%M %p, %d/%m/%Y".format(ctx.author)))
+    embed.set_footer(
+        icon_url=ctx.author.avatar_url,
+        text=datetime.utcnow().strftime("Acting Moderator: {} at %-I:%M %p, %d/%m/%Y".format(ctx.author)))
     try:
         await ctx.bot.send_message(modlog, embed=embed)
     except discord.Forbidden:

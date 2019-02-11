@@ -7,6 +7,7 @@ def check(name):
     def decorator(func):
         checks[name.lower()] = func
         return func
+
     return decorator
 
 
@@ -73,8 +74,7 @@ async def check_in_server(ctx):
 async def perm_manage_server(ctx):
     if (ctx.user is None) or (ctx.server is None):
         return (2, "An internal error occurred.")
-    if not (ctx.user.server_permissions.manage_server or
-            ctx.user.server_permissions.administrator):
+    if not (ctx.user.server_permissions.manage_server or ctx.user.server_permissions.administrator):
         return (1, "You lack the `Manage Server` permission on this server!")
     return (0, "")
 
@@ -83,21 +83,22 @@ async def perm_manage_server(ctx):
 async def perm_ban_members(ctx):
     if (ctx.user is None) or (ctx.server is None):
         return (2, "An internal error occurred.")
-    if not (ctx.user.server_permissions.ban_members or
-            ctx.user.server_permissions.administrator):
+    if not (ctx.user.server_permissions.ban_members or ctx.user.server_permissions.administrator):
         return (1, "You lack the `Ban Members` permission on this server!")
     return (0, "")
+
 
 @check("has_kick_members")
 async def perm_kick_members(ctx):
     if (ctx.user is None) or (ctx.server is None):
         return (2, "An internal error occurred.")
-    if not (ctx.user.server_permissions.kick_members or
-            ctx.user.server_permissions.administrator):
+    if not (ctx.user.server_permissions.kick_members or ctx.user.server_permissions.administrator):
         return (1, "You lack the `Kick Members` permission on this server!")
     return (0, "")
 
+
 # Mod action checks
+
 
 @check("in_server_has_mod")
 async def check_in_server_has_mod(ctx):
@@ -118,7 +119,6 @@ async def check_in_server_has_mod(ctx):
         return (1, "You don't have the moderator role in this server!")
 
 
-
 @check("in_server_can_ban")
 async def check_in_server_can_ban(ctx):
     """
@@ -133,6 +133,7 @@ async def check_in_server_can_ban(ctx):
     else:
         return (1, "You don't have permission to ban users in this server!")
     return (0, "")
+
 
 @check("in_server_can_unban")
 async def check_in_server_can_unban(ctx):
@@ -149,6 +150,7 @@ async def check_in_server_can_unban(ctx):
         return (1, "You don't have permission to unban users in this server!")
     return (0, "")
 
+
 @check("in_server_can_hackban")
 async def check_in_server_can_ban(ctx):
     """
@@ -163,6 +165,7 @@ async def check_in_server_can_ban(ctx):
     else:
         return (1, "You don't have permission to hackban users in this server!")
     return (0, "")
+
 
 @check("in_server_can_kick")
 async def check_in_server_can_kick(ctx):
@@ -195,6 +198,7 @@ async def check_in_server_can_softban(ctx):
         return (1, "You don't have permission to softban users in this server!")
     return (0, "")
 
+
 @check("in_server_can_mute")
 async def check_in_server_can_softban(ctx):
     """
@@ -206,6 +210,7 @@ async def check_in_server_can_softban(ctx):
     else:
         return (1, "You don't have permission to mute users in this server!")
     return (0, "")
+
 
 @check("in_server_can_unmute")
 async def check_in_server_can_softban(ctx):

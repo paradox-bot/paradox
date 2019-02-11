@@ -1,6 +1,7 @@
-from contextBot.Command import Command
 import re
 import textwrap
+
+from contextBot.Command import Command
 
 
 class paraCMD(Command):

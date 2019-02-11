@@ -1,30 +1,32 @@
-from paraCH import paraCH
-import discord
 import aiohttp
+import discord
+from paraCH import paraCH
 
 cmds = paraCH()
 
 # Provides shutdown, setinfo, logs, dm
 
-status_dict = {"online": discord.Status.online,
-               "offline": discord.Status.offline,
-               "idle": discord.Status.idle,
-               "dnd": discord.Status.dnd,
-               "invisible": discord.Status.invisible}
+status_dict = {
+    "online": discord.Status.online,
+    "offline": discord.Status.offline,
+    "idle": discord.Status.idle,
+    "dnd": discord.Status.dnd,
+    "invisible": discord.Status.invisible
+}
 
-@cmds.cmd("shutdown",
-          category="Bot admin",
-          aliases=["restart"])
+
+@cmds.cmd("shutdown", category="Bot admin", aliases=["restart"])
 @cmds.require("manager_perm")
 async def cmd_shutdown(ctx):
     await ctx.reply("Shutting down, cya another day~")
     await ctx.bot.logout()
 
 
-@cmds.cmd("setinfo",
-          category="Bot admin",
-          short_help="Set my game, avatar, and status",
-          aliases=["status", "setgame", "setstatus"])
+@cmds.cmd(
+    "setinfo",
+    category="Bot admin",
+    short_help="Set my game, avatar, and status",
+    aliases=["status", "setgame", "setstatus"])
 @cmds.execute("flags", flags=["game==", "avatar==", "status="])
 @cmds.require("master_perm")
 async def cmd_setgame(ctx):
@@ -56,9 +58,8 @@ async def cmd_setgame(ctx):
         else:
             await ctx.bot.change_presence(status=status_dict[status])
 
-@cmds.cmd("dm",
-          category="Bot admin",
-          short_help="dms a user")
+
+@cmds.cmd("dm", category="Bot admin", short_help="dms a user")
 @cmds.require("master_perm")
 async def cmd_dm(ctx):
     """
@@ -74,9 +75,8 @@ async def cmd_dm(ctx):
     await ctx.run("dm", user_info=ctx.params[0], message=" ".join(ctx.params[1:]))
     await ctx.reply("Done.")
 
-@cmds.cmd("logs",
-          category="Bot admin",
-          short_help="Reads and returns the logs")
+
+@cmds.cmd("logs", category="Bot admin", short_help="Reads and returns the logs")
 @cmds.require("master_perm")
 async def cmd_logs(ctx):
     """

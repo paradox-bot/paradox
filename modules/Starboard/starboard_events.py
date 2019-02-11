@@ -1,6 +1,5 @@
 import discord
 from contextBot.Context import Context
-
 """
 star format:
     source_msg_id,
@@ -59,9 +58,9 @@ async def starboard_listener(bot, reaction, user):
     post_msg = "{} {} in {}".format(str(reaction.emoji), reaction.count, message.channel.mention)
 
     embed = discord.Embed(colour=discord.Colour.light_grey(), description=message.content)
-    embed.set_author(name="{user.name}".format(user=message.author),
-                     icon_url=message.author.avatar_url)
-    embed.add_field(name="Message link", value="[Click to jump to message]({})".format(ctx.msg_jumpto(message)), inline=False)
+    embed.set_author(name="{user.name}".format(user=message.author), icon_url=message.author.avatar_url)
+    embed.add_field(
+        name="Message link", value="[Click to jump to message]({})".format(ctx.msg_jumpto(message)), inline=False)
     embed.set_footer(text=message.timestamp.strftime("Sent at %-I:%M %p, %d/%m/%Y"))
     if message.attachments and "height" in message.attachments[0]:
         embed.set_image(url=message.attachments[0]["proxy_url"])

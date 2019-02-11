@@ -1,23 +1,22 @@
-from paraCH import paraCH
-import discord
-from datetime import datetime
-from pytz import timezone
-import pytz
-import iso8601
-import traceback
-import aiohttp
-from PIL import Image
-from io import BytesIO
 import itertools
+import traceback
+from datetime import datetime
+from io import BytesIO
 
+import pytz
+from pytz import timezone
+
+import aiohttp
+import discord
+import iso8601
+from paraCH import paraCH
+from PIL import Image
 
 cmds = paraCH()
 # Provides time, rotate
 
 
-@cmds.cmd("rotate",
-          category="Utility",
-          short_help="Rotates the last sent image.")
+@cmds.cmd("rotate", category="Utility", short_help="Rotates the last sent image.")
 async def cmd_rotate(ctx):
     """
     Usage:
@@ -26,7 +25,8 @@ async def cmd_rotate(ctx):
         Rotates the attached image or the last sent image (within the last 10 messages) by <amount>.
         If <amount> is not specified, rotates backwards by 90.
     """
-    amount = -1 * int(ctx.arg_str) if ctx.arg_str and (ctx.arg_str.isdigit() or (len(ctx.arg_str) > 1 and ctx.arg_str[0] == '-' and ctx.arg_str[1:].isdigit())) else 90
+    amount = -1 * int(ctx.arg_str) if ctx.arg_str and (
+        ctx.arg_str.isdigit() or (len(ctx.arg_str) > 1 and ctx.arg_str[0] == '-' and ctx.arg_str[1:].isdigit())) else 90
     try:
         message_list = ctx.bot.logs_from(ctx.ch, limit=10)
     except discord.Forbidden:
@@ -66,9 +66,13 @@ async def timezone_lookup(ctx):
     if search_str in pytz.all_timezones:
         return search_str
     timestr = '%-I:%M %p'
-    tzlist = [(tz, iso8601.parse_date(datetime.now().isoformat()).astimezone(timezone(tz)).strftime(timestr)) for tz in pytz.all_timezones]
+    tzlist = [(tz, iso8601.parse_date(datetime.now().isoformat()).astimezone(timezone(tz)).strftime(timestr))
+              for tz in pytz.all_timezones]
     if search_str:
-        tzlist = [tzpair for tzpair in tzlist if (search_str.lower() in tzpair[0].lower()) or (search_str.lower() in tzpair[1].lower())]
+        tzlist = [
+            tzpair for tzpair in tzlist
+            if (search_str.lower() in tzpair[0].lower()) or (search_str.lower() in tzpair[1].lower())
+        ]
     if not tzlist:
         await ctx.reply("No timezones were found matching these criteria!")
         return
@@ -77,16 +81,14 @@ async def timezone_lookup(ctx):
 
     tz_blocks = [tzlist[i:i + 20] for i in range(0, len(tzlist), 20)]
     max_block_lens = [len(max(list(zip(*tz_block))[0], key=len)) for tz_block in tz_blocks]
-    block_strs = [["{0[0]:^{max_len}} {0[1]:^10}".format(tzpair, max_len=max_block_lens[i]) for tzpair in tzblock] for i, tzblock in enumerate(tz_blocks)]
+    block_strs = [["{0[0]:^{max_len}} {0[1]:^10}".format(tzpair, max_len=max_block_lens[i]) for tzpair in tzblock]
+                  for i, tzblock in enumerate(tz_blocks)]
     blocks = list(itertools.chain(*block_strs))
     tz_num = await ctx.selector("Multiple matching timezones found, please select one!", blocks)
     return tzlist[tz_num][0] if tz_num is not None else None
 
 
-@cmds.cmd("time",
-          category="Utility",
-          short_help="Shows the current time for a user",
-          aliases=["ti"])
+@cmds.cmd("time", category="Utility", short_help="Shows the current time for a user", aliases=["ti"])
 @cmds.execute("user_lookup", in_server=True)
 @cmds.execute("flags", flags=["set=="])
 async def cmd_time(ctx):
@@ -123,14 +125,18 @@ async def cmd_time(ctx):
     if not tz:
         general_prefix = (await ctx.bot.get_prefixes(ctx))[0]
         if user == ctx.authid:
-            await ctx.reply("You haven't set your timezone! Set it using `{0}time --set <timezone>`!`".format(general_prefix))
+            await ctx.reply(
+                "You haven't set your timezone! Set it using `{0}time --set <timezone>`!`".format(general_prefix))
         else:
-            await ctx.reply("This user hasn't set their timezone. Ask them to set it using `{0}time --set <timezone>`!".format(general_prefix))
+            await ctx.reply(
+                "This user hasn't set their timezone. Ask them to set it using `{0}time --set <timezone>`!".format(
+                    general_prefix))
         return
     try:
         TZ = timezone(tz)
     except Exception:
-        await ctx.reply("An invalid timezone was provided in the database. Aborting... \n **Error Code:** `ERR_OBSTRUCTED_DB`")
+        await ctx.reply(
+            "An invalid timezone was provided in the database. Aborting... \n **Error Code:** `ERR_OBSTRUCTED_DB`")
         trace = traceback.format_exc()
         await ctx.log(trace)
         return

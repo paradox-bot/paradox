@@ -1,5 +1,6 @@
-import discord
 from datetime import datetime
+
+import discord
 
 
 async def log_member_update(bot, before, after):

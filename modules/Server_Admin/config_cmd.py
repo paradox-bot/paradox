@@ -1,10 +1,10 @@
-from paraCH import paraCH
 import discord
+from paraCH import paraCH
 
 cmds = paraCH()
+
+
 # Provides config
-
-
 async def _config_pages(ctx, serv_conf, value=True):
     """
     Builds the server configuration pages.
@@ -36,9 +36,7 @@ async def _config_pages(ctx, serv_conf, value=True):
     return pages
 
 
-@cmds.cmd("config",
-          category="Server Admin",
-          short_help="Server configuration")
+@cmds.cmd("config", category="Server Admin", short_help="Server configuration")
 @cmds.require("in_server")
 async def cmd_config(ctx):
     """

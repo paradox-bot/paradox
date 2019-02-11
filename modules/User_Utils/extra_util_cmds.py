@@ -1,19 +1,18 @@
-from paraCH import paraCH
-import discord
-from datetime import datetime
-from pytz import timezone
-import pytz
-import iso8601
-import aiohttp
 import string
+from datetime import datetime
 
+import pytz
+from pytz import timezone
+
+import aiohttp
+import discord
+import iso8601
+from paraCH import paraCH
 
 cmds = paraCH()
 
 
-@cmds.cmd("echo",
-          category="Utility",
-          short_help="Sends what you tell me to!")
+@cmds.cmd("echo", category="Utility", short_help="Sends what you tell me to!")
 async def cmd_echo(ctx):
     """
     Usage:
@@ -24,9 +23,7 @@ async def cmd_echo(ctx):
     await ctx.reply(ctx.arg_str if ctx.arg_str else "I can't send an empty message!")
 
 
-@cmds.cmd("jumpto",
-          category="Utility",
-          short_help="Generates a jump to link with a given message ID.")
+@cmds.cmd("jumpto", category="Utility", short_help="Generates a jump to link with a given message ID.")
 @cmds.require("in_server")
 async def cmd_jumpto(ctx):
 
@@ -53,13 +50,14 @@ async def cmd_jumpto(ctx):
     if not message:
         await ctx.reply("Couldn't find the message!")
         return
-    embed = discord.Embed(colour=discord.Colour.green(), title="Jump to for message ID {}".format(msgid), description="[Click to jump to message]({})".format(ctx.msg_jumpto(message)))
+    embed = discord.Embed(
+        colour=discord.Colour.green(),
+        title="Jump to for message ID {}".format(msgid),
+        description="[Click to jump to message]({})".format(ctx.msg_jumpto(message)))
     await ctx.reply(embed=embed)
 
 
-@cmds.cmd("quote",
-          category="Utility",
-          short_help="Quotes a message by ID")
+@cmds.cmd("quote", category="Utility", short_help="Quotes a message by ID")
 @cmds.execute("flags", flags=["a"])
 @cmds.require("in_server")
 async def cmd_quote(ctx):
@@ -76,7 +74,8 @@ async def cmd_quote(ctx):
     if msgid == "" or not msgid.isdigit():
         await ctx.reply("Please provide a valid message ID.")
         return
-    out_msg = await ctx.reply("Searching for message, please wait {}".format(ctx.aemoji_mention(ctx.bot.objects["emoji_loading"])))
+    out_msg = await ctx.reply("Searching for message, please wait {}".format(
+        ctx.aemoji_mention(ctx.bot.objects["emoji_loading"])))
 
     message = None
     try:
@@ -90,23 +89,21 @@ async def cmd_quote(ctx):
         await ctx.bot.edit_message(out_msg, "Couldn't find the message!")
         return
 
-    embed = discord.Embed(colour=discord.Colour.light_grey(),
-                          description=message.content,
-                          title="Click to jump to message",
-                          url=ctx.msg_jumpto(message))
+    embed = discord.Embed(
+        colour=discord.Colour.light_grey(),
+        description=message.content,
+        title="Click to jump to message",
+        url=ctx.msg_jumpto(message))
 
     if not ctx.flags["a"]:
-        embed.set_author(name="{user.name}".format(user=message.author),
-                         icon_url=message.author.avatar_url)
+        embed.set_author(name="{user.name}".format(user=message.author), icon_url=message.author.avatar_url)
     embed.set_footer(text=message.timestamp.strftime("Sent at %-I:%M %p, %d/%m/%Y in #{}".format(message.channel.name)))
     if message.attachments:
         embed.set_image(url=message.attachments[0]["proxy_url"])
     await ctx.bot.edit_message(out_msg, " ", embed=embed)
 
 
-@cmds.cmd("secho",
-          category="Utility",
-          short_help="Like echo but deletes.")
+@cmds.cmd("secho", category="Utility", short_help="Like echo but deletes.")
 async def cmd_secho(ctx):
     """
     Usage:
@@ -121,10 +118,7 @@ async def cmd_secho(ctx):
     await ctx.reply("{}".format(ctx.arg_str) if ctx.arg_str else "I can't send an empty message!")
 
 
-@cmds.cmd("invitebot",
-          category="Utility",
-          short_help="Generates a bot invite link for a bot",
-          aliases=["ibot"])
+@cmds.cmd("invitebot", category="Utility", short_help="Generates a bot invite link for a bot", aliases=["ibot"])
 @cmds.execute("user_lookup", in_server=True, greedy=True)
 async def cmd_invitebot(ctx):
     """
@@ -147,10 +141,7 @@ async def cmd_invitebot(ctx):
     await ctx.reply("<https://discordapp.com/api/oauth2/authorize?client_id={}&permissions=0&scope=bot>".format(userid))
 
 
-@cmds.cmd("piggybank",
-          category="Utility",
-          short_help="Keep track of money added towards a goal.",
-          aliases=["bank"])
+@cmds.cmd("piggybank", category="Utility", short_help="Keep track of money added towards a goal.", aliases=["bank"])
 async def cmd_piggybank(ctx):
     """
     Usage:
@@ -186,9 +177,8 @@ async def cmd_piggybank(ctx):
         bank_amount += amount if action == "+" else -amount
         await ctx.data.users.set(ctx.authid, "piggybank_amount", bank_amount)
         await ctx.data.users.set(ctx.authid, "piggybank_history", transactions)
-        msg = "${:.2f} has been {} your piggybank. You now have ${:.2f}!".format(amount,
-                                                                                 "added to" if action == "+" else "removed from",
-                                                                                 bank_amount)
+        msg = "${:.2f} has been {} your piggybank. You now have ${:.2f}!".format(
+            amount, "added to" if action == "+" else "removed from", bank_amount)
         if goal:
             if bank_amount >= goal:
                 msg += "\nYou have achieved your goal!"
@@ -209,7 +199,9 @@ async def cmd_piggybank(ctx):
         await ctx.reply("Your goal has been set to ${}. ".format(amount))
     elif (ctx.params[0] == "list"):
         if len(transactions) == 0:
-            await ctx.reply("No transactions to show! Start adding money to your piggy bank with `{}piggybank + <amount>`".format(ctx.used_prefix))
+            await ctx.reply(
+                "No transactions to show! Start adding money to your piggy bank with `{}piggybank + <amount>`".format(
+                    ctx.used_prefix))
             return
         if (len(ctx.params) == 2) and (ctx.params[1] == "clear"):
             await ctx.data.users.set(ctx.authid, "piggybank_history", {})
@@ -235,10 +227,7 @@ async def cmd_piggybank(ctx):
         await ctx.reply("Usage: {}piggybank [+|- <amount>] | [list] | [goal <amount>|none]".format(ctx.used_prefix))
 
 
-@cmds.cmd("timezone",
-          category="Utility",
-          short_help="Searches the timezone list",
-          aliases=["tz"])
+@cmds.cmd("timezone", category="Utility", short_help="Searches the timezone list", aliases=["tz"])
 async def cmd_timezone(ctx):
     """
     Usage:
@@ -247,24 +236,30 @@ async def cmd_timezone(ctx):
         Searches for <partial> amongst the available timezones and shows you the current time in each!
     """
     timestr = '%-I:%M %p'
-    tzlist = [(tz, iso8601.parse_date(datetime.now().isoformat()).astimezone(timezone(tz)).strftime(timestr)) for tz in pytz.all_timezones]
+    tzlist = [(tz, iso8601.parse_date(datetime.now().isoformat()).astimezone(timezone(tz)).strftime(timestr))
+              for tz in pytz.all_timezones]
     if ctx.arg_str:
-        tzlist = [tzpair for tzpair in tzlist if (ctx.arg_str.lower() in tzpair[0].lower()) or (ctx.arg_str.lower() in tzpair[1].lower())]
+        tzlist = [
+            tzpair for tzpair in tzlist
+            if (ctx.arg_str.lower() in tzpair[0].lower()) or (ctx.arg_str.lower() in tzpair[1].lower())
+        ]
     if not tzlist:
         await ctx.reply("No timezones were found matching these criteria!")
         return
 
     tz_blocks = [tzlist[i:i + 20] for i in range(0, len(tzlist), 20)]
     max_block_lens = [len(max(list(zip(*tz_block))[0], key=len)) for tz_block in tz_blocks]
-    block_strs = [["{0[0]:^{max_len}} {0[1]:^10}".format(tzpair, max_len=max_block_lens[i]) for tzpair in tzblock] for i, tzblock in enumerate(tz_blocks)]
+    block_strs = [["{0[0]:^{max_len}} {0[1]:^10}".format(tzpair, max_len=max_block_lens[i]) for tzpair in tzblock]
+                  for i, tzblock in enumerate(tz_blocks)]
     tz_pages = ["```\n{}\n```".format("\n".join(block)) for block in block_strs]
     await ctx.pager(tz_pages)
 
 
-@cmds.cmd(name="emoji",
-          category="Utility",
-          short_help="Displays info and enlarges a custom emoji",
-          aliases=["e", "ee", "ree", "sree"])
+@cmds.cmd(
+    name="emoji",
+    category="Utility",
+    short_help="Displays info and enlarges a custom emoji",
+    aliases=["e", "ee", "ree", "sree"])
 @cmds.execute("flags", flags=["e", "a"])
 async def cmd_emoji(ctx):
     """
@@ -313,15 +308,17 @@ async def cmd_emoji(ctx):
         if id_str.isdigit():
             emoji = discord.utils.get(ctx.bot.get_all_emojis(), id=id_str)
             if emoji is None:
-                link = "https://cdn.discordapp.com/emojis/{}.{}".format(id_str, "gif" if ctx.arg_str[1] == "a" or ctx.flags["a"] else "png")
+                link = "https://cdn.discordapp.com/emojis/{}.{}".format(
+                    id_str, "gif" if ctx.arg_str[1] == "a" or ctx.flags["a"] else "png")
                 embed.set_image(url=link)
                 if not ctx.flags["e"]:
                     emb_fields = [("Name", ctx.arg_str[ctx.arg_str.find(":") + 1:ctx.arg_str.rfind(":")], 0),
-                                  ("ID", id_str, 0),
-                                  ("Link", "[Click me](" + link + ")", 0)]
+                                  ("ID", id_str, 0), ("Link", "[Click me](" + link + ")", 0)]
                     await ctx.emb_add_fields(embed, emb_fields)
                 try:
-                    await ctx.reply(None if ctx.flags["e"] else "I couldn't find the emoji in my servers, but here is what I have!", embed=embed)
+                    await ctx.reply(
+                        None if ctx.flags["e"] else "I couldn't find the emoji in my servers, but here is what I have!",
+                        embed=embed)
                 except Exception:
                     await ctx.reply("I couldn't understand or find the emoji in your message")
                 return
@@ -331,18 +328,18 @@ async def cmd_emoji(ctx):
         emojis = list(filter(lambda e: (em_str.lower() in e.name.lower()), ctx.bot.get_all_emojis()))
         emoji = emoji if emoji else (emojis[0] if emojis else None)
         if not emoji:
-            await ctx.reply("I cannot see any matching emojis.\nPlease note I cannot handle built in emojis at this time.")
+            await ctx.reply(
+                "I cannot see any matching emojis.\nPlease note I cannot handle built in emojis at this time.")
             return
     url = "https://cdn.discordapp.com/emojis/{}.{}".format(emoji.id, "gif" if ctx.flags["a"] else "png")
     embed.set_image(url=url)
     if not ctx.flags["e"]:
         created_ago = ctx.strfdelta(datetime.utcnow() - emoji.created_at)
         created = emoji.created_at.strftime("%-I:%M %p, %d/%m/%Y")
-        emojis = emojis[:10] if emojis else filter(lambda e: (e.name == emoji.name) and (e != emoji), ctx.bot.get_all_emojis())
+        emojis = emojis[:10] if emojis else filter(lambda e: (e.name == emoji.name) and (e != emoji),
+                                                   ctx.bot.get_all_emojis())
         emoj_similar_str = " ".join(map(str, emojis))
-        emb_fields = [("Name", emoji.name, 0),
-                      ("ID", emoji.id, 0),
-                      ("Link", emoji.url, 0),
+        emb_fields = [("Name", emoji.name, 0), ("ID", emoji.id, 0), ("Link", emoji.url, 0),
                       ("Originating server", emoji.server.name if emoji.server else "Built in", 0),
                       ("Created at", "{}({} ago)".format(created, created_ago), 0)]
         if emoj_similar_str:
@@ -368,10 +365,7 @@ async def cmd_emoji(ctx):
             await ctx.reply("Failed to send the emoji!")
 
 
-@cmds.cmd(name="colour",
-          category="Utility",
-          short_help="Displays information about a colour",
-          aliases=["color"])
+@cmds.cmd(name="colour", category="Utility", short_help="Displays information about a colour", aliases=["color"])
 async def cmd_colour(ctx):
     """
     Usage:
@@ -395,9 +389,13 @@ async def cmd_colour(ctx):
             prop_list = ["rgb", "hsl", "hsv", "cmyk", "XYZ"]
             value_list = [js[prop]["value"][len(prop):] for prop in prop_list]
             desc = ctx.prop_tabulate(prop_list, value_list)
-            embed = discord.Embed(title="Colour info for `#{}`".format(hexstr), color=discord.Colour(int(hexstr, 16)), description=desc)
-            embed.set_thumbnail(url="http://placehold.it/150x150.png/{}/{}?text={}".format(hexstr, inverted, "%23" + hexstr))
-            embed.add_field(name="Closest named colour", value="`{}` (Hex `{}`)".format(js["name"]["value"], js["name"]["closest_named_hex"]))
+            embed = discord.Embed(
+                title="Colour info for `#{}`".format(hexstr), color=discord.Colour(int(hexstr, 16)), description=desc)
+            embed.set_thumbnail(
+                url="http://placehold.it/150x150.png/{}/{}?text={}".format(hexstr, inverted, "%23" + hexstr))
+            embed.add_field(
+                name="Closest named colour",
+                value="`{}` (Hex `{}`)".format(js["name"]["value"], js["name"]["closest_named_hex"]))
             await ctx.reply(embed=embed)
         else:
             await ctx.reply("Sorry, something went wrong while fetching your colour! Please try again later")
@@ -409,10 +407,11 @@ def col_invert(color_to_convert):
     return color_to_convert.lower().translate(table).upper()
 
 
-@cmds.cmd(name="names",
-          category="Info",
-          short_help="Lists previous recorded names for a user.",
-          aliases=["namesfor", "whowas"])
+@cmds.cmd(
+    name="names",
+    category="Info",
+    short_help="Lists previous recorded names for a user.",
+    aliases=["namesfor", "whowas"])
 @cmds.execute("user_lookup", in_server=True, greedy=True)
 async def cmd_names(ctx):
     """

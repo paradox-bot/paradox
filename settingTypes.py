@@ -1,4 +1,5 @@
 import re
+
 import discord
 from paraSetting import paraSetting
 
@@ -8,16 +9,17 @@ class BOOL(paraSetting):
     A sort of boolean type, more like a wrapper for a boolean.
     """
     accept = "Yes/No, On/Off, True/False, Enabled/Disabled"
-    inputexps = {"^yes$": True,
-                 "^true$": True,
-                 "^on$": True,
-                 "^enabled?$": True,
-                 "^no$": False,
-                 "^false$": False,
-                 "^off$": False,
-                 "^disabled?$": False}
-    outputs = {True: "",
-               False: ""}
+    inputexps = {
+        "^yes$": True,
+        "^true$": True,
+        "^on$": True,
+        "^enabled?$": True,
+        "^no$": False,
+        "^false$": False,
+        "^off$": False,
+        "^disabled?$": False
+    }
+    outputs = {True: "", False: ""}
 
     @classmethod
     async def humanise(cls, ctx, raw):
@@ -50,6 +52,7 @@ class STR(paraSetting):
             return userstr[1:-1]
         return userstr
 
+
 class LIMITED_STR(STR):
     """
     One of a specific set of acceptable strings.
@@ -64,7 +67,8 @@ class LIMITED_STR(STR):
     async def understand(cls, ctx, userstr):
         userstr = await STR.understand(ctx, userstr)
         if userstr not in cls.acceptable:
-            ctx.cmd_err = (1, "I don't understand \"{}\". Acceptable values are: {}".format(userstr, ",".join(cls.acceptable)))
+            ctx.cmd_err = (1, "I don't understand \"{}\". Acceptable values are: {}".format(
+                userstr, ",".join(cls.acceptable)))
             return None
         return userstr
 
@@ -72,7 +76,6 @@ class LIMITED_STR(STR):
 class USEREVENT(LIMITED_STR):
     acceptable = ["username, nickname, roles, avatar"]
     accept = "One of {}".format(", ".join(acceptable))
-
 
 
 class FMTSTR(STR):
@@ -149,6 +152,7 @@ class EMOJI(paraSetting):
             # It's probably a built in emoji or nonsense. Either way, store it.
             return userstr
 
+
 class MEMBER(paraSetting):
     """
     Member type
@@ -213,11 +217,14 @@ class CHANNEL(paraSetting):
             return ctx.ch.id
         chid = userstr.strip('<#@!>')
         if chid.isdigit():
+
             def is_ch(ch):
                 return ch.id == chid
         else:
+
             def is_ch(ch):
                 return userstr.lower() in ch.name.lower()
+
         ch = discord.utils.find(is_ch, ctx.server.channels)
         if ch:
             return ch.id
@@ -267,6 +274,7 @@ class CHANNELLIST(SETTING_LIST):
     accept = "Comma separated list of channel mentions/ids/names. Use 0 or None to clear the setting"
     setting_type = CHANNEL
 
+
 class USEREVENTLIST(SETTING_LIST):
     """
     List of user events
@@ -282,12 +290,14 @@ class ROLELIST(SETTING_LIST):
     accept = "Comma separated list of role mentions/ids/names. Use 0 or None to clear the setting"
     setting_type = ROLE
 
+
 class MEMBERLIST(SETTING_LIST):
     """
     List of members
     """
     accept = "Comma separated list of user mentions/ids/names. Use None to clear the setting"
     setting_type = MEMBER
+
 
 """
 class YES_BOOL(BOOL):
@@ -346,8 +356,6 @@ class userList(paraSetting):
             (self.error, self.errmsg) = (1, "I don't understand your input. Valid input is: `{}`".format(self.accept))
             return self.raw
 '''
-
-
 """
 class userBlackList(userList):
     name = "List of users"
@@ -366,8 +374,6 @@ class userMasterList(userList):
     str_removed_from_list = "I have rejected this master."
     str_added_to_list = "I accept this user as a new master."
 """
-
-
 '''
 class SERVER(_settingType):
     """

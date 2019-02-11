@@ -1,5 +1,6 @@
 from datetime import datetime
 
+
 async def store_status(bot, before, after):
     if before.status != after.status:
         status = (str(before.status), str(after.status), int(datetime.utcnow().strftime('%s')))

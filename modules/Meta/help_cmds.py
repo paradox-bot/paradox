@@ -1,15 +1,12 @@
-from paraCH import paraCH
 import discord
+from paraCH import paraCH
 
 cmds = paraCH()
 
 # Provides help, list
 
 
-@cmds.cmd("help",
-          category="Meta",
-          short_help="Provides some detailed help on a command.",
-          aliases=["h"])
+@cmds.cmd("help", category="Meta", short_help="Provides some detailed help on a command.", aliases=["h"])
 async def cmd_help(ctx):
     """
     Usage:
@@ -21,28 +18,32 @@ async def cmd_help(ctx):
     here_prefix = await ctx.bot.data.servers.get(ctx.server.id, "guild_prefix") if ctx.server else None
     here_prefix = here_prefix if here_prefix else prefix
 
-    help_keys = {"prefix": prefix,
-                 "msg": ctx.msg}
+    help_keys = {"prefix": prefix, "msg": ctx.msg}
     msg = ""
     all_commands = await ctx.get_cmds()  # Should probably be cached from ctx init
     if ctx.arg_str == "":
-        help_msg = ctx.bot.objects["help_str"].format(prefix=prefix,
-                                                      user=ctx.author,
-                                                      invite=ctx.bot.objects["invite_link"],
-                                                      support=ctx.bot.objects["support_guild"],
-                                                      donate=ctx.bot.objects["donate_link"])
+        help_msg = ctx.bot.objects["help_str"].format(
+            prefix=prefix,
+            user=ctx.author,
+            invite=ctx.bot.objects["invite_link"],
+            support=ctx.bot.objects["support_guild"],
+            donate=ctx.bot.objects["donate_link"])
         help_file = ctx.bot.objects["help_file"] if "help_file" in ctx.bot.objects else None
         help_embed = ctx.bot.objects["help_embed"] if "help_embed" in ctx.bot.objects else None
         out = await ctx.reply(help_msg, file_name=help_file, embed=help_embed, dm=True)
         if out and ctx.server:
-            await ctx.reply("A brief description and guide on how to use me was sent to your DMs! Please use `{prefix}list` to see a list of all my commands, and `{prefix}help cmd` to get detailed help on a command!".format(prefix=here_prefix))
+            await ctx.reply(
+                "A brief description and guide on how to use me was sent to your DMs! Please use `{prefix}list` to see a list of all my commands, and `{prefix}help cmd` to get detailed help on a command!"
+                .format(prefix=here_prefix))
     else:
         cmd = ctx.params[0]
         if cmd in all_commands:
             command = all_commands[cmd]
             cmd = command.name
-            alias_str = "(alias{} `{}`)".format("es" if len(command.aliases) > 1 else "", "`, `".join(command.aliases)) if command.aliases else ""
-            embed = discord.Embed(type="rich", color=discord.Colour.teal(), title="Help for `{}` {}".format(cmd, alias_str))
+            alias_str = "(alias{} `{}`)".format("es" if len(command.aliases) > 1 else "", "`, `".join(
+                command.aliases)) if command.aliases else ""
+            embed = discord.Embed(
+                type="rich", color=discord.Colour.teal(), title="Help for `{}` {}".format(cmd, alias_str))
             emb_fields = []
             fields = command.help_fields
             if len(fields) == 0:
@@ -52,15 +53,13 @@ async def cmd_help(ctx):
                 await ctx.emb_add_fields(embed, emb_fields)
                 await ctx.reply(embed=embed)
         else:
-            msg += "I couldn't find a command named `{}`. Please make sure you have spelled the command correctly. \n".format(cmd)
+            msg += "I couldn't find a command named `{}`. Please make sure you have spelled the command correctly. \n".format(
+                cmd)
         if msg:
             await ctx.reply(msg, split=True, code=False)
 
 
-@cmds.cmd("list",
-          category="Meta",
-          short_help="Lists all my commands!",
-          flags=["brief"])
+@cmds.cmd("list", category="Meta", short_help="Lists all my commands!", flags=["brief"])
 async def cmd_list(ctx):
     """
     Usage:
@@ -87,7 +86,8 @@ async def cmd_list(ctx):
             if cat.lower() not in cats:
                 continue
             embed.add_field(name=cat, value="`{}`".format('`, `'.join(cats[cat.lower()])), inline=False)
-        embed.set_footer(text="Use {0}help or {0}help <command> for detailed help or get support with {0}support.".format(ctx.used_prefix))
+        embed.set_footer(text="Use {0}help or {0}help <command> for detailed help or get support with {0}support.".
+                         format(ctx.used_prefix))
         out_msg = await ctx.reply(embed=embed, dm=ctx.bot.objects["brief"])
         if out_msg and ctx.bot.objects["brief"]:
             await ctx.confirm_sent(reply="Sending compact command list to your DMs!")
@@ -113,7 +113,8 @@ async def cmd_list(ctx):
                 msg = ""
             msg += cat_msgs[cat.lower()]
 
-        more_help = "Use `{0.used_prefix}help <cmd>` to get detailed help on a command, or `{0.used_prefix}list --brief` to obtain a more compact listing.".format(ctx)
+        more_help = "Use `{0.used_prefix}help <cmd>` to get detailed help on a command, or `{0.used_prefix}list --brief` to obtain a more compact listing.".format(
+            ctx)
 
         out_msg = await ctx.reply(msg, dm=True)
         if out_msg:

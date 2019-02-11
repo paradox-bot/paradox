@@ -1,14 +1,16 @@
-from paraCH import paraCH
-import discord
 import string
+
+import discord
+from paraCH import paraCH
 
 cmds = paraCH()
 
 
-@cmds.cmd("rmrole",
-          category="Server Admin",
-          short_help="Deletes a role",
-          aliases=["removerole", "remrole", "deleterole", "delrole"])
+@cmds.cmd(
+    "rmrole",
+    category="Server Admin",
+    short_help="Deletes a role",
+    aliases=["removerole", "remrole", "deleterole", "delrole"])
 @cmds.require("has_manage_server")
 async def cmd_rmrole(ctx):
     """
@@ -24,7 +26,9 @@ async def cmd_rmrole(ctx):
     if role is None:
         return
     if role.managed:
-        await ctx.reply("⚠ This role is managed by an integration. You will have to reinvite its respective bot to recover the role.")
+        await ctx.reply(
+            "⚠ This role is managed by an integration. You will have to reinvite its respective bot to recover the role."
+        )
     result = await ctx.ask("Are you sure you want to delete the role `{}`?".format(role.name))
     if result is None:
         await ctx.reply("Question timed out, aborting")
@@ -43,10 +47,11 @@ async def cmd_rmrole(ctx):
     await ctx.reply("Successfully deleted the role.")
 
 
-@cmds.cmd("editrole",
-          category="Server Admin",
-          short_help="Create or edit a server role.",
-          aliases=["erole", "roleedit", "roledit", "editr"])
+@cmds.cmd(
+    "editrole",
+    category="Server Admin",
+    short_help="Create or edit a server role.",
+    aliases=["erole", "roleedit", "roledit", "editr"])
 @cmds.require("in_server_has_mod")
 @cmds.execute("flags", flags=["colour=", "color=", "name==", "perm==", "hoist=", "mention=", "pos=="])
 async def cmd_editrole(ctx):
@@ -75,7 +80,8 @@ async def cmd_editrole(ctx):
     if role >= ctx.me.top_role:
         await ctx.reply("The role specified is above or equal to my top role, aborting.")
         return
-    if not (ctx.flags["colour"] or ctx.flags["color"] or ctx.flags["name"] or ctx.flags["perm"] or ctx.flags["hoist"] or ctx.flags["mention"] or ctx.flags["pos"]):
+    if not (ctx.flags["colour"] or ctx.flags["color"] or ctx.flags["name"] or ctx.flags["perm"] or ctx.flags["hoist"]
+            or ctx.flags["mention"] or ctx.flags["pos"]):
         await ctx.reply("Interactive role editing is a work in progress, please check back later!")
         return
     if ctx.flags["colour"] or ctx.flags["color"]:
@@ -118,10 +124,12 @@ async def cmd_editrole(ctx):
         elif pos_flag.lower() == "down":
             position = role.position - 1
         elif pos_flag.startswith("above"):
-            target_role = await ctx.find_role((' '.join(pos_flag.split(' ')[1:])).strip(), create=False, interactive=True)
+            target_role = await ctx.find_role(
+                (' '.join(pos_flag.split(' ')[1:])).strip(), create=False, interactive=True)
             position = target_role.position + 1
         elif pos_flag.startswith("below"):
-            target_role = await ctx.find_role((' '.join(pos_flag.split(' ')[1:])).strip(), create=False, interactive=True)
+            target_role = await ctx.find_role(
+                (' '.join(pos_flag.split(' ')[1:])).strip(), create=False, interactive=True)
             position = target_role.position
         else:
             await ctx.reply("I didn't understand your argument to --pos. See the help for usage.")
@@ -135,6 +143,8 @@ async def cmd_editrole(ctx):
             return
         try:
             await ctx.bot.move_role(ctx.server, role, position)
+
+
 #            msg += "Moved role to position {}!".format(
         except discord.Forbidden:
             await ctx.reply("I am unable to move the role, insufficient permissions.")
@@ -149,7 +159,6 @@ async def cmd_editrole(ctx):
             await ctx.reply("I don't have enough permissions to make the specified edits.")
             return
     await ctx.reply("The role was modified successfully.")
-
 """
 @cmds.cmd("roledesc",
           category="Server Admin",

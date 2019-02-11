@@ -1,10 +1,9 @@
+import asyncio
+
+from checks import checks
 from contextBot.CommandHandler import CommandHandler
 from paraCMD import paraCMD
-
 from snippets import snippets
-from checks import checks
-
-import asyncio
 
 
 class paraCH(CommandHandler):

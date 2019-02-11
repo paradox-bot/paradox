@@ -5,8 +5,10 @@ def load_into(bot):
     @bot.util
     async def listen_for(ctx, chars=[], check=None, timeout=30, lower=True):
         if not check:
+
             def check(message):
                 return ((message.content.lower() if lower else message.content) in chars)
+
         msg = await ctx.bot.wait_for_message(author=ctx.author, check=check, timeout=timeout)
         return msg
 
@@ -68,7 +70,10 @@ def load_into(bot):
             return None
         if len(select_from) == 1:
             return 0
-        pages = ["{}\n{}\nType the number of your selection or `c` to cancel.".format(message, page) for page in ctx.paginate_list(select_from, block_length=max_len)]
+        pages = [
+            "{}\n{}\nType the number of your selection or `c` to cancel.".format(message, page)
+            for page in ctx.paginate_list(select_from, block_length=max_len)
+        ]
         out_msg = await ctx.pager(pages)
         result_msg = await ctx.listen_for([str(i + 1) for i in range(0, len(select_from))] + ["c"], timeout=timeout)
         try:
@@ -100,7 +105,9 @@ def load_into(bot):
             return None
         if len(select_from) == 1:
             return 0
-        page = "{}\n{}\nType the number of your selection or `c` to cancel.".format(message, ctx.paginate_list(select_from, block_length=50)[0])
+        page = "{}\n{}\nType the number of your selection or `c` to cancel.".format(
+            message,
+            ctx.paginate_list(select_from, block_length=50)[0])
 
         out_msg = await ctx.bot.edit_message(use_msg, page) if use_msg else await ctx.reply(page)
         result_msg = await ctx.listen_for([str(i + 1) for i in range(0, len(select_from))] + ["c"], timeout=timeout)
@@ -127,14 +134,16 @@ def load_into(bot):
 
     @bot.util
     async def menu(ctx, items, callback, menu_msg=None, title="Menu", prompt=None, timeout=120):
-        menu = {"items": items,
-                "callback": callback,
-                "msg": menu_msg,
-                "title": title,
-                "timeout": timeout,
-                "result": None,
-                "prompt": None,
-                "done": False}
+        menu = {
+            "items": items,
+            "callback": callback,
+            "msg": menu_msg,
+            "title": title,
+            "timeout": timeout,
+            "result": None,
+            "prompt": None,
+            "done": False
+        }
 
         if "menu" in ctx.objs and not ctx.objs["menu"]["done"]:
             if "menu_stack" not in ctx.objs:
@@ -146,8 +155,10 @@ def load_into(bot):
         while True:
             # Print the menu
             nice_list = ctx.paginate_list(menu["items"], title=menu["title"], block_length=50)[0]
-            nice_list = "{}\n{}".format(nice_list, menu["prompt"] if menu["prompt"] else "Please type your selection number or `c` to go back.")
-            menu["msg"] = await ctx.bot.edit_message(menu["msg"], nice_list) if menu["msg"] is not None else await ctx.reply(nice_list)
+            nice_list = "{}\n{}".format(
+                nice_list, menu["prompt"] if menu["prompt"] else "Please type your selection number or `c` to go back.")
+            menu["msg"] = await ctx.bot.edit_message(
+                menu["msg"], nice_list) if menu["msg"] is not None else await ctx.reply(nice_list)
 
             # Listen for a valid reply
             listening = [str(i + 1) for i in range(0, len(items))]

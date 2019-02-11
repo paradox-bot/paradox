@@ -1,17 +1,16 @@
 import asyncio
-import subprocess
 import datetime
-import discord
 import re
+import subprocess
+
+import discord
 import iso8601
 
 
 def load_into(bot):
-
     @bot.util
     def strfdelta(ctx, delta, sec=False, minutes=True, short=False):
-        output = [[delta.days, 'd' if short else ' day'],
-                  [delta.seconds // 3600, 'h' if short else ' hour']]
+        output = [[delta.days, 'd' if short else ' day'], [delta.seconds // 3600, 'h' if short else ' hour']]
         if minutes:
             output.append([delta.seconds // 60 % 60, 'm' if short else ' minute'])
         if sec:
@@ -39,13 +38,13 @@ def load_into(bot):
             await ctx.log("Running the shell command:\n{}\nwith pid {}".format(to_run, str(process.pid)))
         stdout, stderr = await process.communicate()
         if ctx.bot.DEBUG > 2:
-            await ctx.log("Completed the shell command:\n{}\n{}".format(to_run, "with errors." if process.returncode != 0 else ""))
+            await ctx.log("Completed the shell command:\n{}\n{}".format(
+                to_run, "with errors." if process.returncode != 0 else ""))
         return stdout.decode().strip()
 
     @bot.util
     async def tail(ctx, filename, n):
-        p1 = subprocess.Popen('tail -n ' + str(n) + ' ' + filename,
-                              shell=True, stdin=None, stdout=subprocess.PIPE)
+        p1 = subprocess.Popen('tail -n ' + str(n) + ' ' + filename, shell=True, stdin=None, stdout=subprocess.PIPE)
         out, err = p1.communicate()
         p1.stdout.close()
         return out.decode('utf-8')
@@ -54,10 +53,7 @@ def load_into(bot):
     def convdatestring(datestring):
         datestring = datestring.strip(' ,')
         datearray = []
-        funcs = {'d': lambda x: x * 24 * 60 * 60,
-                 'h': lambda x: x * 60 * 60,
-                 'm': lambda x: x * 60,
-                 's': lambda x: x}
+        funcs = {'d': lambda x: x * 24 * 60 * 60, 'h': lambda x: x * 60 * 60, 'm': lambda x: x * 60, 's': lambda x: x}
         currentnumber = ''
         for char in datestring:
             if char.isdigit():
@@ -171,7 +167,9 @@ def load_into(bot):
         emo_prev = ctx.bot.objects["emoji_prev"]
 
         def check(reaction, user):
-            return (reaction.emoji in [emo_next, emo_prev]) and (not (user == ctx.me)) and (not locked or user == ctx.author)
+            return (reaction.emoji in [emo_next, emo_prev]) and (not (user == ctx.me)) and (not locked
+                                                                                            or user == ctx.author)
+
         try:
             await ctx.bot.add_reaction(out_msg, emo_prev)
             await ctx.bot.add_reaction(out_msg, emo_next)
@@ -182,9 +180,7 @@ def load_into(bot):
         async def paging():
             page = 0
             while True:
-                res = await ctx.bot.wait_for_reaction(message=out_msg,
-                                                      timeout=300,
-                                                      check=check)
+                res = await ctx.bot.wait_for_reaction(message=out_msg, timeout=300, check=check)
                 if res is None:
                     break
                 try:
@@ -206,6 +202,7 @@ def load_into(bot):
                 pass
             except discord.NotFound:
                 pass
+
         asyncio.ensure_future(paging())
         return out_msg
 
@@ -220,10 +217,7 @@ def load_into(bot):
 
     @bot.util
     def parse_dur(ctx, time_str):
-        funcs = {'d': lambda x: x * 24 * 60 * 60,
-                 'h': lambda x: x * 60 * 60,
-                 'm': lambda x: x * 60,
-                 's': lambda x: x}
+        funcs = {'d': lambda x: x * 24 * 60 * 60, 'h': lambda x: x * 60 * 60, 'm': lambda x: x * 60, 's': lambda x: x}
         time_str = time_str.strip(" ,")
         found = re.findall(r'(\d+)\s?(\w+?)', time_str)
         seconds = 0
@@ -235,10 +229,10 @@ def load_into(bot):
     @bot.util
     def prop_tabulate(ctx, prop_list, value_list):
         max_len = max(len(prop) for prop in prop_list)
-        return "\n".join(["`{}{}{}`\t{}".format("​ " * (max_len - len(prop)),
-                                                prop,
-                                                ":" if len(prop) > 1 else "​ " * 2,
-                                                value_list[i]) for i, prop in enumerate(prop_list)])
+        return "\n".join([
+            "`{}{}{}`\t{}".format("​ " * (max_len - len(prop)), prop, ":" if len(prop) > 1 else "​ " * 2, value_list[i])
+            for i, prop in enumerate(prop_list)
+        ])
 
     @bot.util
     def paginate_list(ctx, item_list, block_length=20, style="markdown", title=None):
@@ -268,7 +262,12 @@ def load_into(bot):
         if mask_link:
             attach_list = ["[Link]({})".format(url) for url in attach_list]
         attachments = "\nAttachments: {}".format(", ".join(attach_list)) if attach_list else ""
-        return "`[{time}]` **{user}:** {line_break}{message} {attachments}".format(time=time, user=user, line_break="\n" if line_break else "", message=msg.clean_content if clean else msg.content, attachments=attachments)
+        return "`[{time}]` **{user}:** {line_break}{message} {attachments}".format(
+            time=time,
+            user=user,
+            line_break="\n" if line_break else "",
+            message=msg.clean_content if clean else msg.content,
+            attachments=attachments)
 
     @bot.util
     def msg_jumpto(ctx, msg):
@@ -293,6 +292,7 @@ def load_into(bot):
         mod_role = await ctx.server_conf.mod_role.get(ctx) if ctx.server else None
 
         if ctx.server:
+
             def check(reaction, user):
                 if user == ctx.me:
                     return False
@@ -303,17 +303,17 @@ def load_into(bot):
                 result = result or user == ctx.server.owner
                 return result
         else:
+
             def check(reaction, user):
                 return user == ctx.author
+
         try:
             await ctx.bot.add_reaction(out_msg, ctx.bot.objects["emoji_delete"])
         except discord.Forbidden:
             return
 
-        res = await ctx.bot.wait_for_reaction(message=out_msg,
-                                              emoji=ctx.bot.objects["emoji_delete"],
-                                              check=check,
-                                              timeout=300)
+        res = await ctx.bot.wait_for_reaction(
+            message=out_msg, emoji=ctx.bot.objects["emoji_delete"], check=check, timeout=300)
         if res is None:
             try:
                 await ctx.bot.remove_reaction(out_msg, ctx.bot.objects["emoji_delete"], ctx.me)

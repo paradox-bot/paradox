@@ -8,10 +8,11 @@ def load_into(bot):
             return None
         maybe_user_id = user_str.strip('<@!> ')
         if is_member:
+
             def is_user(member):
-                return ((user_str.lower() in member.display_name.lower()) or
-                       (user_str.lower() in str(member).lower()))
+                return ((user_str.lower() in member.display_name.lower()) or (user_str.lower() in str(member).lower()))
         else:
+
             def is_user(member):
                 return (user_str.lower() in str(member).lower())
 
@@ -29,12 +30,16 @@ def load_into(bot):
             if len(users) == 1:
                 return users[0]
             if is_member:
-                names = ["{} {} {}".format(user.nick if user.nick else (user if collection_names.count(user.name) > 1 else user.name),
-                                           ("<{}>".format(user)) if user.nick else "",
-                                           ("<{}>".format(user.id)) if not in_server else "") for user in users]
+                names = [
+                    "{} {} {}".format(
+                        user.nick if user.nick else (user if collection_names.count(user.name) > 1 else user.name),
+                        ("<{}>".format(user)) if user.nick else "", ("<{}>".format(user.id)) if not in_server else "")
+                    for user in users
+                ]
             else:
                 names = ["{} ({})".format(user, user.id) for user in users]
-            selected = await ctx.selector("Multiple users found matching `{}`! Please select one.".format(user_str), names)
+            selected = await ctx.selector("Multiple users found matching `{}`! Please select one.".format(user_str),
+                                          names)
             if selected is None:
                 return None
             return users[selected]
@@ -73,8 +78,10 @@ def load_into(bot):
 
         roleid = userstr.strip('<#@!>')
         if interactive:
+
             def check(role):
                 return (role.id == roleid) or (userstr.lower() in role.name.lower())
+
             roles = list(filter(check, collection))
             if len(roles) == 0:
                 role = None
@@ -86,11 +93,14 @@ def load_into(bot):
                 role = roles[selected]
         else:
             if roleid.isdigit():
+
                 def is_role(role):
                     return role.id == roleid
             else:
+
                 def is_role(role):
                     return userstr.lower() in role.name.lower()
+
             role = discord.utils.find(is_role, collection)
         if role:
             return role

@@ -1,16 +1,32 @@
-from paraCH import paraCH
-import discord
 import asyncio
+
 from pytz import timezone
+
+import discord
+from paraCH import paraCH
 
 cmds = paraCH()
 
-skeleton = {"server": {"id": 0},
-            "from": {"id": 0},
-            "mentions": {"id": 0},
-            "rolementions": {"id": 0},
-            "contains": {"text": ""},
-            "in": {"id": ""}}
+skeleton = {
+    "server": {
+        "id": 0
+    },
+    "from": {
+        "id": 0
+    },
+    "mentions": {
+        "id": 0
+    },
+    "rolementions": {
+        "id": 0
+    },
+    "contains": {
+        "text": ""
+    },
+    "in": {
+        "id": ""
+    }
+}
 
 
 def check_listen(user, checks, msg_ctx):
@@ -52,11 +68,17 @@ async def check_to_str(ctx, check, markdown=True):
     return (" **and** " if markdown else " and ").join(items)
 
 
-@cmds.cmd("notifyme",
-          category="Utility",
-          short_help="DMs you messages matching given criteria.",
-          aliases=["tellme", "pounce", "listenfor", "notify"])
-@cmds.execute("flags", flags=["remove", "interactive", "delay", "mentions==", "contains==", "here", "from==", "rolementions==", "in==", "notbot"])
+@cmds.cmd(
+    "notifyme",
+    category="Utility",
+    short_help="DMs you messages matching given criteria.",
+    aliases=["tellme", "pounce", "listenfor", "notify"])
+@cmds.execute(
+    "flags",
+    flags=[
+        "remove", "interactive", "delay", "mentions==", "contains==", "here", "from==", "rolementions==", "in==",
+        "notbot"
+    ])
 async def cmd_notifyme(ctx):
     """
     Usage:
@@ -178,9 +200,11 @@ async def notify_user(user, ctx, check):
     tz = await ctx.data.users.get(user.id, "tz")
     TZ = timezone(tz) if tz else None
 
-    msg_lines = "\n".join([ctx.msg_string(msg, mask_link=False, line_break=False, tz=TZ) for msg in reversed(prior_msgs)])
+    msg_lines = "\n".join(
+        [ctx.msg_string(msg, mask_link=False, line_break=False, tz=TZ) for msg in reversed(prior_msgs)])
     jump_link = ctx.msg_jumpto(ctx.msg)
-    message = "**__Pounce fired__** by **{}** in channel **{}** of **{}**\nJump link: {}\n\n{}".format(ctx.msg.author, ctx.ch.name, ctx.server.name, jump_link, msg_lines)
+    message = "**__Pounce fired__** by **{}** in channel **{}** of **{}**\nJump link: {}\n\n{}".format(
+        ctx.msg.author, ctx.ch.name, ctx.server.name, jump_link, msg_lines)
     await ctx.send(user, message=message)
 
 

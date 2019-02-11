@@ -1,6 +1,6 @@
+import settingTypes
 from contextBot.Conf import Conf
 from paraSetting import paraSetting
-import settingTypes
 
 server_conf = Conf("s_conf")
 
@@ -42,8 +42,7 @@ class Server_Setting_Starboard(Server_Setting, settingTypes.BOOL):
     category = "Starboard"
     default = False
 
-    outputs = {True: "Enabled",
-               False: "Disabled"}
+    outputs = {True: "Enabled", False: "Disabled"}
 
     @classmethod
     async def write(cls, ctx, value):
@@ -143,6 +142,7 @@ class Server_Setting_Clean_Channels(Server_Setting, settingTypes.CHANNELLIST):
         cleaned[ctx.server.id] = value if value else []
         return result
 
+
 # Moderation settings
 
 
@@ -163,8 +163,7 @@ class Server_Setting_role_persistence(Server_Setting, settingTypes.BOOL):
     default = True
     category = "Moderation"
 
-    outputs = {True: "Enabled",
-               False: "Disabled"}
+    outputs = {True: "Enabled", False: "Disabled"}
 
 
 @server_conf.setting
@@ -174,6 +173,7 @@ class Server_Setting_mute_role(Server_Setting, settingTypes.ROLE):
     desc = "Role given to mute users (automatically set, but can be overridden)"
     default = None
     category = "Moderation"
+
 
 # Logging settings
 
@@ -222,6 +222,7 @@ class Server_Setting_userlog_ignore(Server_Setting, settingTypes.MEMBERLIST):
     default = None
     category = "Logging"
 
+
 # Join and leave message settings
 
 
@@ -263,6 +264,7 @@ class Server_Setting_Leave_Ch(Server_Setting, settingTypes.CHANNEL):
 
 # Maths related settings
 
+
 @server_conf.setting
 class Server_Setting_Latex_Listen(Server_Setting, settingTypes.BOOL):
     name = "latex_listen_enabled"
@@ -271,8 +273,7 @@ class Server_Setting_Latex_Listen(Server_Setting, settingTypes.BOOL):
     default = False
     category = "Mathematical settings"
 
-    outputs = {True: "Enabled",
-               False: "Disabled"}
+    outputs = {True: "Enabled", False: "Disabled"}
 
     @classmethod
     async def write(cls, ctx, value):

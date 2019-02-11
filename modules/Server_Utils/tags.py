@@ -1,14 +1,10 @@
-from paraCH import paraCH
 import discord
-
+from paraCH import paraCH
 
 cmds = paraCH()
 
 
-@cmds.cmd("tag",
-          category="Utility",
-          short_help="Remember pieces of text",
-          aliases=["tags"])
+@cmds.cmd("tag", category="Utility", short_help="Remember pieces of text", aliases=["tags"])
 @cmds.require("in_server")
 @cmds.execute("flags", flags=["create", "info", "update", "from=", "delete"])
 async def cmd_tag(ctx):
@@ -78,8 +74,12 @@ async def cmd_tag(ctx):
         embed = discord.Embed(title="Tag Info")
         embed.add_field(name="Tag Name", value=tag["name"], inline=False)
         embed.add_field(name="Tag Content", value=tag["content"], inline=False)
-        embed.add_field(name="Usable by", value=role.name if roleid and role else ("Everyone" if not roleid else "Noone"), inline=False)
-        embed.set_footer(text="Created at {} by {} ({})".format(tag["time"], (await ctx.bot.get_user_info(tag["author"])).name, tag["author"]))
+        embed.add_field(
+            name="Usable by",
+            value=role.name if roleid and role else ("Everyone" if not roleid else "Noone"),
+            inline=False)
+        embed.set_footer(text="Created at {} by {} ({})".format(tag["time"], (
+            await ctx.bot.get_user_info(tag["author"])).name, tag["author"]))
         await ctx.reply(embed=embed)
         return
     if roleid:
@@ -155,7 +155,8 @@ async def create_tag(ctx):
         create_embed.set_field_at(1, name="Tag Content", value=content)
         await ctx.bot.edit_message(embed_msg, embed=create_embed)
 
-    role_name = await ctx.input("Enter the role required to use this tag, or `everyone` or `.` if everyone can use it (or `cancel` to abort)")
+    role_name = await ctx.input(
+        "Enter the role required to use this tag, or `everyone` or `.` if everyone can use it (or `cancel` to abort)")
     if role_name in ["cancel", "Cancel"]:
         await ctx.reply("User canceled, aborting")
         role_name = None
@@ -176,12 +177,14 @@ async def create_tag(ctx):
     create_embed.set_field_at(2, name="Usable by", value=role.name if role else "Everyone")
     await ctx.bot.edit_message(embed_msg, embed=create_embed)
     await ctx.reply("Your tag `{}` has been created!".format(tag_name))
-    return {"name": tag_name,
-            "content": content,
-            "role": role.id if role else None,
-            "time": created_time_str,
-            "author": ctx.authid,
-            "server": ctx.server.id}
+    return {
+        "name": tag_name,
+        "content": content,
+        "role": role.id if role else None,
+        "time": created_time_str,
+        "author": ctx.authid,
+        "server": ctx.server.id
+    }
 
 
 def load_into(bot):

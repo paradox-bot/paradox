@@ -1,20 +1,19 @@
-from paraCH import paraCH
-import discord
-import aiohttp
 import asyncio
-from datetime import datetime, timedelta
-import urllib
 import random
+import urllib
+from datetime import datetime, timedelta
+
+import aiohttp
+import discord
+from paraCH import paraCH
 
 cmds = paraCH()
 
 # Provides cat, duck, dog, image
 
 
-@cmds.cmd("image",
-          category="Fun",
-          short_help="Searches images for the specified text",
-          aliases=["imagesearch", "images"])
+@cmds.cmd(
+    "image", category="Fun", short_help="Searches images for the specified text", aliases=["imagesearch", "images"])
 async def cmd_image(ctx):
     """
     Usage:
@@ -49,10 +48,7 @@ async def cmd_image(ctx):
             return
 
 
-@cmds.cmd("dog",
-          category="Fun",
-          short_help="Sends a random dog image",
-          aliases=["doge", "pupper", "doggo", "woof"])
+@cmds.cmd("dog", category="Fun", short_help="Sends a random dog image", aliases=["doge", "pupper", "doggo", "woof"])
 async def cmd_dog(ctx):
     """
     Usage:
@@ -66,15 +62,13 @@ async def cmd_dog(ctx):
             if not (dog.endswith("png") or dog.endswith("jpg") or dog.endswith("gif")):
                 await cmd_dog(ctx)
                 return
-            embed = discord.Embed(description="[Woof!]({})".format("https://random.dog/"+dog), color=discord.Colour.light_grey())
-            embed.set_image(url="https://random.dog/"+dog)
+            embed = discord.Embed(
+                description="[Woof!]({})".format("https://random.dog/" + dog), color=discord.Colour.light_grey())
+            embed.set_image(url="https://random.dog/" + dog)
             await ctx.reply(embed=embed)
 
 
-@cmds.cmd("duck",
-          category="Fun",
-          short_help="Sends a random duck image",
-          aliases=["quack"])
+@cmds.cmd("duck", category="Fun", short_help="Sends a random duck image", aliases=["quack"])
 @cmds.execute("flags", flags=["g"])
 async def cmd_duck(ctx):
     """
@@ -100,10 +94,7 @@ async def cmd_duck(ctx):
             await ctx.reply("The ducks are too powerful right now! Please try again later.")
 
 
-@cmds.cmd("cat",
-          category="Fun",
-          short_help="Sends a random cat image",
-          aliases=["meow", "purr", "pussy"])
+@cmds.cmd("cat", category="Fun", short_help="Sends a random cat image", aliases=["meow", "purr", "pussy"])
 async def cmd_cat(ctx, recursion=0):
     """
     Usage:
@@ -124,6 +115,6 @@ async def cmd_cat(ctx, recursion=0):
         else:
             if recursion < 10:
                 asyncio.sleep(1)
-                await cmd_cat(ctx, recursion=recursion+1)
+                await cmd_cat(ctx, recursion=recursion + 1)
                 return
         await ctx.reply("Sorry! The cats are too powerful right now. Please try again later!")

@@ -1,12 +1,12 @@
-from paraCH import paraCH
-import aiohttp
-from bs4 import BeautifulSoup
 import urllib
+
+import aiohttp
 import discord
+from bs4 import BeautifulSoup
+from paraCH import paraCH
 
 cmds = paraCH()
 # Provides nlab
-
 
 nlab_url = "https://ncatlab.org{}"
 search_target = "https://ncatlab.org/nlab/search?query={}"
@@ -71,10 +71,7 @@ def field_pager(strings):
     return pages
 
 
-@cmds.cmd("nlab",
-          category="Maths",
-          short_help="Searches the nLab",
-          aliases=["nlablink", "nl"])
+@cmds.cmd("nlab", category="Maths", short_help="Searches the nLab", aliases=["nlablink", "nl"])
 async def cmd_nlab(ctx):
     """
     Usage:
@@ -106,15 +103,18 @@ async def cmd_nlab(ctx):
 
     soup = await soup_site(url)
     direct_soup = await soup_site(direct_page)
-    direct_found = False if not direct_soup.find("title") or "Page not found" in direct_soup.find("title").contents[0] else True
+    direct_found = False if not direct_soup.find("title") or "Page not found" in direct_soup.find(
+        "title").contents[0] else True
     direct_str = "\nDirect page found at: [{}]({})".format(ctx.arg_str, direct_page) if direct_found else ""
 
     if "Search results" not in soup.find("title").contents[0]:
-        await ctx.bot.edit_message(out_msg, "Nlab directed us to this page which I don't understand:\n{}".format(soup.find("a").attrs["href"]))
+        await ctx.bot.edit_message(
+            out_msg, "Nlab directed us to this page which I don't understand:\n{}".format(soup.find("a").attrs["href"]))
         return
     parsed = await search_page_parse(soup)
     if not parsed:
-        await ctx.bot.edit_message(out_msg, "I don't understand the search results. Read them yourself at:\n{}".format(url))
+        await ctx.bot.edit_message(out_msg,
+                                   "I don't understand the search results. Read them yourself at:\n{}".format(url))
         return
     in_title, in_body = parsed
 
@@ -124,12 +124,14 @@ async def cmd_nlab(ctx):
         in_title_links = ["[{}]({})".format(link[0], nlab_url.format(link[1])) for link in in_title]
         in_title_fields_raw = field_pager(in_title_links)
 
-        base_title = "{} result{} where query appeared in title.".format(len(in_title), "" if len(in_title) == 1 else "s")
+        base_title = "{} result{} where query appeared in title.".format(
+            len(in_title), "" if len(in_title) == 1 else "s")
         if len(in_title_fields_raw) == 1:
             in_title_fields = [(base_title, in_title_fields_raw[0], 0)]
         else:
             page_num = len(in_title_fields_raw)
-            in_title_fields = [("{} (Page {}/{})".format(base_title, i + 1, page_num), page, 0) for i, page in enumerate(in_title_fields_raw)]
+            in_title_fields = [("{} (Page {}/{})".format(base_title, i + 1, page_num), page, 0)
+                               for i, page in enumerate(in_title_fields_raw)]
 
     in_body_fields = []
     if in_body:
@@ -142,7 +144,8 @@ async def cmd_nlab(ctx):
             in_body_fields = [(base_title, in_body_fields_raw[0], 0)]
         else:
             page_num = len(in_body_fields_raw)
-            in_body_fields = [("{} (Page {}/{})".format(base_title, i + 1, page_num), page, 0) for i, page in enumerate(in_body_fields_raw)]
+            in_body_fields = [("{} (Page {}/{})".format(base_title, i + 1, page_num), page, 0)
+                              for i, page in enumerate(in_body_fields_raw)]
 
     if not in_title and not in_body:
         await ctx.bot.edit_message(out_msg, "No results found at:\n{}".format(url))
@@ -161,10 +164,11 @@ async def cmd_nlab(ctx):
 
     emb_pages.extend([[field] for field in in_body_fields[1:]])
 
-    params = {"title": "Search results for {}".format(ctx.arg_str),
-              "description": "From {}{}".format(url, direct_str),
-              "color": discord.Colour.light_grey()
-              }
+    params = {
+        "title": "Search results for {}".format(ctx.arg_str),
+        "description": "From {}{}".format(url, direct_str),
+        "color": discord.Colour.light_grey()
+    }
 
     embeds = []
     for page in emb_pages:

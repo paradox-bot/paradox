@@ -1,10 +1,11 @@
-from paraCH import paraCH
-import discord
 import asyncio
-import aiohttp
-from urllib import parse
 import json
 from io import BytesIO
+from urllib import parse
+
+import aiohttp
+import discord
+from paraCH import paraCH
 from PIL import Image, ImageChops, ImageDraw, ImageFont
 
 cmds = paraCH()
@@ -38,17 +39,14 @@ async def get_query(query, appid, **kwargs):
         Dictionary containing results or None if an http error occured.
     """
     # Default params
-    payload = {"input": query,
-               "appid": appid,
-               "format": "image,plaintext",
-               "units": "metric",
-               "output": "json"}
+    payload = {"input": query, "appid": appid, "format": "image,plaintext", "units": "metric", "output": "json"}
 
     # Allow kwargs to overwrite and add to the default params
     payload.update(kwargs)
 
     # Get the query response
-    async with aiohttp.get(ENDPOINT, params=payload) as r:
+    async with aiohttp.get(
+        ENDPOINT, params=payload) as r:
         if r.status == 200:
             # Read the response, interp as json, and return
             data = await r.read()
@@ -212,11 +210,12 @@ def triage_pods(pod_list):
         return (important, extra)
 
 
-@cmds.cmd("query",
-          category="Maths",
-          short_help="Sends a query to Wolfram Alpha",
-          aliases=["ask", "wolf", "w", "?w"],
-          edit_handler=cmds.edit_handler_rerun)
+@cmds.cmd(
+    "query",
+    category="Maths",
+    short_help="Sends a query to Wolfram Alpha",
+    aliases=["ask", "wolf", "w", "?w"],
+    edit_handler=cmds.edit_handler_rerun)
 @cmds.execute("flags", flags=["text"])
 async def cmd_query(ctx):
     """
@@ -229,7 +228,9 @@ async def cmd_query(ctx):
         text:: Attempts to reply with a copyable plaintext version of the output.
     """
     if ctx.arg_str == "":
-        await ctx.reply("Please submit a valid query! For example, `{}ask differentiate x+y^2 with respect to x`.".format(ctx.used_prefix))
+        await ctx.reply(
+            "Please submit a valid query! For example, `{}ask differentiate x+y^2 with respect to x`.".format(
+                ctx.used_prefix))
         return
     loading_emoji = "<a:{}:{}>".format(ctx.bot.objects["emoji_loading"].name, ctx.bot.objects["emoji_loading"].id)
 
@@ -241,7 +242,9 @@ async def cmd_query(ctx):
     try:
         result = await get_query(ctx.arg_str, appid)
     except Exception:
-        await ctx.reply("An unknown exception occurred while fetching the Wolfram Alpha query. If the problem persists please contact support.")
+        await ctx.reply(
+            "An unknown exception occurred while fetching the Wolfram Alpha query. If the problem persists please contact support."
+        )
         return
     if not result:
         await ctx.bot.delete_message(temp_msg)
@@ -249,7 +252,8 @@ async def cmd_query(ctx):
         return
     if "queryresult" not in result:
         await ctx.bot.delete_message(temp_msg)
-        await ctx.reply("Did not get a valid response from Wolfram Alpha. If the problem persists, please contact support.")
+        await ctx.reply(
+            "Did not get a valid response from Wolfram Alpha. If the problem persists, please contact support.")
         return
 
     link = "[Display results online and refine query]({})".format(build_web_url(ctx.arg_str))
@@ -289,10 +293,8 @@ async def cmd_query(ctx):
         except discord.Forbidden:
             pass
         else:
-            res = await ctx.bot.wait_for_reaction(message=out_msg,
-                                                  user=ctx.author,
-                                                  emoji=ctx.bot.objects["emoji_more"],
-                                                  timeout=300)
+            res = await ctx.bot.wait_for_reaction(
+                message=out_msg, user=ctx.author, emoji=ctx.bot.objects["emoji_more"], timeout=300)
             if res is None:
                 try:
                     await ctx.bot.remove_reaction(out_msg, ctx.bot.objects["emoji_more"], ctx.me)

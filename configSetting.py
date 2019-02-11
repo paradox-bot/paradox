@@ -1,7 +1,6 @@
 from checks import checks
 
 permFuncs = {}
-
 """
 We will be wanting to do this for user settings as well at some point.
 Might not be able to stick with humanise as class method. Or maybe split it up.

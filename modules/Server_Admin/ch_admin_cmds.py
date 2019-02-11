@@ -1,14 +1,16 @@
-from paraCH import paraCH
-import discord
 import asyncio
+
+import discord
+from paraCH import paraCH
 
 cmds = paraCH()
 
 
-@cmds.cmd("cleanch",
-          category="Server Admin",
-          short_help="Enable or disable automatic deletion on a channel.",
-          aliases=["chclean"])
+@cmds.cmd(
+    "cleanch",
+    category="Server Admin",
+    short_help="Enable or disable automatic deletion on a channel.",
+    aliases=["chclean"])
 @cmds.require("has_manage_server")
 async def cmd_cleanch(ctx):
     """
@@ -32,7 +34,8 @@ async def cmd_cleanch(ctx):
 async def channel_cleaner(ctx):
     if not ctx.server:
         return
-    if not (ctx.server.id in ctx.bot.objects["cleaned_channels"] and ctx.ch.id in ctx.bot.objects["cleaned_channels"][ctx.server.id]):
+    if not (ctx.server.id in ctx.bot.objects["cleaned_channels"]
+            and ctx.ch.id in ctx.bot.objects["cleaned_channels"][ctx.server.id]):
         return
     await asyncio.sleep(30)
     if ctx.msg.pinned:

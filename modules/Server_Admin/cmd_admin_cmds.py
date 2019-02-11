@@ -5,10 +5,11 @@ cmds = paraCH()
 # TODO: Upgrade to limitcmd
 
 
-@cmds.cmd("bancmd",
-          category="Server Admin",
-          short_help="Blacklist commands in the server.",
-          aliases=["bcmd", "nocmd", "unbancmd"])
+@cmds.cmd(
+    "bancmd",
+    category="Server Admin",
+    short_help="Blacklist commands in the server.",
+    aliases=["bcmd", "nocmd", "unbancmd"])
 @cmds.require("in_server")
 @cmds.require("has_manage_server")
 async def cmd_bancmd(ctx):
@@ -23,7 +24,8 @@ async def cmd_bancmd(ctx):
     bans = await ctx.data.servers.get(ctx.server.id, "banned_cmds")
     bans = bans if bans else []
     if not ctx.arg_str:
-        bans_str = "Current banned commands: `{}`".format("`, `".join(bans)) if bans else "There are no banned commands in this server!"
+        bans_str = "Current banned commands: `{}`".format(
+            "`, `".join(bans)) if bans else "There are no banned commands in this server!"
         await ctx.reply(bans_str)
         return
     cmds = ctx.arg_str.split(",")

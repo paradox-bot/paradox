@@ -1,16 +1,13 @@
-import discord
-import shutil
 import os
+import shutil
 from datetime import datetime
 
-from paradata import BotData
+import discord
 from botconf import Conf
-
-from contextBot.Context import Context
-from contextBot.Bot import Bot
-
 from cachetools import LRUCache
-
+from contextBot.Bot import Bot
+from contextBot.Context import Context
+from paradata import BotData
 
 # Configuration file for environment variables.
 
@@ -32,7 +29,6 @@ LOG_CHANNEL = conf.get("LOG_CHANNEL")
 
 # Server where the referenced emojis live
 EMOJI_SERVER = conf.get("EMOJI_SERVER")
-
 
 # ------------------------------
 # Initialise data
@@ -61,24 +57,21 @@ else:
 
 
 async def get_prefixes(ctx):
-        """
+    """
         Returns a list of valid prefixes in this context.
         Currently just bot and server prefixes
         """
-        prefix = 0
-        prefix_conf = ctx.server_conf.guild_prefix
-        if ctx.server:
-            prefix = await prefix_conf.get(ctx)
-        user_prefix = await ctx.bot.data.users.get(ctx.authid, "custom_prefix")
-        prefix = prefix if prefix else ctx.bot.prefix
-        return [prefix, user_prefix] if user_prefix else [prefix]
+    prefix = 0
+    prefix_conf = ctx.server_conf.guild_prefix
+    if ctx.server:
+        prefix = await prefix_conf.get(ctx)
+    user_prefix = await ctx.bot.data.users.get(ctx.authid, "custom_prefix")
+    prefix = prefix if prefix else ctx.bot.prefix
+    return [prefix, user_prefix] if user_prefix else [prefix]
+
 
 # Initialise the bot
-bot = Bot(data=botdata,
-          bot_conf=conf,
-          prefix=PREFIX,
-          prefix_func=get_prefixes,
-          log_file=LOGFILE)
+bot = Bot(data=botdata, bot_conf=conf, prefix=PREFIX, prefix_func=get_prefixes, log_file=LOGFILE)
 
 bot.DEBUG = conf.get("DEBUG")
 bot.objects["logfile"] = open(bot.LOGFILE, 'a+')
@@ -93,8 +86,8 @@ async def log(bot, logMessage):
         for log in log_splits:
             await bot.send_message(discord.utils.get(bot.get_all_channels(), id=LOG_CHANNEL), log)
 
-Bot.log = log
 
+Bot.log = log
 
 # --------------------------------
 
@@ -102,25 +95,14 @@ Bot.log = log
 bot.load("config", "global_events", "utils", ignore=["RCS", "__pycache__"])
 
 # Add shared bot info
-bot.objects["sorted cats"] = ["Info",
-                              "Fun",
-                              "Social",
-                              "Utility",
-                              "Moderation",
-                              "Server Admin",
-                              "Maths",
-                              "Meta",
-                              "Misc"]
+bot.objects["sorted cats"] = ["Info", "Fun", "Social", "Utility", "Moderation", "Server Admin", "Maths", "Meta", "Misc"]
 
 bot.objects["sorted_conf_pages"] = [("General", ["Guild settings", "Starboard", "Mathematical settings"]),
                                     ("Manual Moderation", ["Moderation", "Logging"]),
                                     ("Join/Leave Messages", ["Join message", "Leave message"])]
 
 # Pass to app to load app-specific objects and resources
-bot.load("apps/shared",
-         "apps/{}".format(CURRENT_APP if CURRENT_APP else "default"),
-         ignore=["RCS", "__pycache__"])
-
+bot.load("apps/shared", "apps/{}".format(CURRENT_APP if CURRENT_APP else "default"), ignore=["RCS", "__pycache__"])
 
 bot.objects["regions"] = {
     "brazil": "Brazil",
@@ -139,29 +121,29 @@ bot.objects["regions"] = {
     "vip-us-east": "Eastern United States (VIP)"
 }
 
-emojis = {"emoji_tex_del": "delete",
-          "emoji_tex_show": "showtex",
-          "emoji_tex_errors": "errors",
-          "emoji_tex_delsource": "delete_source",
-          "emoji_bot": "parabot",
-          "emoji_botowner": "botowner",
-          "emoji_botmanager": "botmanager",
-          "emoji_online": "ParaOn",
-          "emoji_idle": "ParaIdle",
-          "emoji_dnd": "ParaDND",
-          "emoji_offline": "ParaInvis",
-          "emoji_next": "Next",
-          "emoji_more": "More",
-          "emoji_delete": "delete",
-          "emoji_loading": "loading",
-          "emoji_prev": "Previous"}
-
+emojis = {
+    "emoji_tex_del": "delete",
+    "emoji_tex_show": "showtex",
+    "emoji_tex_errors": "errors",
+    "emoji_tex_delsource": "delete_source",
+    "emoji_bot": "parabot",
+    "emoji_botowner": "botowner",
+    "emoji_botmanager": "botmanager",
+    "emoji_online": "ParaOn",
+    "emoji_idle": "ParaIdle",
+    "emoji_dnd": "ParaDND",
+    "emoji_offline": "ParaInvis",
+    "emoji_next": "Next",
+    "emoji_more": "More",
+    "emoji_delete": "delete",
+    "emoji_loading": "loading",
+    "emoji_prev": "Previous"
+}
 
 # Initialise bot objects
 
 bot.objects["ready"] = False
 bot.objects["command_cache"] = LRUCache(1000)
-
 
 # ----Discord event handling----
 
@@ -184,11 +166,8 @@ async def on_ready():
         \nLogged into {n} servers.\
         \nLoaded {CH} command handlers.\
         \nListening for {cmds} command keywords.\
-        \nReady to process commands.".format(bot=bot,
-                                             app=bot.objects["app"],
-                                             n=len(bot.servers),
-                                             CH=len(bot.handlers),
-                                             cmds=len(bot.cmd_cache))
+        \nReady to process commands.".format(
+        bot=bot, app=bot.objects["app"], n=len(bot.servers), CH=len(bot.handlers), cmds=len(bot.cmd_cache))
 
     for emoji in emojis:
         bot.objects[emoji] = get_emoji(emojis[emoji])
@@ -199,7 +178,6 @@ async def on_ready():
     bot.objects["server_change_log_channel"] = discord.utils.get(bot.get_all_channels(), id=BOT_LOG_CH)
 
     await bot.log(log_msg)
-
     """
     ctx = Context(bot=bot)
     # This log isn't really needed. If it doesn't start up, it won't log anyway.
@@ -212,6 +190,7 @@ async def on_ready():
 
 async def publish_ready(bot):
     bot.objects["ready"] = True
+
 
 bot.add_after_event("ready", publish_ready, priority=100)
 # ----Event loops----

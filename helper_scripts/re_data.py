@@ -1,5 +1,6 @@
 import sqlite3 as sq
 
+
 def dict_factory(cursor, row):
     d = {}
     for idx, col in enumerate(cursor.description):
@@ -11,7 +12,6 @@ old_file = "botdata.db"
 
 old_conn = sq.connect(old_file)
 old_conn.row_factory = dict_factory
-
 
 server_data = {}
 sql = "SELECT * FROM servers "
@@ -28,7 +28,6 @@ for row in cursor.fetchall():
     userid = row.pop("userid")
     print("Adding row for user {}".format(userid))
     user_data[userid] = row
-
 
 new_file = "paradata.db"
 new_conn = sq.connect(new_file)
@@ -73,5 +72,5 @@ for user in user_data:
         value = user_data[user][prop]
         if value is None:
             continue
-        cursor.execute('INSERT INTO users VALUES (?, ?, ?)', (user , prop, value))
+        cursor.execute('INSERT INTO users VALUES (?, ?, ?)', (user, prop, value))
 new_conn.commit()

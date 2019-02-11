@@ -1,15 +1,15 @@
-from paraCH import paraCH
-import discord
 from datetime import datetime, timedelta
+
 from pytz import timezone
+
+import discord
 import iso8601
+from paraCH import paraCH
 
 cmds = paraCH()
 
 
-@cmds.cmd("profile",
-          category="Social",
-          short_help="Displays a user profile")
+@cmds.cmd("profile", category="Social", short_help="Displays a user profile")
 @cmds.execute("user_lookup", in_server=True)
 async def cmd_profile(ctx):
     """
@@ -25,8 +25,7 @@ async def cmd_profile(ctx):
             await ctx.reply("I couldn't find any matching users in this server sorry!")
             return
 
-    badge_dict = {"master_perm": "botowner",
-                  "manager_perm": "botmanager"}
+    badge_dict = {"master_perm": "botowner", "manager_perm": "botmanager"}
     badges = ""
     tempid = ctx.authid
     ctx.authid = user.id
@@ -63,19 +62,17 @@ async def cmd_profile(ctx):
         try:
             TZ = timezone(tz)
         except Exception:
-            await ctx.reply("An invalid timezone was provided in the database. Aborting... \n **Error Code:** `ERR_CORRUPTED_DB`")
+            await ctx.reply(
+                "An invalid timezone was provided in the database. Aborting... \n **Error Code:** `ERR_CORRUPTED_DB`")
             return
         timestr = '%-I:%M %p on %a, %d/%m/%Y'
         timestr = iso8601.parse_date(datetime.now().isoformat()).astimezone(TZ).strftime(timestr)
         embed.add_field(name="Current Time", value="{}".format(timestr), inline=False)
-    embed.add_field(name="Created at",
-                    value="{} ({} ago)".format(created, created_ago), inline=False)
+    embed.add_field(name="Created at", value="{} ({} ago)".format(created, created_ago), inline=False)
     await ctx.reply(embed=embed)
 
 
-@cmds.cmd("rep",
-          category="Social",
-          short_help="Give reputation to a user")
+@cmds.cmd("rep", category="Social", short_help="Give reputation to a user")
 async def cmd_rep(ctx):
     """
     Usage:
@@ -107,7 +104,8 @@ async def cmd_rep(ctx):
         else:
             given_rep = await ctx.data.users.get(ctx.authid, "given_rep")
             last_rep_str = ctx.strfdelta(timedelta(seconds=given_ago))
-            msg = "You have given **{}** reputation point{}! You last gave a reputation point **{}** ago.".format(given_rep, "s" if int(given_rep) > 1 else "", last_rep_str)
+            msg = "You have given **{}** reputation point{}! You last gave a reputation point **{}** ago.".format(
+                given_rep, "s" if int(given_rep) > 1 else "", last_rep_str)
         await ctx.reply(msg)
         return
     else:
@@ -128,7 +126,8 @@ async def cmd_rep(ctx):
         if last_rep is not None:
             given_ago = now_timestamp - int(last_rep)
             if given_ago < cooldown:
-                msg = "Cool down! You may give reputation in {}.".format(ctx.strfdelta(timedelta(seconds=(cooldown - given_ago)), sec=True))
+                msg = "Cool down! You may give reputation in {}.".format(
+                    ctx.strfdelta(timedelta(seconds=(cooldown - given_ago)), sec=True))
                 await ctx.reply(msg)
                 return
         rep = await ctx.data.users.get(user.id, "rep")

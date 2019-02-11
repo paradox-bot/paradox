@@ -1,11 +1,9 @@
-from contextBot.Context import Context
-import discord
 from datetime import datetime
 
-statusdict = {"offline": "Offline/Invisible",
-              "dnd": "Do Not Disturb",
-              "online": "Online",
-              "idle": "Idle/Away"}
+import discord
+from contextBot.Context import Context
+
+statusdict = {"offline": "Offline/Invisible", "dnd": "Do Not Disturb", "online": "Online", "idle": "Idle/Away"}
 
 
 async def log_join(bot, member):
@@ -32,9 +30,10 @@ async def log_join(bot, member):
     desc = ctx.prop_tabulate(prop_list, value_list)
 
     embed = discord.Embed(type="rich", color=colour, description=desc)
-    embed.set_author(name="New {usertype} joined: {user} (id: {user.id})".format(usertype="bot" if user.bot else "user", user=user),
-                     icon_url=user.avatar_url,
-                     url=user.avatar_url)
+    embed.set_author(
+        name="New {usertype} joined: {user} (id: {user.id})".format(usertype="bot" if user.bot else "user", user=user),
+        icon_url=user.avatar_url,
+        url=user.avatar_url)
     embed.set_thumbnail(url=user.avatar_url)
     embed.set_footer(text=datetime.utcnow().strftime("Sent at %-I:%M %p, %d/%m/%Y"))
 
@@ -57,11 +56,11 @@ async def log_leave(bot, member):
     joined_ago = "({} ago)".format(ctx.strfdelta(datetime.utcnow() - user.joined_at))
     joined = user.joined_at.strftime("%-I:%M %p, %d/%m/%Y")
     usernames = await ctx.bot.data.users.get(user.id, "name_history")
-    name_list = "{}{}".format("..., " if len(usernames) > 10 else "",
-                              ", ".join(usernames[-10:])) if usernames else "No recent past usernames."
+    name_list = "{}{}".format("..., " if len(usernames) > 10 else "", ", ".join(
+        usernames[-10:])) if usernames else "No recent past usernames."
     nicknames = await ctx.bot.data.members.get(ctx.server.id, user.id, "nickname_history")
-    nickname_list = "{}{}".format("..., " if len(nicknames) > 10 else "",
-                                  ", ".join(nicknames[-10:])) if nicknames else "No recent past nicknames."
+    nickname_list = "{}{}".format("..., " if len(nicknames) > 10 else "", ", ".join(
+        nicknames[-10:])) if nicknames else "No recent past nicknames."
 
     roles = [r.name for r in user.roles if r.name != "@everyone"]
     roles = ('`' + '`, `'.join(roles) + '`') if roles else "None"
@@ -71,9 +70,10 @@ async def log_leave(bot, member):
     desc = ctx.prop_tabulate(prop_list, value_list)
 
     embed = discord.Embed(type="rich", color=colour, description=desc)
-    embed.set_author(name="{usertype} left: {user} (id: {user.id})".format(usertype="Bot" if user.bot else "User", user=user),
-                     icon_url=user.avatar_url,
-                     url=user.avatar_url)
+    embed.set_author(
+        name="{usertype} left: {user} (id: {user.id})".format(usertype="Bot" if user.bot else "User", user=user),
+        icon_url=user.avatar_url,
+        url=user.avatar_url)
     embed.set_thumbnail(url=user.avatar_url)
     embed.set_footer(text=datetime.utcnow().strftime("Sent at %-I:%M %p, %d/%m/%Y"))
 

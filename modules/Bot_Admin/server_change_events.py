@@ -1,9 +1,10 @@
-from contextBot.Context import Context
-import discord
 from datetime import datetime
 
-# Provides logging events for when the bot joins and leaves servers
+import discord
+from contextBot.Context import Context
 
+
+# Provides logging events for when the bot joins and leaves servers
 async def log_left_server(bot, server):
     owner = server.owner
     icon = server.icon_url
@@ -48,11 +49,14 @@ async def log_joined_server(bot, server):
     unknown = "`{}`".format(unknown)
     bots = "`{}`".format(bots)
     total = "`{}`".format(server.member_count)
-    mem_str = "{0:<5}\t{4},\n{1:<5}\t{5},\n{2:<5}\t{6}, and\n{3:<5}\t{7}.".format(known, unknown, bots, total, mem1, mem2, mem3, mem4)
+    mem_str = "{0:<5}\t{4},\n{1:<5}\t{5},\n{2:<5}\t{6}, and\n{3:<5}\t{7}.".format(known, unknown, bots, total, mem1,
+                                                                                  mem2, mem3, mem4)
 
     created = server.created_at.strftime("%-I:%M %p, %d/%m/%Y")
 
-    embed = discord.Embed(title="`{0.name} (ID: {0.id})`".format(server), colour=owner.colour if owner.colour.value else discord.Colour.light_grey())
+    embed = discord.Embed(
+        title="`{0.name} (ID: {0.id})`".format(server),
+        colour=owner.colour if owner.colour.value else discord.Colour.light_grey())
     embed.set_author(name="Joined server!")
     embed.set_thumbnail(url=icon)
     embed.add_field(name="Owner", value="{0.name} (ID: {0.id})".format(owner), inline=False)
@@ -71,5 +75,5 @@ async def log_joined_server(bot, server):
 
 
 def load_into(bot):
-    bot.add_after_event("server_join", log_joined_server, priority = 10)
-    bot.add_after_event("server_remove", log_left_server, priority = 10)
+    bot.add_after_event("server_join", log_joined_server, priority=10)
+    bot.add_after_event("server_remove", log_left_server, priority=10)

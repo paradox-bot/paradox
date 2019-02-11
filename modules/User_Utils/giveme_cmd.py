@@ -1,14 +1,15 @@
-from paraCH import paraCH
 import discord
+from paraCH import paraCH
 
 cmds = paraCH()
 # Provides giveme
 
 
-@cmds.cmd("giveme",
-          category="Moderation",
-          short_help="Request, list and modify the self assignable roles.",
-          aliases=["selfrole", "srole", "iam", "iamnot"])
+@cmds.cmd(
+    "giveme",
+    category="Moderation",
+    short_help="Request, list and modify the self assignable roles.",
+    aliases=["selfrole", "srole", "iam", "iamnot"])
 @cmds.require("in_server")
 @cmds.execute("flags", flags=["add", "remove", "list"])
 async def cmd_giveme(ctx):
@@ -50,7 +51,8 @@ async def cmd_giveme(ctx):
             msg = "**Self assignable roles for this server**:\
                 \n{roles}\
                 \nUse `{prefix}giveme role1, role2,...` to add or remove your self assignable roles.\
-                \nType the command again to remove the roles.".format(roles=role_list, prefix=ctx.used_prefix)
+                \nType the command again to remove the roles.".format(
+                roles=role_list, prefix=ctx.used_prefix)
         else:
             msg = "No self assignable roles have been set for this server. Roles may be set using the `--add` flag on this command or the selfroles config option."
         await ctx.reply(msg)
@@ -71,7 +73,11 @@ async def cmd_giveme(ctx):
         roles = ctx.arg_str.split(",")
     msg_roles = []
     for role in roles:
-        msg_role = await ctx.find_role(role.strip(), create=True if mod else False, interactive=True, collection=None if ctx.flags["add"] else self_roles)
+        msg_role = await ctx.find_role(
+            role.strip(),
+            create=True if mod else False,
+            interactive=True,
+            collection=None if ctx.flags["add"] else self_roles)
         if msg_role is None:
             if role.isdigit() and ctx.flags["remove"]:
                 continue

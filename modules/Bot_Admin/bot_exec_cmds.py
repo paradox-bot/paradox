@@ -1,18 +1,17 @@
-import sys
-from io import StringIO
-import traceback
 import asyncio
-import discord
+import sys
+import traceback
+from io import StringIO
 
+import discord
 from paraCH import paraCH
 
 cmds = paraCH()
 
 # Provides async, exec, eval, seval
 
-@cmds.cmd("async",
-          category="Bot admin",
-          short_help="Executes async code and displays the output")
+
+@cmds.cmd("async", category="Bot admin", short_help="Executes async code and displays the output")
 @cmds.require("exec_perm")
 async def cmd_async(ctx):
     """
@@ -28,15 +27,11 @@ async def cmd_async(ctx):
     await ctx.reply("**Async input:**\
                     \n```py\n{}\n```\
                     \n**Output {}:** \
-                    \n```py\n{}\n```".format(ctx.arg_str,
-                                             "error" if error else "",
-                                             output))
+                    \n```py\n{}\n```".format(ctx.arg_str, "error" if error else "", output))
 
 
-@cmds.cmd("exec",
-          category="Bot admin",
-          short_help="Executes python code using exec and displays the output",
-          aliases=["ex"])
+@cmds.cmd(
+    "exec", category="Bot admin", short_help="Executes python code using exec and displays the output", aliases=["ex"])
 @cmds.require("exec_perm")
 async def cmd_exec(ctx):
     """
@@ -52,15 +47,11 @@ async def cmd_exec(ctx):
     await ctx.reply("**Exec input:**\
                     \n```py\n{}\n```\
                     \n**Output {}:** \
-                    \n```py\n{}\n```".format(ctx.arg_str,
-                                             "error" if error else "",
-                                             output))
+                    \n```py\n{}\n```".format(ctx.arg_str, "error" if error else "", output))
 
 
-@cmds.cmd("eval",
-          category="Bot admin",
-          short_help="Executes python code using eval and displays the output",
-          aliases=["ev"])
+@cmds.cmd(
+    "eval", category="Bot admin", short_help="Executes python code using eval and displays the output", aliases=["ev"])
 @cmds.require("exec_perm")
 async def cmd_eval(ctx):
     """
@@ -76,14 +67,10 @@ async def cmd_eval(ctx):
     await ctx.reply("**Eval input:**\
                     \n```py\n{}\n```\
                     \n**Output {}:** \
-                    \n```py\n{}\n```".format(ctx.arg_str,
-                                             "error" if error else "",
-                                             output))
+                    \n```py\n{}\n```".format(ctx.arg_str, "error" if error else "", output))
 
 
-@cmds.cmd("seval",
-          category="Bot admin",
-          short_help="Silent version of eval.")
+@cmds.cmd("seval", category="Bot admin", short_help="Silent version of eval.")
 @cmds.require("exec_perm")
 async def cmd_seval(ctx):
     """
@@ -100,13 +87,10 @@ async def cmd_seval(ctx):
         await ctx.reply("**Eval input:**\
                         \n```py\n{}\n```\
                         \n**Output (error):** \
-                        \n```py\n{}\n```".format(ctx.arg_str,
-                                                 output))
+                        \n```py\n{}\n```".format(ctx.arg_str, output))
 
 
-@cmds.cmd("shell",
-          category="Bot admin",
-          short_help="Runs a command in the operating environment.")
+@cmds.cmd("shell", category="Bot admin", short_help="Runs a command in the operating environment.")
 @cmds.require("exec_perm")
 async def cmd_shell(ctx):
     """
@@ -123,8 +107,7 @@ async def cmd_shell(ctx):
         await ctx.reply("**Command:**\
                         \n```sh\n{}\n```\
                         \n**Output:** \
-                        \n```\n{}\n```".format(ctx.arg_str,
-                                               output))
+                        \n```\n{}\n```".format(ctx.arg_str, output))
     else:
         await ctx.reply("**Command:**\
                         \n```sh\n{}\n```\

@@ -1,7 +1,7 @@
-from paraCH import paraCH
 from datetime import datetime
-import discord
 
+import discord
+from paraCH import paraCH
 
 cmds = paraCH()
 
@@ -12,9 +12,7 @@ cmds = paraCH()
 # TODO: cooldown on feedback
 
 
-@cmds.cmd("feedback",
-          category="Meta",
-          short_help="Send feedback to my creators")
+@cmds.cmd("feedback", category="Meta", short_help="Send feedback to my creators")
 async def cmd_feedback(ctx):
     """
     Usage:
@@ -49,10 +47,7 @@ async def cmd_feedback(ctx):
     await ctx.reply("Thank you! Your feedback has been sent.")
 
 
-@cmds.cmd("abusereport",
-          category="Meta",
-          short_help="Reports a user for abusing a bot command.",
-          flags=["e=="])
+@cmds.cmd("abusereport", category="Meta", short_help="Reports a user for abusing a bot command.", flags=["e=="])
 async def cmd_cr(ctx):
     """
     Usage:
@@ -68,7 +63,8 @@ async def cmd_cr(ctx):
         return
     user = ctx.params[0]
     cheat = ' '.join(ctx.params[1:])
-    evidence = ctx.flags['e'] if ctx.flags['e'] else "None. (Note that cheat reports without evidence are not recommended)"
+    evidence = ctx.flags['e'] if ctx.flags[
+        'e'] else "None. (Note that cheat reports without evidence are not recommended)"
     if not user.isdigit():
         if not ctx.server:
             await ctx.reply("Please provide a valid user ID when reporting from private message")

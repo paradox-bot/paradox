@@ -1,15 +1,12 @@
-from paraCH import paraCH
 import discord
+from paraCH import paraCH
 
 cmds = paraCH()
 
 # Provides bin2ascii, lenny
 
 
-@cmds.cmd("bin2ascii",
-          category="Fun",
-          short_help="Converts binary to ascii",
-          aliases=["bin2a", "binarytoascii"])
+@cmds.cmd("bin2ascii", category="Fun", short_help="Converts binary to ascii", aliases=["bin2a", "binarytoascii"])
 async def cmd_bin2ascii(ctx):
     """
     Usage:
@@ -28,9 +25,8 @@ async def cmd_bin2ascii(ctx):
     asciilist = [chr(sum([int(b) << 7 - n for (n, b) in enumerate(byte)])) for byte in bytelist]
     await ctx.reply("Output: `{}`".format(''.join(asciilist)))
 
-@cmds.cmd("lenny",
-          category="Fun",
-          short_help="( ͡° ͜ʖ ͡°)")
+
+@cmds.cmd("lenny", category="Fun", short_help="( ͡° ͜ʖ ͡°)")
 async def cmd_lenny(ctx):
     """
     Usage:
@@ -44,9 +40,8 @@ async def cmd_lenny(ctx):
         pass
     await ctx.reply("( ͡° ͜ʖ ͡°)")
 
-@cmds.cmd("discrim",
-          category="Fun",
-          short_help="Searches for users with a given discrim")
+
+@cmds.cmd("discrim", category="Fun", short_help="Searches for users with a given discrim")
 async def prim_cmd_discrim(ctx):
     """
     Usage:
@@ -67,4 +62,6 @@ async def prim_cmd_discrim(ctx):
     user_info = [(str(m), "({})".format(m.id)) for m in found_members]
     max_len = len(max(list(zip(*user_info))[0], key=len))
     user_strs = ["{0[0]:^{max_len}} {0[1]:^25}".format(user, max_len=max_len) for user in user_info]
-    await ctx.pager(ctx.paginate_list(user_strs, title="{} user{} found".format(len(user_strs), "s" if len(user_strs) > 1 else "", discrim)))
+    await ctx.pager(
+        ctx.paginate_list(
+            user_strs, title="{} user{} found".format(len(user_strs), "s" if len(user_strs) > 1 else "", discrim)))
